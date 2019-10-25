@@ -9,22 +9,20 @@ const Home = () => (
     <Head>
       <title>Home</title>
       <link rel='icon' href='/favicon.ico' />
+      <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto:400,700&display=swap" rel="stylesheet"/>
     </Head>
 
     <Nav />
 
     <div className='hero'>
-      <h1 className='title'>Welcome to Next.js!</h1>
       <div className='logo'>
         <Lottie
           options={{
-            animationData: logoAnimation
+            animationData: logoAnimation,
+            loop: false
           }}
         />
       </div>
-      <p className='description'>
-        To get started, edit <code>pages/index.js</code> and save to reload.
-      </p>
 
       <div className='row'>
         <a href='https://nextjs.org/docs' className='card'>
