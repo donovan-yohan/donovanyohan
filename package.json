@@ -1,0 +1,17 @@
+{
+  "name": "donovanyohan",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "easy-peasy": "^3.1.0",
+    "lottie-react-web": "^2.1.4",
+    "next": "9.1.1",
+    "react": "16.11.0",
+    "react-dom": "16.11.0"
+  }
+}
