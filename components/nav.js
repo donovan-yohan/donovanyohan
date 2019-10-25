@@ -42,6 +42,7 @@ const Nav = () => (
         display: flex;
         justify-content: center;
         min-width: 100vw;
+        background-color: white;
         position: fixed;
         height: 62px;
       }
