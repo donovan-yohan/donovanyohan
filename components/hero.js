@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react'
 
 
-const TypedText = (props, speed) => {
-  const text = props.children.props.children;
+const TypedText = ({ speed, text }) => {
   const [currentText, setCurrentText] = useState("");
-  console.log(currentText.length);
-  console.log(text);
   useEffect(() => {
-    setCurrentText(currentText => {
+    let id = window.setInterval(() => {
+      setCurrentText(currentText => {
         let nextChar = text[currentText.length];
+        if (nextChar === undefined) {
+          clearInterval(id);
+          return currentText;
+        }
         return currentText + nextChar;
-    });
-  }, 30);
-  return (
-    <p>{text}</p>
-  )
+      });
+    }, 3000 / speed);
+  }, []);
+  return <p>{currentText}</p>;
 };
 
 const Hero = props => (
@@ -25,11 +26,7 @@ const Hero = props => (
           {props.image}
         </div>
         <div className='text'>
-          <TypedText
-            speed={40}
-          >
-            {props.text}
-          </TypedText>
+          <TypedText speed={40} text={props.text} />  
         </div>
       </div>
     </div>
@@ -65,7 +62,8 @@ const Hero = props => (
       }
       .logo {
         margin-top: -58px;
-
+        width: 25vw;;
+        min-width: 25vw;
       }
 
       @media only screen and (max-width: 1290px) {
