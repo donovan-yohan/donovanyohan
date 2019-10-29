@@ -15,7 +15,7 @@ const TypedText = ({ speed, text }) => {
       });
     }, 3000 / speed);
   }, []);
-  return <p>{currentText}</p>;
+  return <p>{currentText}|</p>;
 };
 
 const Hero = props => (
@@ -26,7 +26,7 @@ const Hero = props => (
           {props.image}
         </div>
         <div className='text'>
-          <TypedText speed={40} text={props.text} />  
+          <TypedText speed={225} text={props.text} />
         </div>
       </div>
     </div>
@@ -36,7 +36,7 @@ const Hero = props => (
         font-family: "Open Sans";
       }
       .container {
-        width: 100vw;
+        width: 100%;
         height: 95vh;
         display: flex;
         justify-content: center;
@@ -55,28 +55,30 @@ const Hero = props => (
         font-size: 58px;
         line-height: 1.3em;
         letter-spacing: -0.01em;
-
+        height: 416px;
       }
       .typedText {
         display: inline-block !important;
       }
       .logo {
         margin-top: -58px;
-        width: 25vw;;
-        min-width: 25vw;
+        width: 442px;
+        min-width: 442px;
       }
 
       @media only screen and (max-width: 1290px) {
         .text {
-          flex-basis: 62vw;
+          flex-basis: 62%;
           flex-shrink: 1;
           font-size: 4.53125vw;
           margin-left: 4vw;
+          height: 32.8vw;
         }
         .logo {
           flex-shrink: 2;
-          flex-basis: 34vw;
+          flex-basis: 34%;
           margin-top: -6.25vw;
+          min-width: 34%;
         }
       }
     `}</style>

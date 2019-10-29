@@ -1,8 +1,8 @@
 import React from "react";
 import Link from "next/link";
 
+
 const links = [
-  { href: "", label: "Resume" },
   { href: "", label: "Work" },
   { href: "", label: "Process" },
   { href: "/about", label: "About" }
@@ -22,6 +22,9 @@ const Nav = () => (
         </li>
       </div>
       <div className="navLinks">
+        <li>
+          <a href="/DonovanYohanResume.pdf">Resume</a>
+        </li>
         {links.map(({ key, href, label }) => (
           <li key={key}>
             <Link href={href}>
@@ -74,6 +77,8 @@ const Nav = () => (
         text-decoration: none;
         font-size: 16px;
         text-transform: uppercase;
+        transition: 0.1s;
+        position: relative;
       }
       .navLinks {
         display: flex;
@@ -87,6 +92,21 @@ const Nav = () => (
       }
       .homelink li {
         padding-left: 0px;
+      }
+      a:hover {
+        color: black;
+      }
+      a::before {
+        content: "";
+        transition: .1s ease-out;
+        z-index: -1;
+        position: absolute;
+        width: 0%;
+        height: 100%
+      }
+      a:hover::before {
+        width:100%;
+        background-color: #FFF500
       }
     `}</style>
   </nav>
