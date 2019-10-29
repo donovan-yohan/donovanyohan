@@ -26,7 +26,7 @@ const Hero = props => (
           {props.image}
         </div>
         <div className='text'>
-          <TypedText speed={225} text={props.text} />
+          <TypedText speed={175} text={props.text} />
         </div>
       </div>
     </div>
