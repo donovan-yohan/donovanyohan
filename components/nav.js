@@ -2,10 +2,10 @@ import React from "react";
 import Link from "next/link";
 
 const links = [
-  { href: "https://github.com/zeit/next.js", label: "Resume" },
-  { href: "https://github.com/zeit/next.js", label: "Work" },
-  { href: "https://github.com/zeit/next.js", label: "Process" },
-  { href: "https://github.com/zeit/next.js", label: "About" }
+  { href: "", label: "Resume" },
+  { href: "", label: "Work" },
+  { href: "", label: "Process" },
+  { href: "/about", label: "About" }
 ].map(link => {
   link.key = `nav-link-${link.href}-${link.label}`;
   return link;
@@ -24,7 +24,9 @@ const Nav = () => (
       <div className="navLinks">
         {links.map(({ key, href, label }) => (
           <li key={key}>
-            <a href={href}>{label}</a>
+            <Link href={href}>
+              <a>{label}</a>
+            </Link>
           </li>
         ))}
       </div>
@@ -34,21 +36,22 @@ const Nav = () => (
     <style jsx>{`
       :global(body) {
         margin: 0;
-        font-family: "Open Sans";
+        font-family: 'Open Sans';
       }
       nav {
         z-index: 1000;
         text-align: center;
         display: flex;
         justify-content: center;
-        min-width: 100vw;
+        width: 100vw;
         background-color: white;
         position: fixed;
         height: 62px;
+        top: 0;
       }
       ul {
         width: 95vw;
-        max-width: 1000px;
+        max-width: 1280px;
         display: flex;
         align-items: center;
         justify-content: space-between;
