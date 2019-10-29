@@ -23,9 +23,7 @@ const Main = () => (
           }}
         />
       }
-      text={
-        <p>{HomeText}</p>
-      }
+      text={HomeText}
     />
 
     <div className='row'>
