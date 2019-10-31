@@ -112,6 +112,7 @@ const Nav = () => (
       }
 
 
+      // Adjust for mobile
 
       @media only screen and (max-width: 767px) {
         .smallLogo {

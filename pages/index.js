@@ -11,6 +11,7 @@ const HomeText = "Hi! I'm a UI & UX designer, full stack programmer, graphic des
 
 
 const Main = () => {
+  // logic for finding current viewport size to determine if mobile layout is needed
   const [width, setWidth] = useState(null)
 
   useEffect(() => {
@@ -44,6 +45,8 @@ const Main = () => {
           />
         }
         text={HomeText}
+        delay={750}
+        speed={125}
       />
 
       <div className='row'>

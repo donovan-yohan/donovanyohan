@@ -7,21 +7,23 @@ import { MobileWidth, debounce } from '../global/global'
 const text = "Hi! I'm a gymnast, dancer, computer nerd, origami lover, bubble tea enthusiast, and more than just my work."
 
 const About = () => {
-  const [width, setWidth] = useState(null);
+  // logic for finding current viewport size to determine if mobile layout is needed
+  const [width, setWidth] = useState(null)
 
-  if (process.browser) {
-    useEffect(() => {
-      const debouncedHandleResize = debounce(function handleResize() {
-        setWidth(document.children[0].clientWidth);
-      }, 250);
+  useEffect(() => {
+    // assign initial width value on first load
+    if (!width) setWidth(document.children[0].clientWidth);
 
-      window.addEventListener("resize", debouncedHandleResize);
+    const debouncedHandleResize = debounce(function handleResize() {
+      setWidth(document.children[0].clientWidth);
+    }, 250);
 
-      return _ => {
-        window.removeEventListener("resize", debouncedHandleResize);
-      };
-    }, []);
-  };
+    window.addEventListener("resize", debouncedHandleResize);
+
+    return _ => {
+      window.removeEventListener("resize", debouncedHandleResize);
+    };
+  });
   return (
     <div>
       <Nav />

@@ -1,21 +1,42 @@
 import React, { useState, useEffect } from 'react'
 
 
-const TypedText = ({ speed, text }) => {
+const TypedText = ({ speed, text, delay }) => {
   const [currentText, setCurrentText] = useState("");
+
   useEffect(() => {
-    let id = window.setInterval(() => {
-      setCurrentText(currentText => {
-        let nextChar = text[currentText.length];
-        if (nextChar === undefined) {
-          clearInterval(id);
-          return currentText;
-        }
-        return currentText + nextChar;
-      });
-    }, 3000 / speed);
+    setTimeout(() => {
+      let id = window.setInterval(() => {
+        setCurrentText(currentText => {
+          let nextChar = text[currentText.length];
+          if (nextChar === undefined) {
+            clearInterval(id);
+            return currentText;
+          }
+          return currentText + nextChar;
+        });
+      }, 3000 / speed);
+    }, delay);
   }, []);
-  return <p>{currentText}|</p>;
+
+
+  return (
+    <p>
+      {currentText}
+      <span className="cursor">|</span>
+      <style jsx>{`
+      .cursor {
+        animation: fade 0.9s ease infinite;
+      }
+      @keyframes fade {
+        0% { opacity: 0; }
+        50% { opacity: 1; }
+        100% { opacity: 0; }
+      } 
+    `}</style>
+    </p>
+
+  );
 };
 
 const Hero = props => (
@@ -26,7 +47,7 @@ const Hero = props => (
           {props.image}
         </div>
         <div className='text'>
-          <TypedText speed={175} text={props.text} />
+          <TypedText speed={props.speed ? props.speed : 150} text={props.text} delay={props.delay ? props.delay : 0} />
         </div>
       </div>
     </div>
@@ -69,6 +90,8 @@ const Hero = props => (
 
 
 
+      // Adjust for small displays
+
       @media only screen and (max-width: 1290px) {
         .text {
           flex-basis: 62%;
@@ -87,7 +110,7 @@ const Hero = props => (
 
 
 
-
+      // Adjust for Mobile
 
       @media only screen and (max-width: 767px) {
         .wrapper {

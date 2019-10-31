@@ -17,7 +17,7 @@ const BottomNav = () => (
           <li key={key}>
             <Link href={href}>
               <a>
-                <Icon src={'/img/icons/' + label + '.svg'} size='small' />
+                <Icon src={'/img/icons/' + label.toLowerCase() + '.svg'} size='small' />
                 <span>{label}</span>
               </a>
             </Link>
