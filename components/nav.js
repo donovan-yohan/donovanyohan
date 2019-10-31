@@ -51,16 +51,14 @@ const Nav = () => (
         top: 0;
       }
       ul {
-        width: 95%;
-        max-width: 1280px;
+        padding: 0 40px;
+        width: 100%;
+        max-width: 1100px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         font-family: "Roboto";
         font-weight: bold;
-      }
-      nav > ul {
-        padding: 4px 16px;
       }
       li {
         display: flex;
@@ -114,7 +112,7 @@ const Nav = () => (
 
       // Adjust for mobile
 
-      @media only screen and (max-width: 767px) {
+      @media only screen and (max-width: 1025px) {
         .smallLogo {
           display: flex;
           padding-right: 16px;
@@ -122,6 +120,9 @@ const Nav = () => (
         nav {
           min-height: 56px;
           height: 56px;
+        }
+        ul {
+          padding: 0 16px;
         }
 
         .navLinks {

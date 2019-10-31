@@ -3,6 +3,7 @@ import Head from 'next/head'
 import Nav from '../components/nav'
 import BottomNav from '../components/bottomNav'
 import Hero from '../components/hero'
+import Card from '../components/card'
 import Lottie from 'lottie-react-web'
 import logoAnimation from '../public/img/animations/dy.json'
 import { MobileWidth, debounce } from '../global/global'
@@ -35,72 +36,94 @@ const Main = () => {
       </Head>
 
       <Nav />
-      <Hero
-        image={
-          <Lottie
-            options={{
-              animationData: logoAnimation,
-              loop: false
-            }}
-          />
-        }
-        text={HomeText}
-        delay={750}
-        speed={125}
-      />
+      <div className='content'>
+        <Hero
+          image={
+            <Lottie
+              options={{
+                animationData: logoAnimation,
+                loop: false
+              }}
+            />
+          }
+          text={HomeText}
+          delay={750}
+          speed={125}
+        />
+        <div className='cardWrapper'>
+          <div>
+            <Card
+              title="Manulife Mobile"
+              caption="Fall 2019"
+              colour="limegreen"
+            />
+          </div>
+          <div>
+            <Card
+              title="flowr"
+              caption="Fall 2019"
+              colour="turquoise"
+            />
+          </div>
+          <div>
+            <Card
+              title="Cooperators Mobile App"
+              caption="Winter 2019"
+              colour="skyblue"
+            />
+          </div>
+          <div>
+            <Card
+              title="Motion Graphics"
+              caption="2014 - Present"
+              colour="orange"
+            />
+          </div>
+          <div>
+            <Card
+              title="Graphic Design"
+              caption="2012 - Present"
+              colour="purple"
+            />
+          </div>
 
-      <div className='row'>
-        <a href='' className='card'>
-          <h3>Documentation &rarr;</h3>
-          <p>Learn more about Next.js in the documentation.</p>
-        </a>
-        <a href='' className='card'>
-          <h3>Next.js Learn &rarr;</h3>
-          <p>Learn about Next.js by following an interactive tutorial!</p>
-        </a>
-        <a
-          href=''
-          className='card'
-        >
-          <h3>Examples &rarr;</h3>
-          <p>Find other example boilerplates on the Next.js GitHub.</p>
-        </a>
+        </div>
       </div>
+
 
       {width && width < MobileWidth &&
         <BottomNav />
       }
 
       <style jsx>{`
-      .row {
-        max-width: 880px;
-        margin: 80px auto 40px;
+      .content {
+        width: 100%;
         display: flex;
-        flex-direction: row;
-        justify-content: space-around;
+        flex-direction: column;
+        align-items: center;
       }
-      .card {
-        padding: 18px 18px 24px;
-        width: 220px;
-        text-align: left;
-        text-decoration: none;
-        color: #434343;
-        border: 1px solid #9b9b9b;
+      .cardWrapper {
+        margin: 0 40px;
+        max-width: 1000px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
       }
-      .card:hover {
-        border-color: #067df7;
+
+      @media only screen and (min-width: 1025px) {
+        .cardWrapper div:nth-child(even) {
+          position: relative;
+          top: 212px;
+        }
       }
-      .card h3 {
-        margin: 0;
-        color: #067df7;
-        font-size: 18px;
+
+      @media only screen and (max-width: 1024px) {
+        .cardWrapper {
+          margin: 0 0 64px 0;
+          max-width: 100%;
+        }
       }
-      .card p {
-        margin: 0;
-        padding: 12px 0 0;
-        font-size: 13px;
-        color: #333;
-      }
+
     `}</style>
     </main>
   )

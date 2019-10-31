@@ -32,7 +32,10 @@ const TypedText = ({ speed, text, delay }) => {
         0% { opacity: 0; }
         50% { opacity: 1; }
         100% { opacity: 0; }
-      } 
+      }
+      ::selection {
+        background: #FFF500; /* WebKit/Blink Browsers */
+      }
     `}</style>
     </p>
 
@@ -58,53 +61,52 @@ const Hero = props => (
       }
       .container {
         width: 100%;
-        height: 90vh;
+        height: 100vh;
         display: flex;
         justify-content: center;
       }
       .wrapper {
-        margin-top: 5vh;
         display: flex;
         align-items: center;
         width: 95vw;
-        max-width: 1280px;
+        max-width: 1100px;
       }
       .text {
         display: inline-block;
-        margin-left: 48px;
+        margin-left: 32px;
         font-family: 'Open Sans';
         font-weight: 300;
-        font-size: 58px;
+        font-size: 47px;
         line-height: 1.3em;
         letter-spacing: -0.01em;
-        height: 416px;
+        height: 338px;
       }
       .typedText {
         display: inline-block !important;
       }
       .logo {
-        margin-top: -58px;
-        width: 442px;
-        min-width: 442px;
+        margin-top: -24px;
+        width: 429px;
+        min-width: 429px;
       }
 
 
 
       // Adjust for small displays
 
-      @media only screen and (max-width: 1290px) {
+      @media only screen and (max-width: 1130px) {
         .text {
-          flex-basis: 62%;
+          flex-basis: 60%;
           flex-shrink: 1;
-          font-size: 4.53125vw;
-          margin-left: 4vw;
-          height: 32.8vw;
+          font-size: 4.1717vw;
+          margin-left: 2.8vw;
+          height: 30.7272vw;
         }
         .logo {
           flex-shrink: 2;
-          flex-basis: 34%;
-          margin-top: -6.25vw;
-          min-width: 34%;
+          flex-basis: 40%;
+          margin-top: -2.1818vw;
+          min-width: 38%;
         }
       }
 
@@ -116,6 +118,7 @@ const Hero = props => (
         .wrapper {
           width: 100%;
           margin-top: 0;
+          margin-bottom: 10vh;
         }
         .text {
           flex-basis: 100%;

@@ -27,27 +27,33 @@ const About = () => {
   return (
     <div>
       <Nav />
-      <Hero
-        image={
-          <div className="placeholder" />
-        }
-        text={text}
-        customImageStyle={{
-          margin: '0px'
-        }}
-      />
+      <div className="content">
+        <Hero
+          image={
+            <div className="placeholder" />
+          }
+          text={text}
+          customImageStyle={{
+            margin: '0px'
+          }}
+        />
+      </div>
 
       {width < MobileWidth &&
         <BottomNav />
       }
       <style jsx>{`
-      .placeholder {
-      border-radius: 100%;
-        width: 400px;
-        height: 400px;
-        background-color: gray;
-      }
-    `}</style>
+        .content {
+          width: 100%;
+        }
+        .placeholder {
+          border-radius: 100%;
+          width: 400px;
+          height: 400px;
+          background-color: gray;
+        }
+      `}</style>
+
     </div>
   )
 }
