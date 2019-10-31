@@ -37,11 +37,12 @@ const Hero = props => (
       }
       .container {
         width: 100%;
-        height: 95vh;
+        height: 90vh;
         display: flex;
         justify-content: center;
       }
       .wrapper {
+        margin-top: 5vh;
         display: flex;
         align-items: center;
         width: 95vw;
@@ -66,6 +67,8 @@ const Hero = props => (
         min-width: 442px;
       }
 
+
+
       @media only screen and (max-width: 1290px) {
         .text {
           flex-basis: 62%;
@@ -79,6 +82,28 @@ const Hero = props => (
           flex-basis: 34%;
           margin-top: -6.25vw;
           min-width: 34%;
+        }
+      }
+
+
+
+
+
+      @media only screen and (max-width: 767px) {
+        .wrapper {
+          width: 100%;
+          margin-top: 0;
+        }
+        .text {
+          flex-basis: 100%;
+          flex-shrink: unset;
+          font-size: 8.5vw;
+          margin: 0 16px 0 48px;
+          height: 71.875vw;
+          text-size-adjust: none;
+        }
+        .logo {
+          display: none;
         }
       }
     `}</style>

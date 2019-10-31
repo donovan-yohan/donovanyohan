@@ -1,50 +1,74 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Nav from '../components/nav'
+import BottomNav from '../components/bottomNav'
 import Hero from '../components/hero'
 import Lottie from 'lottie-react-web'
-import logoAnimation from '../assets/animations/dy.json'
+import logoAnimation from '../public/img/animations/dy.json'
+import { MobileWidth, debounce } from '../global/global'
 
 const HomeText = "Hi! I'm a UI & UX designer, full stack programmer, graphic designer, motion graphics artist, and video editor."
 
-const Main = () => (
-  <main>
-    <Head>
-      <title>Donovan Yohan</title>
-    </Head>
 
-    <Nav />
-    <Hero
-      image={
-        <Lottie
-          options={{
-            animationData: logoAnimation,
-            loop: false
-          }}
-        />
+const Main = () => {
+  const [width, setWidth] = useState(null)
+
+  useEffect(() => {
+    if (!width) setWidth(document.children[0].clientWidth);
+
+    const debouncedHandleResize = debounce(function handleResize() {
+      setWidth(document.children[0].clientWidth);
+    }, 250);
+
+    window.addEventListener("resize", debouncedHandleResize);
+
+    return _ => {
+      window.removeEventListener("resize", debouncedHandleResize);
+    };
+  });
+
+  return (
+    <main>
+      <Head>
+        <title>Donovan Yohan</title>
+      </Head>
+
+      <Nav />
+      <Hero
+        image={
+          <Lottie
+            options={{
+              animationData: logoAnimation,
+              loop: false
+            }}
+          />
+        }
+        text={HomeText}
+      />
+
+      <div className='row'>
+        <a href='' className='card'>
+          <h3>Documentation &rarr;</h3>
+          <p>Learn more about Next.js in the documentation.</p>
+        </a>
+        <a href='' className='card'>
+          <h3>Next.js Learn &rarr;</h3>
+          <p>Learn about Next.js by following an interactive tutorial!</p>
+        </a>
+        <a
+          href=''
+          className='card'
+        >
+          <h3>Examples &rarr;</h3>
+          <p>Find other example boilerplates on the Next.js GitHub.</p>
+        </a>
+      </div>
+
+      {width && width < MobileWidth &&
+        <BottomNav />
       }
-      text={HomeText}
-    />
 
-    <div className='row'>
-      <a href='' className='card'>
-        <h3>Documentation &rarr;</h3>
-        <p>Learn more about Next.js in the documentation.</p>
-      </a>
-      <a href='' className='card'>
-        <h3>Next.js Learn &rarr;</h3>
-        <p>Learn about Next.js by following an interactive tutorial!</p>
-      </a>
-      <a
-        href=''
-        className='card'
-      >
-        <h3>Examples &rarr;</h3>
-        <p>Find other example boilerplates on the Next.js GitHub.</p>
-      </a>
-    </div>
-
-    <style jsx>{`
+      <style jsx>{`
       .row {
         max-width: 880px;
         margin: 80px auto 40px;
@@ -75,7 +99,8 @@ const Main = () => (
         color: #333;
       }
     `}</style>
-  </main>
-)
+    </main>
+  )
+}
 
 export default Main

@@ -1,20 +1,17 @@
 import React from "react";
 import Link from "next/link";
-
-
-const links = [
-  { href: "", label: "Work" },
-  { href: "", label: "Process" },
-  { href: "/about", label: "About" }
-].map(link => {
-  link.key = `nav-link-${link.href}-${link.label}`;
-  return link;
-});
+import Icon from "../components/icon"
+import links from "../global/global"
 
 const Nav = () => (
   <nav>
     <ul>
       <div className="homeLink">
+        <li className="smallLogo">
+          <Link href="/">
+            <a><Icon src='/img/icons/dy.svg' size='small' /></a>
+          </Link>
+        </li>
         <li>
           <Link href="/">
             <a>Donovan Yohan</a>
@@ -46,14 +43,15 @@ const Nav = () => (
         text-align: center;
         display: flex;
         justify-content: center;
-        width: 100vw;
+        width: 100%;
         background-color: white;
         position: fixed;
+        min-height: 62px;
         height: 62px;
         top: 0;
       }
       ul {
-        width: 95vw;
+        width: 95%;
         max-width: 1280px;
         display: flex;
         align-items: center;
@@ -80,10 +78,11 @@ const Nav = () => (
         transition: 0.1s;
         position: relative;
       }
-      .navLinks {
+      .navLinks, .homeLink {
         display: flex;
       }
       .homeLink a {
+        display: flex;
         line-height: 26px;
         font-size: 22px;
         text-transform: none;
@@ -92,6 +91,9 @@ const Nav = () => (
       }
       .homelink li {
         padding-left: 0px;
+      }
+      .smallLogo {
+        display: none;
       }
       a:hover {
         color: black;
@@ -107,6 +109,27 @@ const Nav = () => (
       a:hover::before {
         width:100%;
         background-color: #FFF500
+      }
+
+
+
+      @media only screen and (max-width: 767px) {
+        .smallLogo {
+          display: flex;
+          padding-right: 16px;
+        }
+        nav {
+          min-height: 56px;
+          height: 56px;
+        }
+
+        .navLinks {
+          display: none;
+        }
+
+        .homeLink a {
+          font-size: 14px;
+        }
       }
     `}</style>
   </nav>
