@@ -4,6 +4,7 @@ import Nav from '../components/nav'
 import BottomNav from '../components/bottomNav'
 import Hero from '../components/hero'
 import Card from '../components/card'
+import Footer from '../components/footer'
 import Lottie from 'lottie-react-web'
 import Link from 'next/link'
 import logoAnimation from '../public/img/animations/dy.json'
@@ -108,8 +109,8 @@ const Main = () => {
           }
           )}
         </div>
+        <Footer />
       </div>
-
 
       {width && width < MobileWidth &&
         <BottomNav />
@@ -117,17 +118,20 @@ const Main = () => {
 
       <style jsx>{`
       .content {
+        position: absolute;
         width: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
       }
       .cardWrapper {
+        position: relative;
         margin: 0 40px;
         max-width: 1100px;
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
+        align-items: flex-start;
       }
       .cardWrapper div {
         width: 48%
@@ -137,19 +141,22 @@ const Main = () => {
         color: black;
       }
 
+      
+      // only use stagger effect when on desktop sized machines
       @media only screen and (min-width: 1024px) {
         .cardWrapper div:nth-child(even) {
           position: relative;
-          top: 212px;
+          top: 235px;
         }
       }
 
+
+      // mobile scaling
       @media only screen and (max-width: 1023px) {
         .cardWrapper {
           margin: 0 0 64px 0;
           max-width: 100%;
           flex-direction: column;
-
         }
       }
 

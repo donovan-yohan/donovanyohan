@@ -4,41 +4,14 @@ import links from "../global/global"
 import Icon from "../components/icon"
 
 const BottomNav = () => (
-  <div className="bottomNav">
-    <ul>
-      <div className="navLinks">
-        <li>
-          <a target="_blank" href="/DonovanYohanResume.pdf">
-            <Icon src='/img/icons/resume.svg' size='small' />
-            <span>Resume</span>
-          </a>
-        </li>
-        {links.map(({ key, href, label }) => (
-          <li key={key}>
-            <Link href={href}>
-              <a>
-                <Icon src={'/img/icons/' + label.toLowerCase() + '.svg'} size='small' />
-                <span>{label}</span>
-              </a>
-            </Link>
-          </li>
-        ))}
-      </div>
-    </ul>
+  <div className="footer">
+    <div>
+      <p>Hello, world!</p>
+    </div>
 
     <style jsx>{`
-      .bottomNav {
-        z-index: 1000;
-        text-align: center;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        background-color: white;
-        position: fixed;
-        min-height: 56px;
-        height: 56px;
-        bottom: 0;
+      .footer{
+
       }
       ul {
         width: 100%;

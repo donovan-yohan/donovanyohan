@@ -15,14 +15,13 @@ const Card = props => (
         <div className="title">
           {props.title}
         </div>
-        <div className="content">
-          {props.content ? props.content : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac turpis neque. Nam vehicula porta nulla sed tristique. Aliquam vitae ex a libero molestie tristique. "}
-        </div>
+
         <div className="subheader">
           {props.caption}
         </div>
-        <span className="details">
-        </span>
+        <div className="content">
+          {props.content ? props.content : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac turpis neque. Nam vehicula porta nulla sed tristique. Aliquam vitae ex a libero molestie tristique. "}
+        </div>
       </div>
     </div>
     <style jsx>{`
@@ -34,8 +33,8 @@ const Card = props => (
       }
       .imageWrapper {
         display: flex;
-        border-radius: 25px;
-        height: 250px;
+        border-radius: 20px;
+        height: 275px;
         transition: 0.2s;
         background: gray;
       }
@@ -68,19 +67,18 @@ const Card = props => (
         font-weight: bold;
         font-size: 20px;
         line-height: 1.2;
-        margin: 8px 0;
-        opacity: 0.54;
+        margin: 4px 0 4px 0;
         position: relative;
         transition: 0.5s;
         z-index: 2;
       }
       .content {
-        padding-bottom: 4px;
-        line-height: 1.4;
+        line-height: 1.75;
       }
       .subheader {
         text-transform: uppercase;
         opacity: 0.54;
+        padding-bottom: 8px;
       }
 
 
@@ -88,9 +86,7 @@ const Card = props => (
         .container:hover .imageWrapper {
           box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
           background: #FFF500;
-        }
-        .container:hover .title {
-          opacity: 1;
+          transform: scale(1.02);
         }
         .title::before {
           bottom: 0;
@@ -130,9 +126,13 @@ const Card = props => (
         .title {
           font-size: 16px;
           opacity: 1;
+          margin-bottom: 4px;
         }
-
+        .content {
+          line-height: 1.6;
+        }
         .subheader {
+          padding-bottom: 4px;
           font-size: 14px;
         }
       }
