@@ -33,6 +33,7 @@ const About = () => {
             <div className="placeholder" />
           }
           text={text}
+          speed={75}
           customImageStyle={{
             margin: '0px'
           }}

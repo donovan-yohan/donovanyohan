@@ -17,7 +17,7 @@ const links = [{
 
 export default links;
 
-export const MobileWidth = 1025;
+export const MobileWidth = 1024;
 
 export function debounce(fn, ms) {
     let timer;

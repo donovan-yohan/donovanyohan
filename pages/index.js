@@ -5,10 +5,41 @@ import BottomNav from '../components/bottomNav'
 import Hero from '../components/hero'
 import Card from '../components/card'
 import Lottie from 'lottie-react-web'
+import Link from 'next/link'
 import logoAnimation from '../public/img/animations/dy.json'
 import { MobileWidth, debounce } from '../global/global'
 
 const HomeText = "Hi! I'm a UI & UX designer, full stack programmer, graphic designer, motion graphics artist, and video editor."
+
+const projects = [
+  {
+    href: "",
+    label: "Manulife Mobile",
+    date: "Fall 2019",
+    content: "",
+  },
+  {
+    href: "",
+    label: "flowr",
+    date: "Fall 2019",
+    content: "",
+  },
+  {
+    href: "",
+    label: "donovanyohan.com",
+    date: "Fall 2019",
+    content: "",
+  },
+  {
+    href: "",
+    label: "Cooperators Mobile App",
+    date: "Winter 2019",
+    content: "",
+  }
+].map(project => {
+  project.key = `nav-link-${project.href}-${project.label}`;
+  return project;
+});
 
 
 const Main = () => {
@@ -17,6 +48,7 @@ const Main = () => {
 
   useEffect(() => {
     if (!width) setWidth(document.children[0].clientWidth);
+    console.log(document.children);
 
     const debouncedHandleResize = debounce(function handleResize() {
       setWidth(document.children[0].clientWidth);
@@ -47,46 +79,34 @@ const Main = () => {
             />
           }
           text={HomeText}
-          delay={750}
-          speed={125}
+          delay={650}
+          speed={85}
         />
         <div className='cardWrapper'>
-          <div>
-            <Card
-              title="Manulife Mobile"
-              caption="Fall 2019"
-              colour="limegreen"
-            />
-          </div>
-          <div>
-            <Card
-              title="flowr"
-              caption="Fall 2019"
-              colour="turquoise"
-            />
-          </div>
-          <div>
-            <Card
-              title="Cooperators Mobile App"
-              caption="Winter 2019"
-              colour="skyblue"
-            />
-          </div>
-          <div>
-            <Card
-              title="Motion Graphics"
-              caption="2014 - Present"
-              colour="orange"
-            />
-          </div>
-          <div>
-            <Card
-              title="Graphic Design"
-              caption="2012 - Present"
-              colour="purple"
-            />
-          </div>
+          {projects.map(({ key, href, label, date, content }) => {
+            if (width && width < MobileWidth) {
+              return (
+                <div key={key}>
+                  <Card title={label} caption={date} href={href}>
 
+                  </Card>
+                </div>
+              )
+            } else {
+              return (
+                <div key={key}>
+                  <Link href={href} >
+                    <a>
+                      <Card title={label} caption={date} >
+
+                      </Card>
+                    </a>
+                  </Link>
+                </div>
+              )
+            }
+          }
+          )}
         </div>
       </div>
 
@@ -104,23 +124,32 @@ const Main = () => {
       }
       .cardWrapper {
         margin: 0 40px;
-        max-width: 1000px;
+        max-width: 1100px;
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
       }
+      .cardWrapper div {
+        width: 48%
+      }
+      .cardWrapper a {
+        text-decoration: none;
+        color: black;
+      }
 
-      @media only screen and (min-width: 1025px) {
+      @media only screen and (min-width: 1024px) {
         .cardWrapper div:nth-child(even) {
           position: relative;
           top: 212px;
         }
       }
 
-      @media only screen and (max-width: 1024px) {
+      @media only screen and (max-width: 1023px) {
         .cardWrapper {
           margin: 0 0 64px 0;
           max-width: 100%;
+          flex-direction: column;
+
         }
       }
 
