@@ -45,10 +45,10 @@ const projects = [
 
 const Main = () => {
   // logic for finding current viewport size to determine if mobile layout is needed
-  const [width, setWidth] = useState(null)
+  const [windowWidth, setWidth] = useState(null)
 
   useEffect(() => {
-    if (!width) setWidth(document.children[0].clientWidth);
+    if (!windowWidth) setWidth(document.children[0].clientWidth);
     console.log(document.children);
 
     const debouncedHandleResize = debounce(function handleResize() {
@@ -85,7 +85,8 @@ const Main = () => {
         />
         <div className='cardWrapper'>
           {projects.map(({ key, href, label, date, content }) => {
-            if (width && width < MobileWidth) {
+            // components to show on mobile
+            if (windowWidth && windowWidth < MobileWidth) {
               return (
                 <div key={key}>
                   <Card title={label} caption={date} href={href}>
@@ -93,7 +94,9 @@ const Main = () => {
                   </Card>
                 </div>
               )
-            } else {
+            }
+            // components to show on web
+            else {
               return (
                 <div key={key}>
                   <Link href={href} >
@@ -112,7 +115,7 @@ const Main = () => {
         <Footer />
       </div>
 
-      {width && width < MobileWidth &&
+      {windowWidth && windowWidth < MobileWidth &&
         <BottomNav />
       }
 
@@ -141,7 +144,7 @@ const Main = () => {
       }
 
 
-      // only use stagger effect when on desktop sized machines
+      // only use stagger effect when on desktop sized screens
       @media only screen and (min-width: 1024px) {
         .cardWrapper div:nth-child(even) {
           position: relative;

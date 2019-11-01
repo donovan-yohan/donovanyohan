@@ -3041,6 +3041,11 @@ lodash.templatesettings@^4.0.0:
   dependencies:
     lodash._reinterpolate "^3.0.0"
 
+lodash.throttle@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/lodash.throttle/-/lodash.throttle-4.1.1.tgz#c23e91b710242ac70c37f1e1cda9274cc39bf2f4"
+  integrity sha1-wj6RtxAkKscMN/HhzaknTMOb8vQ=
+
 lodash@^4.17.11, lodash@^4.17.13, lodash@^4.17.15, lodash@^4.17.4:
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
@@ -4471,6 +4476,13 @@ react-is@^16.8.1:
   version "16.11.0"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.11.0.tgz#b85dfecd48ad1ce469ff558a882ca8e8313928fa"
   integrity sha512-gbBVYR2p8mnriqAwWx9LbuUrShnAuSCNnuPGyc7GJrMVQtPDAh8iLpv7FRuMPFb56KkaVZIYSz1PrjI9q0QPCw==
+
+react-use-visibility@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/react-use-visibility/-/react-use-visibility-0.3.0.tgz#1bf967dbde36a61af47d785156e5988c4c807e8e"
+  integrity sha512-CYlC/YngQ//IDdwO0tWw2p64tFAKBmjDAhxztX7K7aYn2Bme/GSUq8fExekCQ8vBvNK0+JJ9I0NCI3qprCwLkw==
+  dependencies:
+    lodash.throttle "^4.1.1"
 
 react@16.11.0:
   version "16.11.0"

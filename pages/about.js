@@ -8,11 +8,11 @@ const text = "Hi! I'm a gymnast, dancer, computer nerd, origami lover, bubble te
 
 const About = () => {
   // logic for finding current viewport size to determine if mobile layout is needed
-  const [width, setWidth] = useState(null)
+  const [windowWidth, setWidth] = useState(null)
 
   useEffect(() => {
-    // assign initial width value on first load
-    if (!width) setWidth(document.children[0].clientWidth);
+    // assign initial windowWidth value on first load
+    if (!windowWidth) setWidth(document.children[0].clientWidth);
 
     const debouncedHandleResize = debounce(function handleResize() {
       setWidth(document.children[0].clientWidth);
@@ -40,7 +40,7 @@ const About = () => {
         />
       </div>
 
-      {width < MobileWidth &&
+      {windowWidth < MobileWidth &&
         <BottomNav />
       }
       <style jsx>{`
