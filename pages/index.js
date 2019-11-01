@@ -130,6 +130,7 @@ const Main = () => {
       .cardWrapper {
         position: relative;
         margin: 0 40px;
+        margin-top: 235px;
         max-width: 1100px;
         display: flex;
         flex-wrap: wrap;
@@ -146,9 +147,9 @@ const Main = () => {
 
       // only use stagger effect when on desktop sized screens
       @media only screen and (min-width: 1024px) {
-        .cardWrapper div:nth-child(even) {
+        .cardWrapper div:nth-child(odd) {
           position: relative;
-          top: 235px;
+          top: -235px;
         }
       }
 
