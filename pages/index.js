@@ -131,7 +131,6 @@ const Main = () => {
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
-        align-items: flex-start;
       }
       .cardWrapper div {
         width: 48%
@@ -141,7 +140,7 @@ const Main = () => {
         color: black;
       }
 
-      
+
       // only use stagger effect when on desktop sized machines
       @media only screen and (min-width: 1024px) {
         .cardWrapper div:nth-child(even) {
