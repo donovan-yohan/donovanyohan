@@ -17,6 +17,35 @@ const links = [{
 
 export default links;
 
+export const socialLinks = [{
+        href: "mailto:donovanyohan@gmail.com",
+        label: "Email",
+        icon: "/img/icons/email.svg"
+    }, {
+        href: "https://github.com/donovan-yohan",
+        label: "Github",
+        icon: "/img/icons/github.svg"
+    },
+    {
+        href: "https://www.linkedin.com/in/donovan-yohan/",
+        label: "LinkedIn",
+        icon: "/img/icons/linkedin.svg"
+    },
+    {
+        href: "https://www.behance.net/donovanyohan",
+        label: "Behance Graphic Design",
+        icon: "/img/icons/behance.svg"
+    },
+    {
+        href: "https://www.youtube.com/donovanyohan",
+        label: "YouTube Motion Graphics",
+        icon: "/img/icons/youtube.svg"
+    }
+].map(socialLink => {
+    socialLink.key = `nav-link-${socialLink.href}-${socialLink.label}`;
+    return socialLink;
+});
+
 export const MobileWidth = 1024;
 
 export function debounce(fn, ms) {

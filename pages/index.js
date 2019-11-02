@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Head from 'next/head'
 import Nav from '../components/nav'
 import BottomNav from '../components/bottomNav'
@@ -62,6 +62,8 @@ const Main = () => {
     };
   });
 
+  // logic for finding currently visible element
+
   return (
     <main>
       <Head>
@@ -85,30 +87,13 @@ const Main = () => {
         />
         <div className='cardWrapper'>
           {projects.map(({ key, href, label, date, content }) => {
-            // components to show on mobile
-            if (windowWidth && windowWidth < MobileWidth) {
-              return (
-                <div key={key}>
-                  <Card title={label} caption={date} href={href}>
+            return (
+              <div key={key}>
+                <Card title={label} caption={date} href={href} isMobile={windowWidth < MobileWidth}>
 
-                  </Card>
-                </div>
-              )
-            }
-            // components to show on web
-            else {
-              return (
-                <div key={key}>
-                  <Link href={href} >
-                    <a>
-                      <Card title={label} caption={date} >
-
-                      </Card>
-                    </a>
-                  </Link>
-                </div>
-              )
-            }
+                </Card>
+              </div>
+            )
           }
           )}
         </div>
@@ -120,16 +105,20 @@ const Main = () => {
       }
 
       <style jsx>{`
+      main {
+        display: flex;
+        justify-content: center;
+      }
       .content {
-        position: absolute;
         width: 100%;
+        max-width: 1100px;
+        margin: 0 40px;
         display: flex;
         flex-direction: column;
         align-items: center;
       }
       .cardWrapper {
         position: relative;
-        margin: 0 40px;
         margin-top: 235px;
         max-width: 1100px;
         display: flex;

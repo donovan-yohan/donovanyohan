@@ -98,11 +98,12 @@ const Nav = () => (
       }
       a::before {
         content: "";
-        transition: .1s ease-out;
+        transition: .3s;
         z-index: -1;
         position: absolute;
+        bottom: 2px;
         width: 0%;
-        height: 100%
+        height: 60%
       }
       a:hover::before {
         width:100%;

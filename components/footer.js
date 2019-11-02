@@ -1,66 +1,131 @@
 import React from "react";
 import Link from "next/link";
-import links from "../global/global"
+import { socialLinks } from "../global/global"
 import Icon from "../components/icon"
 
 const BottomNav = () => (
   <div className="footer">
-    <div>
-      <p>Hello, world!</p>
+    <div className="container">
+      <h2>You made it!</h2>
+      <div className="wrapper">
+        <div className="message">
+          <p>Thanks for checking out my website! If you want to learn more about my work, feel free to check out some of these links.</p>
+        </div>
+        <div>
+          <div className="linkGroup">
+            <p>Get in touch:</p>
+            <Link href="mailto:donovanyohan@gmail.com"><a className="email">donovanyohan@gmail.com</a></Link>
+          </div>
+          <div className="linkGroup">
+            <p>Connect with me:</p>
+            <ul>
+              {socialLinks.map(({ key, href, icon, label }) => (
+                <li key={key}>
+                  <Link href={href}>
+                    <a><Icon src={icon} size="large" link={true} black={true} /></a>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
 
     <style jsx>{`
       .footer{
-
-      }
-      ul {
         width: 100%;
-        font-family: "Roboto";
-        font-weight: bold;
-        padding: 0;
-        margin: 0;
+        margin: 64px 0;
       }
-      .navLinks{
-        display: flex;
-        justify-content: space-around;
+      .container {
+        margin: 16px;
       }
-      li {
+      .wrapper {
         display: flex;
+        justify-content: space-between;
       }
-      a {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+      .wrapper div {
+        flex-basis: 46.5%;
+      }
+      .linkGroup {
+        margin-bottom: 32px;
+      }
+      h2 {
+        font-size: 20px;
+        line-height: 1.2;
+        margin: 64px 0;
+      }
+      p {
+        font-size: 16px;
+        line-height: 1.75;
+        margin: 0 0 8px 0;
+      }
+
+      .email {
         color: black;
-        opacity: 0.54;
         text-decoration: none;
-        transition: 0.1s;
         position: relative;
-        padding: 0 4px;
+        font-weight: bold;
       }
-      a span {
-        line-height: 19px;
-        font-size: 12px;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        padding-top: 4px;
-        opacity: 1;
-      }
-      a:active {
-        opacity: 1;
-      }
-      a::before {
+
+      .email::before {
         align-self: flex-start;
         content: "";
-        transition: .1s ease-out;
         z-index: -1;
+        transition: 0.3s;
         position: absolute;
+        bottom: 2px;
         width: 0%;
-        height: 100%
+        height: 60%
       }
-      a:active::before {
+      .email:hover::before {
         width:100%;
         background-color: #FFF500
+      }
+
+      ul {
+        display: flex;
+        padding: 0;
+        list-style-type: none;
+      }
+
+      li {
+        margin-right: 16px;
+      }
+
+      @media only screen and (max-width: 1023px) {
+        .footer {
+          display: flex;
+          justify-content: center;
+          margin: 0 0 32px 0;
+        }
+        .container {
+          max-width: 425px;
+          margin-top: 0;
+          margin-bottom: 64px;
+        }
+        .wrapper {
+          flex-direction: column;
+        }
+        h2 {
+          font-size: 16px;
+          line-height: 1.2;
+          margin: 0 0 32px 0;
+        }
+        p {
+          font-size: 16px;
+          line-height: 1.6;
+          margin: 0 0 8px 0;
+        }
+        .message {
+          margin-bottom: 32px;
+        }
+        .email::before {
+          width: 100%;
+        }
+        ul {
+          justify-content: space-between;
+        }
       }
     `}</style>
   </div>
