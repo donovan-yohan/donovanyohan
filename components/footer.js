@@ -34,11 +34,14 @@ const BottomNav = () => (
 
     <style jsx>{`
       .footer{
+        display: flex;
+        justify-content: center;
         width: 100%;
         margin: 64px 0;
       }
       .container {
         margin: 16px;
+        max-width: 1100px;
       }
       .wrapper {
         display: flex;
@@ -51,12 +54,12 @@ const BottomNav = () => (
         margin-bottom: 32px;
       }
       h2 {
-        font-size: 20px;
+        font-size: 22px;
         line-height: 1.2;
         margin: 64px 0;
       }
       p {
-        font-size: 16px;
+        font-size: 18px;
         line-height: 1.75;
         margin: 0 0 8px 0;
       }
@@ -114,7 +117,7 @@ const BottomNav = () => (
         }
         p {
           font-size: 16px;
-          line-height: 1.6;
+          line-height: 1.8;
           margin: 0 0 8px 0;
         }
         .message {
@@ -122,9 +125,6 @@ const BottomNav = () => (
         }
         .email::before {
           width: 100%;
-        }
-        ul {
-          justify-content: space-between;
         }
       }
     `}</style>

@@ -46,6 +46,35 @@ export const socialLinks = [{
     return socialLink;
 });
 
+export const projects = [{
+        href: "",
+        label: "Manulife Mobile",
+        date: "Fall 2019",
+        content: "",
+    },
+    {
+        href: "/work/flowr",
+        label: "flowr",
+        date: "Fall 2019",
+        content: "",
+    },
+    {
+        href: "",
+        label: "donovanyohan.com",
+        date: "Fall 2019",
+        content: "",
+    },
+    {
+        href: "",
+        label: "Cooperators Mobile App",
+        date: "Winter 2019",
+        content: "",
+    }
+].map(project => {
+    project.key = `nav-link-${project.href}-${project.label}`;
+    return project;
+});
+
 export const MobileWidth = 1024;
 
 export function debounce(fn, ms) {

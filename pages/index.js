@@ -8,39 +8,9 @@ import Footer from '../components/footer'
 import Lottie from 'lottie-react-web'
 import Link from 'next/link'
 import logoAnimation from '../public/img/animations/dy.json'
-import { MobileWidth, debounce } from '../global/global'
+import { MobileWidth, debounce, projects } from '../global/global'
+import { HomeText } from '../global/content'
 
-const HomeText = "Hi! I'm a UI & UX designer, full stack programmer, graphic designer, motion graphics artist, and video editor."
-
-const projects = [
-  {
-    href: "",
-    label: "Manulife Mobile",
-    date: "Fall 2019",
-    content: "",
-  },
-  {
-    href: "",
-    label: "flowr",
-    date: "Fall 2019",
-    content: "",
-  },
-  {
-    href: "",
-    label: "donovanyohan.com",
-    date: "Fall 2019",
-    content: "",
-  },
-  {
-    href: "",
-    label: "Cooperators Mobile App",
-    date: "Winter 2019",
-    content: "",
-  }
-].map(project => {
-  project.key = `nav-link-${project.href}-${project.label}`;
-  return project;
-});
 
 
 const Main = () => {
@@ -49,7 +19,6 @@ const Main = () => {
 
   useEffect(() => {
     if (!windowWidth) setWidth(document.children[0].clientWidth);
-    console.log(document.children);
 
     const debouncedHandleResize = debounce(function handleResize() {
       setWidth(document.children[0].clientWidth);
@@ -97,8 +66,8 @@ const Main = () => {
           }
           )}
         </div>
-        <Footer />
       </div>
+      <Footer />
 
       {windowWidth && windowWidth < MobileWidth &&
         <BottomNav />
@@ -107,10 +76,11 @@ const Main = () => {
       <style jsx>{`
       main {
         display: flex;
-        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+
       }
       .content {
-        width: 100%;
         max-width: 1100px;
         margin: 0 40px;
         display: flex;
@@ -153,6 +123,7 @@ const Main = () => {
       }
 
     `}</style>
+
     </main>
   )
 }

@@ -4,18 +4,22 @@ import React, { useState, useEffect } from 'react'
 const TypedText = ({ speed, text, delay }) => {
   const [currentText, setCurrentText] = useState("");
 
+  function typeText(str) {
+    let nextChar = text[str.length];
+    console.log(str);
+    if (nextChar !== undefined) {
+      setCurrentText(str + nextChar);
+      setTimeout(() => {
+        typeText(str + nextChar);
+      }, 3000 / speed + Math.floor(Math.random() * 20))
+    } else {
+      return
+    }
+  };
+
   useEffect(() => {
     setTimeout(() => {
-      let id = window.setInterval(() => {
-        setCurrentText(currentText => {
-          let nextChar = text[currentText.length];
-          if (nextChar === undefined) {
-            clearInterval(id);
-            return currentText;
-          }
-          return currentText + nextChar;
-        });
-      }, 3000 / speed);
+      typeText(currentText);
     }, delay);
   }, []);
 
@@ -34,7 +38,7 @@ const TypedText = ({ speed, text, delay }) => {
         100% { opacity: 0; }
       }
       ::selection {
-        background: #FFF500; /* WebKit/Blink Browsers */
+        background: #FFF500; 
       }
     `}</style>
     </p>

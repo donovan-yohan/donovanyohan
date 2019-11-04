@@ -32,7 +32,7 @@ const Card = props => {
     .container {
       width: 100%;
       margin-bottom: 32px;
-      font-size: 16px;
+      font-size: 18px;
       line-height: 24px;
     }
     .imageWrapper {
@@ -73,7 +73,7 @@ const Card = props => {
     .title {
       font-style: normal;
       font-weight: bold;
-      font-size: 20px;
+      font-size: 22px;
       line-height: 1.2;
       margin: 4px 0 4px 0;
       position: relative;
