@@ -35,8 +35,9 @@ const Icon = props => (
         transition: .3s ease-out;
         z-index: -1;
         position: absolute;
+        left: 0;
         width: 0%;
-        height: 100%
+        height: 100%;
       }
       .link:hover::before {
         width:100%;

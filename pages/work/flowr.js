@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import Nav from '../../components/nav'
 import ArticleHero from '../../components/articlehero'
+import ArticleImage from '../../components/articleimage'
+import Article from '../../components/article'
 import BottomNav from '../../components/bottomNav'
 import Footer from '../../components/footer'
 import { MobileWidth, debounce } from '../../global/global'
@@ -39,6 +41,44 @@ const About = () => {
           content={'Ullamco elit veniam ipsum nostrud magna in nisi labore fugiat qui mollit excepteur. Occaecat cillum reprehenderit cillum culpa officia officia esse laborum pariatur. Nisi deserunt ipsum sunt officia ea occaecat anim sunt.'}
           info={flowrInfo}
         />
+        <ArticleImage
+          images={[
+            {
+              key: '1',
+              src: 'a'
+            },
+            {
+              key: '2',
+              src: 'b'
+            },
+            {
+              key: '3',
+              src: 'c'
+            }
+
+          ]}
+        />
+        <ArticleImage
+          images={[
+            {
+              key: '4',
+              src: 'a'
+            },
+            {
+              key: '5',
+              src: 'b'
+            },
+          ]}
+        />
+        <ArticleImage
+          images={[
+            {
+              key: '6',
+              src: 'a'
+            },
+          ]}
+        />
+        <Article title="Hello, world!" content="Lorum ipsum dolor veniam ipsum nostrud magna in nisi labore fuigat qui moilt exceptuer. Occaecat cillum reprehendirit." />
         <Footer />
       </div>
       {windowWidth < MobileWidth &&

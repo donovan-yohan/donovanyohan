@@ -58,7 +58,7 @@ const ArticleHero = props => (
         font-size: 18px;
         line-height: 2;
         max-width: 1000px;
-        margin: 16px;
+        margin: 16px 40px;
       }
       .wrapper {
         display: flex;
@@ -92,13 +92,6 @@ const ArticleHero = props => (
         text-decoration: none;
         color: black;
       }
-      // Adjust for small displays
-
-      @media only screen and (max-width: 1130px) {
-
-      }
-
-
 
       // Adjust for Mobile
 
@@ -110,7 +103,7 @@ const ArticleHero = props => (
         .content {
           font-size: 18px;
           line-height: 36px;
-          margin-bottom: 64px;
+          margin: 16px 16px 0px 16px
         }
         h2 {
           font-size: 22px;

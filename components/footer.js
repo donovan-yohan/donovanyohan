@@ -40,7 +40,7 @@ const BottomNav = () => (
         margin: 64px 0;
       }
       .container {
-        margin: 16px;
+        margin: 16px 40px;
         max-width: 1100px;
       }
       .wrapper {
@@ -96,7 +96,7 @@ const BottomNav = () => (
         margin-right: 16px;
       }
 
-      @media only screen and (max-width: 1023px) {
+      @media only screen and (max-width: 767px) {
         .footer {
           display: flex;
           justify-content: center;
@@ -104,8 +104,7 @@ const BottomNav = () => (
         }
         .container {
           max-width: 425px;
-          margin-top: 0;
-          margin-bottom: 64px;
+          margin: 0 16px 64px 16px;
         }
         .wrapper {
           flex-direction: column;

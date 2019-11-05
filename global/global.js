@@ -21,7 +21,13 @@ export const socialLinks = [{
         href: "mailto:donovanyohan@gmail.com",
         label: "Email",
         icon: "/img/icons/email.svg"
-    }, {
+    },
+    {
+        href: "https://www.instagram.com/donovan.yohan/",
+        label: "Instagram",
+        icon: "/img/icons/instagram.svg"
+    },
+    {
         href: "https://github.com/donovan-yohan",
         label: "Github",
         icon: "/img/icons/github.svg"
