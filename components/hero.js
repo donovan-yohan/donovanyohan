@@ -119,6 +119,9 @@ const Hero = props => (
       // Adjust for Mobile
 
       @media only screen and (max-width: 767px) {
+        .container {
+          min-width: 100vw;
+        }
         .wrapper {
           width: 100%;
           margin-top: 0;

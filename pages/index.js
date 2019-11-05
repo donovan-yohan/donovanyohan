@@ -116,7 +116,7 @@ const Main = () => {
       // mobile scaling
       @media only screen and (max-width: 1023px) {
         .cardWrapper {
-          margin: 0 0 64px 0;
+          margin: 0;
           max-width: 100%;
           flex-direction: column;
         }

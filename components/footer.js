@@ -100,7 +100,7 @@ const BottomNav = () => (
         .footer {
           display: flex;
           justify-content: center;
-          margin: 0 0 32px 0;
+          margin: 64px 0 32px 0;
         }
         .container {
           max-width: 425px;

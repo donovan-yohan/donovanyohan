@@ -47,7 +47,7 @@ const Article = props => (
         .content {
           font-size: 18px;
           line-height: 36px;
-          margin: 16px 16px 64px 16px;
+          margin: 8px 16px 16px 16px;
         }
         h2 {
           font-size: 22px;

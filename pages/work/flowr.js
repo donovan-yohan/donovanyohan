@@ -44,41 +44,26 @@ const About = () => {
         <ArticleImage
           images={[
             {
-              key: '1',
-              src: 'a'
-            },
-            {
-              key: '2',
-              src: 'b'
-            },
-            {
-              key: '3',
-              src: 'c'
-            }
-
-          ]}
-        />
-        <ArticleImage
-          images={[
-            {
-              key: '4',
-              src: 'a'
-            },
-            {
-              key: '5',
-              src: 'b'
-            },
-          ]}
-        />
-        <ArticleImage
-          images={[
-            {
               key: '6',
               src: 'a'
             },
           ]}
         />
         <Article title="Hello, world!" content="Lorum ipsum dolor veniam ipsum nostrud magna in nisi labore fuigat qui moilt exceptuer. Occaecat cillum reprehendirit." />
+        <ArticleImage
+          images={[
+            {
+              key: '8',
+              src: 'a'
+            },
+            {
+              key: '7',
+              src: 'a'
+            },
+          ]}
+        />
+        <Article title="Hello, world!" content="Lorum ipsum dolor veniam ipsum nostrud magna in nisi labore fuigat qui moilt exceptuer. Occaecat cillum reprehendirit." />
+        <br />
         <Footer />
       </div>
       {windowWidth < MobileWidth &&
