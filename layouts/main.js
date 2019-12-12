@@ -35,10 +35,55 @@ return (
         <BottomNav />
     }
     <style jsx global>{`
+        html {
+            scroll-behavior: smooth;
+        }
         a {
             text-decoration: none;
             color: black;
         }
+
+        .pageRoot {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .pageContent {
+          max-width: 1024px;
+          width: calc(100% - 32px);
+          margin: 0 40px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        // mimicks behaviour of hero text
+        .headerText {
+          align-self: flex-start;
+          font-size: 47px;
+          margin-bottom: 64px;
+          margin-top: 0;
+          cursor: pointer;
+        }
+        @media only screen and (max-width: 1130px) {
+          .headerText {
+            font-size: 4.1717vw;
+          }
+        }
+        @media only screen and (max-width: 767px) {
+          .headerText {
+            font-size: 8.5vw;
+            margin-bottom: 32px;
+          }
+        }
+        .heroBlurb {
+          font-size: 18px;
+          line-height: 2;
+          margin-bottom: 64px;
+        }
+
+
         // link highlight
         .highlight {
           text-decoration: none;
@@ -50,7 +95,7 @@ return (
           cursor: pointer;
         }
         .highlight::before {
-          transition: 0.2s;
+          transition: 0.35s cubic-bezier(.8,.01,.54,.99);
           content: "";
           z-index: -1;
           position: absolute;
@@ -71,6 +116,13 @@ return (
         // static highlight effect 
         .highlightStatic {
             background: linear-gradient(0deg, #FFFFFF 10%, #FFF500 10%, #FFF500 60%, #FFFFFF 60%);
+        }
+        .textLink {
+            opacity: 0.54;
+            transition: 0.35s;
+        }
+        .textLink:hover {
+            opacity: 1;
         }
     `}</style>
   </div>

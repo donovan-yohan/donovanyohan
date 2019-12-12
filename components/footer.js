@@ -14,16 +14,14 @@ const BottomNav = () => (
         <div>
           <div className="linkGroup">
             <p>Get in touch:</p>
-            <Link href="mailto:donovanyohan@gmail.com"><a className="email">donovanyohan@gmail.com</a></Link>
+            <a href="mailto:donovanyohan@gmail.com" className="email">donovanyohan@gmail.com</a>
           </div>
           <div className="linkGroup">
             <p>Connect with me:</p>
             <ul>
               {socialLinks.map(({ key, href, icon, label }) => (
                 <li key={key}>
-                  <Link href={href}>
-                    <a target='_blank'><Icon src={icon} size="large" link={true} black={true} /></a>
-                  </Link>
+                  <a href={href} target='_blank'><Icon src={icon} size="large" link={true} black={true} /></a>
                 </li>
               ))}
             </ul>

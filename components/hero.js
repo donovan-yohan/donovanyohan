@@ -79,7 +79,7 @@ const Hero = props => (
         }
         .wrapper {
           max-width: 100%;
-          margin-top: 17vh;
+          margin-top: 15vh;
           flex-direction: column;
         }
         .text {

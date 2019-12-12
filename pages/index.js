@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import Hero from '../components/hero'
 import Card from '../components/card'
 import Lottie from 'lottie-react-web'
 import Link from 'next/link'
 import logoAnimation from '../public/img/animations/dy.json'
 import { MobileWidth, debounce, projects } from '../global/global'
-import { AboutText } from '../global/content'
-import { Link as ScrollLink, animateScroll as scroll } from "react-scroll";
+import { HomeAboutText } from '../global/content'
+import { Link as ScrollLink } from "react-scroll";
 import Main from '../layouts/main'
 
 
@@ -30,8 +30,8 @@ const Index = () => {
 
   return (
     <Main>
-      <index>
-        <div className='content'>
+      <div className="pageRoot">
+        <div className='pageContent'>
           <Hero
             image={
               <Lottie
@@ -44,22 +44,28 @@ const Index = () => {
             text={
               <span>
                 <span>Hi! I'm Donovan Yohan, and I'm a </span>
-                <ScrollLink to='work' smooth={true} duration={750} offset={-64}><span className='highlight'>UI & UX designer</span></ScrollLink> 
+                <ScrollLink to='work' duration={750} offset={-64}><span className='highlight'>UI & UX designer</span></ScrollLink> 
                 <span> and a </span>
-                <Link href='http://github.com/donovan-yohan'><a target='_blank' className='highlight'>front end developer</a></Link>
+                <a href='http://github.com/donovan-yohan' target='_blank' className='highlight'>front end developer</a>
                 .
               </span>
             }
-            delay={1200}
-            speed={85}
           />
 
-          <h1 className='headerText highlightStatic'>
-            <Link href='/about'><a>Who I am</a></Link>
-          </h1>
-          <span className='aboutText'>{AboutText}<span><Link href='/about'><a className='highlight'> Learn more about me here.</a></Link></span></span>
-         
-          <ScrollLink to='work' smooth={true} duration={250} offset={-64} style={{alignSelf: 'flex-start'}}>
+			<h1 className='headerText highlightStatic'>
+				<Link href='/about'><a>Who I am</a></Link>
+			</h1>
+          	<span className='heroBlurb'>
+				<span>I am a designer & a developer passionate about creating user-focused, robust, and well-researched digital solutions. In addition to UI & UX, I'm an experienced </span>
+				<a className='highlight textLink' href="#">graphic designer</a>
+				<span> and </span>
+				<a className='highlight textLink' href="#">motion graphics artist</a>
+				<span>. I'm well versed in native mobile design languages for both iOS and Android, and have built numerous responsive websites using React, Vue, and Angular. But, believe it or not, </span>
+				<span><Link href='/about'><a className='highlight textLink'>I don't just draw and code!</a></Link></span>
+			</span>
+        
+         <a id='work'> </a>
+          <ScrollLink to='work' duration={250} offset={-64} style={{alignSelf: 'flex-start'}}>
             <h1 name='work' className='headerText highlightStatic'>Work I've done</h1>
           </ScrollLink>
           <div className='cardWrapper'>
@@ -74,50 +80,16 @@ const Index = () => {
         </div>
 
         <style jsx>{`
-        index {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
 
-        .content {
-          max-width: 1024px;
-          width: calc(100% - 32px);
-          margin: 0 40px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-
-        // mimicks behaviour of hero text
-        .headerText {
-          align-self: flex-start;
-          font-size: 47px;
-          margin-bottom: 64px;
-          margin-top: 0;
-          cursor: pointer;
-        }
-        @media only screen and (max-width: 1130px) {
-          .headerText {
-            font-size: 4.1717vw;
-          }
-        }
-        @media only screen and (max-width: 767px) {
-          .headerText {
-            font-size: 8.5vw;
-            margin-bottom: 32px;
-          }
-        }
-        .aboutText {
-          font-size: 18px;
-          line-height: 2;
-          margin-bottom: 32px;
+        #work {
+          position: relative;
+          top: -64px;
         }
 
         .cardWrapper {
           width: 100%;
           position: relative;
-          margin-top: 235px;
+          margin-top: 250px;
           max-width: 1024px;
           display: flex;
           flex-wrap: wrap;
@@ -164,7 +136,7 @@ const Index = () => {
 
       `}</style>
 
-      </index>
+      </div>
     </Main>
   )
 }

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import Nav from '../components/nav'
+import Link from 'next/link'
 import Hero from '../components/hero'
-import BottomNav from '../components/bottomNav'
-import { MobileWidth, debounce } from '../global/global'
-
-const text = "Hi! I'm a gymnast, dancer, computer nerd, origami lover, bubble tea enthusiast, and more than just my work."
+import Card from '../components/card'
+import { MobileWidth, debounce, hobbies } from '../global/global'
+import Main from '../layouts/main'
+import { AboutHero, AboutText } from '../global/content'
 
 const About = () => {
   // logic for finding current viewport size to determine if mobile layout is needed
@@ -25,37 +25,94 @@ const About = () => {
     };
   });
   return (
-    <div>
-      <Nav />
-      <div className="content">
-        <Hero
-          image={
-            <div className="placeholder" />
+    <Main>
+      <div className='pageRoot'>
+        <div className="pageContent">
+          <Hero
+            image={
+              <div className="placeholder" />
+            }
+            text={AboutHero}
+            customImageStyle={{
+              margin: '0px'
+            }}
+          />
+          <h1 className='headerText highlightStatic'>
+            <Link href='/about'><a>About me</a></Link>
+          </h1>
+          <span className='heroBlurb'>{AboutText}</span>
+        
+          <div className='cardWrapper'>
+            {hobbies.map(({ key, href, label, date, content }) => {
+              return (
+                <div key={key}>
+                  <Card title={label} caption={date} href={href} isMobile={windowWidth < MobileWidth}/>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        <style jsx>{`
+
+          .placeholder {
+            border-radius: 100%;
+            width: 400px;
+            height: 400px;
+            background-color: gray;
           }
-          text={text}
-          speed={75}
-          customImageStyle={{
-            margin: '0px'
-          }}
-        />
-      </div>
 
-      {windowWidth <= MobileWidth &&
-        <BottomNav />
-      }
-      <style jsx>{`
-        .content {
+          .cardWrapper {
           width: 100%;
+          position: relative;
+          margin-top: 250px;
+          max-width: 1024px;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: space-between;
         }
-        .placeholder {
-          border-radius: 100%;
-          width: 400px;
-          height: 400px;
-          background-color: gray;
+        .cardWrapper div {
+          width: 48%
         }
-      `}</style>
+        .cardWrapper a {
+          text-decoration: none;
+          color: black;
+        }
+        .cardWrapper div:nth-child(odd) {
+          position: relative;
+          top: -250px;
+        }
 
-    </div>
+        @media only screen and (max-width: 1024px) {
+          .cardWrapper div {
+            width: 49%;
+          }
+          .cardWrapper div:nth-child(odd) {
+            // calculated based on ratio of card height to desired spacing
+            top: calc(50vw * 9 / 16 / 1.1 * -1);
+          }
+          .cardWrapper {
+            margin-top: calc(50vw * 9 / 16 / 1.1);;
+          }
+        }
+
+        @media only screen and (max-width: 425px) {
+          
+          .cardWrapper div:nth-child(odd) {
+            top: 0;
+          }
+          .cardWrapper {
+            flex-direction: column;
+            margin-top: 0;
+          }
+          .cardWrapper div {
+            width: 100%;
+          }
+        }
+        `}</style>
+
+      </div>
+    </Main>
   )
 }
 

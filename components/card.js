@@ -36,16 +36,16 @@ const Card = props => {
       line-height: 24px;
       border-style: solid;
       border-width: 0.5px;
-      border-color: rgba(0, 0, 0, 0.20);
+      border-color: rgba(0, 0, 0, 0.25);
       border-radius: 20px;
-      transition: 0.2s;
+      transition: 0.35s;
       overflow: hidden;
     }
     .imageWrapper {
       display: flex;
       max-height: 320px;
       height: calc(50vw * 9 / 16);
-      transition: 0.2s;
+      transition: 0.35s;
       background: gray;
     }
     .mobileButton {
@@ -83,7 +83,7 @@ const Card = props => {
       line-height: 1.2;
       margin: 4px 0 4px 0;
       position: relative;
-      transition: 0.5s;
+      transition: 0.35s;
       z-index: 2;
     }
     .content {
@@ -103,7 +103,7 @@ const Card = props => {
       .title::before {
         bottom: 2px;
         content: "";
-        transition: .25s ease-out;
+        transition: 0.35s cubic-bezier(.8,.01,.54,.99);
         z-index: -1;
         position: absolute;
         width: 0%;
@@ -125,7 +125,7 @@ const Card = props => {
     @media only screen and (max-width: 1024px) {
       .container {
         border-radius: 8px;
-        margin-bottom: 16px;
+        border-color: rgba(0, 0, 0, 0.4);
       }
       .title {
         font-size: 16px;

@@ -1,9 +1,12 @@
-import React from "react";
+import React from 'react'
 import Link from "next/link";
 import Icon from "../components/icon"
 import links from "../global/global"
 
-const Nav = () => (
+
+export default function Nav() {
+
+  return (
   <nav>
     <ul>
       <div className="homeLink">
@@ -14,18 +17,18 @@ const Nav = () => (
         </li>
         <li>
           <Link href="/">
-            <a>Donovan Yohan</a>
+            <a className='highlight'>Donovan Yohan</a>
           </Link>
         </li>
       </div>
       <div className="navLinks">
         <li>
-          <a target="_blank" href="/DonovanYohanResume.pdf">Resume</a>
+          <a target="_blank" href="/DonovanYohanResume.pdf" className='highlight'>Resume</a>
         </li>
         {links.map(({ key, href, label }) => (
-          <li key={key}>
+          <li key={key} >
             <Link href={href}>
-              <a>{label}</a>
+              <a className='highlight'>{label}</a>
             </Link>
           </li>
         ))}
@@ -73,7 +76,7 @@ const Nav = () => (
         text-decoration: none;
         font-size: 16px;
         text-transform: uppercase;
-        transition: 0.1s;
+        transition: 0.35s;
         position: relative;
       }
       .navLinks, .homeLink {
@@ -96,20 +99,6 @@ const Nav = () => (
       a:hover {
         color: black;
       }
-      a::before {
-        content: "";
-        transition: .3s;
-        z-index: -1;
-        position: absolute;
-        bottom: 2px;
-        width: 0%;
-        height: 60%
-      }
-      a:hover::before {
-        width:100%;
-        background-color: #FFF500
-      }
-
 
       // Adjust for mobile
 
@@ -136,6 +125,4 @@ const Nav = () => (
       }
     `}</style>
   </nav>
-);
-
-export default Nav;
+)};

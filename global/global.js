@@ -1,5 +1,5 @@
 const links = [{
-        href: "",
+        href: "/#work",
         label: "Work"
     },
     {
@@ -74,6 +74,47 @@ export const projects = [{
 ].map(project => {
     project.key = `nav-link-${project.href}-${project.label}`;
     return project;
+});
+
+export const hobbies = [{
+    href: "",
+    label: "Parkour",
+    date: "2010 - Present",
+    content: "",
+},
+{
+    href: "",
+    label: "Acting",
+    date: "2006 - Present",
+    content: "",
+},
+{
+    href: "",
+    label: "Dancing",
+    date: "2018 - Present",
+    content: "",
+},
+{
+    href: "",
+    label: "Photography",
+    date: "2018 - Present",
+    content: "",
+},
+{
+    href: "",
+    label: "Computers",
+    date: "2015 - Present",
+    content: "",
+},
+{
+    href: "",
+    label: "Origami",
+    date: "2010 - Present",
+    content: "",
+}
+].map(hobby => {
+hobby.key = `nav-link-${hobby.href}-${hobby.label}`;
+return hobby;
 });
 
 export const MobileWidth = 1024;
