@@ -35,6 +35,10 @@ return (
         <BottomNav />
     }
     <style jsx global>{`
+        a {
+            text-decoration: none;
+            color: black;
+        }
         // link highlight
         .highlight {
           text-decoration: none;

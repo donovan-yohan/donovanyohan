@@ -43,7 +43,7 @@ const Index = () => {
             }
             text={
               <span>
-                <span>Hi! I'm a </span>
+                <span>Hi! I'm Donovan Yohan, and I'm a </span>
                 <ScrollLink to='work' smooth={true} duration={750} offset={-64}><span className='highlight'>UI & UX designer</span></ScrollLink> 
                 <span> and a </span>
                 <Link href='http://github.com/donovan-yohan'><a target='_blank' className='highlight'>front end developer</a></Link>
@@ -53,9 +53,15 @@ const Index = () => {
             delay={1200}
             speed={85}
           />
-          <h1 className='headerText highlightStatic'>Who I am</h1>
-          <span className='aboutText'>{AboutText}</span>
-          <h1 name='work' className='headerText highlightStatic'>Work I've done</h1>
+
+          <h1 className='headerText highlightStatic'>
+            <Link href='/about'><a>Who I am</a></Link>
+          </h1>
+          <span className='aboutText'>{AboutText}<span><Link href='/about'><a className='highlight'> Learn more about me here.</a></Link></span></span>
+         
+          <ScrollLink to='work' smooth={true} duration={250} offset={-64} style={{alignSelf: 'flex-start'}}>
+            <h1 name='work' className='headerText highlightStatic'>Work I've done</h1>
+          </ScrollLink>
           <div className='cardWrapper'>
             {projects.map(({ key, href, label, date, content }) => {
               return (
@@ -63,8 +69,7 @@ const Index = () => {
                   <Card title={label} caption={date} href={href} isMobile={windowWidth < MobileWidth}/>
                 </div>
               )
-            }
-            )}
+            })}
           </div>
         </div>
 
@@ -90,6 +95,7 @@ const Index = () => {
           font-size: 47px;
           margin-bottom: 64px;
           margin-top: 0;
+          cursor: pointer;
         }
         @media only screen and (max-width: 1130px) {
           .headerText {

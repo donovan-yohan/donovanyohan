@@ -20,7 +20,7 @@ const Nav = () => (
       </div>
       <div className="navLinks">
         <li>
-          <a href="/DonovanYohanResume.pdf">Resume</a>
+          <a target="_blank" href="/DonovanYohanResume.pdf">Resume</a>
         </li>
         {links.map(({ key, href, label }) => (
           <li key={key}>

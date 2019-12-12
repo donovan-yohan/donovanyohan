@@ -37,7 +37,7 @@ const Hero = props => (
         font-size: 47px;
         line-height: 1.3em;
         letter-spacing: -0.01em;
-        height: 200px;
+        height: 240px;
       }
       .typedText {
         display: inline-block !important;
@@ -58,7 +58,7 @@ const Hero = props => (
           flex-shrink: 1;
           font-size: 4.1717vw;
           margin-left: 2.8vw;
-          height: 18.18vw;
+          height: 22vw;
         }
         .logo {
           flex-shrink: 2;
@@ -79,7 +79,7 @@ const Hero = props => (
         }
         .wrapper {
           max-width: 100%;
-          margin-top: 20vh;
+          margin-top: 17vh;
           flex-direction: column;
         }
         .text {
