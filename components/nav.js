@@ -53,7 +53,7 @@ const Nav = () => (
       ul {
         padding: 0 40px;
         width: 100%;
-        max-width: 1100px;
+        max-width: 1024px;
         display: flex;
         align-items: center;
         justify-content: space-between;

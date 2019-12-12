@@ -22,7 +22,7 @@ const BottomNav = () => (
               {socialLinks.map(({ key, href, icon, label }) => (
                 <li key={key}>
                   <Link href={href}>
-                    <a><Icon src={icon} size="large" link={true} black={true} /></a>
+                    <a target='_blank'><Icon src={icon} size="large" link={true} black={true} /></a>
                   </Link>
                 </li>
               ))}
@@ -37,10 +37,10 @@ const BottomNav = () => (
         display: flex;
         justify-content: center;
         width: 100%;
-        margin: 64px 0;
+        margin: 0 0 64px 0;
       }
       .container {
-        margin: 16px 40px;
+        margin: 16px;
         max-width: 1024px;
       }
       .wrapper {
@@ -103,7 +103,7 @@ const BottomNav = () => (
           margin: 64px 0 32px 0;
         }
         .container {
-          margin: 0 16px 64px 16px;
+          margin: 0 16px 32px 16px;
         }
         .wrapper {
           flex-direction: column;

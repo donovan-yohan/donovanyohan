@@ -1,6 +1,6 @@
 const test = "";
 
-export const HomeText = "Hi! I'm a UI & UX designer and a front end developer.";
+export const AboutText="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam porta pharetra laoreet. Quisque ut vulputate sem, id aliquam turpis. Pellentesque a mauris quis velit aliquam placerat et ac nisi. Sed nec sollicitudin quam. Integer ac varius odio. Nam a urna justo. Vestibulum varius ullamcorper elit facilisis tincidunt."
 
 export const flowrInfo = [{
         isLink: false,
@@ -28,5 +28,6 @@ export const flowrInfo = [{
     project.key = `work-link-${project.isLink}-${project.label}`;
     return project;
 });
+
 
 export default test;

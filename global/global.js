@@ -78,8 +78,6 @@ export const projects = [{
 
 export const MobileWidth = 1024;
 
-export const PhoneWidth = 425;
-
 export function debounce(fn, ms) {
     let timer;
     return _ => {

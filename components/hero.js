@@ -1,51 +1,5 @@
 import React, { useState, useEffect } from 'react'
 
-
-// const TypedText = ({ speed, text, delay }) => {
-//   const [currentText, setCurrentText] = useState("");
-
-//   function typeText(str) {
-//     let nextChar = text[str.length];
-//     console.log(str);
-//     if (nextChar !== undefined) {
-//       setCurrentText(str + nextChar);
-//       setTimeout(() => {
-//         typeText(str + nextChar);
-//       }, 3000 / speed + Math.floor(Math.random() * 20))
-//     } else {
-//       return
-//     }
-//   };
-
-//   useEffect(() => {
-//     setTimeout(() => {
-//       typeText(currentText);
-//     }, delay);
-//   }, []);
-
-
-//   return (
-//     <p>
-//       {currentText}
-//       <span className="cursor">|</span>
-//       <style jsx>{`
-//       .cursor {
-//         animation: fade 0.9s ease infinite;
-//       }
-//       @keyframes fade {
-//         0% { opacity: 0; }
-//         50% { opacity: 1; }
-//         100% { opacity: 0; }
-//       }
-//       ::selection {
-//         background: #FFF500; 
-//       }
-//     `}</style>
-//     </p>
-
-//   );
-// };
-
 const Hero = props => (
   <div>
     <div className='container'>
@@ -55,7 +9,6 @@ const Hero = props => (
         </div>
         <div className='text'>
           {props.text}
-          {/* <TypedText speed={props.speed ? props.speed : 150} text={props.text} delay={props.delay ? props.delay : 0} /> */}
         </div>
       </div>
     </div>
@@ -74,7 +27,7 @@ const Hero = props => (
         display: flex;
         align-items: center;
         width: 95vw;
-        max-width: 1100px;
+        max-width: 1024px;
       }
       .text {
         display: inline-block;
@@ -91,8 +44,8 @@ const Hero = props => (
       }
       .logo {
         margin-top: -24px;
-        width: 429px;
-        min-width: 429px;
+        width: 420px;
+        min-width: 420px;
       }
 
 
@@ -109,7 +62,7 @@ const Hero = props => (
         }
         .logo {
           flex-shrink: 2;
-          flex-basis: 40%;
+          flex-basis: 47%;
           margin-top: -2.1818vw;
           min-width: 38%;
         }

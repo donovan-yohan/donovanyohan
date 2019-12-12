@@ -100,7 +100,6 @@ const Card = props => {
       .container:hover {
         border-color: rgba(0, 0, 0, .87);
       }
-
       .title::before {
         bottom: 2px;
         content: "";
