@@ -45,6 +45,27 @@ const Icon = props => (
       }
     }
 
+    @media only screen and (min-width: 1025px) {
+      .link::before {
+        content: "";
+        transition: .3s ease-out;
+        z-index: -1;
+        position: absolute;
+        left: 0;
+        width: 0%;
+        height: 100%;
+      }
+      .link:hover::before {
+        width:100%;
+        background-color: #FFF500
+      }
+    }
+    @media only screen and (max-width: 1024px) {
+      div {
+        opacity: 1 !important;
+      }
+    }
+
     `}</style>
   </div>
 );

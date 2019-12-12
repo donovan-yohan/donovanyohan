@@ -1,6 +1,6 @@
 const test = "";
 
-export const HomeText = "Hi! I'm a UI & UX designer, full stack programmer, graphic designer, motion graphics artist, and video editor.";
+export const HomeText = "Hi! I'm a UI & UX designer and full stack developer.";
 
 export const flowrInfo = [{
         isLink: false,

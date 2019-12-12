@@ -57,7 +57,7 @@ const ArticleHero = props => (
       .content {
         font-size: 18px;
         line-height: 2;
-        max-width: 1000px;
+        max-width: 1024px;
         margin: 16px 40px;
       }
       .wrapper {

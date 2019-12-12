@@ -3,12 +3,12 @@ const links = [{
         label: "Work"
     },
     {
-        href: "",
-        label: "Process"
-    },
-    {
         href: "/about",
         label: "About"
+    },
+    {
+        href: "",
+        label: "Contact"
     }
 ].map(link => {
     link.key = `nav-link-${link.href}-${link.label}`;
@@ -77,6 +77,8 @@ export const projects = [{
 });
 
 export const MobileWidth = 1024;
+
+export const PhoneWidth = 425;
 
 export function debounce(fn, ms) {
     let timer;

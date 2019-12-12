@@ -41,7 +41,7 @@ const BottomNav = () => (
       }
       .container {
         margin: 16px 40px;
-        max-width: 1100px;
+        max-width: 1024px;
       }
       .wrapper {
         display: flex;
@@ -96,27 +96,22 @@ const BottomNav = () => (
         margin-right: 16px;
       }
 
-      @media only screen and (max-width: 767px) {
+      @media only screen and (max-width: 1024px) {
         .footer {
           display: flex;
           justify-content: center;
           margin: 64px 0 32px 0;
         }
         .container {
-          max-width: 425px;
           margin: 0 16px 64px 16px;
         }
         .wrapper {
           flex-direction: column;
         }
         h2 {
-          font-size: 16px;
-          line-height: 1.2;
           margin: 0 0 32px 0;
         }
         p {
-          font-size: 16px;
-          line-height: 1.8;
           margin: 0 0 8px 0;
         }
         .message {
@@ -124,6 +119,7 @@ const BottomNav = () => (
         }
         .email::before {
           width: 100%;
+          background-color: #FFF500
         }
       }
     `}</style>

@@ -8,7 +8,7 @@ import Footer from '../components/footer'
 import Lottie from 'lottie-react-web'
 import Link from 'next/link'
 import logoAnimation from '../public/img/animations/dy.json'
-import { MobileWidth, debounce, projects } from '../global/global'
+import { MobileWidth, PhoneWidth, debounce, projects } from '../global/global'
 import { HomeText } from '../global/content'
 
 
@@ -51,7 +51,7 @@ const Main = () => {
             />
           }
           text={HomeText}
-          delay={650}
+          delay={1200}
           speed={85}
         />
         <div className='cardWrapper'>
@@ -69,7 +69,7 @@ const Main = () => {
       </div>
       <Footer />
 
-      {windowWidth && windowWidth < MobileWidth &&
+      {windowWidth && windowWidth <= MobileWidth &&
         <BottomNav />
       }
 
@@ -82,12 +82,14 @@ const Main = () => {
       }
       .content {
         max-width: 1100px;
+        width: calc(100% - 32px);
         margin: 0 40px;
         display: flex;
         flex-direction: column;
         align-items: center;
       }
       .cardWrapper {
+        width: 100%;
         position: relative;
         margin-top: 235px;
         max-width: 1100px;
@@ -102,23 +104,34 @@ const Main = () => {
         text-decoration: none;
         color: black;
       }
+      .cardWrapper div:nth-child(odd) {
+        position: relative;
+        top: -250px;
+      }
 
-
-      // only use stagger effect when on desktop sized screens
-      @media only screen and (min-width: 1024px) {
+      @media only screen and (max-width: 1024px) {
+        .cardWrapper div {
+          width: 49%;
+        }
         .cardWrapper div:nth-child(odd) {
-          position: relative;
-          top: -235px;
+          // calculated based on ratio of card height to desired spacing
+          top: calc(50vw * 9 / 16 / 1.1 * -1);
+        }
+        .cardWrapper {
+          margin-top: calc(50vw * 9 / 16 / 1.1);;
         }
       }
 
-
-      // mobile scaling
-      @media only screen and (max-width: 1023px) {
+      @media only screen and (max-width: 425px) {
+        .cardWrapper div:nth-child(odd) {
+          top: 0;
+        }
         .cardWrapper {
-          margin: 0;
-          max-width: 100%;
           flex-direction: column;
+          margin-top: 0;
+        }
+        .cardWrapper div {
+          width: 100%;
         }
       }
 

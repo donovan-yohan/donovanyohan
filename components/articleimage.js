@@ -34,7 +34,7 @@ const ArticleImage = props => (
         display: flex;
         margin: 48px 40px 0 40px;
         width: calc(100% - 64px);
-        max-width: 1116px;
+        max-width: 1024px;
         height: 366px;
       }
       .image {

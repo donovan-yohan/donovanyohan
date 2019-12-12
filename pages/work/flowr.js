@@ -66,7 +66,7 @@ const About = () => {
         <br />
         <Footer />
       </div>
-      {windowWidth < MobileWidth &&
+      {windowWidth <= MobileWidth &&
         <BottomNav />
       }
       <style jsx>{`

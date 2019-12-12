@@ -40,7 +40,7 @@ const About = () => {
         />
       </div>
 
-      {windowWidth < MobileWidth &&
+      {windowWidth <= MobileWidth &&
         <BottomNav />
       }
       <style jsx>{`

@@ -32,13 +32,19 @@ const Card = props => {
     .container {
       width: 100%;
       margin-bottom: 32px;
-      font-size: 18px;
+      font-size: 16px;
       line-height: 24px;
+      border-style: solid;
+      border-width: 0.5px;
+      border-color: rgba(0, 0, 0, 0.20);
+      border-radius: 20px;
+      transition: 0.2s;
+      overflow: hidden;
     }
     .imageWrapper {
       display: flex;
-      border-radius: 20px;
-      height: 275px;
+      max-height: 320px;
+      height: calc(50vw * 9 / 16);
       transition: 0.2s;
       background: gray;
     }
@@ -90,12 +96,11 @@ const Card = props => {
     }
 
 
-    @media only screen and (min-width: 1024px) {
-      .container:hover .imageWrapper {
-        box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
-        background: #FFF500;
-        transform: scale(1.02);
+    @media only screen and (min-width: 1025px) {
+      .container:hover {
+        border-color: rgba(0, 0, 0, .87);
       }
+
       .title::before {
         bottom: 2px;
         content: "";
@@ -118,30 +123,25 @@ const Card = props => {
 
     // mobile scaling 
 
-    @media only screen and (max-width: 1023px) {
+    @media only screen and (max-width: 1024px) {
       .container {
-        max-width: 425px;
-        width: 100vw;
-        height: auto;
+        border-radius: 8px;
         margin-bottom: 16px;
       }
-      .imageWrapper {
-        max-height: 133vw;
-        min-height: 56.25vw;
-        border-radius: 0;
-      }
-
       .title {
         font-size: 16px;
         opacity: 1;
         margin-bottom: 4px;
       }
-      .content {
-        line-height: 1.6;
-      }
       .subheader {
         padding-bottom: 4px;
         font-size: 14px;
+      }
+    }
+
+    @media only screen and (max-width: 425px) {
+      .imageWrapper {
+        height: calc(100vw * 9 / 16);
       }
     }
   `}</style>

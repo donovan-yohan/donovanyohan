@@ -113,7 +113,7 @@ const Nav = () => (
 
       // Adjust for mobile
 
-      @media only screen and (max-width: 1023px) {
+      @media only screen and (max-width: 1024px) {
         .smallLogo {
           display: flex;
           padding-right: 16px;
