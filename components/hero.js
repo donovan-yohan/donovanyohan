@@ -1,50 +1,50 @@
 import React, { useState, useEffect } from 'react'
 
 
-const TypedText = ({ speed, text, delay }) => {
-  const [currentText, setCurrentText] = useState("");
+// const TypedText = ({ speed, text, delay }) => {
+//   const [currentText, setCurrentText] = useState("");
 
-  function typeText(str) {
-    let nextChar = text[str.length];
-    console.log(str);
-    if (nextChar !== undefined) {
-      setCurrentText(str + nextChar);
-      setTimeout(() => {
-        typeText(str + nextChar);
-      }, 3000 / speed + Math.floor(Math.random() * 20))
-    } else {
-      return
-    }
-  };
+//   function typeText(str) {
+//     let nextChar = text[str.length];
+//     console.log(str);
+//     if (nextChar !== undefined) {
+//       setCurrentText(str + nextChar);
+//       setTimeout(() => {
+//         typeText(str + nextChar);
+//       }, 3000 / speed + Math.floor(Math.random() * 20))
+//     } else {
+//       return
+//     }
+//   };
 
-  useEffect(() => {
-    setTimeout(() => {
-      typeText(currentText);
-    }, delay);
-  }, []);
+//   useEffect(() => {
+//     setTimeout(() => {
+//       typeText(currentText);
+//     }, delay);
+//   }, []);
 
 
-  return (
-    <p>
-      {currentText}
-      <span className="cursor">|</span>
-      <style jsx>{`
-      .cursor {
-        animation: fade 0.9s ease infinite;
-      }
-      @keyframes fade {
-        0% { opacity: 0; }
-        50% { opacity: 1; }
-        100% { opacity: 0; }
-      }
-      ::selection {
-        background: #FFF500; 
-      }
-    `}</style>
-    </p>
+//   return (
+//     <p>
+//       {currentText}
+//       <span className="cursor">|</span>
+//       <style jsx>{`
+//       .cursor {
+//         animation: fade 0.9s ease infinite;
+//       }
+//       @keyframes fade {
+//         0% { opacity: 0; }
+//         50% { opacity: 1; }
+//         100% { opacity: 0; }
+//       }
+//       ::selection {
+//         background: #FFF500; 
+//       }
+//     `}</style>
+//     </p>
 
-  );
-};
+//   );
+// };
 
 const Hero = props => (
   <div>
@@ -54,7 +54,8 @@ const Hero = props => (
           {props.image}
         </div>
         <div className='text'>
-          <TypedText speed={props.speed ? props.speed : 150} text={props.text} delay={props.delay ? props.delay : 0} />
+          {props.text}
+          {/* <TypedText speed={props.speed ? props.speed : 150} text={props.text} delay={props.delay ? props.delay : 0} /> */}
         </div>
       </div>
     </div>
@@ -83,7 +84,7 @@ const Hero = props => (
         font-size: 47px;
         line-height: 1.3em;
         letter-spacing: -0.01em;
-        height: 338px;
+        height: 200px;
       }
       .typedText {
         display: inline-block !important;
@@ -104,7 +105,7 @@ const Hero = props => (
           flex-shrink: 1;
           font-size: 4.1717vw;
           margin-left: 2.8vw;
-          height: 30.7272vw;
+          height: 18.18vw;
         }
         .logo {
           flex-shrink: 2;
@@ -120,23 +121,27 @@ const Hero = props => (
 
       @media only screen and (max-width: 767px) {
         .container {
-          min-width: 100vw;
+          min-width: 100%;
+          height: 95vh;
         }
         .wrapper {
-          width: 100%;
-          margin-top: 0;
-          margin-bottom: 10vh;
+          max-width: 100%;
+          margin-top: 20vh;
+          flex-direction: column;
         }
         .text {
           flex-basis: 100%;
           flex-shrink: unset;
           font-size: 8.5vw;
-          margin: 0 16px 0 48px;
-          height: 71.875vw;
+          margin: 24px;
+          text-align: center;
+          height: auto;
           text-size-adjust: none;
         }
         .logo {
-          display: none;
+          margin-top: 0;
+          max-width: 66%;
+          min-height: 66vw;
         }
       }
     `}</style>
