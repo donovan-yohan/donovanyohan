@@ -8,6 +8,7 @@ import { MobileWidth, debounce, projects } from '../global/global'
 import { HomeAboutText } from '../global/content'
 import { Link as ScrollLink } from "react-scroll";
 import Main from '../layouts/main'
+import useSmoothScroll from '../hooks/useSmoothScroll'
 
 
 const Index = () => {
@@ -25,8 +26,10 @@ const Index = () => {
 
     return _ => {
       window.removeEventListener("resize", debouncedHandleResize);
-    };
+	};
   });
+
+  useSmoothScroll();
 
   return (
     <Main>
@@ -55,7 +58,7 @@ const Index = () => {
 			<h1 className='headerText highlightStatic'>
 				<Link href='/about'><a>Who I am</a></Link>
 			</h1>
-          	<span className='heroBlurb'>
+          	<span className='body heroBlurb'>
 				<span>I am a designer & a developer passionate about creating user-focused, robust, and well-researched digital solutions. In addition to UI & UX, I'm an experienced </span>
 				<a className='highlight textLink' href="#">graphic designer</a>
 				<span> and </span>
@@ -80,6 +83,7 @@ const Index = () => {
         </div>
 
         <style jsx>{`
+
 
         #work {
           position: relative;

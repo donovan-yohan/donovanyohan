@@ -59,6 +59,7 @@ const Hero = props => (
           font-size: 4.1717vw;
           margin-left: 2.8vw;
           height: 22vw;
+          line-height: 1.4;
         }
         .logo {
           flex-shrink: 2;

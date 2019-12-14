@@ -10,8 +10,8 @@ const ArticleHero = props => (
       <div className='content'>
         <div className='wrapper'>
           <div className='intro'>
-            <h2>flowr</h2>
-            <p>
+            <h1 className="headerText highlightStatic">flowr</h1>
+            <p className='body'>
               {props.content}
             </p>
           </div>
@@ -20,7 +20,7 @@ const ArticleHero = props => (
               isLink ? (
                 <li key={key}>
                   <Link href={href}>
-                    <a>{label}</a>
+                    <a className='highlight'>{label}</a>
                   </Link>
                 </li>
               ) : (
@@ -50,15 +50,14 @@ const ArticleHero = props => (
         justify-content: center;
         align-items: center;
         margin-top: 50px;
-        min-height: 50%;
-        width: 100%;
+        max-height: 400px;
+        height: 33vw;
+        width: 100vw;
         background: #F5F5F5;
       }
       .content {
-        font-size: 18px;
-        line-height: 2;
         max-width: 1024px;
-        margin: 16px 40px;
+        font-size: 18px;
       }
       .wrapper {
         display: flex;
@@ -66,16 +65,19 @@ const ArticleHero = props => (
         justify-content: space-between;
       }
       .intro {
-        flex-basis: 65%;
+        flex-basis: 70%;
       }
-      h2 {
-        font-size: 22px;
+      h1 {
         margin: 32px 0 0 0;
+        width: fit-content;
+        height: fit-content;
       }
       p {
         margin: 16px 0 0 0;
+        line-height: 2;
       }
       ul {
+        line-height: 36px;
         flex-basis: 25%;
         padding: 0;
         margin:64px 0 0 0;
@@ -83,30 +85,30 @@ const ArticleHero = props => (
         flex-direction: column;
         font-size: 16px;
         font-weight: bold;
-        color: gray;
       }
       ul li {
         list-style-type: none;
+        color: rgba(0,0,0,0.54);
       }
       a {
         text-decoration: none;
-        color: black;
+        color: rgba(0,0,0,1);
       }
 
+
+      // adjust for tablet and smaller 
+      @media only screen and (max-width: 1024px) {
+        .content {
+          font-size: 18px;
+          margin: 0 16px;
+        }
+      }
       // Adjust for Mobile
 
       @media only screen and (max-width: 767px) {
         .hero {
           max-height: 50vw;
           overflow: hidden;
-        }
-        .content {
-          font-size: 18px;
-          line-height: 36px;
-          margin: 16px 16px 0px 16px
-        }
-        h2 {
-          font-size: 22px;
         }
         .wrapper {
           flex-direction: column-reverse;
@@ -117,7 +119,7 @@ const ArticleHero = props => (
         }
         ul {
           flex-basis: unset;
-          margin-top: 0;
+          margin-top: 16px;
         }
       }
     `}</style>

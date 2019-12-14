@@ -23,11 +23,13 @@ useEffect(() => {
         window.removeEventListener("resize", debouncedHandleResize);
     };
 });
+
 return (
   <div>
     <Head>
         <title>Donovan Yohan</title>
     </Head>
+        
     <Nav />
     { children }
     <Footer />
@@ -35,12 +37,15 @@ return (
         <BottomNav />
     }
     <style jsx global>{`
-        html {
-            scroll-behavior: smooth;
-        }
+
         a {
             text-decoration: none;
             color: black;
+        }
+        h2 {
+            font-size: 24px;
+            line-height: 1.8;
+            width: fit-content;
         }
 
         .pageRoot {
@@ -56,6 +61,11 @@ return (
           display: flex;
           flex-direction: column;
           align-items: center;
+        }
+
+        .body {
+            font-size: 20px;
+            line-height: 2;
         }
 
         // mimicks behaviour of hero text
@@ -78,8 +88,6 @@ return (
           }
         }
         .heroBlurb {
-          font-size: 18px;
-          line-height: 2;
           margin-bottom: 64px;
         }
 
@@ -95,7 +103,7 @@ return (
           cursor: pointer;
         }
         .highlight::before {
-          transition: 0.35s cubic-bezier(.8,.01,.54,.99);
+          transition: 0.35s cubic-bezier(0.51, 0.07, 0.09, 0.95);
           content: "";
           z-index: -1;
           position: absolute;
@@ -106,11 +114,6 @@ return (
         }
         .highlight:hover::before {
           width: 100%;
-        }
-        @media only screen and (max-width: 1024px) {
-          .highlight {
-            background: linear-gradient(0deg, #FFFFFF 10%, #FFF500 10%, #FFF500 60%, #FFFFFF 60%);
-          }
         }
 
         // static highlight effect 
@@ -124,6 +127,28 @@ return (
         .textLink:hover {
             opacity: 1;
         }
+
+        @media only screen and (max-width: 1024px) {
+          .highlight {
+            background: linear-gradient(0deg, #FFFFFF 10%, #FFF500 10%, #FFF500 60%, #FFFFFF 60%);
+          }
+
+          .textLink {
+              opacity: 1;
+          }
+        }
+
+        @media only screen and (max-width: 767px) {
+            h2 {
+                font-size: 20px;
+            }
+            .body {
+                font-size: 18px;
+            }
+        }
+
+
+
     `}</style>
   </div>
 )}

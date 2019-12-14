@@ -6,18 +6,18 @@ import Icon from "../components/icon"
 const BottomNav = () => (
   <div className="footer">
     <div className="container">
-      <h2>You made it!</h2>
+      <h2 className="highlightStatic">You made it!</h2>
       <div className="wrapper">
-        <div className="message">
+        <div className="body message">
           <p>Thanks for checking out my website! If you want to learn more about my work, feel free to check out some of these links.</p>
         </div>
         <div>
           <div className="linkGroup">
-            <p>Get in touch:</p>
+            <p className='body'>Get in touch:</p>
             <a href="mailto:donovanyohan@gmail.com" className="email">donovanyohan@gmail.com</a>
           </div>
           <div className="linkGroup">
-            <p>Connect with me:</p>
+            <p className='body'>Connect with me:</p>
             <ul>
               {socialLinks.map(({ key, href, icon, label }) => (
                 <li key={key}>
@@ -52,13 +52,9 @@ const BottomNav = () => (
         margin-bottom: 32px;
       }
       h2 {
-        font-size: 22px;
-        line-height: 1.2;
         margin: 64px 0;
       }
       p {
-        font-size: 18px;
-        line-height: 1.75;
         margin: 0 0 8px 0;
       }
 
@@ -107,6 +103,7 @@ const BottomNav = () => (
           flex-direction: column;
         }
         h2 {
+          font-size: 18px;
           margin: 0 0 32px 0;
         }
         p {

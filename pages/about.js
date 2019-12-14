@@ -40,7 +40,7 @@ const About = () => {
           <h1 className='headerText highlightStatic'>
             <Link href='/about'><a>About me</a></Link>
           </h1>
-          <span className='heroBlurb'>{AboutText}</span>
+          <span className='body heroBlurb'>{AboutText}</span>
         
           <div className='cardWrapper'>
             {hobbies.map(({ key, href, label, date, content }) => {
