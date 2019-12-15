@@ -47,29 +47,29 @@ const Index = () => {
             text={
               <span>
                 <span>Hi! I'm Donovan Yohan, and I'm a </span>
-                <ScrollLink to='work' duration={750} offset={-64}><span className='highlight'>UI & UX designer</span></ScrollLink> 
+                <ScrollLink to='work' duration={750} offset={-64}><span className='highlight heroHighlight'>UI & UX designer</span></ScrollLink> 
                 <span> and a </span>
-                <a href='http://github.com/donovan-yohan' target='_blank' className='highlight'>front end developer</a>
+                <a href='http://github.com/donovan-yohan' target='_blank' className='highlight heroHighlight'>front end developer</a>
                 .
               </span>
             }
           />
 
 			<h1 className='headerText highlightStatic'>
-				<Link href='/about'><a>Who I am</a></Link>
+				<Link href='/about'><a>Nice to meet you!</a></Link>
 			</h1>
-          	<span className='body heroBlurb'>
+      <span className='body heroBlurb'>
 				<span>I am a designer & a developer passionate about creating user-focused, robust, and well-researched digital solutions. In addition to UI & UX, I'm an experienced </span>
-				<a className='highlight textLink' href="#">graphic designer</a>
+				<a className='textLink' href="#">graphic designer</a>
 				<span> and </span>
-				<a className='highlight textLink' href="#">motion graphics artist</a>
+				<a className='textLink' href="#">motion graphics artist</a>
 				<span>. I'm well versed in native mobile design languages for both iOS and Android, and have built numerous responsive websites using React, Vue, and Angular. But, believe it or not, </span>
-				<span><Link href='/about'><a className='highlight textLink'>I don't just draw and code!</a></Link></span>
+				<span><Link href='/about'><a className='textLink'>I don't just draw and code!</a></Link></span>
 			</span>
         
          <a id='work'> </a>
           <ScrollLink to='work' duration={250} offset={-64} style={{alignSelf: 'flex-start'}}>
-            <h1 name='work' className='headerText highlightStatic'>Work I've done</h1>
+            <h1 name='work' className='headerText highlightStatic'>Work I've done.</h1>
           </ScrollLink>
           <div className='cardWrapper'>
             {projects.map(({ key, href, label, date, content }) => {
@@ -83,7 +83,11 @@ const Index = () => {
         </div>
 
         <style jsx>{`
-
+        {/* .heroHighlight {
+        }
+        .heroHighlight::before {
+          animation: 700ms cubic-bezier(0.51, 0.07, 0.09, 0.95) 1.5s 2 alternate highlighterOn;
+        } */}
 
         #work {
           position: relative;
@@ -138,6 +142,15 @@ const Index = () => {
           }
         }
 
+        @keyframes highlighterOn {
+          0% {
+            width: 0%;
+          }
+
+          100% {
+            width: 100%;
+          }
+        }
       `}</style>
 
       </div>

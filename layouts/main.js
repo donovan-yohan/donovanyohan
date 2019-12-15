@@ -96,11 +96,12 @@ return (
 
 
         // link highlight
-        .highlight {
+        .highlight, .textLink {
           text-decoration: none;
           color: black;
           font-weight: bold;
           position: relative;
+ 
         }
         .highlight:hover {
           cursor: pointer;
@@ -120,12 +121,13 @@ return (
         }
 
         // static highlight effect 
-        .highlightStatic {
-            background: linear-gradient(0deg, #FFFFFF 10%, #FFF500 10%, #FFF500 60%, #FFFFFF 60%);
+        .highlightStatic, .textLink:hover {
+          background: linear-gradient(0deg, #FFFFFF 10%, #FFF500 10%, #FFF500 60%, #FFFFFF 60%);
         }
+
         .textLink {
             opacity: 0.54;
-            transition: 0.35s;
+            transition: 0.35s ease;
         }
         .textLink:hover {
             opacity: 1;
@@ -153,8 +155,6 @@ return (
                 font-size: 18px;
             }
         }
-
-
 
     `}</style>
   </div>
