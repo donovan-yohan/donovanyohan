@@ -29,8 +29,8 @@ export default function Nav() {
           <a target="_blank" href="/DonovanYohanResume.pdf" className='highlight'>Resume</a>
         </li>
         {links.map(({ key, href, label }) => (
-          <li key={key} >
-            <Link scroll={true} href={href}>
+          <li key={key}>
+            <Link href={href}>
               <a className='highlight'>{label}</a>
             </Link>
           </li>

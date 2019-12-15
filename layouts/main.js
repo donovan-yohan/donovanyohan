@@ -7,7 +7,7 @@ import { MobileWidth, debounce } from '../global/global'
 import useSmoothScroll from '../hooks/useSmoothScroll'
 
 
-const Main = ({ children }) => {
+const Main = (props) => {
 // logic for finding current viewport size to determine if mobile layout is needed
 const [windowWidth, setWidth] = useState(null);
 
@@ -32,9 +32,9 @@ return (
     <Head>
         <title>Donovan Yohan</title>
     </Head>
-        
+    
     <Nav />
-    { children }
+    { props.children }
     <Footer />
     {windowWidth && windowWidth <= MobileWidth &&
         <BottomNav />

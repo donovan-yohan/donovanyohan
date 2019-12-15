@@ -5,15 +5,19 @@ import Lottie from 'lottie-react-web'
 import Link from 'next/link'
 import logoAnimation from '../public/img/animations/dy.json'
 import { MobileWidth, debounce, projects } from '../global/global'
-import { HomeAboutText } from '../global/content'
-import { Link as ScrollLink } from "react-scroll";
 import Main from '../layouts/main'
 import useSmoothScroll from '../hooks/useSmoothScroll'
+import VisibilitySensor from 'react-visibility-sensor'
 
 
 const Index = () => {
   // logic for finding current viewport size to determine if mobile layout is needed
   const [windowWidth, setWidth] = useState(null)
+  const [heroVisible, setVisible] = useState(true);
+
+  function onChange(isVisible) {
+    setVisible(isVisible);
+  }
 
   useEffect(() => {
     if (!windowWidth) setWidth(document.children[0].clientWidth);
@@ -37,40 +41,42 @@ const Index = () => {
         <div className='pageContent'>
           <Hero
             image={
-              <Lottie
-                options={{
-                  animationData: logoAnimation,
-                  loop: false
-                }}
-              />
+              <VisibilitySensor partialVisibility={true} onChange={onChange}>
+                <Lottie
+                  options={{
+                    animationData: logoAnimation,
+                    loop: false,
+                  }}
+                  isStopped={!heroVisible}
+                />
+              </VisibilitySensor>
             }
             text={
               <span>
                 <span>Hi! I'm Donovan Yohan, and I'm a </span>
-                <ScrollLink to='work' duration={750} offset={-64}><span className='highlight heroHighlight'>UI & UX designer</span></ScrollLink> 
+                <a href='#work' className='highlight heroHighlight'>UI & UX designer</a> 
                 <span> and a </span>
                 <a href='http://github.com/donovan-yohan' target='_blank' className='highlight heroHighlight'>front end developer</a>
                 .
               </span>
             }
           />
-
-			<h1 className='headerText highlightStatic'>
-				<Link href='/about'><a>Nice to meet you!</a></Link>
-			</h1>
-      <span className='body heroBlurb'>
-				<span>I am a designer & a developer passionate about creating user-focused, robust, and well-researched digital solutions. In addition to UI & UX, I'm an experienced </span>
-				<a className='textLink' href="#">graphic designer</a>
-				<span> and </span>
-				<a className='textLink' href="#">motion graphics artist</a>
-				<span>. I'm well versed in native mobile design languages for both iOS and Android, and have built numerous responsive websites using React, Vue, and Angular. But, believe it or not, </span>
-				<span><Link href='/about'><a className='textLink'>I don't just draw and code!</a></Link></span>
-			</span>
-        
-         <a id='work'> </a>
-          <ScrollLink to='work' duration={250} offset={-64} style={{alignSelf: 'flex-start'}}>
+          <h1 className='headerText highlightStatic'>
+            <Link href='/about'><a>Nice to meet you!</a></Link>
+          </h1>
+          <span className='body heroBlurb'>
+            <span>I'm a designer & developer passionate about creating user-focused, robust, and well-researched digital solutions. In addition to UI & UX, I'm an experienced </span>
+            <a className='textLink' href="#">graphic designer</a>
+            <span> and </span>
+            <a className='textLink' href="#">motion graphics artist</a>
+            <span>. I'm well versed in native mobile design languages for both iOS and Android, and have built numerous responsive websites using React, Vue, and Angular. But, believe it or not, </span>
+            <span><Link href='/about'><a className='textLink'>I don't just draw and code!</a></Link></span>
+          </span>
+            
+          <a id='work'> </a>
+          <a href='#work' className='headerLink'>
             <h1 name='work' className='headerText highlightStatic'>Work I've done.</h1>
-          </ScrollLink>
+          </a>
           <div className='cardWrapper'>
             {projects.map(({ key, href, label, date, content }) => {
               return (
@@ -82,7 +88,7 @@ const Index = () => {
           </div>
         </div>
 
-        <style jsx>{`
+    <style jsx>{`
         {/* .heroHighlight {
         }
         .heroHighlight::before {
@@ -92,6 +98,9 @@ const Index = () => {
         #work {
           position: relative;
           top: -64px;
+        }
+        .headerLink {
+          align-self: flex-start;
         }
 
         .cardWrapper {
