@@ -2,9 +2,12 @@ import React from 'react'
 import Link from "next/link";
 import Icon from "../components/icon"
 import links from "../global/global"
+import { useRouter } from 'next/router'
 
 
 export default function Nav() {
+  const router = useRouter();
+  const contactRoute = router.pathname + '#footer';
 
   return (
   <nav>
@@ -27,11 +30,14 @@ export default function Nav() {
         </li>
         {links.map(({ key, href, label }) => (
           <li key={key} >
-            <Link href={href}>
+            <Link scroll={true} href={href}>
               <a className='highlight'>{label}</a>
             </Link>
           </li>
         ))}
+        <li>
+          <a href={contactRoute} className='highlight'>Contact</a>
+        </li>
       </div>
 
     </ul>

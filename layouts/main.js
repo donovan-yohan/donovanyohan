@@ -4,11 +4,14 @@ import Nav from '../components/nav'
 import Footer from '../components/footer'
 import BottomNav from '../components/bottomNav'
 import { MobileWidth, debounce } from '../global/global'
+import useSmoothScroll from '../hooks/useSmoothScroll'
 
 
 const Main = ({ children }) => {
 // logic for finding current viewport size to determine if mobile layout is needed
-const [windowWidth, setWidth] = useState(null)
+const [windowWidth, setWidth] = useState(null);
+
+useSmoothScroll();
 
 useEffect(() => {
     if (!windowWidth) setWidth(document.children[0].clientWidth);

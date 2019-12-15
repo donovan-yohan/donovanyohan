@@ -6,14 +6,14 @@ import Icon from "../components/icon"
 const BottomNav = () => (
   <div className="footer">
     <div className="container">
-      <h2 className="highlightStatic">You made it!</h2>
+      <h2 id='footer' className="highlightStatic">Contact or connect with me!</h2>
       <div className="wrapper">
         <div className="body message">
           <p>Thanks for checking out my website! If you want to learn more about my work, feel free to check out some of these links.</p>
         </div>
         <div>
           <div className="linkGroup">
-            <p className='body'>Get in touch:</p>
+            <p className='body'>Contact me:</p>
             <a href="mailto:donovanyohan@gmail.com" className="email">donovanyohan@gmail.com</a>
           </div>
           <div className="linkGroup">
