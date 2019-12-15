@@ -73,7 +73,7 @@ const Hero = props => (
 
       // Adjust for Mobile
 
-      @media only screen and (max-width: 767px) {
+      @media only screen and (max-width: 450px) {
         .container {
           min-width: 100%;
           height: 95vh;
