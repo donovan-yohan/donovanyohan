@@ -18,9 +18,9 @@ export default function Nav() {
             <a><Icon src='/img/icons/dy.svg' size='small' /></a>
           </Link>
         </li>
-        <li>
+        <li className='title'>
           <Link href="/">
-            <a className='highlight'>Donovan Yohan</a>
+            <a className='highlight nav'>Donovan Yohan</a>
           </Link>
         </li>
       </div>
@@ -36,7 +36,9 @@ export default function Nav() {
           </li>
         ))}
         <li>
-          <a href={contactRoute} className='highlight'>Contact</a>
+          <Link href={contactRoute}>
+            <a className='highlight'>Contact</a>
+          </Link>
         </li>
       </div>
 
@@ -127,6 +129,12 @@ export default function Nav() {
 
         .homeLink a {
           font-size: 14px;
+        }
+      }
+
+      @media only screen and (max-width: 450px) {
+        .title {
+          display: none;
         }
       }
     `}</style>

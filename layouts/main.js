@@ -139,6 +139,10 @@ return (
           .textLink {
               opacity: 1;
           }
+
+          .nav {
+            background: none;
+          }
         }
 
         @media only screen and (max-width: 767px) {

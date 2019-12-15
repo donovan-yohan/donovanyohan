@@ -2,8 +2,12 @@ import React from "react";
 import Link from "next/link";
 import links from "../global/global"
 import Icon from "../components/icon"
+import { useRouter } from 'next/router'
 
-const BottomNav = () => (
+const BottomNav = () => {
+const router = useRouter();
+const contactRoute = router.pathname + '#footer'
+return (
   <div className="bottomNav">
     <ul>
       <div className="navLinks">
@@ -23,6 +27,12 @@ const BottomNav = () => (
             </Link>
           </li>
         ))}
+        <li>
+          <a href={contactRoute}>
+            <Icon src='/img/icons/contact.svg' size='small' />
+            <span>Contact</span>
+          </a>
+        </li>
       </div>
     </ul>
 
@@ -91,6 +101,6 @@ const BottomNav = () => (
       }
     `}</style>
   </div>
-);
+)};
 
 export default BottomNav;
