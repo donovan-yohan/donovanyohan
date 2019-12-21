@@ -11,7 +11,7 @@ import { flowrInfo } from '../../global/content'
 
 const About = () => {
   return (
-    <Main>
+    <Main breadcrumbs={[{label: 'Work', href: '/#work'}, {label: 'flowr', href: '/work/flowr'}]}>
       <div className="pageRoot">
         <div className="pageContent">
           <ArticleHero

@@ -33,7 +33,7 @@ return (
         <title>Donovan Yohan</title>
     </Head>
     
-    <Nav />
+    <Nav breadcrumbs={props.breadcrumbs} isPhone={windowWidth && windowWidth <= 425}/>
     { props.children }
     <Footer />
     {windowWidth && windowWidth <= MobileWidth &&
@@ -74,7 +74,9 @@ return (
         // mimicks behaviour of hero text
         .headerText {
           align-self: flex-start;
+          width: fit-content;
           font-size: 47px;
+          line-height: 1.5;
           margin-bottom: 64px;
           margin-top: 0;
           cursor: pointer;
@@ -139,7 +141,8 @@ return (
           }
 
           .textLink {
-              opacity: 1;
+            background: linear-gradient(0deg, #FFFFFF 10%, #FFF500 10%, #FFF500 60%, #FFFFFF 60%);
+            opacity: 1;
           }
 
           .nav {

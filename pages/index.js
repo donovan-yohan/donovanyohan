@@ -74,7 +74,7 @@ const Index = () => {
           </span>
             
           <a id='work'> </a>
-          <a href='#work' className='headerLink'>
+          <a href='#work' id='workWrapper'>
             <h1 name='work' className='headerText highlightStatic'>Work I've done.</h1>
           </a>
           <div className='cardWrapper'>
@@ -97,9 +97,11 @@ const Index = () => {
 
         #work {
           position: relative;
+          align
           top: -64px;
         }
-        .headerLink {
+        
+        #workWrapper {
           align-self: flex-start;
         }
 

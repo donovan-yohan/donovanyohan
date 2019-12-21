@@ -5,7 +5,7 @@ import links from "../global/global"
 import { useRouter } from 'next/router'
 
 
-export default function Nav() {
+export default function Nav(props) {
   const router = useRouter();
   const contactRoute = router.pathname + '#footer';
 
@@ -15,14 +15,25 @@ export default function Nav() {
       <div className="homeLink">
         <li className="smallLogo">
           <Link href="/">
-            <a><Icon src='/img/icons/dy.svg' size='small' /></a>
+            <a><Icon src='/img/icons/dy.svg' size='small' link={true} /></a>
           </Link>
         </li>
+        {(!props.breadcrumbs || !props.breadcrumbs[0]) && 
         <li className='title'>
           <Link href="/">
-            <a className='highlight nav'>Donovan Yohan</a>
+            <a className='highlight'>Donovan Yohan</a>
           </Link>
-        </li>
+        </li>}
+        {props.breadcrumbs && props.breadcrumbs.map(({ href, label}, i) => {
+              return (
+                <li className='breadcrumb'>
+                  <span className='divider'>/</span>
+                  <Link href={href}>
+                    <a className={i === props.breadcrumbs.length - 1 ? 'highlightStatic path' : 'highlight path'}>{label}</a>
+                  </Link>
+                </li>
+              )
+            })}
       </div>
       <div className="navLinks">
         <li>
@@ -98,23 +109,25 @@ export default function Nav() {
         color: black;
         letter-spacing: 0;
       }
-      .homelink li {
-        padding-left: 0px;
-      }
-      .smallLogo {
-        display: none;
+      .title {
+        padding-left: 16px;
       }
       a:hover {
         color: black;
+      }
+      .divider {
+        padding: 0 16px;
+        font-size: 22px;
+        line-height: 26px;
+        font-weight: normal;
+      }
+      .path {
+        font-weight: normal;
       }
 
       // Adjust for mobile
 
       @media only screen and (max-width: 1024px) {
-        .smallLogo {
-          display: flex;
-          padding-right: 16px;
-        }
         nav {
           min-height: 56px;
           height: 56px;
@@ -130,11 +143,12 @@ export default function Nav() {
         .homeLink a {
           font-size: 14px;
         }
-      }
-
-      @media only screen and (max-width: 450px) {
-        .title {
-          display: none;
+        .divider {
+          font-size: 14px;
+          padding: 0 12px;
+        }
+        .highlight {
+          background: white !important;
         }
       }
     `}</style>

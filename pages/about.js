@@ -25,7 +25,7 @@ const About = () => {
     };
   });
   return (
-    <Main>
+    <Main breadcrumbs={[{label: 'About', href: '/about'}]}>
       <div className='pageRoot'>
         <div className="pageContent">
           <Hero
