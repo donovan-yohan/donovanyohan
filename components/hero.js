@@ -76,7 +76,7 @@ const Hero = props => (
       @media only screen and (max-width: 450px) {
         .container {
           min-width: 100%;
-          height: 95vh;
+          min-height: 95vh;
         }
         .wrapper {
           max-width: 100%;

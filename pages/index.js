@@ -66,9 +66,9 @@ const Index = () => {
           </h1>
           <span className='body heroBlurb'>
             <span>I'm a designer & developer passionate about creating user-focused, robust, and well-researched digital solutions. In addition to UI & UX, I'm an experienced </span>
-            <a className='textLink' href="#">graphic designer</a>
+            <a className='textLink' href="https://www.behance.net/donovanyohan" target="_blank">graphic designer</a>
             <span> and </span>
-            <a className='textLink' href="#">motion graphics artist</a>
+            <a className='textLink' href="https://www.youtube.com/donovanyohan" target="_blank">motion graphics artist</a>
             <span>. I'm well versed in native mobile design languages for both iOS and Android, and have built numerous responsive websites using React, Vue, and Angular. But, believe it or not, </span>
             <span><Link href='/about'><a className='textLink'>I don't just draw and code!</a></Link></span>
           </span>
@@ -81,7 +81,7 @@ const Index = () => {
             {projects.map(({ key, href, label, date, content }) => {
               return (
                 <div key={key}>
-                  <Card title={label} caption={date} href={href} isMobile={windowWidth < MobileWidth}/>
+                  <Card title={label} caption={date} href={href} isMobile={windowWidth < MobileWidth} content={content}/>
                 </div>
               )
             })}
@@ -97,7 +97,6 @@ const Index = () => {
 
         #work {
           position: relative;
-          align
           top: -64px;
         }
         
@@ -105,6 +104,7 @@ const Index = () => {
           align-self: flex-start;
         }
 
+        {/* ADJUST MARGIN-BOTTOM to -250PX WHEN THERE'S AN ODD NUMBER OF CARDS */}
         .cardWrapper {
           width: 100%;
           position: relative;
@@ -113,6 +113,9 @@ const Index = () => {
           display: flex;
           flex-wrap: wrap;
           justify-content: space-between;
+
+
+          margin-bottom: -250px;
         }
         .cardWrapper div {
           width: 48%
@@ -147,6 +150,7 @@ const Index = () => {
           .cardWrapper {
             flex-direction: column;
             margin-top: 0;
+            margin-bottom: 0;
           }
           .cardWrapper div {
             width: 100%;

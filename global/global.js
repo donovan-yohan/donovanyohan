@@ -44,28 +44,35 @@ export const socialLinks = [{
 });
 
 export const projects = [{
-        href: "",
+        href: "/work/manulife",
         label: "Manulife Mobile",
         date: "Fall 2019",
-        content: "",
-    },
-    {
-        href: "/work/flowr",
-        label: "flowr",
-        date: "Fall 2019",
-        content: "",
+        content: "At Manulife, I worked as a Mobile UI/UX designer, and had the opportunity to bring user-centered design to a diverse team in a very large fin-tech corporation.",
     },
     {
         href: "",
         label: "donovanyohan.com",
         date: "Fall 2019",
-        content: "",
+        content: "Ah, the portfolio. How do you design something that's never finished and that nobody can seem to agree on how to do? In my approach, I carefully designed the problem before creating my solution.",
     },
+    {
+        href: "",
+        label: "shop.donovanyohan.com",
+        date: "Winter 2020",
+        content: "I've been running a small business for selling customized graphic apparel and stickers since highschool. As both a design & programming challenge, I wanted to build a webstore from the ground up to market and sell my work."
+    },
+    {
+        href: "/work/flowr",
+        label: "flowr",
+        date: "Spring 2019",
+        content: "Part passion project, part I-had-to-do-this-because-my-gpa-would-suffer-if-I-didn't, flowr is a time management tool that focuses on students, and their pain points with existing digital calendars.",
+    },
+
     {
         href: "",
         label: "Cooperators Mobile App",
         date: "Winter 2019",
-        content: "",
+        content: "As a software engineer, I worked closely with the UX team to build reusable components and line-up the grid systems being used in Sketch with the layouts of our app.",
     }
 ].map(project => {
     project.key = `nav-link-${project.href}-${project.label}`;
@@ -74,39 +81,33 @@ export const projects = [{
 
 export const hobbies = [{
     href: "",
-    label: "Parkour",
+    label: "Parkour & Gymnastics",
     date: "2010 - Present",
-    content: "",
+    content: "Staying in shape shouldn't have to be a chore, and it doesn't have to be, but it can be a job. I'm a parkour & tricking coach, but what even is 'parkour' and 'tricking,' and how do you even start?",
 },
 {
     href: "",
-    label: "Acting",
+    label: "Acting & Theatre",
     date: "2006 - Present",
-    content: "",
+    content: "My parents told me that I never stopped talking when I was a kid, so they put me on a stage and made other people listen too. Over the years I discovered my love for public speaking and Shakespeare!",
 },
 {
     href: "",
-    label: "Dancing",
+    label: "Street Dance",
     date: "2018 - Present",
-    content: "",
+    content: "Since starting university, I've been challenging myself to step out of my comfort zone and explore the hobbies I've been intersted in but always too scared to try. For dance, I am so glad that I did.",
 },
 {
     href: "",
     label: "Photography",
     date: "2018 - Present",
-    content: "",
-},
-{
-    href: "",
-    label: "Computers",
-    date: "2015 - Present",
-    content: "",
+    content: "I started photography to learn more about composition theory. Aside from being incredibly fun, photography has helped me be a more overall resourceful and creative designer.",
 },
 {
     href: "",
     label: "Origami",
     date: "2010 - Present",
-    content: "",
+    content: "When teachers take away your toys in class, play with something they can't take away-- paper. What may have started as a joke is now one of my favourite hobbies and pass-times, and makes great gifts too!",
 }
 ].map(hobby => {
 hobby.key = `nav-link-${hobby.href}-${hobby.label}`;

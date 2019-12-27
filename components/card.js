@@ -19,12 +19,11 @@ const Card = props => {
           <div className="title">
             {props.title}
           </div>
-
           <div className="subheader">
             {props.caption}
           </div>
           <div className="content">
-            {props.content ? props.content : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac turpis neque. Nam vehicula porta nulla sed tristique. Aliquam vitae ex a libero molestie tristique. "}
+            <span>{props.content}</span>
           </div>
         </div>
       </div>

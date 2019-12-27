@@ -6,7 +6,7 @@ import Icon from "../components/icon"
 const BottomNav = () => (
   <div className="footer">
     <div className="container">
-      <h1 id='footer' className='headerText'><span className='headerText highlightStatic'>Contact or connect with me!</span></h1>
+      <h1 id='footer' className='headerText'><span className='headerText highlightStatic'><a href="#footer">Contact or connect with me!</a></span></h1>
       <div className="wrapper">
         <div className="body message">
           <p>Thanks for checking out my website! If you want to learn more about my work, feel free to check out some of these links.</p>

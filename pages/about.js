@@ -30,11 +30,11 @@ const About = () => {
         <div className="pageContent">
           <Hero
             image={
-              <div className="placeholder" />
+              <img src="img/photos/about.jpg" className="heroImage"/>
             }
             text={AboutHero}
             customImageStyle={{
-              margin: '0px'
+              margin: '0px',
             }}
           />
           <h1 className='headerText highlightStatic'>
@@ -46,7 +46,7 @@ const About = () => {
             {hobbies.map(({ key, href, label, date, content }) => {
               return (
                 <div key={key}>
-                  <Card title={label} caption={date} href={href} isMobile={windowWidth < MobileWidth}/>
+                  <Card title={label} caption={date} href={href} isMobile={windowWidth < MobileWidth} content={content}/>
                 </div>
               )
             })}
@@ -55,14 +55,13 @@ const About = () => {
 
         <style jsx>{`
 
-          .placeholder {
-            border-radius: 100%;
-            width: 400px;
-            height: 400px;
-            background-color: gray;
-          }
+        .heroImage {
+          border-radius: 100%;
+          max-width: 100%;
+          max-height: 100%;
+        }
 
-          .cardWrapper {
+        .cardWrapper {
           width: 100%;
           position: relative;
           margin-top: 250px;
@@ -70,6 +69,9 @@ const About = () => {
           display: flex;
           flex-wrap: wrap;
           justify-content: space-between;
+
+
+          margin-bottom: -250px;
         }
         .cardWrapper div {
           width: 48%
@@ -104,6 +106,7 @@ const About = () => {
           .cardWrapper {
             flex-direction: column;
             margin-top: 0;
+            margin-bottom: 0;
           }
           .cardWrapper div {
             width: 100%;

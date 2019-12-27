@@ -1,20 +1,17 @@
-import React, { useEffect, useState } from 'react'
-import Nav from '../../components/nav'
+import React from 'react'
 import ArticleHero from '../../components/articlehero'
 import ArticleImage from '../../components/articleimage'
 import Article from '../../components/article'
-import BottomNav from '../../components/bottomNav'
-import Footer from '../../components/footer'
 import Main from '../../layouts/main'
-import { MobileWidth, debounce } from '../../global/global'
 import { flowrInfo } from '../../global/content'
 
-const About = () => {
+const Flowr = () => {
   return (
     <Main breadcrumbs={[{label: 'Work', href: '/#work'}, {label: 'flowr', href: '/work/flowr'}]}>
       <div className="pageRoot">
         <div className="pageContent">
           <ArticleHero
+            title={'flower'}
             image={''}
             customImageStyle={{
               margin: '0px'
@@ -51,4 +48,4 @@ const About = () => {
   )
 }
 
-export default About
+export default Flowr

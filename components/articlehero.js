@@ -10,7 +10,7 @@ const ArticleHero = props => (
       <div className='content'>
         <div className='wrapper'>
           <div className='intro'>
-            <h1 className="headerText highlightStatic">flowr</h1>
+            <h1 className="headerText highlightStatic">{props.title}</h1>
             <p className='body'>
               {props.content}
             </p>
