@@ -17,16 +17,21 @@ const Flowr = () => {
               margin: '0px'
             }}
             content={`
-            At Manulife, I worked as a Mobile UI/UX designer, and had the opportunity to bring user-centered design to a diverse team in a very large fin-tech corporation.
-            I worked on the Manulife Mobile Group Retirement app, as the sole UX designer on a scrum-based agile team.
+              Manulife provides group retirement and benefits services to other businesses' employees. Manulife Mobile allows Manulife account holders to
+              make and view their benefits claims for various medical, dental, and well-being services as well as see how their retirement investment 
+              portfolio is performing.
             `}
             info={manulifeInfo}
           />
           <Article>
+            <p className='body'>
+              At Manulife, I worked as a Mobile UI/UX designer, and had the opportunity to bring user-centered design to a diverse team in a very large fin-tech corporation.
+              I worked on the Manulife Mobile Group Retirement project, as the sole UX designer on a scrum-based agile team.
+            </p>
             <p className='body'>During my stay, I got to be a part of:</p>
             <ul className='body tableOfContents'>
-              <li><a href="#team">Using stories to make design matter to my agile team</a></li>
-              <li><a href="">Identifying the actual problem rather than accepting blanket solutions</a></li>
+              <li><a href="#team">Making design matter to my agile team</a></li>
+              <li><a href="">Vying for what's best for the user</a></li>
               <li><a href="">Research, design, validate, rinse, repeat</a></li>
             </ul>
           </Article>
@@ -35,10 +40,12 @@ const Flowr = () => {
           />
           <Article>
             <h2 id="team" className='anchor'></h2>
-            <h2 className="highlightStatic">Using stories to make design matter to my agile team</h2>
+            <h2 className="highlightStatic">Making design matter to my agile team</h2>
             <p className='body'>
               One of the first things I did at Manulife, was estalish a short weekly meeting with my entire team called a, 'Design Check-in.' This 
-              was my opportunity to talk about design with my whole team, and what better way to get a message across than to tell a story.
+              was my opportunity to get the whole team on board with the design itself, the objectives of the design, and how we would measure its success.
+              By involving the entire team, including developers, from the beginning, I was able to use my team as a design resource that helped verify my
+              own design decisions. 
             </p>
           </Article>
           <ArticleImage

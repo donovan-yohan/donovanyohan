@@ -90,7 +90,6 @@ const Card = props => {
       font-size: 18px;
     }
     .subheader {
-      text-transform: uppercase;
       opacity: 0.54;
       padding-bottom: 8px;
     }

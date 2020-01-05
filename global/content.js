@@ -10,11 +10,11 @@ export const AboutHero="Hi! I love parkour, acting, dancing, photography, origam
 
 export const flowrInfo = [{
         isLink: false,
-        label: "Side project",
+        label: "Full Stack Designer & Developer",
     },
     {
         isLink: false,
-        label: "Collaborative",
+        label: "Side Project",
     },
     {
         isLink: false,
@@ -37,11 +37,11 @@ export const flowrInfo = [{
 
 export const manulifeInfo = [{
     isLink: false,
-    label: "Co-op Term",
+    label: "UX Designer",
 },
 {
     isLink: false,
-    label: "Collaborative",
+    label: "Co-op",
 },
 {
     isLink: false,

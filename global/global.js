@@ -46,32 +46,32 @@ export const socialLinks = [{
 export const projects = [{
         href: "/work/manulife",
         label: "Manulife Mobile",
-        date: "Fall 2019",
+        date: "UX • Co-op • Fall 2019",
         content: "At Manulife, I worked as a Mobile UI/UX designer, and had the opportunity to bring user-centered design to a diverse team in a very large fin-tech corporation.",
     },
     {
         href: "",
         label: "donovanyohan.com",
-        date: "Fall 2019",
+        date: "Full Stack • Side Project • Fall 2019",
         content: "Ah, the portfolio. How do you design something that's never finished and that nobody can seem to agree on how to do? In my approach, I carefully designed the problem before creating my solution.",
     },
     {
         href: "",
         label: "shop.donovanyohan.com",
-        date: "Winter 2020",
+        date: "Full Stack • Side Project • Winter 2020",
         content: "I've been running a small business for selling customized graphic apparel and stickers since highschool. As both a design & programming challenge, I wanted to build a webstore from the ground up to market and sell my work."
     },
     {
         href: "/work/flowr",
         label: "flowr",
-        date: "Spring 2019",
+        date: "Full Stack • Side Project • Spring 2019",
         content: "Part passion project, part I-had-to-do-this-because-my-gpa-would-suffer-if-I-didn't, flowr is a time management tool that focuses on students, and their pain points with existing digital calendars.",
     },
 
     {
         href: "",
         label: "Cooperators Mobile App",
-        date: "Winter 2019",
+        date: "Developer • Co-op • Winter 2019",
         content: "As a software engineer, I worked closely with the UX team to build reusable components and line-up the grid systems being used in Sketch with the layouts of our app.",
     }
 ].map(project => {
@@ -101,7 +101,7 @@ export const hobbies = [{
     href: "",
     label: "Photography",
     date: "2018 - Present",
-    content: "I started photography to learn more about composition theory. Aside from being incredibly fun, photography has helped me be a more overall resourceful and creative designer.",
+    content: "I started photography to learn more about composition theory. Aside from being incredibly fun, photography has helped me become a more resourceful and creative designer.",
 },
 {
     href: "",

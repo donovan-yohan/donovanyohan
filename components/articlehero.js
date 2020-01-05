@@ -20,7 +20,7 @@ const ArticleHero = props => (
               isLink ? (
                 <li key={key}>
                   <Link href={href}>
-                    <a className='highlight'>{label}</a>
+                    <a target="_blank" className='highlight'>{label}</a>
                   </Link>
                 </li>
               ) : (
@@ -44,6 +44,7 @@ const ArticleHero = props => (
         display: flex;
         flex-direction: column;
         align-items: center;
+        margin-bottom: 64px;
       }
       .hero {
         display: flex;
@@ -80,7 +81,7 @@ const ArticleHero = props => (
         line-height: 36px;
         flex-basis: 25%;
         padding: 0;
-        margin:64px 0 0 0;
+        margin: 96px 0 0 0;
         display: flex;
         flex-direction: column;
         font-size: 16px;
