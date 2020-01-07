@@ -72,6 +72,7 @@ const Card = props => {
           justify-content: space-between;
           align-items: center;
           background: #fff500;
+          z-index: 5;
         }
         a {
           color: unset;
@@ -107,7 +108,7 @@ const Card = props => {
           font-size: 18px;
         }
         .subheader {
-          opacity: 0.54;
+          opacity: 0.7;
           padding-bottom: 8px;
         }
 
