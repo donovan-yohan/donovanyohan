@@ -3,20 +3,20 @@ import ArticleHero from "../../components/articlehero";
 import ArticleImage from "../../components/articleimage";
 import Article from "../../components/article";
 import Main from "../../layouts/main";
-import { manulifeInfo } from "../../global/content";
+import { donovanyohanInfo } from "../../global/content";
 
 const Flowr = () => {
   return (
     <Main
       breadcrumbs={[
         { label: "Work", href: "/#work" },
-        { label: "Manulife Mobile", href: "/work/manulife" }
+        { label: "donovanyohan.com", href: "/work/donovanyohan" }
       ]}
     >
       <div className="pageRoot">
         <div className="pageContent">
           <ArticleHero
-            title={"Manulife Mobile"}
+            title={"donovanyohan.com"}
             image={""}
             customImageStyle={{
               margin: "0px"
@@ -26,7 +26,7 @@ const Flowr = () => {
               make and view their benefits claims for various medical, dental, and well-being services as well as see how their retirement investment 
               portfolio is performing.
             `}
-            info={manulifeInfo}
+            info={donovanyohanInfo}
           />
           <Article>
             <p className="body">

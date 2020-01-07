@@ -3,7 +3,7 @@ import ArticleHero from "../../components/articlehero";
 import ArticleImage from "../../components/articleimage";
 import Article from "../../components/article";
 import Main from "../../layouts/main";
-import { manulifeInfo } from "../../global/content";
+import { cooperatorsInfo } from "../../global/content";
 
 const Flowr = () => {
   return (
@@ -22,35 +22,27 @@ const Flowr = () => {
               margin: "0px"
             }}
             content={`
-              Manulife provides group retirement and benefits services to other businesses' employees. Manulife Mobile allows Manulife account holders to
-              make and view their benefits claims for various medical, dental, and well-being services as well as see how their retirement investment 
-              portfolio is performing.
+              The Co-operators is an insurance company that provides home, auto, life, business, farm, and wealth insurance. The Co-operators Mobile App
+              allows clients to make claims, payments, and view all their policy details, as well as their auto liability slips, all from their mobile device.
             `}
-            info={manulifeInfo}
+            info={cooperatorsInfo}
           />
           <Article>
             <p className="body">
-              At Manulife, I worked as a Mobile UI/UX designer, and had the
-              opportunity to bring user-centered design to a diverse team in a
-              very large fin-tech corporation. I worked on the Manulife Mobile
-              Group Retirement project, as the sole UX designer on a scrum-based
-              agile team.
+              At The Co-operators, I was a full-stack mobile developer, working
+              on an agile team with other developers and a UI/UX team. In
+              addition to growing my skillset as a developer, I had the
+              opportunity to learn a lot about the UX process from my
+              colleagues. We worked closely together to bring their vision to
+              life, and I was able to contribute my own technical knowledge and
+              motion graphics experience.
             </p>
-            <p className="body">During my stay, I got to be a part of:</p>
             <ul className="body tableOfContents">
               <li>
-                <a href="#team">Making design matter to my project team</a>
+                <a href="#team">Why leave the grid behind in Sketch?</a>
               </li>
               <li>
-                <a href="">Designing with many lenses</a>
-              </li>
-              <li>
-                <a href="">
-                  Balancing business needs with the user's experience
-                </a>
-              </li>
-              <li>
-                <a href="">Creating a healthy design feedback environment</a>
+                <a href="">Developing with the user in mind</a>
               </li>
             </ul>
           </Article>

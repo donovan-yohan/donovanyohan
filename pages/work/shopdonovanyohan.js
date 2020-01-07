@@ -3,7 +3,7 @@ import ArticleHero from "../../components/articlehero";
 import ArticleImage from "../../components/articleimage";
 import Article from "../../components/article";
 import Main from "../../layouts/main";
-import { manulifeInfo } from "../../global/content";
+import { shopdonovanyohanInfo } from "../../global/content";
 
 const Flowr = () => {
   return (
@@ -22,19 +22,17 @@ const Flowr = () => {
               margin: "0px"
             }}
             content={`
-              Manulife provides group retirement and benefits services to other businesses' employees. Manulife Mobile allows Manulife account holders to
-              make and view their benefits claims for various medical, dental, and well-being services as well as see how their retirement investment 
-              portfolio is performing.
+              shop.donovanyohan.com is a platform for handling my custom apparel business. I sell designs I've made myself, as well as
+              provide a service for others to commission custom apparel using either their own designs or requesting one to be custom made.
             `}
-            info={manulifeInfo}
+            info={shopdonovanyohanInfo}
           />
           <Article>
             <p className="body">
-              At Manulife, I worked as a Mobile UI/UX designer, and had the
-              opportunity to bring user-centered design to a diverse team in a
-              very large fin-tech corporation. I worked on the Manulife Mobile
-              Group Retirement project, as the sole UX designer on a scrum-based
-              agile team.
+              As someone who loves fashion and satire, I want to provide high
+              quality apparel and decorations with unique and humourous motifs
+              to people who care about the clothes they wear, not the status it
+              brings.
             </p>
             <p className="body">During my stay, I got to be a part of:</p>
             <ul className="body tableOfContents">
