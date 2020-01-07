@@ -113,7 +113,7 @@ const Index = () => {
             </h1>
           </a>
           <div className="cardWrapper">
-            {projects.map(({ key, href, label, date, content }) => {
+            {projects.map(({ key, href, label, date, content, src }) => {
               return (
                 <div key={key}>
                   <Card
@@ -122,6 +122,7 @@ const Index = () => {
                     href={href}
                     isMobile={windowWidth < MobileWidth}
                     content={content}
+                    src={src}
                   />
                 </div>
               );

@@ -6,7 +6,10 @@ const Card = props => {
   const content = (
     <div className="root">
       <div className="container">
-        <div className="imageWrapper">
+        <div className="cardWrapper">
+          <div className="imageWrapper">
+            <img src={props.src} />
+          </div>
           <Link href={props.href}>
             <a className="mobileButton">
               <span>Learn More</span>
@@ -35,13 +38,31 @@ const Card = props => {
           transition: 0.35s;
           overflow: hidden;
         }
-        .imageWrapper {
+        .cardWrapper {
+          position: relative;
           display: flex;
           max-height: 320px;
+          width: 100%;
           height: calc(50vw * 9 / 16);
           transition: 0.35s;
-          background: gray;
           overflow: hidden;
+        }
+        .imageWrapper {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+        }
+        img {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          overflow: hidden;
+          filter: grayscale(100%);
+          transition: 0.35s ease;
         }
         .mobileButton {
           display: flex;
@@ -97,15 +118,19 @@ const Card = props => {
           .title::before {
             bottom: 2px;
             content: "";
-            transition: 0.35s cubic-bezier(0.8, 0.01, 0.54, 0.99);
+            transition: 0.35s;
             z-index: -1;
             position: absolute;
-            width: 0%;
+            opacity: 0;
+            width: 100%;
             height: 60%;
           }
           .container:hover .title::before {
-            width: 100%;
+            opacity: 1;
             background-color: #fff500;
+          }
+          .container:hover img {
+            filter: grayscale(0%);
           }
           .mobileButton {
             position: relative;
@@ -120,6 +145,9 @@ const Card = props => {
         // mobile scaling
 
         @media only screen and (max-width: 1024px) {
+          img {
+            filter: none;
+          }
           .container {
             border-radius: 8px;
             border-color: rgba(0, 0, 0, 0.4);
@@ -136,7 +164,7 @@ const Card = props => {
         }
 
         @media only screen and (max-width: 425px) {
-          .imageWrapper {
+          .cardWrapper {
             height: calc(100vw * 9 / 16);
           }
           .content {

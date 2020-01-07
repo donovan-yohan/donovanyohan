@@ -44,6 +44,7 @@ export const socialLinks = [{
 });
 
 export const projects = [{
+    src: "img/photos/manulife.jpg",
     href: "/work/manulife",
     label: "Manulife Mobile",
     date: "UX • Co-op • Fall 2019",
@@ -65,7 +66,7 @@ export const projects = [{
     href: "/work/flowr",
     label: "flowr",
     date: "UX Concept • Side Project • Spring 2019",
-    content: "Part passion project, part I-had-to-do-this-because-my-gpa-would-suffer-if-I-didn't, flowr is a time management tool that focuses on students, and their pain points with existing digital calendars."
+    content: "Part passion project, part I-had-to-do-this-because-my-gpa-would-suffer-if-I-didn't, flowr is a mobile time management tool that focuses on students, and their pain points with existing digital calendars."
   },
   {
     href: "/work/cooperators",
@@ -79,30 +80,35 @@ export const projects = [{
 });
 
 export const hobbies = [{
+    src: "img/photos/parkour.png",
     href: "",
     label: "Parkour & Gymnastics",
     date: "2010 - Present",
     content: "Staying in shape shouldn't have to be a chore, and it doesn't have to be, but it can be a job. I'm a parkour & tricking coach, but what even is 'parkour' and 'tricking,' and how do you even start?"
   },
   {
+    src: "img/photos/acting.png",
     href: "",
     label: "Acting & Theatre",
     date: "2006 - Present",
     content: "My parents told me that I never stopped talking when I was a kid, so they put me on a stage and made other people listen too. Over the years I discovered my love for public speaking and Shakespeare!"
   },
   {
+    src: "img/photos/dance.jpg",
     href: "",
     label: "Street Dance",
     date: "2018 - Present",
     content: "Since starting university, I've been challenging myself to step out of my comfort zone and explore the hobbies I've been intersted in but always too scared to try. For dance, I am so glad that I did."
   },
   {
-    href: "",
+    src: "img/photos/photography.jpg",
+    href: "https://www.instagram.com/donovan.yohan/",
     label: "Photography",
     date: "2018 - Present",
     content: "I started photography to learn more about composition theory. Aside from being incredibly fun, photography has helped me become a more resourceful and creative designer."
   },
   {
+    src: "img/photos/origami.jpg",
     href: "",
     label: "Origami",
     date: "2010 - Present",
