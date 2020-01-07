@@ -57,8 +57,10 @@ const Flowr = () => {
           <ArticleImage images={"src"} />
           <Article>
             <h2 id="team" className="anchor"></h2>
-            <h2 className="highlightStatic">
-              Making design matter to my project team
+            <h2>
+              <span className="highlightStatic">
+                Making design matter to my project team
+              </span>
             </h2>
             <p className="body">
               One of the first things I did was estalish a short weekly meeting
@@ -108,7 +110,6 @@ const Flowr = () => {
           }
           h2 {
             margin: 16px 0 0 0;
-            font-size: 20px;
           }
           p {
             margin: 16px 0 0 0;

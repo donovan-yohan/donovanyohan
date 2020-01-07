@@ -1,34 +1,34 @@
-import React from 'react'
-import Link from 'next/link'
+import React from "react";
+import Link from "next/link";
 
 const ArticleHero = props => (
   <div>
-    <div className='container'>
-      <div className='hero'>
-        {props.image}
-      </div>
-      <div className='content'>
-        <div className='wrapper'>
-          <div className='intro'>
-            <h1 className="headerText highlightStatic">{props.title}</h1>
-            <p className='body'>
-              {props.content}
-            </p>
+    <div className="container">
+      <div className="hero">{props.image}</div>
+      <div className="content">
+        <div className="wrapper">
+          <div className="intro">
+            <h1>
+              <span className="headerText highlightStatic">
+                <a href="#">{props.title}</a>
+              </span>
+            </h1>
+            <p className="body">{props.content}</p>
           </div>
           <ul>
-            {props.info.map(({ key, label, isLink, href }) => (
+            {props.info.map(({ key, label, isLink, href }) =>
               isLink ? (
                 <li key={key}>
                   <Link href={href}>
-                    <a target="_blank" className='highlight'>{label}</a>
+                    <a target="_blank" className="highlight">
+                      {label}
+                    </a>
                   </Link>
                 </li>
               ) : (
-                  <li key={key}>
-                    {label}
-                  </li>
-                )
-            ))}
+                <li key={key}>{label}</li>
+              )
+            )}
           </ul>
         </div>
       </div>
@@ -54,7 +54,7 @@ const ArticleHero = props => (
         max-height: 400px;
         height: 33vw;
         width: 100vw;
-        background: #F5F5F5;
+        background: #f5f5f5;
       }
       .content {
         max-width: 1024px;
@@ -89,15 +89,14 @@ const ArticleHero = props => (
       }
       ul li {
         list-style-type: none;
-        color: rgba(0,0,0,0.54);
+        color: rgba(0, 0, 0, 0.54);
       }
       a {
         text-decoration: none;
-        color: rgba(0,0,0,1);
+        color: rgba(0, 0, 0, 1);
       }
 
-
-      // adjust for tablet and smaller 
+      // adjust for tablet and smaller
       @media only screen and (max-width: 1024px) {
         .content {
           font-size: 18px;

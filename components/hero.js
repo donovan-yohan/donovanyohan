@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React from "react";
 
 const Hero = props => (
   <div>
-    <div className='container'>
-      <div className='wrapper'>
-        <div className='logo' style={props.customImageStyle}>
+    <div className="container">
+      <div className="wrapper">
+        <div className="logo" style={props.customImageStyle}>
           {props.image}
         </div>
-        <div className='text'>
-          {props.text}
-        </div>
+        <div className="text">{props.text}</div>
       </div>
     </div>
     <style jsx>{`
@@ -32,7 +30,7 @@ const Hero = props => (
       .text {
         display: inline-block;
         margin-left: 32px;
-        font-family: 'Open Sans';
+        font-family: "Open Sans";
         font-weight: 300;
         font-size: 47px;
         line-height: 1.3em;
@@ -47,8 +45,6 @@ const Hero = props => (
         width: 420px;
         min-width: 420px;
       }
-
-
 
       // Adjust for small displays
 
@@ -68,8 +64,6 @@ const Hero = props => (
           min-width: 38%;
         }
       }
-
-
 
       // Adjust for Mobile
 

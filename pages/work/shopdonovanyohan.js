@@ -10,13 +10,13 @@ const Flowr = () => {
     <Main
       breadcrumbs={[
         { label: "Work", href: "/#work" },
-        { label: "Manulife Mobile", href: "/work/manulife" }
+        { label: "shop.donovanyohan.com", href: "/work/shopdonovanyohan" }
       ]}
     >
       <div className="pageRoot">
         <div className="pageContent">
           <ArticleHero
-            title={"Manulife Mobile"}
+            title={"shop.donovanyohan.com"}
             image={""}
             customImageStyle={{
               margin: "0px"

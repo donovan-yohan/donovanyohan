@@ -1,54 +1,53 @@
-import React, { useState, useEffect } from 'react'
-import Head from 'next/head'
-import Nav from '../components/nav'
-import Footer from '../components/footer'
-import BottomNav from '../components/bottomNav'
-import { MobileWidth, debounce } from '../global/global'
-import useSmoothScroll from '../hooks/useSmoothScroll'
+import React, { useState, useEffect } from "react";
+import Head from "next/head";
+import Nav from "../components/nav";
+import Footer from "../components/footer";
+import BottomNav from "../components/bottomNav";
+import { MobileWidth, debounce } from "../global/global";
+import useSmoothScroll from "../hooks/useSmoothScroll";
 
+const Main = props => {
+  // logic for finding current viewport size to determine if mobile layout is needed
+  const [windowWidth, setWidth] = useState(null);
 
-const Main = (props) => {
-// logic for finding current viewport size to determine if mobile layout is needed
-const [windowWidth, setWidth] = useState(null);
+  useSmoothScroll();
 
-useSmoothScroll();
-
-useEffect(() => {
+  useEffect(() => {
     if (!windowWidth) setWidth(document.children[0].clientWidth);
 
     const debouncedHandleResize = debounce(function handleResize() {
-        setWidth(document.children[0].clientWidth);
+      setWidth(document.children[0].clientWidth);
     }, 250);
 
     window.addEventListener("resize", debouncedHandleResize);
 
     return _ => {
-        window.removeEventListener("resize", debouncedHandleResize);
+      window.removeEventListener("resize", debouncedHandleResize);
     };
-});
+  });
 
-return (
-  <div>
-    <Head>
+  return (
+    <div>
+      <Head>
         <title>Donovan Yohan</title>
-    </Head>
-    
-    <Nav breadcrumbs={props.breadcrumbs} isPhone={windowWidth && windowWidth <= 425}/>
-    { props.children }
-    <Footer />
-    {windowWidth && windowWidth <= MobileWidth &&
-        <BottomNav />
-    }
-    <style jsx global>{`
+      </Head>
 
+      <Nav
+        breadcrumbs={props.breadcrumbs}
+        isPhone={windowWidth && windowWidth <= 425}
+      />
+      {props.children}
+      <Footer />
+      {windowWidth && windowWidth <= MobileWidth && <BottomNav />}
+      <style jsx global>{`
         a {
-            text-decoration: none;
-            color: black;
+          text-decoration: none;
+          color: black;
         }
         h2 {
-            font-size: 24px;
-            line-height: 1.8;
-            width: fit-content;
+          font-size: 28px;
+          line-height: 1.8;
+          width: fit-content;
         }
 
         .pageRoot {
@@ -67,8 +66,8 @@ return (
         }
 
         .body {
-            font-size: 20px;
-            line-height: 2;
+          font-size: 18px;
+          line-height: 2;
         }
 
         // mimicks behaviour of hero text
@@ -81,14 +80,10 @@ return (
           margin-top: 0;
           cursor: pointer;
         }
-        @media only screen and (max-width: 1130px) {
-          .headerText {
-            font-size: 4.1717vw;
-          }
-        }
+
         @media only screen and (max-width: 767px) {
           .headerText {
-            font-size: 8.5vw;
+            font-size: 32px;
             margin-bottom: 32px;
           }
         }
@@ -96,14 +91,13 @@ return (
           margin-bottom: 64px;
         }
 
-
         // link highlight
-        .highlight, .textLink {
+        .highlight,
+        .textLink {
           text-decoration: none;
           color: black;
           font-weight: bold;
           position: relative;
- 
         }
         .highlight:hover {
           cursor: pointer;
@@ -116,32 +110,65 @@ return (
           bottom: 2px;
           width: 0%;
           height: 60%;
-          background-color: #FFF500;
+          background-color: #fff500;
         }
         .highlight:hover::before {
           width: 100%;
         }
 
-        // static highlight effect 
-        .highlightStatic, .textLink:hover {
-          background: linear-gradient(0deg, #FFFFFF 10%, #FFF500 10%, #FFF500 60%, #FFFFFF 60%);
+        // static highlight effect
+        .highlightStatic {
+          background: linear-gradient(
+            0deg,
+            #ffffff 10%,
+            #fff500 10%,
+            #fff500 60%,
+            #ffffff 60%
+          );
         }
 
-        .textLink {
-            opacity: 0.54;
-            transition: 0.35s ease;
+        .textLink:hover::before {
+          opacity: 1;
         }
-        .textLink:hover {
-            opacity: 1;
+
+        .textLink::before {
+          z-index: -1;
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          opacity: 0;
+          background: linear-gradient(
+            0deg,
+            #ffffff 10%,
+            #fff500 10%,
+            #fff500 60%,
+            #ffffff 60%
+          );
+          transition: 0.2s ease;
         }
 
         @media only screen and (max-width: 1024px) {
           .highlight {
-            background: linear-gradient(0deg, #FFFFFF 10%, #FFF500 10%, #FFF500 60%, #FFFFFF 60%);
+            background: linear-gradient(
+              0deg,
+              #ffffff 10%,
+              #fff500 10%,
+              #fff500 60%,
+              #ffffff 60%
+            );
           }
 
           .textLink {
-            background: linear-gradient(0deg, #FFFFFF 10%, #FFF500 10%, #FFF500 60%, #FFFFFF 60%);
+            background: linear-gradient(
+              0deg,
+              #ffffff 10%,
+              #fff500 10%,
+              #fff500 60%,
+              #ffffff 60%
+            );
             opacity: 1;
           }
 
@@ -151,16 +178,13 @@ return (
         }
 
         @media only screen and (max-width: 767px) {
-            h2 {
-                font-size: 20px;
-            }
-            .body {
-                font-size: 18px;
-            }
+          h2 {
+            font-size: 24px;
+          }
         }
+      `}</style>
+    </div>
+  );
+};
 
-    `}</style>
-  </div>
-)}
-
-export default Main
+export default Main;

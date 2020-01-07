@@ -1,13 +1,13 @@
-import React from 'react'
+import React from "react";
 
 const Article = props => (
-  <div className='content'>
-    { props.children }
+  <div className="content">
+    {props.children}
 
     <style jsx>{`
       .content {
         width: 100%;
-        font-size: 18px;
+        font-size: 16px;
         line-height: 2;
       }
     `}</style>
