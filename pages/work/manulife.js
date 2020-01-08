@@ -53,6 +53,9 @@ const Flowr = () => {
               <li>
                 <a href="">Creating a healthy design feedback environment</a>
               </li>
+              <li>
+                <a href="">Establishing patterns for usability testing</a>
+              </li>
             </ul>
           </Article>
           <ArticleImage images={"src"} />

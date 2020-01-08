@@ -105,7 +105,7 @@ const Card = props => {
         }
         .content {
           line-height: 1.75;
-          font-size: 18px;
+          font-size: 16px;
         }
         .subheader {
           opacity: 0.7;
@@ -167,9 +167,6 @@ const Card = props => {
         @media only screen and (max-width: 425px) {
           .cardWrapper {
             height: calc(100vw * 9 / 16);
-          }
-          .content {
-            font-size: 16px;
           }
         }
       `}</style>

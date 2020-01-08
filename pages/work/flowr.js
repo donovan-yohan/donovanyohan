@@ -24,7 +24,7 @@ const Flowr = () => {
             }}
             content={`
               Spend less time on time management. Flowr is an organizational tool designed by a frustrated UX student for students. 
-              Its 3 core functions are enabling students to prioritize work, giving students a way to keep track of work, and quickly
+              Its 3 core functions are enabling students to prioritize work, giving students a way to keep track of progress on said work, and quickly
               providing a summary of their grades in their classes.
               `}
             info={flowrInfo}
@@ -58,11 +58,6 @@ const Flowr = () => {
               officia ea occaecat anim sunt.
             </p>
           </Article>
-          <ArticleImage image={"SRC"} />
-          <Article>
-            <h2 className="highlightStatic">Hello, world!</h2>
-            <p className="body"></p>
-          </Article>
           <WorkLinks type={"projects"} label={"flowr"} />
         </div>
         <style jsx>{`
@@ -71,6 +66,9 @@ const Flowr = () => {
           }
           p {
             margin: 16px 0 0 0;
+          }
+          .tableOfContents {
+            text-decoration: underline;
           }
         `}</style>
       </div>

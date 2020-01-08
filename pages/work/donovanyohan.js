@@ -23,35 +23,48 @@ const Flowr = () => {
               margin: "0px"
             }}
             content={`
-              Manulife provides group retirement and benefits services to other businesses' employees. Manulife Mobile allows Manulife account holders to
-              make and view their benefits claims for various medical, dental, and well-being services as well as see how their retirement investment 
-              portfolio is performing.
+              This website exists so that I can hopefully convince you, the reader, that I kind of know what I'm doing when it comes to design and coding.
+              Crazy, right? Like any design, my goal is to minimize confusion, maximize understanding, and provide rationale for my decision wherever a choice
+              over another valid alternative was made.
             `}
             info={donovanyohanInfo}
           />
           <Article>
             <p className="body">
-              At Manulife, I worked as a Mobile UI/UX designer, and had the
-              opportunity to bring user-centered design to a diverse team in a
-              very large fin-tech corporation. I worked on the Manulife Mobile
-              Group Retirement project, as the sole UX designer on a scrum-based
-              agile team.
+              I love talking about design. Keyword, <i>talking.</i> I don't
+              enjoy writing about design, and as it follows, I don't enjoy
+              making portfolios. I understand their value and believe in having
+              one, but it definitely wasn't easy making this one. I love talking
+              about design in conversations-- when I can assess the other
+              person's understanding or engagement based on body language,
+              facial expression, the questions they ask, and so on. I can change
+              my approach, switch up how I want to present the design, focus on
+              what I think is most important for that person, and tackle the
+              challenge of communicating my design much like how I would tackle
+              the challenge of creating a design-- based on the context.
             </p>
-            <p className="body">During my stay, I got to be a part of:</p>
+            <p className="body">
+              Unfortunately, I don't have the luxury of reading your mind, but I
+              know where my strengths are, and I know the objective of a
+              portfolio. So here's how I went about solving the age-old design
+              challenge of the portfolio.
+            </p>
             <ul className="body tableOfContents">
               <li>
-                <a href="#team">Making design matter to my project team</a>
-              </li>
-              <li>
-                <a href="">Designing with many lenses</a>
-              </li>
-              <li>
-                <a href="">
-                  Balancing business needs with the user's experience
+                <a href="#team">
+                  Identifying the actual problem a portfolio solves
                 </a>
               </li>
               <li>
-                <a href="">Creating a healthy design feedback environment</a>
+                <a href="">Categorizing existing solutions</a>
+              </li>
+              <li>
+                <a href="">Creating a design brief for my portfolio</a>
+              </li>
+              <li>
+                <a href="">
+                  Leveraging my skills as a developer to prototype efficiently
+                </a>
               </li>
             </ul>
           </Article>
