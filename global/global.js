@@ -63,16 +63,16 @@ export const projects = [{
   //   content: "I've been running a small business for selling customized graphic apparel and stickers since highschool. As both a design & programming challenge, I wanted to build a webstore from the ground up to market and sell my work."
   // },
   {
-    href: "/work/flowr",
-    label: "flowr",
-    date: "UX Concept • Side Project • Spring 2019",
-    content: "Part passion project, part I-had-to-do-this-because-my-gpa-would-suffer-if-I-didn't, flowr is a mobile time management tool that focuses on students, and their pain points with existing digital calendars."
-  },
-  {
     href: "/work/cooperators",
     label: "The Co-operators Mobile",
     date: "Developer • Co-op • Winter 2019",
     content: "As a software engineer, I worked closely with the UX team to build reusable components and line-up the grid systems being used in Sketch with the layouts of our app."
+  },
+  {
+    href: "/work/flowr",
+    label: "flowr",
+    date: "UX Concept • Side Project • Spring 2019",
+    content: "Part passion project, part I-had-to-do-this-because-my-gpa-would-suffer-if-I-didn't, flowr is a mobile time management tool that focuses on students, and their pain points with existing digital calendars."
   }
 ].map(project => {
   project.key = `nav-link-${project.href}-${project.label}`;

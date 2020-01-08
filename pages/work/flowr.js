@@ -2,6 +2,7 @@ import React from "react";
 import ArticleHero from "../../components/articlehero";
 import ArticleImage from "../../components/articleimage";
 import Article from "../../components/article";
+import WorkLinks from "../../components/worklinks";
 import Main from "../../layouts/main";
 import { flowrInfo } from "../../global/content";
 
@@ -62,6 +63,7 @@ const Flowr = () => {
             <h2 className="highlightStatic">Hello, world!</h2>
             <p className="body"></p>
           </Article>
+          <WorkLinks type={"projects"} label={"flowr"} />
         </div>
         <style jsx>{`
           h2 {

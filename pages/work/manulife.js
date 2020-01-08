@@ -2,6 +2,7 @@ import React from "react";
 import ArticleHero from "../../components/articlehero";
 import ArticleImage from "../../components/articleimage";
 import Article from "../../components/article";
+import WorkLinks from "../../components/worklinks";
 import Main from "../../layouts/main";
 import { manulifeInfo } from "../../global/content";
 
@@ -102,6 +103,7 @@ const Flowr = () => {
               reprehenderit cillum culpa officia officia esse laborum pariatur.
             </p>
           </Article>
+          <WorkLinks type={"projects"} label={"Manulife Mobile"} />
         </div>
         <style jsx>{`
           .anchor {

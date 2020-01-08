@@ -29,7 +29,21 @@ const Main = props => {
   return (
     <div>
       <Head>
-        <title>Donovan Yohan</title>
+        <title>Donovan Yohan - UI/UX Designer & Web Developer</title>
+        <meta
+          name="description"
+          content="Hi! I'm Donovan Yohan, and I'm a UI & UX designer and a front end developer."
+        />
+        <meta name="theme-color" content="#FFFFFF" />
+        <meta
+          name="og:title"
+          content="Donovan Yohan - UI/UX Designer & Web Developer"
+        />
+        <meta
+          name="og:description"
+          content="Hi! I'm Donovan Yohan, and I'm a UI & UX designer and a front end developer."
+        />
+        <meta name="og:image" content="../ogimage.png" />
       </Head>
 
       <Nav
@@ -66,7 +80,7 @@ const Main = props => {
         }
 
         .body {
-          font-size: 18px;
+          font-size: 16px;
           line-height: 2;
         }
 

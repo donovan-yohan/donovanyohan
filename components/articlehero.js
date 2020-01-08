@@ -7,29 +7,29 @@ const ArticleHero = props => (
       <div className="hero">{props.image}</div>
       <div className="content">
         <div className="wrapper">
+          <h1>
+            <span className="headerText highlightStatic">
+              <a href="#">{props.title}</a>
+            </span>
+          </h1>
           <div className="intro">
-            <h1>
-              <span className="headerText highlightStatic">
-                <a href="#">{props.title}</a>
-              </span>
-            </h1>
             <p className="body">{props.content}</p>
+            <ul>
+              {props.info.map(({ key, label, isLink, href }) =>
+                isLink ? (
+                  <li key={key}>
+                    <Link href={href}>
+                      <a target="_blank" className="highlight">
+                        {label}
+                      </a>
+                    </Link>
+                  </li>
+                ) : (
+                  <li key={key}>{label}</li>
+                )
+              )}
+            </ul>
           </div>
-          <ul>
-            {props.info.map(({ key, label, isLink, href }) =>
-              isLink ? (
-                <li key={key}>
-                  <Link href={href}>
-                    <a target="_blank" className="highlight">
-                      {label}
-                    </a>
-                  </Link>
-                </li>
-              ) : (
-                <li key={key}>{label}</li>
-              )
-            )}
-          </ul>
         </div>
       </div>
     </div>
@@ -44,7 +44,7 @@ const ArticleHero = props => (
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin-bottom: 64px;
+        margin-bottom: 16px;
       }
       .hero {
         display: flex;
@@ -60,13 +60,8 @@ const ArticleHero = props => (
         max-width: 1024px;
         font-size: 18px;
       }
-      .wrapper {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-      }
       .intro {
-        flex-basis: 70%;
+        display: flex;
       }
       h1 {
         margin: 32px 0 0 0;
@@ -78,12 +73,11 @@ const ArticleHero = props => (
         line-height: 2;
       }
       ul {
-        line-height: 36px;
-        flex-basis: 25%;
-        padding: 0;
-        margin: 96px 0 0 0;
+        line-height: 2;
+        padding-left: 32px;
         display: flex;
         flex-direction: column;
+        flex-basis: 75%;
         font-size: 16px;
         font-weight: bold;
       }
@@ -110,16 +104,15 @@ const ArticleHero = props => (
           max-height: 50vw;
           overflow: hidden;
         }
-        .wrapper {
+        .intro {
           flex-direction: column-reverse;
-        }
-        p {
-          margin-right: 0;
-          flex-basis: unset;
         }
         ul {
           flex-basis: unset;
-          margin-top: 16px;
+          padding-left: 0px;
+        }
+        p {
+          margin: 0;
         }
       }
     `}</style>

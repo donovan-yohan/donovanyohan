@@ -80,7 +80,7 @@ const Hero = props => (
         .text {
           flex-basis: 100%;
           flex-shrink: unset;
-          font-size: 8.5vw;
+          font-size: 8vw;
           margin: 24px;
           text-align: center;
           height: auto;
