@@ -51,6 +51,7 @@ export const projects = [{
     content: "At Manulife, I worked as a Mobile UI/UX designer, and had the opportunity to bring user-centered design to a diverse team in a very large fin-tech corporation."
   },
   {
+    src: "img/photos/donovanyohancom.jpg",
     href: "/work/donovanyohan",
     label: "donovanyohan.com",
     date: "Full Stack • Side Project • Fall 2019",
@@ -63,12 +64,14 @@ export const projects = [{
   //   content: "I've been running a small business for selling customized graphic apparel and stickers since highschool. As both a design & programming challenge, I wanted to build a webstore from the ground up to market and sell my work."
   // },
   {
+    src: "img/photos/cooperators.jpg",
     href: "/work/cooperators",
     label: "The Co-operators Mobile",
     date: "Developer • Co-op • Winter 2019",
     content: "As a software engineer, I worked closely with the UX team to build reusable components and line-up the grid systems being used in Sketch with the layouts of our app."
   },
   {
+    src: "img/photos/flowr.jpg",
     href: "/work/flowr",
     label: "flowr",
     date: "UX Concept • Side Project • Spring 2019",

@@ -4,7 +4,9 @@ import Link from "next/link";
 const ArticleHero = props => (
   <div>
     <div className="container">
-      <div className="hero">{props.image}</div>
+      <div className="hero">
+        <img src={props.image} />
+      </div>
       <div className="content">
         <div className="wrapper">
           <h1>
@@ -54,8 +56,12 @@ const ArticleHero = props => (
         max-height: 400px;
         height: 33vw;
         width: 100vw;
-        background: #f5f5f5;
       }
+      img {
+        height: 100%;
+        width: auto;
+      }
+
       .content {
         max-width: 1024px;
         font-size: 18px;

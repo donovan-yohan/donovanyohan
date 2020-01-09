@@ -18,7 +18,7 @@ const Flowr = () => {
         <div className="pageContent">
           <ArticleHero
             title={"Manulife Mobile"}
-            image={""}
+            image={"/img/photos/manulifebanner.jpg"}
             customImageStyle={{
               margin: "0px"
             }}
