@@ -36,14 +36,16 @@ const Main = props => {
         />
         <meta name="theme-color" content="#FFFFFF" />
         <meta
-          name="og:title"
+          key="og:title"
+          property="og:title"
           content="Donovan Yohan - UI/UX Designer & Web Developer"
         />
         <meta
-          name="og:description"
+          key="og:description"
+          property="og:description"
           content="Hi, I'm Donovan Yohan! I'm a UI & UX designer and a front end developer."
         />
-        <meta name="og:image" content="ogimage.png" />
+        <meta key="og:image" property="og:image" content="ogimage.png" />
       </Head>
 
       <Nav
