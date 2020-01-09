@@ -45,7 +45,11 @@ const Main = props => {
           property="og:description"
           content="Hi, I'm Donovan Yohan! I'm a UI & UX designer and a front end developer."
         />
-        <meta key="og:image" property="og:image" content="../ogimage.jpg" />
+        <meta
+          key="og:image"
+          property="og:image"
+          content="https://donovanyohan.donovanyohan.now.sh/ogimage.jpg"
+        />
       </Head>
 
       <Nav
