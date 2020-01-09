@@ -29,7 +29,10 @@ export default function Nav(props) {
           {props.breadcrumbs &&
             props.breadcrumbs.map(({ href, label }, i) => {
               return (
-                <li className="breadcrumb">
+                <li
+                  className="breadcrumb"
+                  key={"nav-breadcrumb-" + label + href}
+                >
                   <span className="divider">/</span>
                   <Link href={href}>
                     <a className={"highlight path"}>{label}</a>
@@ -158,6 +161,9 @@ export default function Nav(props) {
           }
           .highlight {
             background: white !important;
+          }
+          .path {
+            text-decoration: underline;
           }
         }
       `}</style>

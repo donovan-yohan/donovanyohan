@@ -52,11 +52,12 @@ const Index = () => {
             }
             text={
               <span>
-                <span>Hi! I'm Donovan Yohan, and I'm a </span>
+                <span>Hi, I'm Donovan Yohan! I'm a </span>
                 <a href="#work" className="highlight heroHighlight">
                   UI & UX designer
                 </a>
                 <span> and a </span>
+                <br />
                 <a
                   href="http://github.com/donovan-yohan"
                   target="_blank"
@@ -76,8 +77,8 @@ const Index = () => {
           <span className="body heroBlurb">
             <span>
               I'm a designer & developer passionate about creating user-focused,
-              robust, and well-researched digital solutions. In addition to UI &
-              UX, I'm an experienced{" "}
+              robust, and well-researched digital solutions. In addition, I'm an
+              experienced{" "}
             </span>
             <a
               className="textLink"
@@ -95,9 +96,9 @@ const Index = () => {
               motion graphics artist
             </a>
             <span>
-              . I'm well versed in native mobile design languages for both iOS
-              and Android, and have built numerous responsive websites using
-              React, Vue, and Angular. But, believe it or not,{" "}
+              . I'm well versed in the Human Interface Guidelines and the
+              Material Design language and have built numerous responsive
+              websites using React, Vue, and Angular. But, believe it or not,{" "}
             </span>
             <span>
               <Link href="/about">

@@ -32,7 +32,7 @@ const Main = props => {
         <title>Donovan Yohan - UI/UX Designer & Web Developer</title>
         <meta
           name="description"
-          content="Hi! I'm Donovan Yohan, and I'm a UI & UX designer and a front end developer."
+          content="Hi, I'm Donovan Yohan! I'm a UI & UX designer and a front end developer."
         />
         <meta name="theme-color" content="#FFFFFF" />
         <meta
@@ -41,9 +41,9 @@ const Main = props => {
         />
         <meta
           name="og:description"
-          content="Hi! I'm Donovan Yohan, and I'm a UI & UX designer and a front end developer."
+          content="Hi, I'm Donovan Yohan! I'm a UI & UX designer and a front end developer."
         />
-        <meta name="og:image" content="../ogimage.png" />
+        <meta name="og:image" content="ogimage.png" />
       </Head>
 
       <Nav

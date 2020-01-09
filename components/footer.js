@@ -1,27 +1,39 @@
 import React from "react";
 import Link from "next/link";
-import { socialLinks } from "../global/global"
-import Icon from "../components/icon"
+import { socialLinks } from "../global/global";
+import Icon from "../components/icon";
 
 const BottomNav = () => (
   <div className="footer">
     <div className="container">
-      <h1 id='footer' className='headerText'><span className='headerText highlightStatic'><a href="#footer">Contact or connect with me!</a></span></h1>
+      <h1 id="footer" className="headerText">
+        <span className="headerText highlightStatic">
+          <a href="#footer">Contact or connect with me!</a>
+        </span>
+      </h1>
       <div className="wrapper">
         <div className="body message">
-          <p>Thanks for checking out my website! If you want to learn more about my work, feel free to check out some of these links.</p>
+          <p>
+            Thanks for checking out my website! If you want to get in touch
+            about my work, or see more about my design background please check
+            out some of these links.
+          </p>
         </div>
         <div>
           <div className="linkGroup">
-            <p className='body'>Contact me:</p>
-            <a href="mailto:donovanyohan@gmail.com" className="email">donovanyohan@gmail.com</a>
+            <p className="body">Contact me:</p>
+            <a href="mailto:donovanyohan@gmail.com" className="email">
+              donovanyohan@gmail.com
+            </a>
           </div>
           <div className="linkGroup">
-            <p className='body'>Connect with me:</p>
+            <p className="body">Connect with me:</p>
             <ul>
               {socialLinks.map(({ key, href, icon, label }) => (
                 <li key={key}>
-                  <a href={href} target='_blank'><Icon src={icon} size="large" link={true} black={true} /></a>
+                  <a href={href} target="_blank">
+                    <Icon src={icon} size="large" link={true} black={true} />
+                  </a>
                 </li>
               ))}
             </ul>
@@ -31,7 +43,7 @@ const BottomNav = () => (
     </div>
 
     <style jsx>{`
-      .footer{
+      .footer {
         display: flex;
         justify-content: center;
         width: 100%;
@@ -73,11 +85,11 @@ const BottomNav = () => (
         position: absolute;
         bottom: 2px;
         width: 0%;
-        height: 60%
+        height: 60%;
       }
       .email:hover::before {
-        width:100%;
-        background-color: #FFF500
+        width: 100%;
+        background-color: #fff500;
       }
 
       ul {
@@ -114,7 +126,7 @@ const BottomNav = () => (
         }
         .email::before {
           width: 100%;
-          background-color: #FFF500
+          background-color: #fff500;
         }
       }
     `}</style>
