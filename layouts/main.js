@@ -101,6 +101,10 @@ const Main = props => {
           cursor: pointer;
         }
 
+        .articleWrapper {
+          display: flex;
+        }
+
         @media only screen and (max-width: 767px) {
           .headerText {
             font-size: 32px;

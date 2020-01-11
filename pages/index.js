@@ -96,9 +96,9 @@ const Index = () => {
               motion graphics artist
             </a>
             <span>
-              . I'm well versed in the Human Interface Guidelines and the
-              Material Design language and have built numerous responsive
-              websites using React, Vue, and Angular. But, believe it or not,{" "}
+              . I'm well versed in native mobile design languages for both iOS
+              and Android, and I have built numerous responsive websites using
+              React, Vue, and Angular. But believe it or not,{" "}
             </span>
             <span>
               <Link href="/about">

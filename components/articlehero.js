@@ -52,10 +52,12 @@ const ArticleHero = props => (
         display: flex;
         justify-content: center;
         align-items: center;
-        margin-top: 50px;
+        margin-top: 56px;
         max-height: 400px;
         height: 33vw;
-        width: 100vw;
+        width: 100%;
+        max-width: 100vw;
+        overflow: hidden;
       }
       img {
         height: 100%;

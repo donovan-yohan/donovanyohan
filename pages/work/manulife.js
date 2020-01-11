@@ -73,28 +73,33 @@ const Flowr = () => {
               the objectives of the design, and the key performance metrics we
               would use to measure its success.
             </p>
-            LESSONS
-            <p className="body">
-              As a designer, I believe in the design decisions I make and the
-              rationale behind them. However, I also believe in sometimes being
-              wrong and the people around me are a resource to keep myself in
-              check. To that end, I strive to foster an environment where
-              everyone feels comfortable sharing their opinion on a design
-            </p>
-          </Article>
-          <Article>
-            OUTCOMES
-            <ul>
-              <li className="body">
-                I was able to use my team as another resource to verify my
-                assumptions, and help me meake informed design decision.
-              </li>
-              <li className="body">
-                Developers started asking questions about design decisions, and
-                giving their own suggestions and ideas, helping make all the
-                designs better.
-              </li>
-            </ul>
+            <div className="articleWrapper">
+              <div>
+                <h3>Everyone is a user, so everyone's opinion matters</h3>
+                <p className="body">
+                  As a designer, I believe in the design decisions I make and
+                  the rationale behind them. However, I also believe in
+                  sometimes being wrong and the people around me are a resource
+                  to keep myself in check. To that end, I strive to foster an
+                  environment where everyone feels comfortable sharing their
+                  opinion on a design
+                </p>
+              </div>
+              <div>
+                <h3>Outcomes</h3>
+                <ul>
+                  <li className="body">
+                    I was able to use my team as another resource to verify my
+                    assumptions, and help me meake informed design decision.
+                  </li>
+                  <li className="body">
+                    Developers started asking questions about design decisions,
+                    and giving their own suggestions and ideas, helping make all
+                    the designs better.
+                  </li>
+                </ul>
+              </div>
+            </div>
           </Article>
           <ArticleImage image={"SRC"} />
           <Article>
