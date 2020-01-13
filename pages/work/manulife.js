@@ -82,20 +82,22 @@ const Flowr = () => {
                   sometimes being wrong and the people around me are a resource
                   to keep myself in check. To that end, I strive to foster an
                   environment where everyone feels comfortable sharing their
-                  opinion on a design
+                  opinion on a design.
                 </p>
               </div>
               <div>
                 <h3>Outcomes</h3>
                 <ul>
                   <li className="body">
-                    I was able to use my team as another resource to verify my
-                    assumptions, and help me meake informed design decision.
-                  </li>
-                  <li className="body">
                     Developers started asking questions about design decisions,
                     and giving their own suggestions and ideas, helping make all
                     the designs better.
+                  </li>
+                  <li className="body">
+                    Because of these meetings, all team members were all already
+                    familiar with the design. As a result, questions that arose
+                    during production were specific and contributed to a better
+                    final product.
                   </li>
                 </ul>
               </div>

@@ -105,6 +105,10 @@ const Main = props => {
           display: flex;
         }
 
+        .articleWrapper div {
+          flex-basis: 50%;
+        }
+
         @media only screen and (max-width: 767px) {
           .headerText {
             font-size: 32px;
