@@ -40,6 +40,7 @@ const ArticleHero = props => (
       :global(body) {
         margin: 0;
         font-family: "Open Sans";
+        overflow-x: hidden;
       }
       .container {
         width: 100%;
@@ -55,8 +56,7 @@ const ArticleHero = props => (
         margin-top: 56px;
         max-height: 400px;
         height: 33vw;
-        width: 100%;
-        max-width: 100vw;
+        width: 100vw;
         overflow: hidden;
       }
       img {
@@ -110,7 +110,6 @@ const ArticleHero = props => (
       @media only screen and (max-width: 767px) {
         .hero {
           max-height: 50vw;
-          overflow: hidden;
         }
         .intro {
           flex-direction: column-reverse;
