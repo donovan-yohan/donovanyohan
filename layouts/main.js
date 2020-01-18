@@ -105,8 +105,25 @@ const Main = props => {
           display: flex;
         }
 
+        .articleWrapper .blurb {
+          flex-basis: 55%;
+          padding-right: 24px;
+        }
+
+        .articleWrapper .list {
+          flex-basis: 45%;
+        }
+
+        .articleWrapper .list ul {
+          margin-top: 0;
+        }
+
+        .articleWrapper .list ul li {
+          margin-top: 8px;
+        }
+
         .articleWrapper div {
-          flex-basis: 50%;
+          margin-top: 16px;
         }
 
         @media only screen and (max-width: 767px) {
@@ -187,6 +204,10 @@ const Main = props => {
               #fff500 60%,
               #ffffff 60%
             );
+          }
+
+          .articleWrapper {
+            flex-direction: column;
           }
 
           .textLink {

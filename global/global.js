@@ -47,7 +47,7 @@ export const projects = [{
     src: "img/photos/manulife.jpg",
     href: "/work/manulife",
     label: "Manulife Mobile",
-    date: "UX • Co-op • Fall 2019",
+    date: "UI/UX • Co-op • Fall 2019",
     content: "At Manulife, I worked as a Mobile UI/UX designer, and had the opportunity to bring user-centered design to a diverse team in a very large fin-tech corporation."
   },
   {
@@ -74,8 +74,8 @@ export const projects = [{
     src: "img/photos/flowr.jpg",
     href: "/work/flowr",
     label: "flowr",
-    date: "UX Concept • Side Project • Spring 2019",
-    content: "Part passion project, part I-had-to-do-this-because-my-gpa-would-suffer-if-I-didn't, flowr is a mobile time management tool that focuses on students, and their pain points with existing digital calendars."
+    date: "UI/UX Concept • Side Project • Spring 2019",
+    content: "Part passion project, part I-had-to-do-this-because-my-GPA-would-suffer-if-I-didn't, flowr is a mobile time management tool that focuses on students, and their pain points with existing digital calendars."
   }
 ].map(project => {
   project.key = `nav-link-${project.href}-${project.label}`;

@@ -9,8 +9,7 @@ I love my work, but there’s a lot of other things I love to do too. I think ev
 export const AboutHero =
   "Hi! I love parkour, acting, dancing, photography, origami, and a lot more than just my work.";
 
-export const flowrInfo = [
-  {
+export const flowrInfo = [{
     isLink: false,
     label: "Full Stack Designer & Developer"
   },
@@ -37,10 +36,9 @@ export const flowrInfo = [
   return project;
 });
 
-export const manulifeInfo = [
-  {
+export const manulifeInfo = [{
     isLink: false,
-    label: "UX Designer"
+    label: "UI/UX Designer"
   },
   {
     isLink: false,
@@ -60,8 +58,7 @@ export const manulifeInfo = [
   return project;
 });
 
-export const donovanyohanInfo = [
-  {
+export const donovanyohanInfo = [{
     isLink: false,
     label: "Full Stack"
   },
@@ -88,8 +85,7 @@ export const donovanyohanInfo = [
   return project;
 });
 
-export const shopdonovanyohanInfo = [
-  {
+export const shopdonovanyohanInfo = [{
     isLink: false,
     label: "Full Stack"
   },
@@ -116,8 +112,7 @@ export const shopdonovanyohanInfo = [
   return project;
 });
 
-export const cooperatorsInfo = [
-  {
+export const cooperatorsInfo = [{
     isLink: false,
     label: "Software Developer"
   },

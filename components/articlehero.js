@@ -47,7 +47,6 @@ const ArticleHero = props => (
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin-bottom: 16px;
       }
       .hero {
         display: flex;
