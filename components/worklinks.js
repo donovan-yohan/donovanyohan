@@ -35,7 +35,7 @@ const WorkLinks = props => {
           display: flex;
           justify-content: center;
           width: 100%;
-          margin-top: 32px;
+          margin-top: 64px;
         }
         .wrapper {
           display: flex;

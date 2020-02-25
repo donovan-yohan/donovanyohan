@@ -19,6 +19,7 @@ const Flowr = () => {
           <ArticleHero
             title={"flowr"}
             image={""}
+            bgColor={"#63C4AD"}
             customImageStyle={{
               margin: "0px"
             }}

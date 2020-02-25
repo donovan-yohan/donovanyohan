@@ -15,7 +15,7 @@ const BottomNav = () => (
         <div className="body message">
           <p>
             Thanks for checking out my website! If you want to get in touch
-            about my work, or see more about my design background please check
+            about my work, or learn more about my design background please check
             out some of these links.
           </p>
         </div>

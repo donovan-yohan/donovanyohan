@@ -19,100 +19,255 @@ const Flowr = () => {
           <ArticleHero
             title={"donovanyohan.com"}
             image={""}
+            bgColor={"lightgray"}
             customImageStyle={{
               margin: "0px"
             }}
             content={`
-              This website exists so that I can hopefully convince you, the reader, that I kind of know what I'm doing when it comes to design and coding.
-              Crazy, right? Like any design, my goal is to minimize confusion, maximize understanding, and provide rationale for my decision wherever a choice
-              over another valid alternative was made.
+              This website exists so that I can hopefully convince you, the reader, that I at least somewhat know what I'm doing when it comes to design and coding.
+              Crazy, right? Specifically, I set out to create a platform to showcase my high-level abilities as a developer and a UI/UX designer.
             `}
             info={donovanyohanInfo}
           />
           <Article>
             <p className="body">
-              I love talking about design. Keyword, <i>talking.</i> I don't
-              enjoy writing about design, and as it follows, I don't enjoy
-              making portfolios. I understand their value and believe in having
-              one, but it definitely wasn't easy making this one. I love talking
-              about design in conversations-- when I can assess the other
-              person's understanding or engagement based on body language,
-              facial expression, the questions they ask, and so on. I can change
-              my approach, switch up how I want to present the design, focus on
-              what I think is most important for that person, and tackle the
-              challenge of communicating my design much like how I would tackle
-              the challenge of creating a design-- based on the context.
+              I love talking to people about design, especially in person when I
+              can assess the other person's understanding or engagement based on
+              body language, facial expression, the questions they ask, and so
+              on. I can change my approach, switch up how I want to present the
+              design, focus on what I think is most important for that person,
+              and tackle the challenge of communicating my design much like how
+              I would tackle the challenge of creating a design-- based on the
+              context.
             </p>
             <p className="body">
-              Unfortunately, I don't have the luxury of reading your mind, but I
-              know where my strengths are, and I know the objective of a
-              portfolio. So here's how I went about solving the age-old design
-              challenge of the portfolio.
+              Unfortunately, I don't have the luxury of talking with every
+              single person that comes across this portfolio, but I know where
+              my strengths lie, and I know what my goal is. So here's how I went
+              about solving the age-old design challenge of the portfolio.
             </p>
             <ul className="body tableOfContents">
               <li>
-                <a href="#team">
-                  Identifying the actual problem a portfolio solves
+                <a href="#problem" className="textLink">
+                  Figure out what problem I'm really solving
                 </a>
               </li>
               <li>
-                <a href="">Categorizing existing solutions</a>
+                <a href="#layout" className="textLink">
+                  Using a layout to achieve my goal
+                </a>
               </li>
               <li>
-                <a href="">Creating a design brief for my portfolio</a>
+                <a href="#content" className="textLink">
+                  Using content to play to my strengths
+                </a>
               </li>
               <li>
-                <a href="">
-                  Leveraging my skills as a developer to prototype efficiently
+                <a href="#beingWrong" className="textLink">
+                  Being OK with being wrong
                 </a>
               </li>
             </ul>
           </Article>
           <ArticleImage images={"src"} />
           <Article>
-            <h2 id="team" className="anchor"></h2>
-            <h2 className="highlightStatic">
-              Making design matter to my project team
+            <h2 id="problem" className="anchor"></h2>
+            <h2>
+              <span className="highlightStatic">
+                Figure out what problem I'm really solving
+              </span>
             </h2>
             <p className="body">
-              One of the first things I did was estalish a short weekly meeting
-              with all my teammates called a, 'Design Check-in.' This was my
-              opportunity to get the whole team on board with the design itself,
-              the objectives of the design, and the key performance metrics we
-              would use to measure its success.
+              There are plenty of hired designers out there today, so how did
+              they do it? Like any good problem, this called for a design brief.
+              How am I going to validate and see if what I'm doing helps me
+              achieve my objective? Who is actually going to be coming to this
+              site, and what will they be looking for? Through interviews with
+              recruiters, studying of existing platforms like Medium, and
+              research into other designers' portfolios, I was able to collect
+              enough data to give myself a problem statement, design principles,
+              and an idea of my real user.
             </p>
-            LESSONS
-            <p className="body">
-              As a designer, I believe in the design decisions I make and the
-              rationale behind them. However, I also believe in sometimes being
-              wrong and the people around me are a resource to keep myself in
-              check. To that end, I strive to foster an environment where
-              everyone feels comfortable sharing their opinion on a design
-            </p>
+            <div className="articleWrapper">
+              <div className="blurb">
+                <h3>Don't reinvent the wheel, but learn why it works</h3>
+                <p className="body">
+                  How might I showcase who I am and the work I am able to do? My
+                  user, a recruiting manager, is someone who goes through
+                  designers faster than I go through tea (that's really fast,
+                  see you're learning about who I am already), so I'll need to
+                  be succinct, but emotive. I think personality plays a big role
+                  in a successful designer, and so I want to make sure I can
+                  share that. Even though I'll be mostly showing work I've
+                  already done, what my user really cares about is what I can do
+                  for their company, and I'll need to be aware of this when
+                  choosing what to share.
+                </p>
+              </div>
+              <div className="list">
+                <h3>Outcomes</h3>
+                <ul>
+                  <li className="body">
+                    Problem statement to validate solutions against
+                  </li>
+                  <li className="body">
+                    Design principles to inform wireframes
+                  </li>
+                  <li className="body">
+                    User journey to give design strcuture
+                  </li>
+                </ul>
+              </div>
+            </div>
           </Article>
+          <ArticleImage images={"src"} />
           <Article>
-            OUTCOMES
-            <ul>
-              <li className="body">
-                I was able to use my team as another resource to verify my
-                assumptions, and help me meake informed design decision.
-              </li>
-              <li className="body">
-                Developers started asking questions about design decisions, and
-                giving their own suggestions and ideas, helping make all the
-                designs better.
-              </li>
-            </ul>
-          </Article>
-          <ArticleImage image={"SRC"} />
-          <Article>
-            <h2 className="highlightStatic">Hello, world!</h2>
+            <h2 id="layout" className="anchor"></h2>
+            <h2>
+              <span className="highlightStatic">
+                Using a layout to achieve my goal
+              </span>
+            </h2>
             <p className="body">
-              Lorum ipsum dolor veniam ipsum nostrud magna in nisi labore fuigat
-              qui moilt exceptuer. Lorum ipsum dolor veniam ipsum nostrud magna
-              in nisi labore fuigat qui moilt exceptuer. Occaecat cillum
-              reprehenderit cillum culpa officia officia esse laborum pariatur.
+              It'd be easy enough to just open up Squarespace, type in
+              "Portfolio" and call it a day. While I'm sure some of them are
+              very well made, I was interested in discovering for myself what
+              made these templates <i>portfolio</i> templates. Also, now I can
+              put "React Developer" on my resume. Before building out the
+              layout, I mapped out the core actions the website would need to
+              perform, based on my earlier research. This started with 3:
+              Resume, View Work, and Contact, but grew to 4 when I wanted to
+              differentiate myself from others, with a real About Me section.
             </p>
+            <div className="articleWrapper">
+              <div className="blurb">
+                <h3>Make it easy and look good doing it</h3>
+                <p className="body">
+                  Seeing that my website had a small number of core actions, I
+                  wanted to make them accessible from anywhere on the site, at
+                  any time. This led to the current global top nav seen on the
+                  site, and global bottom nav if you're on mobile. (Yes, this
+                  site is fully responsive!) Going back to making things
+                  succinct and easy, I decided to keep the design language very
+                  simple and clean. While doing my research, I used a
+                  highlighter to markup things I liked, and ended up really
+                  liking the way it looked, leading to the bright yellow accents
+                  here.
+                </p>
+              </div>
+              <div className="list">
+                <h3>Outcomes</h3>
+                <ul>
+                  <li className="body">Simple and clean design system</li>
+                  <li className="body">
+                    Always-present global navigation system
+                  </li>
+                  <li className="body">Medium-esque content presentation</li>
+                </ul>
+              </div>
+            </div>
+          </Article>
+          <ArticleImage images={"src"} />
+          <Article>
+            <h2 id="content" className="anchor"></h2>
+            <h2>
+              <span className="highlightStatic">
+                Using content to play to my strengths
+              </span>
+            </h2>
+            <p className="body">
+              It'd be easy enough to just open up Squarespace, type in
+              "Portfolio" and call it a day. While I'm sure some of them are
+              very well made, I was interested in discovering for myself what
+              makes a portfolio really <i>work</i>. There are plenty of hired
+              designers out there today, so how did they do it? Like any good
+              problem, this called for a design brief. Through interviews with
+              recruiters, studying of existing platforms like Medium, and
+              research into other designers' portfolios, I was able to collect
+              enough data to give myself a problem statement, design principles,
+              and an idea of my real user.
+            </p>
+            <div className="articleWrapper">
+              <div className="blurb">
+                <h3>Don't reinvent the wheel, but learn why it works</h3>
+                <p className="body">
+                  How might I showcase who I am and the work I am able to do? My
+                  user, a recruiting manager, is someone who goes through
+                  designers faster than I go through tea (that's really fast,
+                  see you're learning about who I am already), so I'll need to
+                  be succinct, but emotive. I think personality plays a big role
+                  in a successful designer, and so I want to make sure I can
+                  share that. Even though I'll be mostly showing work I've
+                  already done, what my user really cares about is what I can do
+                  for their company, and I'll need to be aware of this when
+                  choosing what to share.
+                </p>
+              </div>
+              <div className="list">
+                <h3>Outcomes</h3>
+                <ul>
+                  <li className="body">
+                    Problem statement to validate solutions against
+                  </li>
+                  <li className="body">
+                    Design principles to inform wireframes
+                  </li>
+                  <li className="body">
+                    User journey to give design strcuture
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </Article>
+          <ArticleImage images={"src"} />
+          <Article>
+            <h2 id="beingWrong" className="anchor"></h2>
+            <h2>
+              <span className="highlightStatic">Being OK with being wrong</span>
+            </h2>
+            <p className="body">
+              It'd be easy enough to just open up Squarespace, type in
+              "Portfolio" and call it a day. While I'm sure some of them are
+              very well made, I was interested in discovering for myself what
+              makes a portfolio really <i>work</i>. There are plenty of hired
+              designers out there today, so how did they do it? Like any good
+              problem, this called for a design brief. Through interviews with
+              recruiters, studying of existing platforms like Medium, and
+              research into other designers' portfolios, I was able to collect
+              enough data to give myself a problem statement, design principles,
+              and an idea of my real user.
+            </p>
+            <div className="articleWrapper">
+              <div className="blurb">
+                <h3>Don't reinvent the wheel, but learn why it works</h3>
+                <p className="body">
+                  How might I showcase who I am and the work I am able to do? My
+                  user, a recruiting manager, is someone who goes through
+                  designers faster than I go through tea (that's really fast,
+                  see you're learning about who I am already), so I'll need to
+                  be succinct, but emotive. I think personality plays a big role
+                  in a successful designer, and so I want to make sure I can
+                  share that. Even though I'll be mostly showing work I've
+                  already done, what my user really cares about is what I can do
+                  for their company, and I'll need to be aware of this when
+                  choosing what to share.
+                </p>
+              </div>
+              <div className="list">
+                <h3>Outcomes</h3>
+                <ul>
+                  <li className="body">
+                    Problem statement to validate solutions against
+                  </li>
+                  <li className="body">
+                    Design principles to inform wireframes
+                  </li>
+                  <li className="body">
+                    User journey to give design strcuture
+                  </li>
+                </ul>
+              </div>
+            </div>
           </Article>
           <WorkLinks type={"projects"} label={"donovanyohan.com"} />
         </div>
@@ -127,9 +282,6 @@ const Flowr = () => {
           }
           p {
             margin: 16px 0 0 0;
-          }
-          .tableOfContents {
-            text-decoration: underline;
           }
         `}</style>
       </div>

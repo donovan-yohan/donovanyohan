@@ -1,7 +1,7 @@
-import React from 'react'
+import React from "react";
 
 const ArticleImage = props => (
-  <div className='container'>
+  <div className="container">
     <div className="image">
       <img src={props.image} />
     </div>
@@ -10,9 +10,8 @@ const ArticleImage = props => (
       .container {
         margin: 48px 0 0 0;
         width: 100%;
-        height: 32vw;
+        height: 33vw;
         max-height: calc(1024px / 3);
-
       }
       .image {
         width: 100%;
@@ -21,7 +20,7 @@ const ArticleImage = props => (
         background-color: lightblue;
       }
 
-      // Adjust for tablets
+      // Adjust for mobile
 
       @media only screen and (max-width: 1024px) {
         .container {

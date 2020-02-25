@@ -1,4 +1,5 @@
-const links = [{
+const links = [
+  {
     href: "/#work",
     label: "Work"
   },
@@ -13,7 +14,8 @@ const links = [{
 
 export default links;
 
-export const socialLinks = [{
+export const socialLinks = [
+  {
     href: "https://www.instagram.com/donovan.yohan/",
     label: "Instagram",
     icon: "/img/icons/instagram.svg"
@@ -43,19 +45,22 @@ export const socialLinks = [{
   return socialLink;
 });
 
-export const projects = [{
+export const projects = [
+  {
     src: "img/photos/manulife.jpg",
     href: "/work/manulife",
     label: "Manulife Mobile",
     date: "UI/UX • Co-op • Fall 2019",
-    content: "At Manulife, I worked as a Mobile UI/UX designer, and had the opportunity to bring user-centered design to a diverse team in a very large fin-tech corporation."
+    content:
+      "At Manulife, I worked as a Mobile UI/UX designer, and had the opportunity to bring user-centered design to a diverse team in a very large fin-tech corporation."
   },
   {
     src: "img/photos/donovanyohancom.jpg",
     href: "/work/donovanyohan",
     label: "donovanyohan.com",
     date: "Full Stack • Side Project • Fall 2019",
-    content: "Ah, the portfolio. How do you design something that's never finished and that nobody can seem to agree on how to do? In my approach, I carefully designed the problem before creating my solution."
+    content:
+      "How do you design something that's never really finished? In my approach, I carefully designed the problem before creating my solution."
   },
   // {
   //   href: "/work/shopdonovanyohan",
@@ -68,54 +73,62 @@ export const projects = [{
     href: "/work/cooperators",
     label: "The Co-operators Mobile",
     date: "Developer • Co-op • Winter 2019",
-    content: "As a software engineer, I worked closely with the UX team to build reusable components and line-up the grid systems being used in Sketch with the layouts of our app."
+    content:
+      "As a software engineer, I worked closely with the UX team to build reusable components and line-up the grid systems being used in Sketch with the layouts of our app."
   },
   {
     src: "img/photos/flowr.jpg",
     href: "/work/flowr",
     label: "flowr",
     date: "UI/UX Concept • Side Project • Spring 2019",
-    content: "Part passion project, part I-had-to-do-this-because-my-GPA-would-suffer-if-I-didn't, flowr is a mobile time management tool that focuses on students, and their pain points with existing digital calendars."
+    content:
+      "Part passion project, part I-had-to-do-this-because-my-GPA-would-suffer-if-I-didn't, flowr is a mobile time management tool that focuses on students, and their pain points with existing digital calendars."
   }
 ].map(project => {
   project.key = `nav-link-${project.href}-${project.label}`;
   return project;
 });
 
-export const hobbies = [{
+export const hobbies = [
+  {
     src: "img/photos/parkour.png",
     href: "",
     label: "Parkour & Gymnastics",
     date: "2010 - Present",
-    content: "Staying in shape shouldn't have to be a chore, and it doesn't have to be, but it can be a job. I'm a parkour & tricking coach, but what even is 'parkour' and 'tricking,' and how do you even start?"
+    content:
+      "Staying in shape shouldn't have to be a chore, and it doesn't have to be, but it can be a job. I'm a parkour & tricking coach, but what even is 'parkour' and 'tricking,' and how do you even start?"
   },
   {
     src: "img/photos/acting.png",
     href: "",
     label: "Acting & Theatre",
     date: "2006 - Present",
-    content: "My parents told me that I never stopped talking when I was a kid, so they put me on a stage and made other people listen too. Over the years I discovered my love for public speaking and Shakespeare!"
+    content:
+      "My parents told me that I never stopped talking when I was a kid, so they put me on a stage and made other people listen too. Over the years I discovered my love for public speaking and Shakespeare!"
   },
   {
     src: "img/photos/dance.jpg",
     href: "",
-    label: "Street Dance",
+    label: "Dance",
     date: "2018 - Present",
-    content: "Since starting university, I've been challenging myself to step out of my comfort zone and explore the hobbies I've been intersted in but always too scared to try. For dance, I am so glad that I did."
+    content:
+      "Since starting university, I've been challenging myself to step out of my comfort zone and explore the hobbies I've been intersted in but always too scared to try. For dance, I am so glad that I did."
   },
   {
     src: "img/photos/photography.jpg",
     href: "https://www.instagram.com/donovan.yohan/",
     label: "Photography",
     date: "2018 - Present",
-    content: "I started photography to learn more about composition theory. Aside from being incredibly fun, photography has helped me become a more resourceful and creative designer."
+    content:
+      "I started photography to learn more about composition theory. Aside from being incredibly fun, photography has helped me become a more resourceful and creative designer."
   },
   {
     src: "img/photos/origami.jpg",
     href: "",
     label: "Origami",
     date: "2010 - Present",
-    content: "When teachers take away your toys in class, play with something they can't take away-- paper. What may have started as a joke is now one of my favourite hobbies and pass-times, and makes great gifts too!"
+    content:
+      "When teachers take away your toys in class, play with something they can't take away-- paper. What may have started as a joke is now one of my favourite hobbies and pass-times, and makes great gifts too!"
   }
 ].map(hobby => {
   hobby.key = `nav-link-${hobby.href}-${hobby.label}`;

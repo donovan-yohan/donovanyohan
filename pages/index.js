@@ -113,6 +113,17 @@ const Index = () => {
               Work I've done.
             </h1>
           </a>
+          <span className="body heroBlurb">
+            <span>
+              Here's a high-level look at some of the places I've worked and
+              things I've worked on. If you see or read something that you want
+              to learn more about, please
+              <a className="textLink" href="#footer">
+                {" reach out and connect with me! "}
+              </a>
+              I'd love to share more and answer any questions you may have.
+            </span>
+          </span>
           <div className="cardWrapper">
             {projects.map(({ key, href, label, date, content, src }) => {
               return (

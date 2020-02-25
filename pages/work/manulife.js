@@ -18,7 +18,8 @@ const Flowr = () => {
         <div className="pageContent">
           <ArticleHero
             title={"Manulife Mobile"}
-            image={"/img/photos/manulifebanner.jpg"}
+            image={"/img/photos/manulifebanner.png"}
+            bgColor={"#05AC5B"}
             customImageStyle={{
               margin: "0px"
             }}
@@ -34,28 +35,28 @@ const Flowr = () => {
               At Manulife, I worked as a Mobile UI/UX designer on a young design
               team of just four designers, including myself. The team consisted
               of a UI/UX lead and three designers, each dedicated to a different
-              project. As the sole UI/UX designer on the Manulife Mobile Group
-              Retirement project, I had to consider the interests of both the
-              UI/UX team and the scrum-based agile project team. My design team
-              was my resource for whiteboard brainstorming, design feedback, and
-              establishing patterns for the first steps of our design system.
-              Day to day, I worked with my project team to set priorities,
-              gather requirements, validate technical feasability, and deliver a
-              final product.
+              project. My design team was my resource for brainstorming, design
+              feedback, and establishing patterns for the first steps of our
+              design system. As the sole UI/UX designer on the Manulife Mobile
+              Group Retirement project, I worked with my project team to set
+              priorities, gather requirements, validate technical feasability,
+              and deliver high-fidelity mockups. During my stay, some of the
+              challenges I had to tackle were:
             </p>
-            <p className="body">During my stay, I got to be a part of:</p>
             <ul className="body tableOfContents">
               <li>
-                <a href="">Reinstating UX practices on my project team</a>
+                <a href="#reinstating-ux" className="textLink">
+                  Reinstating UX practices on my project team
+                </a>
               </li>
               <li>
-                <a href="#team">
+                <a href="#making-design-matter" className="textLink">
                   Making user-centered design matter to my project team
                 </a>
               </li>
               <li>
-                <a href="#balance">
-                  Balancing business needs with the user experience
+                <a href="#finding-why" className="textLink">
+                  Finding out why over just accepting asks
                 </a>
               </li>
 
@@ -65,9 +66,9 @@ const Flowr = () => {
             </ul>
           </Article>
 
-          <ArticleImage image={"SRC"} />
+          <ArticleImage image={"picture collaborating"} />
           <Article>
-            <h2 id="balance" className="anchor"></h2>
+            <h2 id="reinstating-ux" className="anchor"></h2>
             <h2>
               <span className="highlightStatic">
                 Reinstating UX practices on my project team
@@ -76,59 +77,75 @@ const Flowr = () => {
             <p className="body">
               Although this was a co-op position, I was filling a full-time
               role. For reasons outside their control, the team didn't have a
-              UI/UX designer for a while before I joined Manulife, so I had
-              plenty of work lined up for me right from the start. As the sole
+              UI/UX designer for a while before I joined Manulife. As the sole
               designer for my team, it was up to me to explore the problem,
               brainstorm flows, create wireframes, and ensure that at every
               stage the user is being put front and center.
             </p>
             <div className="articleWrapper">
               <div className="blurb">
-                <h3>Know the problem, don't jump to solutions</h3>
-                <p className="body"></p>
+                <h3>Adovating for the user through research and design</h3>
+                <p className="body">
+                  As a designer, developer, and business student I was able to
+                  work with everyone on my project team and empathize with their
+                  stance, while still vying for the user experience. Having my
+                  diverse background allowed me to present design rationale and
+                  gather requirements in different ways and contexts, tailored
+                  to the current audience.
+                </p>
               </div>
               <div className="list">
                 <h3>Responsibilities</h3>
                 <ul>
-                  <li className="body"></li>
                   <li className="body">
-                    Questions that arose during production were specific and
-                    contributed to a better final product.
+                    Establishing feature priorities with the product owner
                   </li>
                   <li className="body">
-                    Questions that arose during production were specific and
-                    contributed to a better final product.
+                    Mapping out requirements with the business analyst
+                  </li>
+                  <li className="body">
+                    Creating design briefs with extensive research
+                  </li>
+                  <li className="body">
+                    Designing and validating technical feasibility with
+                    developers
+                  </li>
+                  <li className="body">
+                    Evaluating success by studying the metrics
                   </li>
                 </ul>
               </div>
             </div>
           </Article>
 
-          <ArticleImage images={"src"} />
+          <ArticleImage images={"image-of-design-brief"} />
           <Article>
-            <h2 id="team" className="anchor"></h2>
+            <h2 id="making-design-matter" className="anchor"></h2>
             <h2>
               <span className="highlightStatic">
                 Making user-centered design matter to my project team
               </span>
             </h2>
             <p className="body">
-              All too often, once the requirements are figured out, designers
-              open up their design tool, put their heads down, and look up once
-              they have a finished design to pass along to developers.
+              All too often, as designers we sit down, open up our design tool,
+              put our heads down, and look up once they we have a finished
+              design to pass along to developers. This limits the potential of
+              the design and ignores the developers who can often provide unique
+              ideas and solutions if given the opportunity to share them.
             </p>
             <div className="articleWrapper">
               <div className="blurb">
-                <h3>Everyone is a user, so everyone's opinion matters</h3>
+                <h3>Using the design brief to align the team on a goal</h3>
                 <p className="body">
                   One of the first things I did was estalish a short weekly
-                  meeting with all my teammates called a 'Design Check-in.' This
-                  was my opportunity to align with the whole team on the design
-                  itself, the objectives of the design, and the key performance
-                  metrics we would use to measure its success. Through this
-                  meeting, I strived to foster an environment where everyone
-                  could share their opinion on the experience, and contribute
-                  from their own point of view.
+                  meeting with all my teammates called a 'Design Check-in.' I
+                  would bring my design briefs to this meeting, sometimes
+                  without calling it that, and use it to establish the goals,
+                  principles, and success metrics of the feature being worked
+                  on. Through this meeting, I strived to foster an environment
+                  where everyone could share their opinion on the experience,
+                  and contribute from their own point of view, all rooted in
+                  what was established design.
                 </p>
               </div>
               <div className="list">
@@ -137,7 +154,7 @@ const Flowr = () => {
                   <li className="body">
                     By highlighting the importance of design, the project team
                     had direct input in my design, bringer us closer to finding
-                    a solution that suited the project's needs.
+                    a solution that suited the project's needs
                   </li>
                   <li className="body">
                     Developers became engaged and collaborated on designs
@@ -151,49 +168,55 @@ const Flowr = () => {
             </div>
           </Article>
 
-          <ArticleImage image={"SRC"} />
+          <ArticleImage image={"sketch-file-with-variations"} />
           <Article>
-            <h2 id="balance" className="anchor"></h2>
+            <h2 id="finding-why" className="anchor"></h2>
             <h2>
               <span className="highlightStatic">
-                Balancing business needs with the user experience
+                Finding out why over just accepting asks
               </span>
             </h2>
             <p className="body">
               Being in a big company gave me access to plenty of resources,
               people, and tools to make the best design possible. However, it
-              also came with plenty of constraints and requirements from other
-              teams. One of these teams was responsible for collecting and
-              processing user feedback, and one of their go-to tools was Net
-              Promoter Score (NPS). Our team had been mandated to include a way
-              to collect NPS in the app, but as a UX designer I had to ask,
-              "Why?"
+              also came with a number of requirements from other teams. One of
+              these teams was responsible for collecting and processing user
+              feedback, and one of their go-to tools was Net Promoter Score
+              (NPS). NPS at Manulife is used to measure customer satisfaction at
+              the end of a flow. However, Manulife Mobile is currently more
+              informative than interactive, and our team had been mandated to
+              include a way to collect NPS in the app, but as a UX designer I
+              had to ask, "What problem is this really trying to solve?"
             </p>
             <div className="articleWrapper">
               <div className="blurb">
                 <h3>Know the problem, don't jump to solutions</h3>
                 <p className="body">
-                  Manulife Mobile is currently more informative than
-                  interactive. There's no way to implement NPS without
-                  compromising the user experience. I'm a business student, so I
-                  could speak to business too. Team Made it clear that NPS
-                  wasn't applicable to our situation!!! we reached a consensus
-                  that nps blows ass
+                  There wasn't a flow in our app to implement the generic NPS
+                  solution without compromising the user experience. So, by
+                  communicating with the NPS owners, I was able to find out that
+                  the team was really looking for a means to validate the
+                  development direction of the product. Knowing this, I was able
+                  to propose an alternative, non-intrusive user survey, that
+                  worked on the principles of empowering users to contribute to
+                  the future of our app, and making the user WANT to fill it out
+                  rather than force it in front of them.
                 </p>
               </div>
               <div className="list">
                 <h3>Outcomes</h3>
                 <ul>
                   <li className="body">
-                    Developers became engaged and collaborated on designs
+                    Maintained good user experience while still meeting the
+                    business needs
                   </li>
                   <li className="body">
-                    Questions that arose during production were specific and
-                    contributed to a better final product.
+                    Started conversations about alternatives to NPS for
+                    collecting feedback on features
                   </li>
                   <li className="body">
-                    Questions that arose during production were specific and
-                    contributed to a better final product.
+                    Empowered and motivated my team to challenge blanket
+                    business solutions moving forward
                   </li>
                 </ul>
               </div>
@@ -215,9 +238,6 @@ const Flowr = () => {
           }
           p {
             margin: 8px 0 0 0;
-          }
-          .tableOfContents {
-            text-decoration: underline;
           }
         `}</style>
       </div>

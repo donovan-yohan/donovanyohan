@@ -4,7 +4,7 @@ import Link from "next/link";
 const ArticleHero = props => (
   <div>
     <div className="container">
-      <div className="hero">
+      <div className="hero" style={{ backgroundColor: props.bgColor }}>
         <img src={props.image} />
       </div>
       <div className="content">
