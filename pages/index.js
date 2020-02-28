@@ -4,34 +4,15 @@ import Card from "../components/card";
 import Lottie from "lottie-react-web";
 import Link from "next/link";
 import logoAnimation from "../public/img/animations/dy.json";
-import { MobileWidth, debounce, projects } from "../global/global";
+import { MobileWidth, projects } from "../global/global";
 import Main from "../layouts/main";
 import useSmoothScroll from "../hooks/useSmoothScroll";
+import useWindowWidth from "../hooks/useWindowWidth";
 import VisibilitySensor from "react-visibility-sensor";
 
 const Index = () => {
-  // logic for finding current viewport size to determine if mobile layout is needed
-  const [windowWidth, setWidth] = useState(null);
   const [heroVisible, setVisible] = useState(true);
-
-  function onChange(isVisible) {
-    setVisible(isVisible);
-  }
-
-  useEffect(() => {
-    if (!windowWidth) setWidth(document.children[0].clientWidth);
-
-    const debouncedHandleResize = debounce(function handleResize() {
-      setWidth(document.children[0].clientWidth);
-    }, 250);
-
-    window.addEventListener("resize", debouncedHandleResize);
-
-    return _ => {
-      window.removeEventListener("resize", debouncedHandleResize);
-    };
-  });
-
+  const windowWidth = useWindowWidth();
   useSmoothScroll();
 
   return (
@@ -40,7 +21,10 @@ const Index = () => {
         <div className="pageContent">
           <Hero
             image={
-              <VisibilitySensor partialVisibility={true} onChange={onChange}>
+              <VisibilitySensor
+                partialVisibility={true}
+                onChange={isVisible => setVisible(isVisible)}
+              >
                 <Lottie
                   options={{
                     animationData: logoAnimation,
