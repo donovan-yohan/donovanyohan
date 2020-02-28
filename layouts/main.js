@@ -1,30 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Head from "next/head";
 import Nav from "../components/nav";
 import Footer from "../components/footer";
 import BottomNav from "../components/bottomNav";
-import { MobileWidth, debounce } from "../global/global";
+import { MobileWidth } from "../global/global";
 import useSmoothScroll from "../hooks/useSmoothScroll";
+import useWindowWidth from "../hooks/useWindowWidth";
 
 const Main = props => {
   // logic for finding current viewport size to determine if mobile layout is needed
-  const [windowWidth, setWidth] = useState(null);
-
+  const windowWidth = useWindowWidth();
   useSmoothScroll();
-
-  useEffect(() => {
-    if (!windowWidth) setWidth(document.children[0].clientWidth);
-
-    const debouncedHandleResize = debounce(function handleResize() {
-      setWidth(document.children[0].clientWidth);
-    }, 250);
-
-    window.addEventListener("resize", debouncedHandleResize);
-
-    return _ => {
-      window.removeEventListener("resize", debouncedHandleResize);
-    };
-  });
 
   return (
     <div>
@@ -51,7 +37,6 @@ const Main = props => {
           content="https://donovanyohan.donovanyohan.now.sh/ogimage.jpg"
         />
       </Head>
-
       <Nav
         breadcrumbs={props.breadcrumbs}
         isPhone={windowWidth && windowWidth <= 425}
