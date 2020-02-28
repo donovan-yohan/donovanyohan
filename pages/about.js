@@ -4,26 +4,12 @@ import Hero from "../components/hero";
 import Card from "../components/card";
 import { MobileWidth, debounce, hobbies } from "../global/global";
 import Main from "../layouts/main";
+import useWindowWidth from "../hooks/useWindowWidth";
 import { AboutHero, AboutText } from "../global/content";
 
 const About = () => {
-  // logic for finding current viewport size to determine if mobile layout is needed
-  const [windowWidth, setWidth] = useState(null);
+  const windowWidth = useWindowWidth();
 
-  useEffect(() => {
-    // assign initial windowWidth value on first load
-    if (!windowWidth) setWidth(document.children[0].clientWidth);
-
-    const debouncedHandleResize = debounce(function handleResize() {
-      setWidth(document.children[0].clientWidth);
-    }, 250);
-
-    window.addEventListener("resize", debouncedHandleResize);
-
-    return _ => {
-      window.removeEventListener("resize", debouncedHandleResize);
-    };
-  });
   return (
     <Main breadcrumbs={[{ label: "About", href: "/about" }]}>
       <div className="pageRoot">
