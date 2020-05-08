@@ -11,7 +11,7 @@ const Card = (props) => {
             <img src={props.src} />
           </div>
           {!props.disabled && (
-            <Link href={props.href}>
+            <Link href={!props.disabled ? props.href : null}>
               <a className="mobileButton">
                 <span>Learn More</span>
                 <Icon src="../img/icons/chevron.svg" size="small" />
@@ -19,14 +19,15 @@ const Card = (props) => {
             </Link>
           )}
           {props.disabled && (
-            <a className="mobileButton disabled">
-              <span>Coming Soon</span>
-              <Icon src="../img/icons/dy.svg" size="small" />
+            <a className="mobileButton disabledBar">
+              <span>Contact me to learn more</span>
             </a>
           )}
         </div>
         <div className="textWrapper">
-          <div className="title">{props.title}</div>
+          <div className={!props.disabled ? "title" : "title disabled"}>
+            {props.title}
+          </div>
           <div className="subheader">{props.caption}</div>
           <div className="content">
             <span>{props.content}</span>
@@ -73,6 +74,7 @@ const Card = (props) => {
           transition: 0.35s ease;
         }
         .mobileButton {
+          min-height: 24px;
           display: flex;
           align-self: flex-end;
           width: 100%;
@@ -120,10 +122,14 @@ const Card = (props) => {
           padding-bottom: 8px;
         }
 
-        .disabled {
+        .disabled,
+        .disabledBar {
           cursor: initial;
         }
 
+        .disabledBar {
+          background-color: #ededed;
+        }
         @media only screen and (min-width: 1025px) {
           .container:hover {
             border-color: rgba(0, 0, 0, 0.87);
@@ -141,6 +147,9 @@ const Card = (props) => {
           .container:hover .title::before {
             opacity: 1;
             background-color: #fff500;
+          }
+          .container:hover .disabled::before {
+            background-color: #ededed;
           }
           .container:hover img {
             filter: grayscale(0%);
@@ -190,10 +199,7 @@ const Card = (props) => {
       {props.isMobile ? (
         content
       ) : (
-        <Link
-          href={props.href}
-          style={props.disabled ? { pointerEvents: "none" } : null}
-        >
+        <Link href={!props.disabled ? props.href : null}>
           <a className={props.disabled ? "disabled" : ""}>{content}</a>
         </Link>
       )}

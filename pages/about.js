@@ -8,6 +8,7 @@ import useWindowWidth from "../hooks/useWindowWidth";
 import { AboutHero, AboutText } from "../global/content";
 const About = () => {
   const windowWidth = useWindowWidth();
+
   return (
     <Main breadcrumbs={[{ label: "About", href: "/about" }]}>
       <div className="pageRoot">
@@ -37,7 +38,13 @@ const About = () => {
                     isMobile={windowWidth < MobileWidth}
                     content={content}
                     src={src}
-                    disabled={label == "Parkour & Gymnastics" ? true : false}
+                    disabled={
+                      label == "Parkour & Gymnastics" ||
+                      label == "Acting & Theatre" ||
+                      label == "Dance"
+                        ? true
+                        : false
+                    }
                   />
                 </div>
               );

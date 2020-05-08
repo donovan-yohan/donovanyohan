@@ -1,5 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { debounce } from "../global/global";
+import React, {
+  useState,
+  useEffect
+} from "react";
+import {
+  debounce
+} from "../global/global";
 
 // logic for finding current viewport size
 export default function useWindowWidth() {
