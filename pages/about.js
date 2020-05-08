@@ -2,14 +2,12 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Hero from "../components/hero";
 import Card from "../components/card";
-import { MobileWidth, debounce, hobbies } from "../global/global";
+import { MobileWidth, hobbies } from "../global/global";
 import Main from "../layouts/main";
 import useWindowWidth from "../hooks/useWindowWidth";
 import { AboutHero, AboutText } from "../global/content";
-
 const About = () => {
   const windowWidth = useWindowWidth();
-
   return (
     <Main breadcrumbs={[{ label: "About", href: "/about" }]}>
       <div className="pageRoot">
@@ -18,7 +16,7 @@ const About = () => {
             image={<img src="img/photos/about.jpg" className="heroImage" />}
             text={AboutHero}
             customImageStyle={{
-              margin: "0px"
+              margin: "0px",
             }}
           />
           <h1 className="headerText highlightStatic">
@@ -39,6 +37,7 @@ const About = () => {
                     isMobile={windowWidth < MobileWidth}
                     content={content}
                     src={src}
+                    disabled={label == "Parkour & Gymnastics" ? true : false}
                   />
                 </div>
               );
