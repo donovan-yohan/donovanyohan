@@ -97,11 +97,11 @@ export const hobbies = [{
     disabled: false
   }, {
     src: "img/photos/origami.jpg",
-    href: "",
+    href: "/about/origami",
     label: "Origami",
     date: "2010 - Present",
     content: "When teachers take away your toys in class, play with something they can't take away-- paper. What may have started as a joke is now one of my favourite hobbies and pass-times, and makes great gifts too!",
-    disabled: false
+    disabled: true
   },
   {
     src: "img/photos/parkour.png",

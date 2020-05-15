@@ -25,7 +25,8 @@ const Flowr = () => {
             }}
             content={`
               This website exists so that I can hopefully convince you, the reader, that I at least somewhat know what I'm doing when it comes to design and coding.
-              Crazy, right? Specifically, I set out to create a platform to showcase my high-level abilities as a developer and a UI/UX designer.
+              Crazy, right? Specifically, I set out to create a platform to showcase my high-level abilities as a developer and a UI/UX designer. (Psst! Be sure to check the site out on mobile too, to
+              get a peek of my mobile design experience too!)
             `}
             info={donovanyohanInfo}
           />
@@ -130,14 +131,14 @@ const Flowr = () => {
             </h2>
             <p className="body">
               It'd be easy enough to just open up Squarespace, type in
-              "Portfolio" and call it a day. While I'm sure some of them are
-              very well made, I was interested in discovering for myself what
-              made these templates <i>portfolio</i> templates. Also, now I can
-              put "React Developer" on my resume. Before building out the
-              layout, I mapped out the core actions the website would need to
-              perform, based on my earlier research. This started with 3:
-              Resume, View Work, and Contact, but grew to 4 when I wanted to
-              differentiate myself from others, with a real About Me section.
+              "Portfolio" and call it a day. While some of them are very well
+              made, I was interested in discovering for myself what made these
+              templates <i>portfolio</i> templates. Also, now I can put "React
+              Developer" on my resume. Before building out the layout, I mapped
+              out the core actions the website would need to perform, based on
+              my earlier research. This started with 3: Resume, View Work, and
+              Contact, but grew to 4 when I wanted to differentiate myself from
+              others, with a real About Me section.
             </p>
             <div className="articleWrapper">
               <div className="blurb">

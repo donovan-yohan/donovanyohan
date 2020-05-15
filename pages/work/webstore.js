@@ -11,13 +11,13 @@ const Webstore = () => {
     <Main
       breadcrumbs={[
         { label: "Work", href: "/#work" },
-        { label: "shop.donovanyohan.com", href: "/work/shopdonovanyohan" },
+        { label: "Webstore Project", href: "/work/webstore" },
       ]}
     >
       <div className="pageRoot">
         <div className="pageContent">
           <ArticleHero
-            title={"shop.donovanyohan.com"}
+            title={"Webstore Project"}
             image={""}
             customImageStyle={{
               margin: "0px",

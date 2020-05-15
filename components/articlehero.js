@@ -3,9 +3,12 @@ import React from "react";
 const ArticleHero = (props) => (
   <div>
     <div className="container">
-      <div className="hero" style={{ backgroundColor: props.bgColor }}>
-        <img src={props.image} />
-      </div>
+      {props.image && (
+        <div className="hero" style={{ backgroundColor: props.bgColor }}>
+          <img src={props.image} />
+        </div>
+      )}
+      {!props.image && <div className="spacer" />}
       <div className="content">
         <div className="wrapper">
           <h1>
@@ -15,19 +18,21 @@ const ArticleHero = (props) => (
           </h1>
           <div className="intro">
             <p className="body">{props.content}</p>
-            <ul>
-              {props.info.map(({ key, label, isLink, href }) =>
-                isLink ? (
-                  <li key={key}>
-                    <a href={href} target="_blank" className="highlight">
-                      {label}
-                    </a>
-                  </li>
-                ) : (
-                  <li key={key}>{label}</li>
-                )
-              )}
-            </ul>
+            {props.info && (
+              <ul>
+                {props.info.map(({ key, label, isLink, href }) =>
+                  isLink ? (
+                    <li key={key}>
+                      <a href={href} target="_blank" className="highlight">
+                        {label}
+                      </a>
+                    </li>
+                  ) : (
+                    <li key={key}>{label}</li>
+                  )
+                )}
+              </ul>
+            )}
           </div>
         </div>
       </div>
@@ -54,6 +59,11 @@ const ArticleHero = (props) => (
         height: 33vw;
         width: 100vw;
         overflow: hidden;
+      }
+
+      .spacer {
+        width: 100vw;
+        margin-top: 64px;
       }
       img {
         height: 100%;
@@ -106,6 +116,9 @@ const ArticleHero = (props) => (
       @media only screen and (max-width: 767px) {
         .hero {
           max-height: 50vw;
+        }
+        .spacer {
+          margin-top: 32px;
         }
         .intro {
           flex-direction: column-reverse;
