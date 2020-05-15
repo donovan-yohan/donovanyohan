@@ -40,8 +40,10 @@ const Manulife = () => {
               design system. As the sole UI/UX designer on the Manulife Mobile
               Group Retirement project, I worked with my project team to set
               priorities, gather requirements, validate technical feasability,
-              and deliver high-fidelity mockups. During my stay, some of the
-              challenges I had to tackle were:
+              and deliver high-fidelity mockups uniquely for iOS and Android, as
+              Manulife Mobile had a commitment to delivering native experience
+              to users of both mobile operating systems. During my stay, some of
+              the challenges I had to tackle were:
             </p>
             <ul className="body tableOfContents">
               <li>
@@ -64,10 +66,17 @@ const Manulife = () => {
                   Establishing patterns for remote usability testing
                 </a>
               </li>
+              <li>
+                <a href="#gallery" className="textLink">
+                  Sample works
+                </a>
+              </li>
             </ul>
           </Article>
 
-          <ArticleImage image={"picture collaborating"} />
+          <ArticleImage
+            image={"/img/photos/work/manulife-reinstating-ux.png"}
+          />
           <Article>
             <h2 id="reinstating-ux" className="anchor"></h2>
             <h2>
@@ -119,7 +128,9 @@ const Manulife = () => {
             </div>
           </Article>
 
-          <ArticleImage images={"image-of-design-brief"} />
+          <ArticleImage
+            image={"/img/photos/work/manulife-making-design-matter.png"}
+          />
           <Article>
             <h2 id="making-design-matter" className="anchor"></h2>
             <h2>
@@ -169,7 +180,7 @@ const Manulife = () => {
             </div>
           </Article>
 
-          <ArticleImage image={"sketch-file-with-variations"} />
+          <ArticleImage image={"/img/photos/work/manulife-finding-why.png"} />
           <Article>
             <h2 id="finding-why" className="anchor"></h2>
             <h2>
@@ -223,7 +234,9 @@ const Manulife = () => {
               </div>
             </div>
           </Article>
-          <ArticleImage image={"sketch-file-with-variations"} />
+          <ArticleImage
+            image={"/img/photos/work/manulife-usability-testing.png"}
+          />
           <Article>
             <h2 id="usability-testing" className="anchor"></h2>
             <h2>
@@ -288,6 +301,20 @@ const Manulife = () => {
             </div>
           </Article>
 
+          <Article>
+            <h2 id="gallery" className="anchor"></h2>
+            <h2>
+              <span className="highlightStatic">Sample works</span>
+            </h2>
+          </Article>
+          <ArticleImage
+            zoomable={true}
+            image={"/img/photos/work/manulife-example1.png"}
+          />
+          <ArticleImage
+            zoomable={true}
+            image={"/img/photos/work/manulife-example2.png"}
+          />
           <WorkLinks type={"projects"} label={"Manulife Mobile"} />
         </div>
         <style jsx>{`

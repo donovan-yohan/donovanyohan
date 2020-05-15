@@ -1,34 +1,45 @@
-import React from "react";
+import React, { useState } from "react";
 
-const ArticleImage = props => (
-  <div className="container">
-    <div className="image">
-      <img src={props.image} />
-    </div>
+const ArticleImage = (props) => {
+  const [isZoomed, setZoom] = useState(false);
 
-    <style jsx>{`
-      .container {
-        margin: 48px 0 0 0;
-        width: 100%;
-        height: 33vw;
-        max-height: calc(1024px / 3);
-      }
-      .image {
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background-color: lightblue;
-      }
+  return (
+    <div className="container">
+      <div className="image">
+        {!props.zoomable && <img src={props.image} />}
+        {props.zoomable && (
+          <a href={props.image} target="_blank">
+            <img src={props.image} />
+          </a>
+        )}
+      </div>
 
-      // Adjust for mobile
-
-      @media only screen and (max-width: 1024px) {
+      <style jsx>{`
         .container {
-          margin: 24px 0 0 0;
+          margin: 48px 0 0 0;
+          width: 100%;
+          max-height: calc(1024px * 0.42);
+          overflow: hidden;
         }
-      }
-    `}</style>
-  </div>
-);
+        .image {
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+        }
+        img {
+          width: 100%;
+        }
+
+        // Adjust for mobile
+
+        @media only screen and (max-width: 1024px) {
+          .container {
+            margin: 24px 0 0 0;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
 
 export default ArticleImage;

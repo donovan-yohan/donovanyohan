@@ -64,13 +64,13 @@ const Flowr = () => {
                 </a>
               </li>
               <li>
-                <a href="#beingWrong" className="textLink">
+                <a href="#being-wrong" className="textLink">
                   Being OK with being wrong
                 </a>
               </li>
             </ul>
           </Article>
-          <ArticleImage images={"src"} />
+          <ArticleImage image={"/img/photos/work/dy-problem.png"} />
           <Article>
             <h2 id="problem" className="anchor"></h2>
             <h2>
@@ -121,7 +121,7 @@ const Flowr = () => {
               </div>
             </div>
           </Article>
-          <ArticleImage images={"src"} />
+          <ArticleImage image={"/img/photos/work/dy-layout.png"} />
           <Article>
             <h2 id="layout" className="anchor"></h2>
             <h2>
@@ -168,7 +168,7 @@ const Flowr = () => {
               </div>
             </div>
           </Article>
-          <ArticleImage images={"src"} />
+          <ArticleImage image={"/img/photos/work/dy-content.png"} />
           <Article>
             <h2 id="content" className="anchor"></h2>
             <h2>
@@ -217,9 +217,9 @@ const Flowr = () => {
               </div>
             </div>
           </Article>
-          <ArticleImage images={"src"} />
+          <ArticleImage image={"/img/photos/work/dy-being-wrong.png"} />
           <Article>
-            <h2 id="beingWrong" className="anchor"></h2>
+            <h2 id="being-wrong" className="anchor"></h2>
             <h2>
               <span className="highlightStatic">Being OK with being wrong</span>
             </h2>
