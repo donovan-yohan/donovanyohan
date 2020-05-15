@@ -46,7 +46,7 @@ export const manulifeInfo = [{
   },
   {
     isLink: false,
-    label: "September - December 2019"
+    label: "September - May 2020"
   },
   {
     isLink: true,
@@ -68,16 +68,16 @@ export const donovanyohanInfo = [{
   },
   {
     isLink: false,
-    label: "September 2019 - Present"
+    label: "January 2020 - Present"
   },
   {
     isLink: true,
-    href: "donovanyohan.com",
+    href: "https://donovanyohan.com",
     label: "donovanyohan.com"
   },
   {
     isLink: true,
-    href: "github.com/donovan-yohan/donovanyohan",
+    href: "https://github.com/donovan-yohan/donovanyohan",
     label: "View on GitHub"
   }
 ].map(project => {

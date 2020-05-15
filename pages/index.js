@@ -23,12 +23,12 @@ const Index = () => {
             image={
               <VisibilitySensor
                 partialVisibility={true}
-                onChange={isVisible => setVisible(isVisible)}
+                onChange={(isVisible) => setVisible(isVisible)}
               >
                 <Lottie
                   options={{
                     animationData: logoAnimation,
-                    loop: false
+                    loop: false,
                   }}
                   isStopped={!heroVisible}
                 />
@@ -109,20 +109,23 @@ const Index = () => {
             </span>
           </span>
           <div className="cardWrapper">
-            {projects.map(({ key, href, label, date, content, src }) => {
-              return (
-                <div key={key}>
-                  <Card
-                    title={label}
-                    caption={date}
-                    href={href}
-                    isMobile={windowWidth < MobileWidth}
-                    content={content}
-                    src={src}
-                  />
-                </div>
-              );
-            })}
+            {projects.map(
+              ({ key, href, label, date, content, src, disabled }) => {
+                return (
+                  <div key={key}>
+                    <Card
+                      title={label}
+                      caption={date}
+                      href={href}
+                      isMobile={windowWidth < MobileWidth}
+                      content={content}
+                      src={src}
+                      disabled={disabled}
+                    />
+                  </div>
+                );
+              }
+            )}
           </div>
         </div>
 
@@ -148,9 +151,7 @@ const Index = () => {
             flex-wrap: wrap;
             justify-content: space-between;
 
-             {
-              /* margin-bottom: -250px; */
-            }
+            margin-bottom: -250px;
           }
           .cardWrapper div {
             width: 48%;

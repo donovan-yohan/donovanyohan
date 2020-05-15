@@ -11,17 +11,17 @@ const Flowr = () => {
     <Main
       breadcrumbs={[
         { label: "Work", href: "/#work" },
-        { label: "donovanyohan.com", href: "/work/donovanyohan" }
+        { label: "donovanyohan.com", href: "/work/donovanyohan" },
       ]}
     >
       <div className="pageRoot">
         <div className="pageContent">
           <ArticleHero
             title={"donovanyohan.com"}
-            image={""}
-            bgColor={"lightgray"}
+            image={"/img/photos/donovanyohanbanner.png"}
+            bgColor={"white"}
             customImageStyle={{
-              margin: "0px"
+              margin: "0px",
             }}
             content={`
               This website exists so that I can hopefully convince you, the reader, that I at least somewhat know what I'm doing when it comes to design and coding.

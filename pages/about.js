@@ -28,27 +28,23 @@ const About = () => {
           <span className="body heroBlurb">{AboutText}</span>
 
           <div className="cardWrapper">
-            {hobbies.map(({ key, href, label, date, content, src }) => {
-              return (
-                <div key={key}>
-                  <Card
-                    title={label}
-                    caption={date}
-                    href={href}
-                    isMobile={windowWidth < MobileWidth}
-                    content={content}
-                    src={src}
-                    disabled={
-                      label == "Parkour & Gymnastics" ||
-                      label == "Acting & Theatre" ||
-                      label == "Dance"
-                        ? true
-                        : false
-                    }
-                  />
-                </div>
-              );
-            })}
+            {hobbies.map(
+              ({ key, href, label, date, content, disabled, src }) => {
+                return (
+                  <div key={key}>
+                    <Card
+                      title={label}
+                      caption={date}
+                      href={href}
+                      isMobile={windowWidth < MobileWidth}
+                      content={content}
+                      src={src}
+                      disabled={disabled}
+                    />
+                  </div>
+                );
+              }
+            )}
           </div>
         </div>
 

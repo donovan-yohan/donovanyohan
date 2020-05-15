@@ -6,12 +6,12 @@ import WorkLinks from "../../components/worklinks";
 import Main from "../../layouts/main";
 import { manulifeInfo } from "../../global/content";
 
-const Flowr = () => {
+const Manulife = () => {
   return (
     <Main
       breadcrumbs={[
         { label: "Work", href: "/#work" },
-        { label: "Manulife Mobile", href: "/work/manulife" }
+        { label: "Manulife Mobile", href: "/work/manulife" },
       ]}
     >
       <div className="pageRoot">
@@ -21,7 +21,7 @@ const Flowr = () => {
             image={"/img/photos/manulifebanner.png"}
             bgColor={"#05AC5B"}
             customImageStyle={{
-              margin: "0px"
+              margin: "0px",
             }}
             content={`
               Manulife provides group retirement and benefits services to other businesses' employees. Manulife Mobile allows Manulife account holders to
@@ -59,10 +59,11 @@ const Flowr = () => {
                   Finding out why over just accepting asks
                 </a>
               </li>
-
-              {/* <li>
-                <a href="">Establishing patterns for usability testing</a>
-              </li> */}
+              <li>
+                <a href="#usability-testing" className="textLink">
+                  Establishing patterns for remote usability testing
+                </a>
+              </li>
             </ul>
           </Article>
 
@@ -222,6 +223,70 @@ const Flowr = () => {
               </div>
             </div>
           </Article>
+          <ArticleImage image={"sketch-file-with-variations"} />
+          <Article>
+            <h2 id="usability-testing" className="anchor"></h2>
+            <h2>
+              <span className="highlightStatic">
+                Establishing patterns for remote usability testing
+              </span>
+            </h2>
+            <p className="body">
+              After finishing my co-op term with the Manulife Mobile Group
+              Retirement squad, I returned for the following semester part-time.
+              My new project was working on usability testing from start to
+              finish, and documenting my process to share with other smaller
+              squads without dedicated UI/UX team members. Our goal was to
+              highlight the importance of getting feedback first-hand from
+              users, and empower other squads to start thinking about
+              user-centered design. The biggest challenge I faced in preparing
+              this, was the drastic change to a remote working environment
+              following the Covid-19 quarantine and figuring out what usability
+              feedback sessions looked like without the ability to hold
+              face-to-face sessions.
+            </p>
+            <div className="articleWrapper">
+              <div className="blurb">
+                <h3>
+                  Highlight the value without getting caught in the process
+                </h3>
+                <p className="body">
+                  One of the core design principles behind creating this guide,
+                  especially knowing my target audience wouldn't necessarily be
+                  familiar with UX, was highlighting the objective values
+                  associated with introducing user feedback directly into the
+                  design and development process. It was important to make
+                  usability feedback be something for teams to be excited and
+                  motivated to perform, rather than another checkbox to tick
+                  off. By identifying simple, no-cost solutions, like using
+                  Microsoft Teams screen-share on desktop and mobile, I was able
+                  to have meaningful sessions even in the remote environment,
+                  getting critical user feedback and providing an easy-to-follow
+                  way for others to do the same.
+                </p>
+              </div>
+              <div className="list">
+                <h3>Outcomes</h3>
+                <ul>
+                  <li className="body">
+                    Created usability testing guide for other teams to use
+                  </li>
+                  <li className="body">
+                    Made a framework for tying product/project goals to test
+                    criteria
+                  </li>
+                  <li className="body">
+                    Explored new ways to host remote usability testing without
+                    introducing additional costs
+                  </li>
+                  <li className="body">
+                    Provided insights to help give the design team direction for
+                    the future
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </Article>
 
           <WorkLinks type={"projects"} label={"Manulife Mobile"} />
         </div>
@@ -245,4 +310,4 @@ const Flowr = () => {
   );
 };
 
-export default Flowr;
+export default Manulife;

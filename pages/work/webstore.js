@@ -6,12 +6,12 @@ import WorkLinks from "../../components/worklinks";
 import Main from "../../layouts/main";
 import { shopdonovanyohanInfo } from "../../global/content";
 
-const Flowr = () => {
+const Webstore = () => {
   return (
     <Main
       breadcrumbs={[
         { label: "Work", href: "/#work" },
-        { label: "shop.donovanyohan.com", href: "/work/shopdonovanyohan" }
+        { label: "shop.donovanyohan.com", href: "/work/shopdonovanyohan" },
       ]}
     >
       <div className="pageRoot">
@@ -20,7 +20,7 @@ const Flowr = () => {
             title={"shop.donovanyohan.com"}
             image={""}
             customImageStyle={{
-              margin: "0px"
+              margin: "0px",
             }}
             content={`
               shop.donovanyohan.com is a platform for handling my custom apparel business. I sell designs I've made myself, as well as
@@ -122,4 +122,4 @@ const Flowr = () => {
   );
 };
 
-export default Flowr;
+export default Webstore;

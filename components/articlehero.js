@@ -1,7 +1,6 @@
 import React from "react";
-import Link from "next/link";
 
-const ArticleHero = props => (
+const ArticleHero = (props) => (
   <div>
     <div className="container">
       <div className="hero" style={{ backgroundColor: props.bgColor }}>
@@ -20,11 +19,9 @@ const ArticleHero = props => (
               {props.info.map(({ key, label, isLink, href }) =>
                 isLink ? (
                   <li key={key}>
-                    <Link href={href}>
-                      <a target="_blank" className="highlight">
-                        {label}
-                      </a>
-                    </Link>
+                    <a href={href} target="_blank" className="highlight">
+                      {label}
+                    </a>
                   </li>
                 ) : (
                   <li key={key}>{label}</li>
