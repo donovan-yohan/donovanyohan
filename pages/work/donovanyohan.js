@@ -176,44 +176,41 @@ const Flowr = () => {
               </span>
             </h2>
             <p className="body">
-              It'd be easy enough to just open up Squarespace, type in
-              "Portfolio" and call it a day. While I'm sure some of them are
-              very well made, I was interested in discovering for myself what
-              makes a portfolio really <i>work</i>. There are plenty of hired
-              designers out there today, so how did they do it? Like any good
-              problem, this called for a design brief. Through interviews with
-              recruiters, studying of existing platforms like Medium, and
-              research into other designers' portfolios, I was able to collect
-              enough data to give myself a problem statement, design principles,
-              and an idea of my real user.
+              One of the biggest challenges I face as a designer is being
+              confident in my documentation. Did I present all the information
+              needed to justify my decision? Am I putting too much irrelevant
+              detail, or too little? I've always felt more confident in sharing
+              my designs in person when I can discuss and converse about them,
+              but the reality is that any designer's work is only as good as
+              their ablity to communicate it, and that includes documentation,
+              and even this portfolio. So, as someone who's more confident in
+              their presentations than their writing, how can I go about
+              building a written portfolio?
             </p>
             <div className="articleWrapper">
               <div className="blurb">
-                <h3>Don't reinvent the wheel, but learn why it works</h3>
+                <h3>Keep it human and keep it brief</h3>
                 <p className="body">
-                  How might I showcase who I am and the work I am able to do? My
-                  user, a recruiting manager, is someone who goes through
-                  designers faster than I go through tea (that's really fast,
-                  see you're learning about who I am already), so I'll need to
-                  be succinct, but emotive. I think personality plays a big role
-                  in a successful designer, and so I want to make sure I can
-                  share that. Even though I'll be mostly showing work I've
-                  already done, what my user really cares about is what I can do
-                  for their company, and I'll need to be aware of this when
-                  choosing what to share.
+                  I came up with a system that allowed me to summarize my
+                  learnings in an easy to follow way. You may have noticed all
+                  of these points follow a pattern of problem & challenge, how I
+                  tackled it, and what happened as a result. On top of that, I
+                  try to write in a similar way to how I would talk about these
+                  projects. After all, this is my portfolio, who says it needs
+                  to be a formal essay!
                 </p>
               </div>
               <div className="list">
                 <h3>Outcomes</h3>
                 <ul>
                   <li className="body">
-                    Problem statement to validate solutions against
+                    Design heuristics for portfolio content
                   </li>
                   <li className="body">
-                    Design principles to inform wireframes
+                    Cohesion across different portfolio entries
                   </li>
                   <li className="body">
-                    User journey to give design strcuture
+                    Confidence to write in a more 'spoken' way
                   </li>
                 </ul>
               </div>
@@ -226,44 +223,37 @@ const Flowr = () => {
               <span className="highlightStatic">Being OK with being wrong</span>
             </h2>
             <p className="body">
-              It'd be easy enough to just open up Squarespace, type in
-              "Portfolio" and call it a day. While I'm sure some of them are
-              very well made, I was interested in discovering for myself what
-              makes a portfolio really <i>work</i>. There are plenty of hired
-              designers out there today, so how did they do it? Like any good
-              problem, this called for a design brief. Through interviews with
-              recruiters, studying of existing platforms like Medium, and
-              research into other designers' portfolios, I was able to collect
-              enough data to give myself a problem statement, design principles,
-              and an idea of my real user.
+              One of the toughest concepts for me as a designer and artist is
+              "good-enough is good-enough." The truth is, I can't have all the
+              answers, and there are so many tools and ways to get feedback once
+              you actually present the design to other people. Projects without
+              deadlines are paralyzing, and lead to fruitless journey towards
+              perfection, and part of what makes good designers so great in my
+              opinion is their ability to work within deadlines and constraints.
             </p>
             <div className="articleWrapper">
               <div className="blurb">
-                <h3>Don't reinvent the wheel, but learn why it works</h3>
+                <h3>Validate with others and keep moving forward</h3>
                 <p className="body">
-                  How might I showcase who I am and the work I am able to do? My
-                  user, a recruiting manager, is someone who goes through
-                  designers faster than I go through tea (that's really fast,
-                  see you're learning about who I am already), so I'll need to
-                  be succinct, but emotive. I think personality plays a big role
-                  in a successful designer, and so I want to make sure I can
-                  share that. Even though I'll be mostly showing work I've
-                  already done, what my user really cares about is what I can do
-                  for their company, and I'll need to be aware of this when
-                  choosing what to share.
+                  Crazy that putting this online for others to see doesn't
+                  actually mean that I can't just change it in the future! It
+                  sounds simple when writing it out, but this was a big mental
+                  challenge for me to overcome, and I'm proud of how far my
+                  portfolio has come since opening up to friends, mentors, and
+                  just general feedback from anyone willing to give it. (That
+                  means you too, I'd love to hear what you think!)
                 </p>
               </div>
               <div className="list">
                 <h3>Outcomes</h3>
                 <ul>
+                  <li className="body">Personal growth as a designer</li>
                   <li className="body">
-                    Problem statement to validate solutions against
+                    Iterative design that is continually improved upon
                   </li>
                   <li className="body">
-                    Design principles to inform wireframes
-                  </li>
-                  <li className="body">
-                    User journey to give design strcuture
+                    Better designs achieved faster by getting real feedback
+                    sooner
                   </li>
                 </ul>
               </div>

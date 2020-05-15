@@ -65,7 +65,7 @@ export const projects = [{
     label: "Webstore Project",
     date: "Full Stack • Side Project • Winter 2020",
     content: "A school project where I designed the UI and UX for a responsive webstore from the ground up through research. I also helped develop the React front-end.",
-    disabled: false
+    disabled: true
   },
   {
     src: "img/photos/cooperators.jpg",

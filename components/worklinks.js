@@ -2,11 +2,11 @@ import React from "react";
 import Link from "next/link";
 import { projects, hobbies } from "../global/global";
 
-const WorkLinks = props => {
+const WorkLinks = (props) => {
   let type = projects;
   props.type === "hobbies" ? (type = hobbies) : (type = projects);
 
-  let index = type.findIndex(p => p.label === props.label);
+  let index = type.findIndex((p) => p.label === props.label);
 
   return (
     <div className="worklinks">
@@ -22,7 +22,7 @@ const WorkLinks = props => {
               <a className="highlight">&lt; Previous</a>
             </Link>
           )}
-          {index < type.length - 1 && (
+          {index < type.length - 1 && !type[index + 1].disabled && (
             <Link href={type[index + 1].href}>
               <a className="highlight">Next &gt;</a>
             </Link>
