@@ -13,7 +13,7 @@ const BottomNav = () => {
         <div className="navLinks">
           <li>
             <a target="_blank" href="/DonovanYohanResume.pdf">
-              <Icon icon="" size="small" />
+              <Icon icon="" size="small" gray={true} link={true} />
               <span>Resume</span>
             </a>
           </li>
@@ -21,7 +21,7 @@ const BottomNav = () => {
             <li key={key}>
               <Link href={href}>
                 <a>
-                  <Icon icon={icon} size="small" />
+                  <Icon icon={icon} size="small" gray={true} link={true} />
                   <span>{label}</span>
                 </a>
               </Link>
@@ -29,7 +29,7 @@ const BottomNav = () => {
           ))}
           <li>
             <a href={contactRoute}>
-              <Icon icon="" size="small" />
+              <Icon icon="" size="small" gray={true} link={true} />
               <span>Contact</span>
             </a>
           </li>
@@ -44,7 +44,7 @@ const BottomNav = () => {
           justify-content: center;
           align-items: center;
           width: 100%;
-          background-color: white;
+          background-color: var(--background);
           position: fixed;
           min-height: 56px;
           height: 56px;
@@ -68,14 +68,14 @@ const BottomNav = () => {
           display: flex;
           flex-direction: column;
           align-items: center;
-          color: black;
-          opacity: 0.54;
+          color: var(--gray);
           text-decoration: none;
           transition: 0.1s;
           position: relative;
           padding: 0 4px;
         }
         a span {
+          color: var(--gray);
           line-height: 19px;
           font-size: 12px;
           letter-spacing: 0.1em;
@@ -83,21 +83,21 @@ const BottomNav = () => {
           padding-top: 4px;
           opacity: 1;
         }
-        a:active {
-          opacity: 1;
-        }
+
         a::before {
           align-self: flex-start;
           content: "";
           transition: 0.1s ease-out;
           z-index: -1;
+          left: 0;
           position: absolute;
-          width: 0%;
+          width: 100%;
           height: 100%;
+          opacity: 0;
         }
         a:active::before {
-          width: 100%;
-          background-color: #fff500;
+          opacity: 1;
+          background-color: var(--highlight);
         }
       `}</style>
     </div>

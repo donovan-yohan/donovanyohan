@@ -5,7 +5,7 @@ const Hero = (props) => (
     <div className="container">
       <div className="wrapper">
         <div className="logo" style={props.customImageStyle}>
-          <div style={props.dark ? { filter: "invert(97%)" } : {}}>
+          <div style={props.dark ? { filter: "invert(95%)" } : {}}>
             {props.image}
           </div>
         </div>

@@ -3,8 +3,11 @@ import React from "react";
 const Icon = (props) => (
   <div className={"icon"}>
     <span
-      className={`${props.link ? "link" : ""} ${props.size} `}
+      className={`${props.gray ? "gray" : ""} ${props.link ? "link" : ""} ${
+        props.size
+      } `}
       src={props.src}
+      onClick={props.onClick}
     >
       {props.icon}
     </span>
@@ -31,6 +34,11 @@ const Icon = (props) => (
         color: var(--main);
         font-weight: normal;
       }
+
+      .gray {
+        color: var(--gray);
+      }
+
       .icon {
         color: var(--main);
       }

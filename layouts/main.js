@@ -76,7 +76,13 @@ const Main = (props) => {
           font-display: block;
         }
 
-        :root {
+        html {
+          ${Object.entries(cssRootVars)
+            .map(([key, val]) => `--${key}: ${val}`)
+            .join(";")}
+        }
+
+        html[data-theme="dark"] {
           ${Object.entries(cssDarkVars)
             .map(([key, val]) => `--${key}: ${val}`)
             .join(";")}
@@ -86,6 +92,7 @@ const Main = (props) => {
           background-color: var(--background);
           color: var(--main);
         }
+
         a {
           color: var(--main);
           text-decoration: none;
@@ -218,6 +225,32 @@ const Main = (props) => {
             var(--background) 60%
           );
           transition: 0.2s ease;
+        }
+
+        #transition {
+          background-color: var(--background);
+          position: fixed;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 99999;
+          animation: fade 1.5s linear;
+        }
+
+        @keyframes fade {
+          0% {
+            opacity: 0;
+          }
+          33% {
+            opacity: 1;
+          }
+          66% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0;
+          }
         }
 
         @media only screen and (max-width: 1024px) {

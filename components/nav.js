@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState, useContext } from "react";
 import Link from "next/link";
 import Icon from "../components/icon";
 import links from "../global/global";
 import { useRouter } from "next/router";
+import Context from "../components/context";
 
 export default function Nav(props) {
   const router = useRouter();
   const contactRoute = router.pathname + "#footer";
+  const { theme, toggleTheme } = useContext(Context);
 
   return (
     <nav>
@@ -65,6 +67,15 @@ export default function Nav(props) {
           </li>
         </div>
       </ul>
+      <div className="themeToggle">
+        <Icon
+          size="small"
+          link={true}
+          gray={true}
+          icon={theme === "dark" ? "" : ""}
+          onClick={toggleTheme}
+        />
+      </div>
 
       <style jsx>{`
         :global(body) {
@@ -138,6 +149,15 @@ export default function Nav(props) {
           font-weight: normal;
         }
 
+        .themeToggle {
+          height: 100%;
+          position: absolute;
+          right: 16px;
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+        }
+
         // Adjust for mobile
 
         @media only screen and (max-width: 1024px) {
@@ -161,7 +181,7 @@ export default function Nav(props) {
             padding: 0 12px;
           }
           .highlight {
-            background: white !important;
+            background: var(--background) !important;
           }
           .path {
             text-decoration: underline;
