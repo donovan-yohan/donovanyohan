@@ -11,9 +11,13 @@ export default class MyApp extends App {
     // Define which query we will check
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     // If matches, set data-theme to dark, else to light
-    if (mediaQuery.matches)
+    if (mediaQuery.matches) {
       document.documentElement.setAttribute("data-theme", "dark");
-    else document.documentElement.setAttribute("data-theme", "light");
+      this.setState({ theme: "dark" });
+    } else {
+      document.documentElement.setAttribute("data-theme", "light");
+      this.setState({ theme: "light" });
+    }
   };
 
   toggleTheme = () => {
