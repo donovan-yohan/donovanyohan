@@ -34,19 +34,19 @@ export default class MyApp extends App {
 
     window.setTimeout(function () {
       document.documentElement.setAttribute("data-theme", newTheme);
-    }, 500);
+    }, 320);
     window.setTimeout(
       function () {
         this.setState({ theme: newTheme });
       }.bind(this),
-      500
+      320
     );
 
     window.setTimeout(function () {
       document
         .getElementById("transition")
         .parentNode.removeChild(document.getElementById("transition"));
-    }, 1500);
+    }, 1000);
   };
   render() {
     const { Component, pageProps } = this.props;

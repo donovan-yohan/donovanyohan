@@ -235,17 +235,17 @@ const Main = (props) => {
           width: 100%;
           height: 100%;
           z-index: 99999;
-          animation: fade 1.5s linear;
+          animation: fade 1s ease-in-out;
         }
 
         @keyframes fade {
           0% {
             opacity: 0;
           }
-          33% {
+          35% {
             opacity: 1;
           }
-          66% {
+          65% {
             opacity: 1;
           }
           100% {
