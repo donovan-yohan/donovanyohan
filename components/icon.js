@@ -1,71 +1,48 @@
-import React from 'react'
+import React from "react";
 
-const Icon = props => (
-  <div className={props.link ? 'link' : ''} style={{ opacity: props.black ? '0.54' : '1' }}>
-    <img className={props.size} src={props.src} />
+const Icon = (props) => (
+  <div className={"icon"}>
+    <span
+      className={`${props.link ? "link" : ""} ${props.size} `}
+      src={props.src}
+    >
+      {props.icon}
+    </span>
 
     <style jsx>{`
-    .small {
-      width: 24px;
-      height: 24px;
-    }
-    .medium {
-      width: 28px;
-      height: 28px;
-    }
-    .large {
-      width: 32px;
-      height: 32px;
-    }
-    div {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: 0.2s;
-    }
-
-    .link:hover {
-      opacity: 1 !important;
-    }
-
-    @media only screen and (min-width: 1024px) {
-      .link::before {
-        content: "";
-        transition: .3s ease-out;
-        z-index: -1;
-        position: absolute;
-        left: 0;
-        width: 0%;
-        height: 100%;
+      .small {
+        font-size: 28px;
       }
-      .link:hover::before {
-        width:100%;
-        background-color: #FFF500
+      .medium {
+        font-size: 32px;
       }
-    }
-
-    @media only screen and (min-width: 1025px) {
-      .link::before {
-        content: "";
-        transition: .3s ease-out;
-        z-index: -1;
-        position: absolute;
-        left: 0;
-        width: 0%;
-        height: 100%;
+      .large {
+        font-size: 36px;
       }
-      .link:hover::before {
-        width:100%;
-        background-color: #FFF500
-      }
-    }
-    @media only screen and (max-width: 1024px) {
       div {
-        opacity: 1 !important;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: 0.2s;
       }
-    }
+      span {
+        font-family: "icomoon";
+        color: var(--main);
+        font-weight: normal;
+      }
+      .icon {
+        color: var(--main);
+      }
 
+      .link {
+        transition: 0.35s cubic-bezier(0.51, 0.07, 0.09, 0.95);
+      }
+      @media only screen and (min-width: 1025px) {
+        .link:hover {
+          color: var(--highlight);
+        }
+      }
     `}</style>
   </div>
 );

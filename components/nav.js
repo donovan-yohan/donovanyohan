@@ -15,7 +15,7 @@ export default function Nav(props) {
           <li className="smallLogo">
             <Link href="/">
               <a>
-                <Icon src="/img/icons/dy.svg" size="small" link={true} />
+                <Icon size="small" link={true} icon={""} />
               </a>
             </Link>
           </li>
@@ -77,7 +77,7 @@ export default function Nav(props) {
           display: flex;
           justify-content: center;
           width: 100%;
-          background-color: white;
+          background-color: var(--background);
           position: fixed;
           min-height: 62px;
           height: 62px;
@@ -100,9 +100,9 @@ export default function Nav(props) {
           padding: 6px 0px 6px 50px;
         }
         a {
+          color: var(--gray);
           line-height: 19px;
           letter-spacing: 0.1em;
-          color: rgba(0, 0, 0, 0.54);
           text-decoration: none;
           font-size: 16px;
           text-transform: uppercase;
@@ -118,14 +118,15 @@ export default function Nav(props) {
           line-height: 26px;
           font-size: 22px;
           text-transform: none;
-          color: black;
+          color: var(--main);
+          opacity: 1;
           letter-spacing: 0;
         }
         .title {
           padding-left: 16px;
         }
         a:hover {
-          color: black;
+          color: var(--main);
         }
         .divider {
           padding: 0 16px;

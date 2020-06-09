@@ -20,18 +20,21 @@ const Index = () => {
       <div className="pageRoot">
         <div className="pageContent">
           <Hero
+            dark={true}
             image={
               <VisibilitySensor
                 partialVisibility={true}
                 onChange={(isVisible) => setVisible(isVisible)}
               >
-                <Lottie
-                  options={{
-                    animationData: logoAnimation,
-                    loop: false,
-                  }}
-                  isStopped={!heroVisible}
-                />
+                <div>
+                  <Lottie
+                    options={{
+                      animationData: logoAnimation,
+                      loop: false,
+                    }}
+                    isStopped={!heroVisible}
+                  />
+                </div>
               </VisibilitySensor>
             }
             text={

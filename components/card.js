@@ -14,7 +14,7 @@ const Card = (props) => {
             <Link href={!props.disabled ? props.href : null}>
               <a className="mobileButton">
                 <span>Learn More</span>
-                <Icon src="../img/icons/chevron.svg" size="small" />
+                <Icon icon="" size="small" />
               </a>
             </Link>
           )}
@@ -42,7 +42,7 @@ const Card = (props) => {
           line-height: 24px;
           border-style: solid;
           border-width: 0.5px;
-          border-color: rgba(0, 0, 0, 0.25);
+          border-color: var(--border);
           border-radius: 20px;
           transition: 0.35s;
           overflow: hidden;
@@ -81,7 +81,7 @@ const Card = (props) => {
           padding: 4px 12px 4px 16px;
           justify-content: space-between;
           align-items: center;
-          background: #fff500;
+          background: var(--highlight);
           z-index: 5;
         }
         a {
@@ -118,7 +118,7 @@ const Card = (props) => {
           font-size: 16px;
         }
         .subheader {
-          opacity: 0.7;
+          color: var(--gray);
           padding-bottom: 8px;
         }
 
@@ -128,11 +128,11 @@ const Card = (props) => {
         }
 
         .disabledBar {
-          background-color: #ededed;
+          background-color: var(--disabled);
         }
         @media only screen and (min-width: 1025px) {
           .container:hover {
-            border-color: rgba(0, 0, 0, 0.87);
+            border-color: var(--main);
           }
           .title::before {
             bottom: 2px;
@@ -146,10 +146,10 @@ const Card = (props) => {
           }
           .container:hover .title::before {
             opacity: 1;
-            background-color: #fff500;
+            background-color: var(--highlight);
           }
           .container:hover .disabled::before {
-            background-color: #ededed;
+            background-color: var(--disabled);
           }
           .container:hover img {
             filter: grayscale(0%);
@@ -172,7 +172,7 @@ const Card = (props) => {
           }
           .container {
             border-radius: 8px;
-            border-color: rgba(0, 0, 0, 0.4);
+            border-color: var(--gray);
           }
           .title {
             font-size: 16px;

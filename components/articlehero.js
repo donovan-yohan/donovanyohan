@@ -97,11 +97,11 @@ const ArticleHero = (props) => (
       }
       ul li {
         list-style-type: none;
-        color: rgba(0, 0, 0, 0.54);
+        color: var(--gray);
       }
       a {
         text-decoration: none;
-        color: rgba(0, 0, 0, 1);
+        color: var(--main);
       }
 
       // adjust for tablet and smaller

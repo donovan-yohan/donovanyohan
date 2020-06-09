@@ -1,11 +1,13 @@
 import React from "react";
 
-const Hero = props => (
+const Hero = (props) => (
   <div>
     <div className="container">
       <div className="wrapper">
         <div className="logo" style={props.customImageStyle}>
-          {props.image}
+          <div style={props.dark ? { filter: "invert(97%)" } : {}}>
+            {props.image}
+          </div>
         </div>
         <div className="text">{props.text}</div>
       </div>

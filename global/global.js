@@ -1,10 +1,12 @@
 const links = [{
     href: "/#work",
-    label: "Work"
+    label: "Work",
+    icon: ""
   },
   {
     href: "/about",
-    label: "About"
+    label: "About",
+    icon: ""
   }
 ].map(link => {
   link.key = `nav-link-${link.href}-${link.label}`;
@@ -16,27 +18,27 @@ export default links;
 export const socialLinks = [{
     href: "https://www.instagram.com/donovan.yohan/",
     label: "Instagram",
-    icon: "/img/icons/instagram.svg"
+    icon: ""
   },
   {
     href: "https://www.linkedin.com/in/donovan-yohan/",
     label: "LinkedIn",
-    icon: "/img/icons/linkedin.svg"
+    icon: ""
   },
   {
     href: "https://github.com/donovan-yohan",
     label: "Github",
-    icon: "/img/icons/github.svg"
+    icon: ""
   },
   {
     href: "https://www.behance.net/donovanyohan",
     label: "Behance Graphic Design",
-    icon: "/img/icons/behance.svg"
+    icon: ""
   },
   {
     href: "https://www.youtube.com/donovanyohan",
     label: "YouTube Motion Graphics",
-    icon: "/img/icons/youtube.svg"
+    icon: ""
   }
 ].map(socialLink => {
   socialLink.key = `nav-link-${socialLink.href}-${socialLink.label}`;

@@ -7,7 +7,25 @@ import { MobileWidth } from "../global/global";
 import useSmoothScroll from "../hooks/useSmoothScroll";
 import useWindowWidth from "../hooks/useWindowWidth";
 
-const Main = props => {
+const cssRootVars = {
+  background: "#ffffff",
+  main: "#000000",
+  highlight: "#fff500",
+  gray: "#757575",
+  disabled: "#ededed",
+  border: "#757575",
+};
+
+const cssDarkVars = {
+  background: "#000000",
+  main: "#ffffff",
+  highlight: "#E6007E",
+  gray: "#bcbcbc",
+  disabled: "#505050",
+  border: "#505050",
+};
+
+const Main = (props) => {
   // logic for finding current viewport size to determine if mobile layout is needed
   const windowWidth = useWindowWidth();
   useSmoothScroll();
@@ -45,9 +63,32 @@ const Main = props => {
       <Footer />
       {windowWidth && windowWidth <= MobileWidth && <BottomNav />}
       <style jsx global>{`
+        @font-face {
+          font-family: "icomoon";
+          src: url("/img/icons/icomoon.eot?c46m5p");
+          src: url("/img/icons/icomoon.eot?c46m5p#iefix")
+              format("embedded-opentype"),
+            url("/img/icons/icomoon.ttf?c46m5p") format("truetype"),
+            url("/img/icons/icomoon.woff?c46m5p") format("woff"),
+            url("/img/icons/icomoon.svg?c46m5p#icomoon") format("svg");
+          font-weight: normal;
+          font-style: normal;
+          font-display: block;
+        }
+
+        :root {
+          ${Object.entries(cssDarkVars)
+            .map(([key, val]) => `--${key}: ${val}`)
+            .join(";")}
+        }
+
+        body {
+          background-color: var(--background);
+          color: var(--main);
+        }
         a {
+          color: var(--main);
           text-decoration: none;
-          color: black;
         }
         h2 {
           font-size: 28px;
@@ -125,7 +166,6 @@ const Main = props => {
         .highlight,
         .textLink {
           text-decoration: none;
-          color: black;
           font-weight: bold;
           position: relative;
         }
@@ -140,7 +180,7 @@ const Main = props => {
           bottom: 2px;
           width: 0%;
           height: 60%;
-          background-color: #fff500;
+          background-color: var(--highlight);
         }
         .highlight:hover::before {
           width: 100%;
@@ -150,10 +190,10 @@ const Main = props => {
         .highlightStatic {
           background: linear-gradient(
             0deg,
-            #ffffff 10%,
-            #fff500 10%,
-            #fff500 60%,
-            #ffffff 60%
+            var(--background) 10%,
+            var(--highlight) 10%,
+            var(--highlight) 60%,
+            var(--background) 60%
           );
         }
 
@@ -172,10 +212,10 @@ const Main = props => {
           opacity: 0;
           background: linear-gradient(
             0deg,
-            #ffffff 10%,
-            #fff500 10%,
-            #fff500 60%,
-            #ffffff 60%
+            var(--background) 10%,
+            var(--highlight) 10%,
+            var(--highlight) 60%,
+            var(--background) 60%
           );
           transition: 0.2s ease;
         }
@@ -184,10 +224,10 @@ const Main = props => {
           .highlight {
             background: linear-gradient(
               0deg,
-              #ffffff 10%,
-              #fff500 10%,
-              #fff500 60%,
-              #ffffff 60%
+              var(--background) 10%,
+              var(--highlight) 10%,
+              var(--highlight) 60%,
+              var(--background) 60%
             );
           }
 
@@ -198,10 +238,10 @@ const Main = props => {
           .textLink {
             background: linear-gradient(
               0deg,
-              #ffffff 10%,
-              #fff500 10%,
-              #fff500 60%,
-              #ffffff 60%
+              var(--background) 10%,
+              var(--highlight) 10%,
+              var(--highlight) 60%,
+              var(--background) 60%
             );
             opacity: 1;
           }
@@ -215,6 +255,12 @@ const Main = props => {
           h2 {
             font-size: 24px;
           }
+        }
+
+         {
+          /* DARK MODE */
+        }
+        @media (prefers-color-scheme: dark) {
         }
       `}</style>
     </div>

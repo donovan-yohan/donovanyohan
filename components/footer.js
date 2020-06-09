@@ -22,7 +22,7 @@ const BottomNav = () => (
         <div>
           <div className="linkGroup">
             <p className="body">Contact me:</p>
-            <a href="mailto:donovanyohan@gmail.com" className="email">
+            <a href="mailto:donovanyohan@gmail.com" className="highlight">
               donovanyohan@gmail.com
             </a>
           </div>
@@ -32,7 +32,7 @@ const BottomNav = () => (
               {socialLinks.map(({ key, href, icon, label }) => (
                 <li key={key}>
                   <a href={href} target="_blank">
-                    <Icon src={icon} size="large" link={true} black={true} />
+                    <Icon icon={icon} size="large" link={true} dark={true} />
                   </a>
                 </li>
               ))}
@@ -70,28 +70,6 @@ const BottomNav = () => (
         margin: 0 0 8px 0;
       }
 
-      .email {
-        color: black;
-        text-decoration: none;
-        position: relative;
-        font-weight: bold;
-      }
-
-      .email::before {
-        align-self: flex-start;
-        content: "";
-        z-index: -1;
-        transition: 0.3s;
-        position: absolute;
-        bottom: 2px;
-        width: 0%;
-        height: 60%;
-      }
-      .email:hover::before {
-        width: 100%;
-        background-color: #fff500;
-      }
-
       ul {
         display: flex;
         padding: 0;
@@ -123,10 +101,6 @@ const BottomNav = () => (
         }
         .message {
           margin-bottom: 32px;
-        }
-        .email::before {
-          width: 100%;
-          background-color: #fff500;
         }
       }
     `}</style>
