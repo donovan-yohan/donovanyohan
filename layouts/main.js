@@ -22,7 +22,7 @@ const cssRootVars = {
 const cssDarkVars = {
   background: "#000000",
   main: "#ffffff",
-  highlight: "#E6007E",
+  highlight: "#DC267F",
   gray: "#bcbcbc",
   disabled: "#505050",
   border: "#505050",
@@ -38,6 +38,29 @@ const Main = (props) => {
 
   return (
     <div>
+      <Head>
+        <title>Donovan Yohan - UI/UX Designer & Web Developer</title>
+        <meta
+          name="description"
+          content="Hi, I'm Donovan Yohan! I'm a UI & UX designer and a front end developer."
+        />
+        <meta name="theme-color" content="#FFFFFF" />
+        <meta
+          key="og:title"
+          property="og:title"
+          content="Donovan Yohan - UI/UX Designer & Web Developer"
+        />
+        <meta
+          key="og:description"
+          property="og:description"
+          content="Hi, I'm Donovan Yohan! I'm a UI & UX designer and a front end developer."
+        />
+        <meta
+          key="og:image"
+          property="og:image"
+          content="https://donovanyohan.donovanyohan.now.sh/ogimage.jpg"
+        />
+      </Head>
       <Nav
         breadcrumbs={props.breadcrumbs}
         isPhone={windowWidth && windowWidth <= 425}
