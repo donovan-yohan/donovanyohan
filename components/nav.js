@@ -4,11 +4,15 @@ import Icon from "../components/icon";
 import links from "../global/global";
 import { useRouter } from "next/router";
 import Context from "../components/context";
+import Lottie from "lottie-react-web";
+import themeAnimation from "../public/img/animations/darkmode.json";
 
 export default function Nav(props) {
   const router = useRouter();
   const contactRoute = router.pathname + "#footer";
   const { theme, toggleTheme } = useContext(Context);
+  const themeMultiplier = theme == "light" ? 1 : -1;
+  const [hover, setHover] = useState(false);
 
   return (
     <nav>
@@ -67,13 +71,24 @@ export default function Nav(props) {
           </li>
         </div>
       </ul>
-      <div className="themeToggle">
-        <Icon
-          size="small"
-          link={true}
-          gray={true}
-          icon={theme === "dark" ? "" : ""}
-          onClick={toggleTheme}
+      <div
+        className="themeToggle"
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        onClick={toggleTheme}
+      >
+        <Lottie
+          options={{
+            animationData: themeAnimation,
+            autoplay: false,
+            loop: false,
+          }}
+          height={30}
+          width={30}
+          direction={hover ? 1 * themeMultiplier : -1 * themeMultiplier}
+          style={{
+            filter: `${theme == "dark" ? "invert(97%)" : ""}`,
+          }}
         />
       </div>
 
@@ -156,6 +171,13 @@ export default function Nav(props) {
           display: flex;
           align-items: center;
           cursor: pointer;
+          opacity: var(--grayOpacity);
+          transition: all 0.8s cubic-bezier(0.51, 0.07, 0.09, 0.95);
+        }
+
+        .themeToggle:hover {
+          opacity: 1;
+          filter: var(--hoverFilter);
         }
 
         // Adjust for mobile

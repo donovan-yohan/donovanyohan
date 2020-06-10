@@ -10,10 +10,13 @@ import useWindowWidth from "../hooks/useWindowWidth";
 const cssRootVars = {
   background: "#ffffff",
   main: "#000000",
-  highlight: "#fff500",
+  highlight: "#FFEF00",
   gray: "#757575",
   disabled: "#ededed",
   border: "#757575",
+  hoverFilter:
+    "invert(94%) sepia(7%) saturate(6933%) hue-rotate(-2deg) brightness(101%) contrast(110%);",
+  grayOpacity: "0.54",
 };
 
 const cssDarkVars = {
@@ -23,6 +26,9 @@ const cssDarkVars = {
   gray: "#bcbcbc",
   disabled: "#505050",
   border: "#505050",
+  hoverFilter:
+    "brightness(0) saturate(100%) invert(15%) sepia(94%) saturate(7163%) hue-rotate(-40deg) brightness(91%) contrast(102%);",
+  grayOpacity: "0.7",
 };
 
 const Main = (props) => {
