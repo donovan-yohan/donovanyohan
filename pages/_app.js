@@ -4,19 +4,15 @@ import Context from "../components/context";
 
 export default class MyApp extends App {
   state = {
-    theme: undefined,
+    theme: "light",
   };
 
   componentDidMount = () => {
     // Define which query we will check
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    // If matches, set data-theme to dark, else to light
+    // If matches, set data-theme to dark
     if (mediaQuery.matches) {
-      document.documentElement.setAttribute("data-theme", "dark");
-      this.setState({ theme: "dark" });
-    } else {
-      document.documentElement.setAttribute("data-theme", "light");
-      this.setState({ theme: "light" });
+      this.toggleTheme();
     }
   };
 
@@ -48,12 +44,16 @@ export default class MyApp extends App {
         .parentNode.removeChild(document.getElementById("transition"));
     }, 1000);
   };
+
   render() {
     const { Component, pageProps } = this.props;
 
     return (
       <Context.Provider
-        value={{ theme: this.state.theme, toggleTheme: this.toggleTheme }}
+        value={{
+          theme: this.state.theme,
+          toggleTheme: this.toggleTheme,
+        }}
       >
         <Component {...pageProps} />
       </Context.Provider>
