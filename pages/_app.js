@@ -54,7 +54,27 @@ export default class MyApp extends App {
           toggleTheme: this.toggleTheme,
         }}
       >
+        <div
+          className="fouc"
+          style={{
+            position: "fixed",
+            width: "100%",
+            height: "100%",
+            top: "0",
+            left: "0",
+            backgroundColor: `${
+              this.state.theme == "light" ? "white" : "black"
+            }`,
+          }}
+        />
         <Component {...pageProps} />
+        <style jsx global>
+          {`
+            .fouc {
+              display: none;
+            }
+          `}
+        </style>
       </Context.Provider>
     );
   }
@@ -64,10 +84,4 @@ export default class MyApp extends App {
   // perform automatic static optimization, causing every page in your app to
   // be server-side rendered.
   //
-  // MyApp.getInitialProps = async (appContext) => {
-  //   // calls page's `getInitialProps` and fills `appProps.pageProps`
-  //   const appProps = await App.getInitialProps(appContext);
-  //
-  //   return { ...appProps }
-  // }
 }

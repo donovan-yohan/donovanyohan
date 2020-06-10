@@ -32,29 +32,6 @@ const Main = (props) => {
 
   return (
     <div>
-      <Head>
-        <title>Donovan Yohan - UI/UX Designer & Web Developer</title>
-        <meta
-          name="description"
-          content="Hi, I'm Donovan Yohan! I'm a UI & UX designer and a front end developer."
-        />
-        <meta name="theme-color" content="#FFFFFF" />
-        <meta
-          key="og:title"
-          property="og:title"
-          content="Donovan Yohan - UI/UX Designer & Web Developer"
-        />
-        <meta
-          key="og:description"
-          property="og:description"
-          content="Hi, I'm Donovan Yohan! I'm a UI & UX designer and a front end developer."
-        />
-        <meta
-          key="og:image"
-          property="og:image"
-          content="https://donovanyohan.donovanyohan.now.sh/ogimage.jpg"
-        />
-      </Head>
       <Nav
         breadcrumbs={props.breadcrumbs}
         isPhone={windowWidth && windowWidth <= 425}
@@ -288,12 +265,6 @@ const Main = (props) => {
           h2 {
             font-size: 24px;
           }
-        }
-
-         {
-          /* DARK MODE */
-        }
-        @media (prefers-color-scheme: dark) {
         }
       `}</style>
     </div>
