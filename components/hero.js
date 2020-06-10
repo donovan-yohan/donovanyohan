@@ -15,7 +15,7 @@ const Hero = (props) => (
     <style jsx>{`
       :global(body) {
         margin: 0;
-        font-family: "Open Sans";
+        font-family: "Open Sans", sans-serif;
       }
       .container {
         width: 100%;
@@ -32,7 +32,7 @@ const Hero = (props) => (
       .text {
         display: inline-block;
         margin-left: 32px;
-        font-family: "Open Sans";
+        font-family: "Open Sans", sans-serif;
         font-weight: 300;
         font-size: 47px;
         line-height: 1.3em;

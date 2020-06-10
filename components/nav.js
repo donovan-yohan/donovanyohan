@@ -101,7 +101,7 @@ export default function Nav(props) {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          font-family: "Roboto";
+          font-family: "Roboto", sans-serif;
           font-weight: bold;
         }
         li {

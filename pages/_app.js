@@ -22,8 +22,7 @@ export default class MyApp extends App {
 
     let transition = document.createElement("div");
     transition.setAttribute("id", "transition");
-    let color;
-    newTheme === "dark" ? (color = "black") : (color = "white");
+    let color = newTheme === "dark" ? "black" : "white";
     transition.style.backgroundColor = color;
 
     document.getElementsByTagName("body")[0].appendChild(transition);
