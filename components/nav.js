@@ -175,9 +175,11 @@ export default function Nav(props) {
           transition: all 0.8s cubic-bezier(0.51, 0.07, 0.09, 0.95);
         }
 
-        .themeToggle:hover {
-          opacity: 1;
-          filter: var(--hoverFilter);
+        @media only screen and (min-width: 1025px) {
+          .themeToggle:hover {
+            opacity: 1;
+            filter: var(--hoverFilter);
+          }
         }
 
         // Adjust for mobile

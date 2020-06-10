@@ -22,12 +22,12 @@ const cssRootVars = {
 const cssDarkVars = {
   background: "#000000",
   main: "#ffffff",
-  highlight: "#DC267F",
+  highlight: "#5a3ec8",
   gray: "#bcbcbc",
   disabled: "#505050",
   border: "#505050",
   hoverFilter:
-    "brightness(0) saturate(100%) invert(15%) sepia(94%) saturate(7163%) hue-rotate(-40deg) brightness(91%) contrast(102%);",
+    "brightness(0) saturate(100%) invert(35%) sepia(77%) saturate(2171%) hue-rotate(-100deg) brightness(96%) contrast(95%);",
   grayOpacity: "0.7",
 };
 
