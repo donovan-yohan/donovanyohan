@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import Hero from "../components/hero";
 import Card from "../components/card";
 import Lottie from "lottie-react-web";
@@ -9,12 +9,12 @@ import Main from "../layouts/main";
 import useSmoothScroll from "../hooks/useSmoothScroll";
 import useWindowWidth from "../hooks/useWindowWidth";
 import VisibilitySensor from "react-visibility-sensor";
-import Context from "../components/context";
+import useDarkMode from "use-dark-mode";
 
 const Index = () => {
-  const { theme } = useContext(Context);
   const [heroVisible, setVisible] = useState(true);
   const windowWidth = useWindowWidth();
+  const darkMode = useDarkMode();
   useSmoothScroll();
 
   return (
@@ -22,7 +22,7 @@ const Index = () => {
       <div className="pageRoot">
         <div className="pageContent">
           <Hero
-            dark={theme == "dark"}
+            dark={darkMode.value}
             image={
               <VisibilitySensor
                 partialVisibility={true}

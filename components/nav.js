@@ -3,12 +3,12 @@ import Link from "next/link";
 import Icon from "../components/icon";
 import links from "../global/global";
 import { useRouter } from "next/router";
-import Context from "../components/context";
+import useDarkMode from "use-dark-mode";
 
 export default function Nav(props) {
   const router = useRouter();
   const contactRoute = router.pathname + "#footer";
-  const { theme, toggleTheme } = useContext(Context);
+  const darkMode = useDarkMode();
 
   return (
     <nav>
@@ -72,8 +72,8 @@ export default function Nav(props) {
           size="small"
           link={true}
           gray={true}
-          icon={theme === "dark" ? "" : ""}
-          onClick={toggleTheme}
+          icon={darkMode.value ? "" : ""}
+          onClick={darkMode.toggle}
         />
       </div>
 

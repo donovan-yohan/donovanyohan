@@ -76,13 +76,13 @@ const Main = (props) => {
           font-display: block;
         }
 
-        html {
+        body.light-mode {
           ${Object.entries(cssRootVars)
             .map(([key, val]) => `--${key}: ${val}`)
             .join(";")}
         }
 
-        html[data-theme="dark"] {
+        body.dark-mode {
           ${Object.entries(cssDarkVars)
             .map(([key, val]) => `--${key}: ${val}`)
             .join(";")}
