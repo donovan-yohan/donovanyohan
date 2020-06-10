@@ -12,7 +12,8 @@ export default class MyApp extends App {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     // If matches, set data-theme to dark
     if (mediaQuery.matches) {
-      this.toggleTheme();
+      document.documentElement.setAttribute("data-theme", "dark");
+      this.setState({ theme: "dark" });
     }
   };
 
