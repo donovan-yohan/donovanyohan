@@ -55,6 +55,7 @@ export const projects = [{
   },
   {
     src: "img/photos/donovanyohancom.jpg",
+    darksrc: "img/photos/donovanyohancom-dark.png",
     href: "/work/donovanyohan",
     label: "donovanyohan.com",
     date: "Full Stack • Side Project • Fall 2019",
@@ -84,6 +85,15 @@ export const projects = [{
     date: "UI/UX Concept • Side Project • Spring 2019",
     content: "Part passion project, part I-had-to-do-this-because-my-GPA-would-suffer-if-I-didn't, flowr is a mobile time management tool that focuses on students, and their pain points with existing digital calendars.",
     disabled: true
+  },
+  {
+    src: "img/photos/graphicdesign.jpg",
+    darksrc: "img/photos/graphicdesign-dark.jpg",
+    href: "https://www.behance.net/donovanyohan",
+    label: "Freelance Graphic Design",
+    date: "Various Mediums • 2014 - Present",
+    content: "See some examples of various visual designs I've worked on for various companies, clients, clubs, and projects, including logo designs, promotional material, and presentations.",
+    disabled: false
   }
 ].map(project => {
   project.key = `nav-link-${project.href}-${project.label}`;

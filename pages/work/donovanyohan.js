@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useContext } from "react";
 import ArticleHero from "../../components/articlehero";
 import ArticleImage from "../../components/articleimage";
 import Article from "../../components/article";
 import WorkLinks from "../../components/worklinks";
 import Main from "../../layouts/main";
 import { donovanyohanInfo } from "../../global/content";
+import Context from "../../components/context";
 
-const Flowr = () => {
+const Donovanyohan = () => {
+  const { theme } = useContext(Context);
   return (
     <Main
       breadcrumbs={[
@@ -18,8 +20,12 @@ const Flowr = () => {
         <div className="pageContent">
           <ArticleHero
             title={"donovanyohan.com"}
-            image={"/img/photos/donovanyohanbanner.png"}
-            bgColor={"white"}
+            image={
+              theme == "light"
+                ? "/img/photos/donovanyohanbanner.png"
+                : "/img/photos/donovanyohanbanner-dark.png"
+            }
+            bgColor={theme == "light" ? "white" : "black"}
             customImageStyle={{
               margin: "0px",
             }}
@@ -280,4 +286,4 @@ const Flowr = () => {
   );
 };
 
-export default Flowr;
+export default Donovanyohan;

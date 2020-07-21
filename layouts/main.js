@@ -17,6 +17,7 @@ const cssRootVars = {
   hoverFilter:
     "invert(94%) sepia(7%) saturate(6933%) hue-rotate(-2deg) brightness(101%) contrast(110%);",
   grayOpacity: "0.54",
+  colorInvert: "invert(0%)",
 };
 
 const cssDarkVars = {
@@ -29,6 +30,7 @@ const cssDarkVars = {
   hoverFilter:
     "brightness(0) saturate(100%) invert(35%) sepia(77%) saturate(2171%) hue-rotate(-100deg) brightness(96%) contrast(95%);",
   grayOpacity: "0.7",
+  colorInvert: "brightness(0) saturate(100%) invert(100%)",
 };
 
 const Main = (props) => {

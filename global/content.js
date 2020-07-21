@@ -134,4 +134,23 @@ export const cooperatorsInfo = [{
   return project;
 });
 
+export const graphicInfo = [{
+    isLink: false,
+    label: "Visual Designer"
+  },
+  {
+    isLink: false,
+    label: "Freelance"
+  },
+  {
+    isLink: false,
+    label: "2014 - Present"
+  }
+].map(project => {
+  project.key = `work-link-${project.isLink}-${project.label}`;
+  return project;
+});
+
+
+
 export default test;

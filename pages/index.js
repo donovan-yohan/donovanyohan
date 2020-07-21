@@ -115,7 +115,7 @@ const Index = () => {
           </span>
           <div className="cardWrapper">
             {projects.map(
-              ({ key, href, label, date, content, src, disabled }) => {
+              ({ key, href, label, date, content, src, darksrc, disabled }) => {
                 return (
                   <div key={key}>
                     <Card
@@ -124,7 +124,7 @@ const Index = () => {
                       href={href}
                       isMobile={windowWidth < MobileWidth}
                       content={content}
-                      src={src}
+                      src={darksrc && theme == "dark" ? darksrc : src}
                       disabled={disabled}
                     />
                   </div>
@@ -156,7 +156,9 @@ const Index = () => {
             flex-wrap: wrap;
             justify-content: space-between;
 
-            margin-bottom: -250px;
+             {
+              /* margin-bottom: -250px; */
+            }
           }
           .cardWrapper div {
             width: 48%;
