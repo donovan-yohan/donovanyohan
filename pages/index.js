@@ -69,11 +69,7 @@ const Index = () => {
               robust, and well-researched digital solutions. In addition, I'm an
               experienced{" "}
             </span>
-            <a
-              className="textLink"
-              href="https://www.behance.net/donovanyohan"
-              target="_blank"
-            >
+            <a className="textLink" href="/work/graphicdesign">
               graphic designer
             </a>
             <span> and </span>
