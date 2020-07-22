@@ -135,22 +135,182 @@ export const cooperatorsInfo = [{
 });
 
 export const logos = [{
-    label: "Labrie",
-    src: "/img/photos/work/graphicdesign/logos/labrie.png",
-    darkmode: true
+    label: "DJ Labrie",
+    src: {
+      light: "djlabrie.png",
+      dark: "djlabrie-dark.png"
+    },
+    invertForDarkMode: false,
+    width: 60
   },
   {
-    label: "DJ Labrie",
-    src: "/img/photos/work/graphicdesign/logos/djlabrie.png",
-    darksrc: "/img/photos/work/graphicdesign/logos/djlabrie-dark.png"
+    label: "Labrie",
+    src: {
+      light: "labrie.png",
+    },
+    invertForDarkMode: true,
+    width: 35
   },
   {
     label: "Shakespearience",
-    src: "/img/photos/work/graphicdesign/logos/shakespearience.png",
-  }
+    src: {
+      light: "shakespearience.png",
+    },
+    invertForDarkMode: false,
+    width: 75
+  },
+  {
+    label: "Science Olympics",
+    src: {
+      light: "scienceolympics.png",
+    },
+    invertForDarkMode: true,
+    width: 20
+  },
+  {
+    label: "Just Parched",
+    src: {
+      light: "justparched.png",
+    },
+    invertForDarkMode: true,
+    width: 35
+  },
+  {
+    label: "Lucid Nexus",
+    src: {
+      light: "lucidnexus.png",
+      dark: "lucidnexus-dark.png",
+    },
+    invertForDarkMode: false,
+    width: 60
+  },
+  {
+    label: "Aces Abroad English",
+    src: {
+      light: "aceseng.png",
+    },
+    invertForDarkMode: false,
+    width: 22
+  },
+  {
+    label: "Aces Abroad English Solid",
+    src: {
+      light: "acesengsolid.png",
+    },
+    invertForDarkMode: true,
+    width: 22
+  },
+  {
+    label: "Aces Abroad Chinese",
+    src: {
+      light: "aces.png",
+    },
+    invertForDarkMode: false,
+    width: 22
+  },
+  {
+    label: "Aces Abroad Chinese Solid",
+    src: {
+      light: "acessolid.png",
+    },
+    invertForDarkMode: true,
+    width: 22
+  },
+  {
+    label: "Golden Hacks",
+    src: {
+      light: "goldenhacks.png",
+      dark: "goldenhacks-dark.png"
+    },
+    invertForDarkMode: false,
+    width: 35
+  },
+  {
+    label: "Golden Hacks Banner",
+    src: {
+      light: "goldenhacksbanner.png",
+      dark: "goldenhacksbanner-dark.png"
+    },
+    invertForDarkMode: false,
+    width: 60
+  },
 ].map(logo => {
-  logo.key = `logo-${logo.label}-${logo.src}`;
+  logo.key = `logo-${logo.label}-${logo.src.light}`;
   return logo;
+});
+
+export const promotions = [{
+  label: "Competitive Programming",
+  src: {
+    light: "competitiveprogramming.jpg",
+  },
+  invertForDarkMode: false,
+  width: 55
+},
+{
+  label: "PHI Discord",
+  src: {
+    light: "phidiscord.png",
+  },
+  invertForDarkMode: false,
+  width: 40
+},
+{
+  label: "Golden Speakers President",
+  src: {
+    light: "goldenspeakers.jpg",
+  },
+  invertForDarkMode: false,
+  width: 50
+},
+{
+  label: "ACE Ping Pong Poster",
+  src: {
+    light: "ace.png",
+  },
+  invertForDarkMode: false,
+  width: 45
+},
+].map(promotion => {
+promotion.key = `promotion-${promotion.label}-${promotion.src.light}`;
+return promotion;
+});
+
+export const apparel = [{
+  label: "Balance",
+  src: {
+    light: "balance.png",
+  },
+  invertForDarkMode: false,
+  width: 50
+},
+{
+  label: "Panther",
+  src: {
+    light: "panther.png",
+  },
+  invertForDarkMode: false,
+  width: 50
+},
+{
+  label: "Panther Press",
+  src: {
+    light: "press.png",
+  },
+  invertForDarkMode: false,
+  width: 50
+},
+{
+  label: "Improv",
+  src: {
+    light: "improv.png",
+  },
+  invertForDarkMode: false,
+  width: 50
+},
+].map(shirt => {
+shirt.key = `shirt-${shirt.label}-${shirt.src.light}`;
+return shirt;
 });
 
 export const graphicInfo = [{

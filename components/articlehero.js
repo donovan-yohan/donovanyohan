@@ -13,7 +13,7 @@ const ArticleHero = (props) => (
         <div className="wrapper">
           <h1>
             <span className="headerText highlightStatic">
-              <a href="#">{props.title}</a>
+              {props.title}
             </span>
           </h1>
           <div className="intro">

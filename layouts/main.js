@@ -139,7 +139,6 @@ const Main = (props) => {
           line-height: 1.5;
           margin-bottom: 64px;
           margin-top: 0;
-          cursor: pointer;
         }
 
         .articleWrapper {
