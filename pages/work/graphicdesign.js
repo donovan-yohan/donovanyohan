@@ -45,7 +45,12 @@ const Graphicdesign = () => {
               </li>
               <li>
                 <a href="#promotional-design" className="textLink">
-                  Promotional design
+                  Promotion design
+                </a>
+              </li>
+              <li>
+                <a href="#apparel-design" className="textLink">
+                  Apparel design
                 </a>
               </li>
             </ul>
@@ -120,9 +125,29 @@ const Graphicdesign = () => {
                 />
               </div>
             </div>
+            <div className="imageWrapper">
+              <div className="image">
+                <img
+                  src={
+                    theme == "dark"
+                      ? "/img/photos/work/graphicdesign/logos/goldenhacks-dark.png"
+                      : "/img/photos/work/graphicdesign/logos/goldenhacks.png"
+                  }
+                />
+              </div>
+              <div className="image">
+                <img
+                  src={
+                    theme == "dark"
+                      ? "/img/photos/work/graphicdesign/logos/goldenhacksbanner-dark.png"
+                      : "/img/photos/work/graphicdesign/logos/goldenhacksbanner.png"
+                  }
+                />
+              </div>
+            </div>
           </Article>
           <Article>
-            <h2 id="promotional-design" className="anchor"></h2>
+            <h2 id="promotion-design" className="anchor"></h2>
             <h2>
               <span className="highlightStatic">Promotional design</span>
             </h2>
@@ -131,15 +156,37 @@ const Graphicdesign = () => {
                 <img src="/img/photos/work/graphicdesign/socialmedia/competitiveprogramming.jpg" />
               </div>
               <div className="image">
-                <img src="/img/photos/work/graphicdesign/socialmedia/codingandcram.png" />
+                <img src="/img/photos/work/graphicdesign/socialmedia/phidiscord.png" />
+              </div>
+            </div>
+            <div className="imageWrapper">
+              <div className="image col-50">
+                <img src="/img/photos/work/graphicdesign/socialmedia/goldenspeakers.jpg" />
+              </div>
+              <div className="image">
+                <img src="/img/photos/work/graphicdesign/socialmedia/ace.png" />
+              </div>
+            </div>
+          </Article>
+          <Article>
+            <h2 id="apparel-design" className="anchor"></h2>
+            <h2>
+              <span className="highlightStatic">Apparel design</span>
+            </h2>
+            <div className="imageWrapper">
+              <div className="image">
+                <img src="/img/photos/work/graphicdesign/apparel/balance.png" />
+              </div>
+              <div className="image">
+                <img src="/img/photos/work/graphicdesign/apparel/panther.png" />
               </div>
             </div>
             <div className="imageWrapper">
               <div className="image">
-                <img src="/img/photos/work/graphicdesign/socialmedia/goldenspeakers.jpg" />
+                <img src="/img/photos/work/graphicdesign/apparel/press.png" />
               </div>
               <div className="image">
-                <img src="/img/photos/work/graphicdesign/socialmedia/phidiscord.png" />
+                <img src="/img/photos/work/graphicdesign/apparel/improv.png" />
               </div>
             </div>
           </Article>
@@ -176,6 +223,10 @@ const Graphicdesign = () => {
             min-width: 33%;
             max-width: 33%;
           }
+          .col-50 {
+            min-width: 50%;
+            max-width: 50%;
+          }
           .col-4 {
             min-width: 22%;
             max-width: 22%;
@@ -197,7 +248,8 @@ const Graphicdesign = () => {
               flex-wrap: wrap;
             }
             .col-25,
-            .col-33 {
+            .col-33,
+            .col-50 {
               min-width: 100%;
               max-width: 100%;
             }
