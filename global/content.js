@@ -134,6 +134,25 @@ export const cooperatorsInfo = [{
   return project;
 });
 
+export const logos = [{
+    label: "Labrie",
+    src: "/img/photos/work/graphicdesign/logos/labrie.png",
+    darkmode: true
+  },
+  {
+    label: "DJ Labrie",
+    src: "/img/photos/work/graphicdesign/logos/djlabrie.png",
+    darksrc: "/img/photos/work/graphicdesign/logos/djlabrie-dark.png"
+  },
+  {
+    label: "Shakespearience",
+    src: "/img/photos/work/graphicdesign/logos/shakespearience.png",
+  }
+].map(logo => {
+  logo.key = `logo-${logo.label}-${logo.src}`;
+  return logo;
+});
+
 export const graphicInfo = [{
     isLink: false,
     label: "Visual Designer"
@@ -150,7 +169,5 @@ export const graphicInfo = [{
   project.key = `work-link-${project.isLink}-${project.label}`;
   return project;
 });
-
-
 
 export default test;

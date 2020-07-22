@@ -43,6 +43,11 @@ const Graphicdesign = () => {
                   Logo design
                 </a>
               </li>
+              <li>
+                <a href="#promotional-design" className="textLink">
+                  Promotional design
+                </a>
+              </li>
             </ul>
           </Article>
           <Article>
@@ -71,11 +76,70 @@ const Graphicdesign = () => {
               <div className="image">
                 <img src="/img/photos/work/graphicdesign/logos/shakespearience.png" />
               </div>
-              <div className="image" style={{ maxWidth: "25%" }}>
+              <div className="image col-25">
                 <img
                   src="/img/photos/work/graphicdesign/logos/scienceolympics.png"
                   className="needsDarkMode"
                 />
+              </div>
+            </div>
+            <div className="imageWrapper">
+              <div className="image col-33">
+                <img
+                  src="/img/photos/work/graphicdesign/logos/justparched.png"
+                  className="needsDarkMode"
+                />
+              </div>
+              <div className="image">
+                <img
+                  src={
+                    theme == "dark"
+                      ? "/img/photos/work/graphicdesign/logos/lucidnexus-dark.png"
+                      : "/img/photos/work/graphicdesign/logos/lucidnexus.png"
+                  }
+                />
+              </div>
+            </div>
+            <div className="imageWrapper">
+              <div className="image col-4">
+                <img src="/img/photos/work/graphicdesign/logos/aceseng.png" />
+              </div>
+              <div className="image col-4">
+                <img
+                  src="/img/photos/work/graphicdesign/logos/acesengsolid.png"
+                  className="needsDarkMode"
+                />
+              </div>
+              <div className="image col-4">
+                <img src="/img/photos/work/graphicdesign/logos/aces.png" />
+              </div>
+              <div className="image col-4">
+                <img
+                  src="/img/photos/work/graphicdesign/logos/acessolid.png"
+                  className="needsDarkMode"
+                />
+              </div>
+            </div>
+          </Article>
+          <Article>
+            <h2 id="promotional-design" className="anchor"></h2>
+            <h2>
+              <span className="highlightStatic">Promotional design</span>
+            </h2>
+            <div className="imageWrapper">
+              <div className="image">
+                <img src="/img/photos/work/graphicdesign/socialmedia/competitiveprogramming.jpg" />
+              </div>
+              <div className="image">
+                <img src="/img/photos/work/graphicdesign/socialmedia/codingandcram.png" />
+              </div>
+            </div>
+            <div className="imageWrapper">
+              <div className="image">
+                <img src="/img/photos/work/graphicdesign/socialmedia/goldenspeakers.jpg" />
+              </div>
+              <div className="image">
+                <img src="/img/photos/work/graphicdesign/socialmedia/phidiscord.png" />
               </div>
             </div>
           </Article>
@@ -87,6 +151,7 @@ const Graphicdesign = () => {
           }
           .imageWrapper {
             display: flex;
+            justify-content: space-between;
           }
           .image {
             flex-grow: 1;
@@ -103,6 +168,18 @@ const Graphicdesign = () => {
           .needsDarkMode {
             filter: var(--colorInvert);
           }
+          .col-25 {
+            min-width: 25%;
+            max-width: 25%;
+          }
+          .col-33 {
+            min-width: 33%;
+            max-width: 33%;
+          }
+          .col-4 {
+            min-width: 22%;
+            max-width: 22%;
+          }
           h2 {
             margin: 16px 0 0 0;
           }
@@ -111,6 +188,23 @@ const Graphicdesign = () => {
           }
           p {
             margin: 8px 0 0 0;
+          }
+          @media only screen and (max-width: 1024px) {
+            .image {
+              padding: 4px 0;
+            }
+            .imageWrapper {
+              flex-wrap: wrap;
+            }
+            .col-25,
+            .col-33 {
+              min-width: 100%;
+              max-width: 100%;
+            }
+            .col-4 {
+              min-width: 48%;
+              max-width: 48%;
+            }
           }
         `}</style>
       </div>

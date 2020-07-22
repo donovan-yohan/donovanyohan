@@ -89,7 +89,7 @@ export const projects = [{
   {
     src: "img/photos/graphicdesign.jpg",
     darksrc: "img/photos/graphicdesign-dark.jpg",
-    href: "https://www.behance.net/donovanyohan",
+    href: "/work/graphicdesign",
     label: "Freelance Graphic Design",
     date: "Various Mediums • 2014 - Present",
     content: "See some examples of various visual designs I've worked on for various companies, clients, clubs, and projects, including logo designs, promotional material, and presentations.",
