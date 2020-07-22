@@ -259,6 +259,7 @@ const Main = (props) => {
             opacity: 0;
           }
         }
+        
 
         @media only screen and (max-width: 1024px) {
           .highlight {

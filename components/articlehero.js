@@ -59,6 +59,8 @@ const ArticleHero = (props) => (
         height: 33vw;
         width: 100vw;
         overflow: hidden;
+        opacity: 0;
+        animation: fade-in 0.1s linear 0.1s 1 forwards;
       }
 
       .spacer {
@@ -103,6 +105,14 @@ const ArticleHero = (props) => (
         text-decoration: none;
         color: var(--main);
       }
+      @keyframes fade-in {
+          0% {
+            opacity: 0;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
 
       // adjust for tablet and smaller
       @media only screen and (max-width: 1024px) {
