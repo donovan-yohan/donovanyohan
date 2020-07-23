@@ -44,7 +44,7 @@ const Graphicdesign = () => {
                 </a>
               </li>
               <li>
-                <a href="#promotional-design" className="textLink">
+                <a href="#promotion-design" className="textLink">
                   Promotion design
                 </a>
               </li>
@@ -61,34 +61,46 @@ const Graphicdesign = () => {
               <span className="highlightStatic">Logo design</span>
             </h2>
             <div className="imageWrapper">
-              {logos.map(
-                ({ key, src, label, width, invertForDarkMode, }) => {
-                  return (
-                    <div key={key} className="image" style={{flexBasis: width + "%"}}>
-                      <img
-                        alt={label}
-                        src={"/img/photos/work/graphicdesign/logos/" + (src.dark && theme == "dark" ? src.dark : src.light)}
-                        className={invertForDarkMode ? "needsDarkMode" : ""}
-                      />
-                    </div>
-                  );
-                }
-              )}
+              {logos.map(({ key, src, label, width, invertForDarkMode }) => {
+                return (
+                  <div
+                    key={key}
+                    className="image"
+                    style={{ flexBasis: width + "%" }}
+                  >
+                    <img
+                      alt={label}
+                      src={
+                        "/img/photos/work/graphicdesign/logos/" +
+                        (src.dark && theme == "dark" ? src.dark : src.light)
+                      }
+                      className={invertForDarkMode ? "needsDarkMode" : ""}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </Article>
           <Article>
             <h2 id="promotion-design" className="anchor"></h2>
             <h2>
-              <span className="highlightStatic">Promotional design</span>
+              <span className="highlightStatic">Promotion design</span>
             </h2>
             <div className="imageWrapper">
               {promotions.map(
-                ({ key, src, label, width, invertForDarkMode, }) => {
+                ({ key, src, label, width, invertForDarkMode }) => {
                   return (
-                    <div key={key} className="image" style={{flexBasis: width + "%"}}>
+                    <div
+                      key={key}
+                      className="image"
+                      style={{ flexBasis: width + "%" }}
+                    >
                       <img
                         alt={label}
-                        src={"/img/photos/work/graphicdesign/socialmedia/" + src.light}
+                        src={
+                          "/img/photos/work/graphicdesign/socialmedia/" +
+                          src.light
+                        }
                         className={invertForDarkMode ? "needsDarkMode" : ""}
                       />
                     </div>
@@ -103,19 +115,23 @@ const Graphicdesign = () => {
               <span className="highlightStatic">Apparel design</span>
             </h2>
             <div className="imageWrapper">
-              {apparel.map(
-                ({ key, src, label, width, invertForDarkMode, }) => {
-                  return (
-                    <div key={key} className="image" style={{flexBasis: width + "%"}}>
-                      <img
-                        alt={label}
-                        src={"/img/photos/work/graphicdesign/apparel/" + src.light}
-                        className={invertForDarkMode ? "needsDarkMode" : ""}
-                      />
-                    </div>
-                  );
-                }
-              )}
+              {apparel.map(({ key, src, label, width, invertForDarkMode }) => {
+                return (
+                  <div
+                    key={key}
+                    className="image"
+                    style={{ flexBasis: width + "%" }}
+                  >
+                    <img
+                      alt={label}
+                      src={
+                        "/img/photos/work/graphicdesign/apparel/" + src.light
+                      }
+                      className={invertForDarkMode ? "needsDarkMode" : ""}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </Article>
         </div>
@@ -132,7 +148,6 @@ const Graphicdesign = () => {
           .image {
             margin: auto 0;
             padding: 8px 0;
-
           }
           .image img {
             max-height: 100%;
