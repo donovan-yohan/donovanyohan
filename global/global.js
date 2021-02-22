@@ -45,7 +45,16 @@ export const socialLinks = [{
   return socialLink;
 });
 
-export const projects = [{
+export const projects = [
+  {
+    src: "img/photos/liquidgradient.jpg",
+    href: "http://callcentreguys.com",
+    label: "Three.js Liquid Gradient",
+    date: "Front-end • Contract • Fall 2020",
+    content: "I learned GLSL and Three.js to build a unique and eye-catching liquid gradient for the Call Centre Guys, focusing on performance and compatability across devices.",
+    disabled: false
+  },
+  {
     src: "img/photos/manulife.jpg",
     href: "/work/manulife",
     label: "Manulife Mobile",
