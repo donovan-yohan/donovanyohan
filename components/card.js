@@ -1,35 +1,76 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Icon from "../components/icon";
 import Link from "next/link";
 
+import { animated, useSpring } from "react-spring";
+
+const PARALLAX_SPRING_FACTOR = 0.1;
+const PARALLAX_TRANSLATION_FACTOR = 0.25;
+const PARALLAX_OFFSET = 25;
+
 const Card = (props) => {
-  const content = (
-    <div className="root">
-      <div className="container">
-        <div className="cardWrapper">
-          <div className="imageWrapper">
-            <img src={props.src} />
+  const content = (transform) => (
+    <div className='root'>
+      <div className='container'>
+        <div className='cardWrapper'>
+          <div className='imageWrapper'>
+            <div className='imageContainer'>
+              {props.src.map((layer, i) => (
+                <div
+                  className='layerContainer'
+                  style={{ zIndex: `${i * 10}` }}
+                  key={props.key + layer}
+                >
+                  <animated.div
+                    style={{
+                      transform: transform
+                        ? transform.xyzs.to((x, y, z, s) => {
+                            let p = PARALLAX_OFFSET + z * i;
+                            let xt =
+                              Math.sin(-y * PARALLAX_SPRING_FACTOR) *
+                              p *
+                              PARALLAX_TRANSLATION_FACTOR;
+                            let yt =
+                              Math.sin(x * PARALLAX_SPRING_FACTOR) *
+                              p *
+                              PARALLAX_TRANSLATION_FACTOR;
+                            return `perspective(750PX) translate3d(${xt}px, ${yt}px, ${p}px)`;
+                          })
+                        : "",
+                    }}
+                  >
+                    {layer && <img className='cardImage' src={layer} />}
+                  </animated.div>
+                </div>
+              ))}
+            </div>
           </div>
-          {!props.disabled && (
-            <Link href={!props.disabled ? props.href : null}>
-              <a className="mobileButton">
+          {!props.disabled && !props.isExternal && (
+            <Link href={props.href}>
+              <span className='mobileButton'>
                 <span>Learn More</span>
-                <Icon icon="" size="small" />
-              </a>
+                <Icon icon='' size='small' />
+              </span>
             </Link>
           )}
-          {props.disabled && (
-            <a className="mobileButton disabledBar">
-              <span>Contact me to learn more</span>
+          {!props.disabled && props.isExternal && (
+            <a href={props.href} target='_blank' className='mobileButton'>
+              <span>Learn More</span>
+              <Icon icon='' size='small' />
             </a>
           )}
+          {props.disabled && (
+            <span className='mobileButton disabledBar'>
+              <span>Contact me to learn more</span>
+            </span>
+          )}
         </div>
-        <div className="textWrapper">
+        <div className='textWrapper'>
           <div className={!props.disabled ? "title" : "title disabled"}>
             {props.title}
           </div>
-          <div className="subheader">{props.caption}</div>
-          <div className="content">
+          <div className='subheader'>{props.caption}</div>
+          <div className='content'>
             <span>{props.content}</span>
           </div>
         </div>
@@ -61,16 +102,24 @@ const Card = (props) => {
           width: 100%;
           height: 100%;
           overflow: hidden;
+          background-color: ${props.bgColor};
+          filter: grayscale(100%);
+          transition: 0.35s ease;
+        }
+        .imageContainer {
+          position: relative;
+        }
+        .layerContainer {
+          position: absolute;
+          top: 0;
+          left: 0;
         }
         img {
-          display: flex;
-          justify-content: center;
-          align-items: center;
           width: 100%;
           height: 100%;
+          top: 0;
           object-fit: cover;
           overflow: hidden;
-          filter: grayscale(100%);
           transition: 0.35s ease;
         }
         .mobileButton {
@@ -151,7 +200,7 @@ const Card = (props) => {
           .container:hover .disabled::before {
             background-color: var(--disabled);
           }
-          .container:hover img {
+          .container:hover .imageWrapper {
             filter: grayscale(0%);
           }
           .mobileButton {
@@ -167,7 +216,7 @@ const Card = (props) => {
         // mobile scaling
 
         @media only screen and (max-width: 1024px) {
-          img {
+          .imageWrapper {
             filter: none;
           }
           .container {
@@ -194,26 +243,89 @@ const Card = (props) => {
     </div>
   );
 
-  return (
-    <div>
-      {props.isMobile ? (
-        content
-      ) : (
-        <Link href={!props.disabled ? props.href : null}>
-          <a className={props.disabled ? "disabled" : ""}>{content}</a>
-        </Link>
-      )}
-      <style jsx>{`
-        a {
-          text-decoration: none;
-          color: unset;
-        }
-        .disabled {
-          cursor: initial;
-        }
-      `}</style>
-    </div>
-  );
+  if (props.isMobile) {
+    return <div>{content()}</div>;
+  } else {
+    const SPRING_DAMPENER = 65;
+    const SCALE = 1.045;
+
+    const el = useRef(null);
+    const [isHovered, setHovered] = useState(false);
+
+    const [springProps, springApi] = useSpring(() => {
+      return {
+        // x rotation, y rotation, scale
+        xyzs: [0, 0, 0, 1],
+        config: { mass: 9, tension: 750, friction: 65, precision: 0.00001 },
+      };
+    });
+
+    return (
+      <animated.div
+        ref={el}
+        className='cardWrapper'
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => {
+          springApi.start({ xyzs: [0, 0, 0, 1] });
+          setHovered(false);
+        }}
+        onMouseMove={({ clientX, clientY }) => {
+          // mouse x inside card
+          const x = clientX - el.current.getBoundingClientRect().x;
+
+          // mouse y in card accounting for scroll
+          const y = clientY - el.current.getBoundingClientRect().y;
+
+          // Update values to animate to
+          springApi.start({
+            xyzs: [
+              -(y - el.current.clientHeight / 3) / SPRING_DAMPENER,
+              (x - el.current.clientWidth / 2) / SPRING_DAMPENER,
+              25,
+              SCALE, // Scale
+            ],
+          });
+        }}
+        style={{
+          zIndex: isHovered ? 2 : 1,
+          transform: springProps.xyzs.to((x, y, z, s) => {
+            return `perspective(750px) rotateX(${x}deg) rotateY(${y}deg) scale(${s})`;
+          }),
+        }}
+      >
+        {props.disabled ? (
+          <span className={"disabled"}>{content(springProps)}</span>
+        ) : props.isExternal ? (
+          <a
+            href={props.href}
+            target='_blank'
+            className={props.disabled ? "disabled" : "card"}
+          >
+            {content(springProps)}
+          </a>
+        ) : (
+          <Link href={props.href}>
+            <span className={"card"}>{content(springProps)}</span>
+          </Link>
+        )}
+        <style jsx>{`
+          .cardWrapper {
+            will-change: transform;
+          }
+          a {
+            text-decoration: none;
+            color: unset;
+          }
+          .disabled {
+            cursor: initial;
+          }
+          .card {
+            cursor: pointer;
+          }
+        `}</style>
+      </animated.div>
+    );
+  }
 };
 
 export default Card;

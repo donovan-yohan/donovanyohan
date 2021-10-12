@@ -19,8 +19,8 @@ const Index = () => {
 
   return (
     <Main>
-      <div className="pageRoot">
-        <div className="pageContent">
+      <div className='pageRoot'>
+        <div className='pageContent'>
           <Hero
             dark={theme == "dark"}
             image={
@@ -42,15 +42,15 @@ const Index = () => {
             text={
               <span>
                 <span>Hi, I'm Donovan Yohan! I'm a </span>
-                <a href="#work" className="highlight heroHighlight">
+                <a href='#work' className='highlight heroHighlight'>
                   UI & UX designer
                 </a>
                 <span> and a </span>
                 <br />
                 <a
-                  href="http://github.com/donovan-yohan"
-                  target="_blank"
-                  className="highlight heroHighlight"
+                  href='http://github.com/donovan-yohan'
+                  target='_blank'
+                  className='highlight heroHighlight'
                 >
                   front end developer
                 </a>
@@ -58,25 +58,25 @@ const Index = () => {
               </span>
             }
           />
-          <h1 className="headerText highlightStatic">
-            <Link href="/about">
+          <h1 className='headerText highlightStatic'>
+            <Link href='/about'>
               <a>Nice to meet you!</a>
             </Link>
           </h1>
-          <span className="body heroBlurb">
+          <span className='body heroBlurb'>
             <span>
               I'm a designer & developer passionate about creating user-focused,
               robust, and well-researched digital solutions. In addition, I'm an
               experienced{" "}
             </span>
-            <a className="textLink" href="/work/graphicdesign">
+            <a className='textLink' href='/work/graphicdesign'>
               graphic designer
             </a>
             <span> and </span>
             <a
-              className="textLink"
-              href="https://www.youtube.com/donovanyohan"
-              target="_blank"
+              className='textLink'
+              href='https://www.youtube.com/donovanyohan'
+              target='_blank'
             >
               motion graphics artist
             </a>
@@ -86,42 +86,55 @@ const Index = () => {
               React, Vue, and Angular. But believe it or not,{" "}
             </span>
             <span>
-              <Link href="/about">
-                <a className="textLink">I don't just draw and code!</a>
+              <Link href='/about'>
+                <a className='textLink'>I don't just draw and code!</a>
               </Link>
             </span>
           </span>
 
-          <a id="work"> </a>
-          <a href="#work" id="workWrapper">
-            <h1 name="work" className="headerText highlightStatic">
+          <a id='work'> </a>
+          <a href='#work' id='workWrapper'>
+            <h1 name='work' className='headerText highlightStatic'>
               Work I've done.
             </h1>
           </a>
-          <span className="body heroBlurb">
+          <span className='body heroBlurb'>
             <span>
               Here's a high-level look at some of the places I've worked and
               things I've worked on. If you see or read something that you want
               to learn more about, please
-              <a className="textLink" href="#footer">
+              <a className='textLink' href='#footer'>
                 {" reach out and connect with me! "}
               </a>
               I'd love to share more and answer any questions you may have.
             </span>
           </span>
-          <div className="cardWrapper">
+          <div className='cardWrapper'>
             {projects.map(
-              ({ key, href, label, date, content, src, darksrc, disabled }) => {
+              ({
+                key,
+                href,
+                label,
+                date,
+                content,
+                src,
+                darksrc,
+                disabled,
+                isExternal,
+                bgColor,
+              }) => {
                 return (
                   <div key={key}>
                     <Card
                       title={label}
                       caption={date}
                       href={href}
+                      isExternal={isExternal}
                       isMobile={windowWidth < MobileWidth}
                       content={content}
                       src={darksrc && theme == "dark" ? darksrc : src}
                       disabled={disabled}
+                      bgColor={bgColor}
                     />
                   </div>
                 );
@@ -152,7 +165,7 @@ const Index = () => {
             flex-wrap: wrap;
             justify-content: space-between;
 
-            margin-bottom: -250px;
+            margin-bottom: 0px;
           }
           .cardWrapper div {
             width: 48%;

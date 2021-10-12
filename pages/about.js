@@ -11,35 +11,47 @@ const About = () => {
 
   return (
     <Main breadcrumbs={[{ label: "About", href: "/about" }]}>
-      <div className="pageRoot">
-        <div className="pageContent">
+      <div className='pageRoot'>
+        <div className='pageContent'>
           <Hero
-            image={<img src="img/photos/about.jpg" className="heroImage" />}
+            image={<img src='img/photos/about.jpg' className='heroImage' />}
             text={AboutHero}
             customImageStyle={{
               margin: "0px",
             }}
           />
-          <h1 className="headerText highlightStatic">
-            <Link href="/about">
+          <h1 className='headerText highlightStatic'>
+            <Link href='/about'>
               <a>About me.</a>
             </Link>
           </h1>
-          <span className="body heroBlurb">{AboutText}</span>
+          <span className='body heroBlurb'>{AboutText}</span>
 
-          <div className="cardWrapper">
+          <div className='cardWrapper'>
             {hobbies.map(
-              ({ key, href, label, date, content, disabled, src }) => {
+              ({
+                key,
+                href,
+                label,
+                date,
+                content,
+                disabled,
+                src,
+                isExternal,
+                bgColor,
+              }) => {
                 return (
                   <div key={key}>
                     <Card
                       title={label}
                       caption={date}
                       href={href}
+                      isExternal={isExternal}
                       isMobile={windowWidth < MobileWidth}
                       content={content}
                       src={src}
                       disabled={disabled}
+                      bgColor={bgColor}
                     />
                   </div>
                 );
