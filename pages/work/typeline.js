@@ -1,29 +1,29 @@
-import React, { useContext } from 'react';
-import ArticleHero from '../../components/articlehero';
-import ArticleImage from '../../components/articleimage';
-import Article from '../../components/article';
-import WorkLinks from '../../components/worklinks';
-import Main from '../../layouts/main';
-import { typelineInfo } from '../../global/content';
-import Context from '../../components/context';
+import React, { useContext } from "react";
+import ArticleHero from "../../components/articlehero";
+import ArticleImage from "../../components/articleimage";
+import Article from "../../components/article";
+import WorkLinks from "../../components/worklinks";
+import Main from "../../layouts/main";
+import { typelineInfo } from "../../global/content";
+import Context from "../../components/context";
 
 const Donovanyohan = () => {
   const { theme } = useContext(Context);
   return (
     <Main
       breadcrumbs={[
-        { label: 'Work', href: '/#work' },
-        { label: 'typeline', href: '/work/typeline' },
+        { label: "Work", href: "/#work" },
+        { label: "typeline", href: "/work/typeline" },
       ]}
     >
-      <div className="pageRoot">
-        <div className="pageContent">
+      <div className='pageRoot'>
+        <div className='pageContent'>
           <ArticleHero
-            title={'typeline'}
-            image={'/img/photos/typelinebanner.png'}
-            bgColor={'#1967FF'}
+            title={"typeline"}
+            image={"/img/photos/typelinebanner.png"}
+            bgColor={"#1967FF"}
             customImageStyle={{
-              margin: '0px',
+              margin: "0px",
             }}
             content={`
               I really like typing and I've used a lot of different typing
@@ -36,38 +36,38 @@ const Donovanyohan = () => {
             info={typelineInfo}
           />
           <Article>
-            <p className="body">
+            <p className='body'>
               Typeline was a great application of interaction design,
               gamification, motion design, and working with a highly dynamic
               React front-end.
             </p>
-            <ul className="body tableOfContents">
+            <ul className='body tableOfContents'>
               <li>
-                <a href="#improving" className="textLink">
+                <a href='#improving' className='textLink'>
                   Improving on a long-standing status-quo
                 </a>
               </li>
               <li>
-                <a href="#building" className="textLink">
+                <a href='#building' className='textLink'>
                   Building a typing engine with React
                 </a>
               </li>
               <li>
-                <a href="#next-steps" className="textLink">
+                <a href='#next-steps' className='textLink'>
                   Gamification and next steps
                 </a>
               </li>
             </ul>
           </Article>
-          <ArticleImage image={'/img/photos/work/dy-problem.png'} />
+          <ArticleImage image={"/img/photos/work/dy-problem.png"} />
           <Article>
-            <h2 id="improving" className="anchor"></h2>
+            <h2 id='improving' className='anchor'></h2>
             <h2>
-              <span className="highlightStatic">
+              <span className='highlightStatic'>
                 Improving on a long-standing status-quo
               </span>
             </h2>
-            <p className="body problem">
+            <p className='body problem'>
               There are a lot of typing tests, educational typing tools, and
               other online resources that already exist, and even some really
               creative typing games. However, I found myself bouncing between
@@ -82,10 +82,10 @@ const Donovanyohan = () => {
               favourite feeling from typing, very few if any of the tools we
               used inherently encouraged getting into this state.
             </p>
-            <div className="articleWrapper">
-              <div className="blurb solution">
+            <div className='articleWrapper'>
+              <div className='blurb solution'>
                 <h3>Encourage consistency and flow by design</h3>
-                <p className="body">
+                <p className='body'>
                   The main guiding design principles for typeline are all about
                   trying to encourage flow. This in addition to focusing on all
                   the good that came from typing tests before laid the
@@ -97,29 +97,29 @@ const Donovanyohan = () => {
                   feedback.
                 </p>
               </div>
-              <div className="list">
+              <div className='list'>
                 <h3>Outcomes</h3>
                 <ul>
-                  <li className="body">
+                  <li className='body'>
                     Design principles to validate design decisions
                   </li>
-                  <li className="body">Emphasis on motion design</li>
-                  <li className="body">
+                  <li className='body'>Emphasis on motion design</li>
+                  <li className='body'>
                     Brought in further ideas of gamification
                   </li>
                 </ul>
               </div>
             </div>
           </Article>
-          <ArticleImage image={'/img/photos/work/dy-layout.png'} />
+          <ArticleImage image={"/img/photos/work/dy-layout.png"} />
           <Article>
-            <h2 id="building" className="anchor"></h2>
+            <h2 id='building' className='anchor'></h2>
             <h2>
-              <span className="highlightStatic">
+              <span className='highlightStatic'>
                 Building a typing engine with React
               </span>
             </h2>
-            <p className="body">
+            <p className='body'>
               Partly as a challenge to myself and partly because nothing
               available fit my needs, the engine powering typeline is entirely
               custom built. Having identified the most important parts of
@@ -131,10 +131,10 @@ const Donovanyohan = () => {
               blocks and using them to prototype and test interactions and
               designs.
             </p>
-            <div className="articleWrapper">
-              <div className="blurb">
+            <div className='articleWrapper'>
+              <div className='blurb'>
                 <h3>Develop for the design, and design to develop</h3>
-                <p className="body">
+                <p className='body'>
                   I scaffolded out a component structure and compared it against
                   my user stories and design principles to make sure I had all
                   the technical pieces covered. This allowed me to develop an
@@ -147,16 +147,16 @@ const Donovanyohan = () => {
                   my user goals but not usually shown in other typing tests.
                 </p>
               </div>
-              <div className="list">
+              <div className='list'>
                 <h3>Outcomes</h3>
                 <ul>
-                  <li className="body">
+                  <li className='body'>
                     Robust reusable and scalable component library
                   </li>
-                  <li className="body">
+                  <li className='body'>
                     Quick validation of design in production
                   </li>
-                  <li className="body">
+                  <li className='body'>
                     Further UX improvement opportunities from testing in
                     development
                   </li>
@@ -164,15 +164,15 @@ const Donovanyohan = () => {
               </div>
             </div>
           </Article>
-          <ArticleImage image={'/img/photos/work/dy-content.png'} />
+          <ArticleImage image={"/img/photos/work/dy-content.png"} />
           <Article>
-            <h2 id="next-steps" className="anchor"></h2>
+            <h2 id='next-steps' className='anchor'></h2>
             <h2>
-              <span className="highlightStatic">
+              <span className='highlightStatic'>
                 Gamification and next steps
               </span>
             </h2>
-            <p className="body">
+            <p className='body'>
               Typeline is a very ambitious project, and what is currently
               available is just a part of what I am hoping typeline can become.
               Currently the groundwork is laid for more gamification and sharing
@@ -183,34 +183,31 @@ const Donovanyohan = () => {
               ultimately a way for users to race against each other in
               real-time.
             </p>
-            <div className="articleWrapper">
-              <div className="blurb">
+            <div className='articleWrapper'>
+              <div className='blurb'>
                 <h3>Practice makes perfect, but it can also be fun</h3>
-                <p className="body">
+                <p className='body'>
                   By borrowing the elements and techniques of arcade games that
                   encourage competition and replayability like leaderboards,
                   positive reinforcement through visual feedback, and simple
-                  rules, typeline aims to achieve all the same of typing tests before it,
-                  but reach a wider audience that can enjoy it as a game.
+                  rules, typeline aims to achieve all the same of typing tests
+                  before it, but reach a wider audience that can enjoy it as a
+                  game.
                 </p>
               </div>
-              <div className="list">
+              <div className='list'>
                 <h3>Outcomes</h3>
                 <ul>
-                  <li className="body">
-                    Roadmap for future updates
-                  </li>
-                  <li className="body">
-                    A typing test mixed with a game
-                  </li>
-                  <li className="body">
+                  <li className='body'>Roadmap for future updates</li>
+                  <li className='body'>A typing test mixed with a game</li>
+                  <li className='body'>
                     Natural building of engagement through competition
                   </li>
                 </ul>
               </div>
             </div>
           </Article>
-          <WorkLinks type={'projects'} label={'donovanyohan.com'} />
+          <WorkLinks type={"projects"} label={"typeline Typing Test"} />
         </div>
         <style jsx>{`
           .anchor {
