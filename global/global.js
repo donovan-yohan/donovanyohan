@@ -211,7 +211,7 @@ export const hobbies = [
     bgColor: "#A6CE39",
   },
   {
-    src: ["img/photos/dance.jpg"],
+    src: ["img/photos/cards/dance/dance00.png", "img/photos/cards/dance/dance10.png"],
     href: "",
     label: "Dance",
     date: "2018 - Present",
