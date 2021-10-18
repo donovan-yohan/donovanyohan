@@ -169,6 +169,56 @@ export const typelineInfo = [
 
 export const logos = [
   {
+    label: "typeline",
+    src: {
+      light: "typeline.png",
+    },
+    invertForDarkMode: false,
+    width: 30,
+  },
+  {
+    label: "ichigo",
+    src: {
+      light: "ichigo.png",
+    },
+    invertForDarkMode: false,
+    width: 30,
+  },
+  {
+    label: "candywebkin invitational",
+    src: {
+      light: "cwianimated.webm",
+      poster: "cwi.png",
+    },
+    invertForDarkMode: false,
+    width: 30,
+    isVideo: true,
+  },
+  {
+    label: "Wavelengths",
+    src: {
+      light: "wavelengths3.png",
+    },
+    invertForDarkMode: true,
+    width: 35,
+  },
+  {
+    label: "Wavelengths",
+    src: {
+      light: "wavelengths1.png",
+    },
+    invertForDarkMode: true,
+    width: 30,
+  },
+  {
+    label: "Wavelengths",
+    src: {
+      light: "wavelengths2.png",
+    },
+    invertForDarkMode: true,
+    width: 30,
+  },
+  {
     label: "DJ Labrie",
     src: {
       light: "djlabrie.png",
@@ -274,6 +324,23 @@ export const logos = [
 });
 
 export const promotions = [
+  {
+    label: "CWI Promo",
+    src: {
+      light: "cwipromo.png",
+    },
+    invertForDarkMode: false,
+    width: 33,
+  },
+  {
+    label: "CWI Animated Promo",
+    src: {
+      light: "cwianimatedpromo.webm",
+    },
+    invertForDarkMode: false,
+    width: 33,
+    isVideo: true,
+  },
   {
     label: "Competitive Programming",
     src: {

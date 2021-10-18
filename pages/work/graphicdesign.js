@@ -16,8 +16,8 @@ const Graphicdesign = () => {
         { label: "Graphic Design", href: "/work/graphicdesign" },
       ]}
     >
-      <div className="pageRoot">
-        <div className="pageContent">
+      <div className='pageRoot'>
+        <div className='pageContent'>
           <ArticleHero
             title={"Freelance Graphic Design"}
             image={
@@ -37,72 +37,70 @@ const Graphicdesign = () => {
             info={graphicInfo}
           />
           <Article>
-            <ul className="body tableOfContents">
+            <ul className='body tableOfContents'>
               <li>
-                <a href="#logo-design" className="textLink">
+                <a href='#logo-design' className='textLink'>
                   Logo design
                 </a>
               </li>
               <li>
-                <a href="#promotion-design" className="textLink">
+                <a href='#promotion-design' className='textLink'>
                   Promotion design
                 </a>
               </li>
               <li>
-                <a href="#apparel-design" className="textLink">
+                <a href='#apparel-design' className='textLink'>
                   Apparel design
                 </a>
               </li>
             </ul>
           </Article>
           <Article>
-            <h2 id="logo-design" className="anchor"></h2>
+            <h2 id='logo-design' className='anchor'></h2>
             <h2>
-              <span className="highlightStatic">Logo design</span>
+              <span className='highlightStatic'>Logo design</span>
             </h2>
-            <div className="imageWrapper">
-              {logos.map(({ key, src, label, width, invertForDarkMode }) => {
-                return (
-                  <div
-                    key={key}
-                    className="image"
-                    style={{ flexBasis: width + "%" }}
-                  >
-                    <img
-                      alt={label}
-                      src={
-                        "/img/photos/work/graphicdesign/logos/" +
-                        (src.dark && theme == "dark" ? src.dark : src.light)
-                      }
-                      className={invertForDarkMode ? "needsDarkMode" : ""}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </Article>
-          <Article>
-            <h2 id="promotion-design" className="anchor"></h2>
-            <h2>
-              <span className="highlightStatic">Promotion design</span>
-            </h2>
-            <div className="imageWrapper">
-              {promotions.map(
-                ({ key, src, label, width, invertForDarkMode }) => {
+            <div className='imageWrapper'>
+              {logos.map(
+                ({ key, src, label, width, invertForDarkMode, isVideo }) => {
                   return (
                     <div
                       key={key}
-                      className="image"
+                      className='image'
                       style={{ flexBasis: width + "%" }}
                     >
-                      <img
-                        alt={label}
-                        src={
-                          "/img/photos/work/graphicdesign/socialmedia/" +
-                          src.light
-                        }
-                        className={invertForDarkMode ? "needsDarkMode" : ""}
-                      />
+                      {isVideo && (
+                        <video
+                          controls
+                          width='100%'
+                          loop={true}
+                          poster={
+                            src.poster
+                              ? "/img/photos/work/graphicdesign/logos/" +
+                                src.poster
+                              : null
+                          }
+                        >
+                          <source
+                            src={
+                              "/img/photos/work/graphicdesign/logos/" +
+                              src.light
+                            }
+                            type='video/webm'
+                          />
+                          Sorry, your browser doesn't support embedded videos.
+                        </video>
+                      )}
+                      {!isVideo && (
+                        <img
+                          alt={label}
+                          src={
+                            "/img/photos/work/graphicdesign/logos/" +
+                            (src.dark && theme == "dark" ? src.dark : src.light)
+                          }
+                          className={invertForDarkMode ? "needsDarkMode" : ""}
+                        />
+                      )}
                     </div>
                   );
                 }
@@ -110,16 +108,58 @@ const Graphicdesign = () => {
             </div>
           </Article>
           <Article>
-            <h2 id="apparel-design" className="anchor"></h2>
+            <h2 id='promotion-design' className='anchor'></h2>
             <h2>
-              <span className="highlightStatic">Apparel design</span>
+              <span className='highlightStatic'>Promotion design</span>
             </h2>
-            <div className="imageWrapper">
+            <div className='imageWrapper'>
+              {promotions.map(
+                ({ key, src, label, width, invertForDarkMode, isVideo }) => {
+                  return (
+                    <div
+                      key={key}
+                      className='image'
+                      style={{ flexBasis: width + "%" }}
+                    >
+                      {isVideo && (
+                        <video controls width='100%'>
+                          <source
+                            src={
+                              "/img/photos/work/graphicdesign/socialmedia/" +
+                              src.light
+                            }
+                            type='video/webm'
+                          />
+                          Sorry, your browser doesn't support embedded videos.
+                        </video>
+                      )}
+                      {!isVideo && (
+                        <img
+                          alt={label}
+                          src={
+                            "/img/photos/work/graphicdesign/socialmedia/" +
+                            (src.dark && theme == "dark" ? src.dark : src.light)
+                          }
+                          className={invertForDarkMode ? "needsDarkMode" : ""}
+                        />
+                      )}
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          </Article>
+          <Article>
+            <h2 id='apparel-design' className='anchor'></h2>
+            <h2>
+              <span className='highlightStatic'>Apparel design</span>
+            </h2>
+            <div className='imageWrapper'>
               {apparel.map(({ key, src, label, width, invertForDarkMode }) => {
                 return (
                   <div
                     key={key}
-                    className="image"
+                    className='image'
                     style={{ flexBasis: width + "%" }}
                   >
                     <img
