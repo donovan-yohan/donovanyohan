@@ -59,7 +59,10 @@ const Donovanyohan = () => {
               </li>
             </ul>
           </Article>
-          <ArticleImage image={"/img/photos/work/dy-problem.png"} />
+          <ArticleImage
+            image={"/img/photos/work/typeline-1.png"}
+            alt={"design iterations of typeline UI"}
+          />
           <Article>
             <h2 id='improving' className='anchor'></h2>
             <h2>
@@ -111,7 +114,10 @@ const Donovanyohan = () => {
               </div>
             </div>
           </Article>
-          <ArticleImage image={"/img/photos/work/dy-layout.png"} />
+          <ArticleImage
+            image={"/img/photos/work/typeline-2.png"}
+            alt={"simple typing engine architecture diagram visualization"}
+          />
           <Article>
             <h2 id='building' className='anchor'></h2>
             <h2>
@@ -164,7 +170,10 @@ const Donovanyohan = () => {
               </div>
             </div>
           </Article>
-          <ArticleImage image={"/img/photos/work/dy-content.png"} />
+          <ArticleImage
+            image={"/img/photos/work/typeline-3.png"}
+            alt={"typeline typing test logo banner"}
+          />
           <Article>
             <h2 id='next-steps' className='anchor'></h2>
             <h2>

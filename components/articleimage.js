@@ -4,12 +4,12 @@ const ArticleImage = (props) => {
   const [isZoomed, setZoom] = useState(false);
 
   return (
-    <div className="container">
-      <div className="image">
+    <div className='container'>
+      <div className='image'>
         {!props.zoomable && <img src={props.image} />}
         {props.zoomable && (
-          <a href={props.image} target="_blank">
-            <img src={props.image} />
+          <a href={props.image} target='_blank'>
+            <img src={props.image} alt={props.alt} />
           </a>
         )}
       </div>
