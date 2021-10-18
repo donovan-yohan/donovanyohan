@@ -59,12 +59,12 @@ export const projects = [
     label: "typeline Typing Test",
     date: "Full-stack • Side Project • Fall 2021",
     content:
-      "I learned GLSL and Three.js to build a unique and eye-catching liquid gradient for the Call Centre Guys, focusing on performance and compatability across devices.",
+      "A typing test designed and developed to encourage and reward consistency and flow in typing through animation and interaction design.",
     disabled: false,
     bgColor: "#1967FF",
   },
   {
-    src: ["img/photos/liquidgradient.jpg"],
+    src: ["", "img/photos/liquidgradient.jpg"],
     href: "http://callcentreguys.com",
     label: "Three.js Liquid Gradient",
     date: "Front-end • Contract • Fall 2020",
@@ -75,6 +75,7 @@ export const projects = [
   },
   {
     src: [
+      "",
       "img/photos/cards/manulife/manulife00.png",
       "img/photos/cards/manulife/manulife10.png",
     ],
@@ -106,6 +107,7 @@ export const projects = [
   },
   {
     src: [
+      "",
       "img/photos/cards/webstore/webstore00.png",
       "img/photos/cards/webstore/webstore10.png",
       "img/photos/cards/webstore/webstore20.png",
@@ -120,6 +122,7 @@ export const projects = [
   },
   {
     src: [
+      "",
       "img/photos/cards/cooperators/coop00.png",
       "img/photos/cards/cooperators/coop10.png",
     ],
@@ -133,6 +136,7 @@ export const projects = [
   },
   {
     src: [
+      "",
       "img/photos/cards/flowr/flowr00.png",
       "img/photos/cards/flowr/flowr10.png",
     ],
@@ -147,10 +151,12 @@ export const projects = [
   {
     src: [
       "img/photos/cards/graphicdesign/graphic00.png",
+      "",
       "img/photos/cards/graphicdesign/graphic10.png",
     ],
     darksrc: [
       "img/photos/cards/graphicdesign/graphicdark00.png",
+      "",
       "img/photos/cards/graphicdesign/graphicdark10.png",
     ],
     href: "/work/graphicdesign",

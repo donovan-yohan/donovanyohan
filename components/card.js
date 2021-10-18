@@ -1,12 +1,25 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import Icon from "../components/icon";
 import Link from "next/link";
 
 import { animated, useSpring } from "react-spring";
 
-const PARALLAX_SPRING_FACTOR = 0.1;
-const PARALLAX_TRANSLATION_FACTOR = 0.25;
-const PARALLAX_OFFSET = 25;
+const PARALLAX_SPRING_FACTOR = 0.075;
+const PARALLAX_TRANSLATION_FACTOR = 0.225;
+const PARALLAX_OFFSET = 10;
+const PARALLAX_MULTIPLIER = 1.66;
+const PERSPECTIVE = 1400;
+const SPRING_DAMPENER = 75;
+const SCALE = 1.021;
+
+const getParallaxStyle = (x, y, z, i) => {
+  let p = PARALLAX_OFFSET + z * i * PARALLAX_MULTIPLIER;
+  let xt =
+    Math.sin(y * PARALLAX_SPRING_FACTOR) * p * PARALLAX_TRANSLATION_FACTOR;
+  let yt =
+    Math.sin(-x * PARALLAX_SPRING_FACTOR) * p * PARALLAX_TRANSLATION_FACTOR;
+  return `perspective(${PERSPECTIVE}PX) translate3d(${xt}px, ${yt}px, ${p}px)`;
+};
 
 const Card = (props) => {
   const content = (transform) => (
@@ -25,16 +38,7 @@ const Card = (props) => {
                     style={{
                       transform: transform
                         ? transform.xyzs.to((x, y, z, s) => {
-                            let p = PARALLAX_OFFSET + z * i;
-                            let xt =
-                              Math.sin(-y * PARALLAX_SPRING_FACTOR) *
-                              p *
-                              PARALLAX_TRANSLATION_FACTOR;
-                            let yt =
-                              Math.sin(x * PARALLAX_SPRING_FACTOR) *
-                              p *
-                              PARALLAX_TRANSLATION_FACTOR;
-                            return `perspective(750PX) translate3d(${xt}px, ${yt}px, ${p}px)`;
+                            return getParallaxStyle(x, y, z, i);
                           })
                         : "",
                     }}
@@ -218,6 +222,7 @@ const Card = (props) => {
         @media only screen and (max-width: 1024px) {
           .imageWrapper {
             filter: none;
+            z-index: 4;
           }
           .container {
             border-radius: 8px;
@@ -246,9 +251,6 @@ const Card = (props) => {
   if (props.isMobile) {
     return <div>{content()}</div>;
   } else {
-    const SPRING_DAMPENER = 65;
-    const SCALE = 1.045;
-
     const el = useRef(null);
     const [isHovered, setHovered] = useState(false);
 
@@ -256,7 +258,7 @@ const Card = (props) => {
       return {
         // x rotation, y rotation, scale
         xyzs: [0, 0, 0, 1],
-        config: { mass: 9, tension: 750, friction: 65, precision: 0.00001 },
+        config: { mass: 9, tension: 800, friction: 65, precision: 0.00001 },
       };
     });
 
@@ -289,7 +291,7 @@ const Card = (props) => {
         style={{
           zIndex: isHovered ? 2 : 1,
           transform: springProps.xyzs.to((x, y, z, s) => {
-            return `perspective(750px) rotateX(${x}deg) rotateY(${y}deg) scale(${s})`;
+            return `perspective(${PERSPECTIVE}px) rotateX(${x}deg) rotateY(${y}deg) scale(${s})`;
           }),
         }}
       >
