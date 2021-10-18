@@ -8,9 +8,9 @@ const PARALLAX_SPRING_FACTOR = 0.075;
 const PARALLAX_TRANSLATION_FACTOR = 0.225;
 const PARALLAX_OFFSET = 10;
 const PARALLAX_MULTIPLIER = 1.66;
-const PERSPECTIVE = 1400;
+const PERSPECTIVE = 1300;
 const SPRING_DAMPENER = 75;
-const SCALE = 1.021;
+const SCALE = 1.022;
 
 const getParallaxStyle = (x, y, z, i) => {
   let p = PARALLAX_OFFSET + z * i * PARALLAX_MULTIPLIER;
@@ -258,7 +258,7 @@ const Card = (props) => {
       return {
         // x rotation, y rotation, scale
         xyzs: [0, 0, 0, 1],
-        config: { mass: 9, tension: 800, friction: 65, precision: 0.00001 },
+        config: { mass: 9, tension: 775, friction: 65, precision: 0.00001 },
       };
     });
 
