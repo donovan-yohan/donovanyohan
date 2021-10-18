@@ -1,8 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Icon from "../components/icon";
 import Link from "next/link";
 
 import { animated, useSpring } from "react-spring";
+import { useDeviceOrientation } from "../hooks/useDeviceOrientation";
 
 const PARALLAX_SPRING_FACTOR = 0.075;
 const PARALLAX_TRANSLATION_FACTOR = 0.225;
@@ -22,6 +23,41 @@ const getParallaxStyle = (x, y, z, i) => {
 };
 
 const Card = (props) => {
+  const { orientation, requestAccess, revokeAccess, error } =
+    useDeviceOrientation();
+  const el = useRef(null);
+  const [isHovered, setHovered] = useState(false);
+
+  const [springProps, springApi] = useSpring(() => {
+    return {
+      // x rotation, y rotation, scale
+      xyzs: [0, 0, 0, 1],
+      config: { mass: 9, tension: 775, friction: 65, precision: 0.00001 },
+    };
+  });
+
+  useEffect(() => {
+    if (props.isMobile) {
+      requestAccess();
+      return () => {
+        revokeAccess();
+      };
+    }
+  }, [props.isMobile]);
+
+  useEffect(() => {
+    if (orientation && props.isMobile) {
+      springApi.start({
+        xyzs: [
+          -(orientation.gamma) / SPRING_DAMPENER,
+          orientation.beta / SPRING_DAMPENER,
+          25,
+          SCALE, // Scale
+        ],
+      });
+    }
+  }, [props.isMobile, orientation]);
+
   const content = (transform) => (
     <div className='root'>
       <div className='container'>
@@ -249,19 +285,21 @@ const Card = (props) => {
   );
 
   if (props.isMobile) {
-    return <div>{content()}</div>;
+    return (
+      <animated.div
+        ref={el}
+        className='cardWrapper'
+        style={{
+          zIndex: isHovered ? 2 : 1,
+          transform: springProps.xyzs.to((x, y, z, s) => {
+            return `perspective(${PERSPECTIVE}px) rotateX(${x}deg) rotateY(${y}deg) scale(${s})`;
+          }),
+        }}
+      >
+        {content()}
+      </animated.div>
+    );
   } else {
-    const el = useRef(null);
-    const [isHovered, setHovered] = useState(false);
-
-    const [springProps, springApi] = useSpring(() => {
-      return {
-        // x rotation, y rotation, scale
-        xyzs: [0, 0, 0, 1],
-        config: { mass: 9, tension: 775, friction: 65, precision: 0.00001 },
-      };
-    });
-
     return (
       <animated.div
         ref={el}
