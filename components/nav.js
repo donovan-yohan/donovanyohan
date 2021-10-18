@@ -17,18 +17,18 @@ export default function Nav(props) {
   return (
     <nav>
       <ul>
-        <div className="homeLink">
-          <li className="smallLogo">
-            <Link href="/">
+        <div className='homeLink'>
+          <li className='smallLogo'>
+            <Link href='/'>
               <a>
-                <Icon size="small" link={true} icon={""} />
+                <Icon size='small' link={true} icon={""} />
               </a>
             </Link>
           </li>
           {(!props.breadcrumbs || !props.breadcrumbs[0]) && (
-            <li className="title">
-              <Link href="/">
-                <a className="highlight">Donovan Yohan</a>
+            <li className='title'>
+              <Link href='/'>
+                <a className='highlight'>Donovan Yohan</a>
               </Link>
             </li>
           )}
@@ -36,10 +36,10 @@ export default function Nav(props) {
             props.breadcrumbs.map(({ href, label }, i) => {
               return (
                 <li
-                  className="breadcrumb"
+                  className='breadcrumb'
                   key={"nav-breadcrumb-" + label + href}
                 >
-                  <span className="divider">/</span>
+                  <span className='divider'>/</span>
                   <Link href={href}>
                     <a className={"highlight path"}>{label}</a>
                   </Link>
@@ -47,12 +47,12 @@ export default function Nav(props) {
               );
             })}
         </div>
-        <div className="navLinks">
+        <div className='navLinks'>
           <li>
             <a
-              target="_blank"
-              href="/DonovanYohanResume.pdf"
-              className="highlight"
+              target='_blank'
+              href='/DonovanYohanResume.pdf'
+              className='highlight'
             >
               Resume
             </a>
@@ -60,36 +60,35 @@ export default function Nav(props) {
           {links.map(({ key, href, label }) => (
             <li key={key}>
               <Link href={href}>
-                <a className="highlight">{label}</a>
+                <a className='highlight'>{label}</a>
               </Link>
             </li>
           ))}
           <li>
             <Link href={contactRoute}>
-              <a className="highlight">Contact</a>
+              <a className='highlight'>Contact</a>
             </Link>
           </li>
         </div>
       </ul>
       <div
-        className="themeToggle"
+        className='themeToggle'
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
         onClick={toggleTheme}
       >
-        <Lottie
-          options={{
-            animationData: themeAnimation,
-            autoplay: false,
-            loop: false,
-          }}
-          height={30}
-          width={30}
-          direction={hover ? 1 * themeMultiplier : -1 * themeMultiplier}
-          style={{
-            filter: `${theme == "dark" ? "invert(97%)" : ""}`,
-          }}
-        />
+        <span className='themeToggleIcon'>
+          <Lottie
+            options={{
+              animationData: themeAnimation,
+              autoplay: false,
+              loop: false,
+            }}
+            height={30}
+            width={30}
+            direction={hover ? 1 * themeMultiplier : -1 * themeMultiplier}
+          />
+        </span>
       </div>
 
       <style jsx>{`
@@ -173,6 +172,10 @@ export default function Nav(props) {
           cursor: pointer;
           opacity: var(--grayOpacity);
           transition: all 0.8s cubic-bezier(0.51, 0.07, 0.09, 0.95);
+        }
+
+        .themeToggleIcon {
+          filter: ${theme == "dark" ? "invert(97%)" : ""};
         }
 
         @media only screen and (min-width: 1025px) {

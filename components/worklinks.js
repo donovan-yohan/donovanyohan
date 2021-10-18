@@ -8,23 +8,44 @@ const WorkLinks = (props) => {
 
   let index = type.findIndex((p) => p.label === props.label);
 
+  let nextIndex = -1;
+  let prevIndex = -1;
+
+  let i = index + 1;
+  while (i < type.length) {
+    if (!type[i].disabled && !type[i].isExternal) {
+      nextIndex = i;
+      i = type.length;
+    }
+    i++;
+  }
+
+  i = index - 1;
+  while (i >= 0) {
+    if (!type[i].disabled && !type[i].isExternal) {
+      prevIndex = i;
+      i = -1;
+    }
+    i--;
+  }
+
   return (
-    <div className="worklinks">
-      <div className="wrapper">
-        <div className="highlight">
+    <div className='worklinks'>
+      <div className='wrapper'>
+        <div className='highlight'>
           <Link href={"/#work"}>
-            <a className="highlight">Back to All Work</a>
+            <a className='highlight'>Back to All Work</a>
           </Link>
         </div>
-        <div className="buttonWrapper">
-          {index > 0 && (
-            <Link href={type[index - 1].href}>
-              <a className="highlight">&lt; Previous</a>
+        <div className='buttonWrapper'>
+          {prevIndex >= 0 && (
+            <Link href={type[prevIndex].href}>
+              <a className='highlight'>&lt; Previous</a>
             </Link>
           )}
-          {index < type.length - 1 && !type[index + 1].disabled && (
-            <Link href={type[index + 1].href}>
-              <a className="highlight">Next &gt;</a>
+          {nextIndex >= 0 && (
+            <Link href={type[nextIndex].href}>
+              <a className='highlight'>Next &gt;</a>
             </Link>
           )}
         </div>
