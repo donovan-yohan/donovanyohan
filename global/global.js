@@ -51,6 +51,21 @@ export const projects = [
   {
     src: [
       "",
+      "img/photos/cards/snakebyte/snakebyte00.png",
+      "",
+      "img/photos/cards/snakebyte/snakebyte01.png",
+    ],
+    href: "https://www.snakebyte.ca/",
+    label: "Snakebyte Studios Website",
+    date: "Full-stack • Contract • Winter 2021",
+    content:
+      "Client facing website for digital media company Snakebyte Studios. Hand-crafted with an emphasis on motion design using React, Framer Motion, and Lottie.",
+    disabled: false,
+    isExternal: true,
+  },
+  {
+    src: [
+      "",
       "img/photos/cards/typeline/typeline10.png",
       "img/photos/cards/typeline/typeline20.png",
       "img/photos/cards/typeline/typeline30.png",

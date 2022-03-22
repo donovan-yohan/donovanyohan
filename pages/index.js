@@ -165,7 +165,7 @@ const Index = () => {
             flex-wrap: wrap;
             justify-content: space-between;
 
-            margin-bottom: 0px;
+            margin-bottom: -250px;
           }
           .cardWrapper div {
             width: 48%;
