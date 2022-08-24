@@ -10,7 +10,7 @@
   "dependencies": {
     "easy-peasy": "^3.1.0",
     "lottie-react-web": "^2.1.4",
-    "next": "9.1.6",
+    "next": "12.1.0",
     "react": "16.11.0",
     "react-dom": "16.11.0",
     "react-spring": "^9.2.5",
