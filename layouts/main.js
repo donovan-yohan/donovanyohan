@@ -44,7 +44,7 @@ const Main = (props) => {
         <title>Donovan Yohan - UI/UX Designer & Web Developer</title>
         <meta
           name="description"
-          content="Hi, I'm Donovan Yohan! I'm a UI & UX designer and a front end developer."
+          content="Hi, I'm Donovan Yohan! I'm a UI & UX designer and a full stack developer."
         />
         <meta name="theme-color" content="#FFFFFF" />
         <meta
@@ -55,7 +55,7 @@ const Main = (props) => {
         <meta
           key="og:description"
           property="og:description"
-          content="Hi, I'm Donovan Yohan! I'm a UI & UX designer and a front end developer."
+          content="Hi, I'm Donovan Yohan! I'm a UI & UX designer and a full stack developer."
         />
         <meta
           key="og:image"

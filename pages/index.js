@@ -52,7 +52,7 @@ const Index = () => {
                   target='_blank'
                   className='highlight heroHighlight'
                 >
-                  front end developer
+                  full stack developer
                 </a>
                 .
               </span>
