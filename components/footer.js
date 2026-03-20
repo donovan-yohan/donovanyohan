@@ -85,6 +85,7 @@ const BottomNav = () => (
           display: flex;
           justify-content: center;
           margin: 64px 0 32px 0;
+          padding-bottom: 56px;
         }
         .container {
           margin: 0 16px 32px 16px;
