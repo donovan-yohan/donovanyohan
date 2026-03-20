@@ -2,7 +2,6 @@ import { useContext } from "react";
 import Hero from "../components/hero";
 import Card from "../components/card";
 import Lottie from "lottie-react";
-import Link from "next/link";
 import logoAnimation from "../public/img/animations/dy.json";
 import { MobileWidth, projects } from "../global/global";
 import Main from "../layouts/main";
@@ -50,7 +49,7 @@ const Index = () => {
             }
           />
           <h1 className='headerText highlightStatic'>
-            <Link href='/about'>Nice to meet you!</Link>
+            <a href='/about'>Nice to meet you!</a>
           </h1>
           <span className='body heroBlurb'>
             <span>
@@ -75,7 +74,7 @@ const Index = () => {
               React, Vue, and Angular. But believe it or not,{" "}
             </span>
             <span>
-              <Link href='/about' className='textLink'>I don't just draw and code!</Link>
+              <a href='/about' className='textLink'>I don't just draw and code!</a>
             </span>
           </span>
 

@@ -1,5 +1,3 @@
-import React from "react";
-import Link from "next/link";
 import { projects, hobbies } from "../global/global";
 
 const WorkLinks = (props) => {
@@ -33,14 +31,14 @@ const WorkLinks = (props) => {
     <div className='worklinks'>
       <div className='wrapper'>
         <div className='highlight'>
-          <Link href={"/#work"} className='highlight'>Back to All Work</Link>
+          <a href={"/#work"} className='highlight'>Back to All Work</a>
         </div>
         <div className='buttonWrapper'>
           {prevIndex >= 0 && (
-            <Link href={type[prevIndex].href} className='highlight'>&lt; Previous</Link>
+            <a href={type[prevIndex].href} className='highlight'>&lt; Previous</a>
           )}
           {nextIndex >= 0 && (
-            <Link href={type[nextIndex].href} className='highlight'>Next &gt;</Link>
+            <a href={type[nextIndex].href} className='highlight'>Next &gt;</a>
           )}
         </div>
       </div>

@@ -1,5 +1,3 @@
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import Hero from "../components/hero";
 import Card from "../components/card";
 import { MobileWidth, hobbies } from "../global/global";
@@ -21,7 +19,7 @@ const About = () => {
             }}
           />
           <h1 className='headerText highlightStatic'>
-            <Link href='/about'>About me.</Link>
+            <a href='/about'>About me.</a>
           </h1>
           <span className='body heroBlurb'>{AboutText}</span>
 

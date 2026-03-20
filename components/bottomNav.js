@@ -1,5 +1,3 @@
-import React from "react";
-import Link from "next/link";
 import links from "../global/global";
 import Icon from "../components/icon";
 import { useRouter } from "next/router";
@@ -19,10 +17,10 @@ const BottomNav = () => {
           </li>
           {links.map(({ key, href, label, icon }) => (
             <li key={key}>
-              <Link href={href}>
+              <a href={href}>
                 <Icon icon={icon} size="small" gray={true} link={true} />
                 <span>{label}</span>
-              </Link>
+              </a>
             </li>
           ))}
           <li>

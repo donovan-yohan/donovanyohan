@@ -1,5 +1,4 @@
 import { useContext, useRef } from "react";
-import Link from "next/link";
 import Icon from "../components/icon";
 import links from "../global/global";
 import { useRouter } from "next/router";
@@ -19,13 +18,13 @@ export default function Nav(props) {
       <ul>
         <div className='homeLink'>
           <li className='smallLogo'>
-            <Link href='/'>
+            <a href='/'>
               <Icon size='small' link={true} icon={""} />
-            </Link>
+            </a>
           </li>
           {(!props.breadcrumbs || !props.breadcrumbs[0]) && (
             <li className='title'>
-              <Link href='/' className='highlight'>Donovan Yohan</Link>
+              <a href='/' className='highlight'>Donovan Yohan</a>
             </li>
           )}
           {props.breadcrumbs &&
@@ -36,7 +35,7 @@ export default function Nav(props) {
                   key={"nav-breadcrumb-" + label + href}
                 >
                   <span className='divider'>/</span>
-                  <Link href={href} className={"highlight path"}>{label}</Link>
+                  <a href={href} className={"highlight path"}>{label}</a>
                 </li>
               );
             })}
@@ -53,11 +52,11 @@ export default function Nav(props) {
           </li>
           {links.map(({ key, href, label }) => (
             <li key={key}>
-              <Link href={href} className='highlight'>{label}</Link>
+              <a href={href} className='highlight'>{label}</a>
             </li>
           ))}
           <li>
-            <Link href={contactRoute} className='highlight'>Contact</Link>
+            <a href={contactRoute} className='highlight'>Contact</a>
           </li>
         </div>
       </ul>

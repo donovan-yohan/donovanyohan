@@ -1,6 +1,5 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import Icon from "../components/icon";
-import Link from "next/link";
 
 import { animated, useSpring } from "react-spring";
 
@@ -50,12 +49,12 @@ const Card = (props) => {
             </div>
           </div>
           {!props.disabled && !props.isExternal && (
-            <Link href={props.href}>
+            <a href={props.href}>
               <span className='mobileButton'>
                 <span>Learn More</span>
                 <Icon icon='' size='small' />
               </span>
-            </Link>
+            </a>
           )}
           {!props.disabled && props.isExternal && (
             <a href={props.href} target='_blank' className='mobileButton'>
@@ -306,9 +305,9 @@ const Card = (props) => {
             {content(springProps)}
           </a>
         ) : (
-          <Link href={props.href}>
-            <span className={"card"}>{content(springProps)}</span>
-          </Link>
+          <a href={props.href} className={"card"}>
+            {content(springProps)}
+          </a>
         )}
         <style jsx>{`
           .cardWrapper {
