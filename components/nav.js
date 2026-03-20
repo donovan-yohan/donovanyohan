@@ -1,10 +1,10 @@
-import React, { useState, useContext } from "react";
+import { useContext, useRef } from "react";
 import Link from "next/link";
 import Icon from "../components/icon";
 import links from "../global/global";
 import { useRouter } from "next/router";
 import Context from "../components/context";
-import Lottie from "lottie-react-web";
+import Lottie from "lottie-react";
 import themeAnimation from "../public/img/animations/darkmode.json";
 
 export default function Nav(props) {
@@ -12,7 +12,7 @@ export default function Nav(props) {
   const contactRoute = router.pathname + "#footer";
   const { theme, toggleTheme } = useContext(Context);
   const themeMultiplier = theme == "light" ? 1 : -1;
-  const [hover, setHover] = useState(false);
+  const lottieRef = useRef(null);
 
   return (
     <nav>
@@ -20,29 +20,23 @@ export default function Nav(props) {
         <div className='homeLink'>
           <li className='smallLogo'>
             <Link href='/'>
-              <a>
-                <Icon size='small' link={true} icon={""} />
-              </a>
+              <Icon size='small' link={true} icon={""} />
             </Link>
           </li>
           {(!props.breadcrumbs || !props.breadcrumbs[0]) && (
             <li className='title'>
-              <Link href='/'>
-                <a className='highlight'>Donovan Yohan</a>
-              </Link>
+              <Link href='/' className='highlight'>Donovan Yohan</Link>
             </li>
           )}
           {props.breadcrumbs &&
-            props.breadcrumbs.map(({ href, label }, i) => {
+            props.breadcrumbs.map(({ href, label }) => {
               return (
                 <li
                   className='breadcrumb'
                   key={"nav-breadcrumb-" + label + href}
                 >
                   <span className='divider'>/</span>
-                  <Link href={href}>
-                    <a className={"highlight path"}>{label}</a>
-                  </Link>
+                  <Link href={href} className={"highlight path"}>{label}</Link>
                 </li>
               );
             })}
@@ -59,34 +53,37 @@ export default function Nav(props) {
           </li>
           {links.map(({ key, href, label }) => (
             <li key={key}>
-              <Link href={href}>
-                <a className='highlight'>{label}</a>
-              </Link>
+              <Link href={href} className='highlight'>{label}</Link>
             </li>
           ))}
           <li>
-            <Link href={contactRoute}>
-              <a className='highlight'>Contact</a>
-            </Link>
+            <Link href={contactRoute} className='highlight'>Contact</Link>
           </li>
         </div>
       </ul>
       <div
         className='themeToggle'
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
+        onMouseEnter={() => {
+          if (lottieRef.current) {
+            lottieRef.current.setDirection(1 * themeMultiplier);
+            lottieRef.current.play();
+          }
+        }}
+        onMouseLeave={() => {
+          if (lottieRef.current) {
+            lottieRef.current.setDirection(-1 * themeMultiplier);
+            lottieRef.current.play();
+          }
+        }}
         onClick={toggleTheme}
       >
         <span className='themeToggleIcon'>
           <Lottie
-            options={{
-              animationData: themeAnimation,
-              autoplay: false,
-              loop: false,
-            }}
-            height={30}
-            width={30}
-            direction={hover ? 1 * themeMultiplier : -1 * themeMultiplier}
+            lottieRef={lottieRef}
+            animationData={themeAnimation}
+            autoplay={false}
+            loop={false}
+            style={{ height: 30, width: 30 }}
           />
         </span>
       </div>

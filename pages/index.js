@@ -1,19 +1,17 @@
-import React, { useState, useContext } from "react";
+import { useContext } from "react";
 import Hero from "../components/hero";
 import Card from "../components/card";
-import Lottie from "lottie-react-web";
+import Lottie from "lottie-react";
 import Link from "next/link";
 import logoAnimation from "../public/img/animations/dy.json";
 import { MobileWidth, projects } from "../global/global";
 import Main from "../layouts/main";
 import useSmoothScroll from "../hooks/useSmoothScroll";
 import useWindowWidth from "../hooks/useWindowWidth";
-import VisibilitySensor from "react-visibility-sensor";
 import Context from "../components/context";
 
 const Index = () => {
   const { theme } = useContext(Context);
-  const [heroVisible, setVisible] = useState(true);
   const windowWidth = useWindowWidth();
   useSmoothScroll();
 
@@ -24,20 +22,13 @@ const Index = () => {
           <Hero
             dark={theme == "dark"}
             image={
-              <VisibilitySensor
-                partialVisibility={true}
-                onChange={(isVisible) => setVisible(isVisible)}
-              >
-                <div>
-                  <Lottie
-                    options={{
-                      animationData: logoAnimation,
-                      loop: false,
-                    }}
-                    isStopped={!heroVisible}
-                  />
-                </div>
-              </VisibilitySensor>
+              <div>
+                <Lottie
+                  animationData={logoAnimation}
+                  loop={false}
+                  autoplay={true}
+                />
+              </div>
             }
             text={
               <span>
@@ -59,9 +50,7 @@ const Index = () => {
             }
           />
           <h1 className='headerText highlightStatic'>
-            <Link href='/about'>
-              <a>Nice to meet you!</a>
-            </Link>
+            <Link href='/about'>Nice to meet you!</Link>
           </h1>
           <span className='body heroBlurb'>
             <span>
@@ -86,9 +75,7 @@ const Index = () => {
               React, Vue, and Angular. But believe it or not,{" "}
             </span>
             <span>
-              <Link href='/about'>
-                <a className='textLink'>I don't just draw and code!</a>
-              </Link>
+              <Link href='/about' className='textLink'>I don't just draw and code!</Link>
             </span>
           </span>
 

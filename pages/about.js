@@ -21,9 +21,7 @@ const About = () => {
             }}
           />
           <h1 className='headerText highlightStatic'>
-            <Link href='/about'>
-              <a>About me.</a>
-            </Link>
+            <Link href='/about'>About me.</Link>
           </h1>
           <span className='body heroBlurb'>{AboutText}</span>
 

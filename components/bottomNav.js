@@ -20,10 +20,8 @@ const BottomNav = () => {
           {links.map(({ key, href, label, icon }) => (
             <li key={key}>
               <Link href={href}>
-                <a>
-                  <Icon icon={icon} size="small" gray={true} link={true} />
-                  <span>{label}</span>
-                </a>
+                <Icon icon={icon} size="small" gray={true} link={true} />
+                <span>{label}</span>
               </Link>
             </li>
           ))}

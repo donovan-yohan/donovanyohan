@@ -33,20 +33,14 @@ const WorkLinks = (props) => {
     <div className='worklinks'>
       <div className='wrapper'>
         <div className='highlight'>
-          <Link href={"/#work"}>
-            <a className='highlight'>Back to All Work</a>
-          </Link>
+          <Link href={"/#work"} className='highlight'>Back to All Work</Link>
         </div>
         <div className='buttonWrapper'>
           {prevIndex >= 0 && (
-            <Link href={type[prevIndex].href}>
-              <a className='highlight'>&lt; Previous</a>
-            </Link>
+            <Link href={type[prevIndex].href} className='highlight'>&lt; Previous</Link>
           )}
           {nextIndex >= 0 && (
-            <Link href={type[nextIndex].href}>
-              <a className='highlight'>Next &gt;</a>
-            </Link>
+            <Link href={type[nextIndex].href} className='highlight'>Next &gt;</Link>
           )}
         </div>
       </div>

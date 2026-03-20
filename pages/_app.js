@@ -1,24 +1,21 @@
-import App from "next/app";
-import React from "react";
+import { useState, useEffect } from "react";
 import Context from "../components/context";
 
-export default class MyApp extends App {
-  state = {
-    theme: "light",
-  };
+export default function MyApp({ Component, pageProps }) {
+  const [theme, setTheme] = useState("light");
 
-  componentDidMount = () => {
+  useEffect(() => {
     // Define which query we will check
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     // If matches, set data-theme to dark
     if (mediaQuery.matches) {
       document.documentElement.setAttribute("data-theme", "dark");
-      this.setState({ theme: "dark" });
+      setTheme("dark");
     }
-  };
+  }, []);
 
-  toggleTheme = () => {
-    let newTheme = this.state.theme;
+  const toggleTheme = () => {
+    let newTheme = theme;
     newTheme === "dark" ? (newTheme = "light") : (newTheme = "dark");
 
     let transition = document.createElement("div");
@@ -31,12 +28,9 @@ export default class MyApp extends App {
     window.setTimeout(function () {
       document.documentElement.setAttribute("data-theme", newTheme);
     }, 320);
-    window.setTimeout(
-      function () {
-        this.setState({ theme: newTheme });
-      }.bind(this),
-      320
-    );
+    window.setTimeout(function () {
+      setTheme(newTheme);
+    }, 320);
 
     window.setTimeout(function () {
       document
@@ -45,38 +39,32 @@ export default class MyApp extends App {
     }, 1000);
   };
 
-  render() {
-    const { Component, pageProps } = this.props;
-
-    return (
-      <Context.Provider
-        value={{
-          theme: this.state.theme,
-          toggleTheme: this.toggleTheme,
+  return (
+    <Context.Provider
+      value={{
+        theme: theme,
+        toggleTheme: toggleTheme,
+      }}
+    >
+      <div
+        className="fouc"
+        style={{
+          position: "fixed",
+          width: "100%",
+          height: "100%",
+          top: "0",
+          left: "0",
+          backgroundColor: `${theme == "light" ? "white" : "black"}`,
         }}
-      >
-        <div
-          className="fouc"
-          style={{
-            position: "fixed",
-            width: "100%",
-            height: "100%",
-            top: "0",
-            left: "0",
-            backgroundColor: `${
-              this.state.theme == "light" ? "white" : "black"
-            }`,
-          }}
-        />
-        <Component {...pageProps} />
-        <style jsx global>
-          {`
-            .fouc {
-              display: none;
-            }
-          `}
-        </style>
-      </Context.Provider>
-    );
-  }
+      />
+      <Component {...pageProps} />
+      <style jsx global>
+        {`
+          .fouc {
+            display: none;
+          }
+        `}
+      </style>
+    </Context.Provider>
+  );
 }
