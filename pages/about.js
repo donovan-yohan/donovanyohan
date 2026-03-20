@@ -98,6 +98,7 @@ const About = () => {
             }
             .cardWrapper {
               margin-top: calc(50vw * 9 / 16 / 1.1);
+              margin-bottom: 0;
             }
           }
 
