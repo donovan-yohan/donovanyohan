@@ -49,11 +49,9 @@ const Card = (props) => {
             </div>
           </div>
           {!props.disabled && !props.isExternal && (
-            <a href={props.href}>
-              <span className='mobileButton'>
-                <span>Learn More</span>
+            <a href={props.href} className='mobileButton'>
+              <span>Learn More</span>
                 <Icon icon='' size='small' />
-              </span>
             </a>
           )}
           {!props.disabled && props.isExternal && (
