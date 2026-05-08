@@ -5,7 +5,7 @@ const ArticleHero = (props) => (
     <div className="container">
       {props.image && (
         <div className="hero" style={{ backgroundColor: props.bgColor }}>
-          <img src={props.image} />
+          <img src={props.image} className={props.cover ? "cover" : ""} />
         </div>
       )}
       {!props.image && <div className="spacer" />}
@@ -70,6 +70,11 @@ const ArticleHero = (props) => (
       img {
         height: 100%;
         width: auto;
+      }
+      img.cover {
+        height: 100%;
+        object-fit: cover;
+        width: 100%;
       }
 
       .content {
