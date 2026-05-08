@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import ArticleHero from "../../components/articlehero";
+import BlogHero from "../../components/bloghero";
 import Article from "../../components/article";
 import Main from "../../layouts/main";
 import { blogPosts, getBlogPost } from "../../global/blog";
@@ -17,23 +17,16 @@ const BlogPost = ({ post }) => {
     >
       <div className="pageRoot">
         <div className="pageContent">
-          <motion.div
-            className="heroWrap"
-            animate={{ y: [0, -4, 0] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <ArticleHero
-              title={post.title}
-              image={post.image}
-              bgColor="var(--background)"
-              cover
-              content={post.subtitle}
-              info={[
-                { key: `${post.slug}-date`, label: post.date, isLink: false },
-                { key: `${post.slug}-back`, label: "Back to Blog", href: "/blog", isLink: true },
-              ]}
-            />
-          </motion.div>
+          <BlogHero
+            eyebrow="Article"
+            title={post.title}
+            date={post.date}
+            quote={`“${post.quote}”`}
+            image={post.image}
+            imageAlt={post.visualAlt}
+            linkHref="/blog"
+            linkLabel="Back to all articles"
+          />
 
           {post.sections.map((section, index) => (
             <motion.div
@@ -73,7 +66,6 @@ const BlogPost = ({ post }) => {
             width: 100%;
           }
 
-          .heroWrap,
           .animatedArticle {
             width: 100%;
           }

@@ -8,6 +8,7 @@ export const blogPosts = [
     "subtitle": "How my thinking moved from agent capability to context routing.",
     "date": "April 2026",
     "image": "/img/photos/blog/context-is-the-constraint.svg",
+    "visualAlt": "Diagram of a context window filled with repo, memory, CI, diff, and docs blocks.",
     "quote": "The hard part isn't whether the model can do the work. It's what the model knows when it's doing it.",
     "sections": [
       {
@@ -179,6 +180,7 @@ export const blogPosts = [
     "subtitle": "A snapshot from when I started separating orchestration, repo practice, and model execution.",
     "date": "March 2026",
     "image": "/img/photos/blog/three-roles-three-phases.svg",
+    "visualAlt": "Diagram connecting agent, harness, repo, explore, climb, and summit phases.",
     "quote": "Agentic engineering isn't one problem. It's three problems that keep getting mistaken for one.",
     "sections": [
       {
@@ -326,6 +328,7 @@ export const blogPosts = [
     "subtitle": "The first version: small bounded tools, clear handoffs, and workflows composed from workflows.",
     "date": "March 2026",
     "image": "/img/photos/blog/three-hats-one-engineer.svg",
+    "visualAlt": "Illustration of three engineer hats labeled plan, code, and review.",
     "quote": "Every engineer wears three hats: refinement and planning, implementation, and code review.",
     "sections": [
       {

@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import ArticleHero from "../../components/articlehero";
+import BlogHero from "../../components/bloghero";
 import Main from "../../layouts/main";
 import { blogPosts, latestPost } from "../../global/blog";
 
@@ -11,29 +11,16 @@ const Blog = () => {
     <Main breadcrumbs={[{ label: "Blog", href: "/blog" }]}>
       <div className="pageRoot">
         <div className="pageContent blogContent">
-          <motion.div
-            className="heroWrap"
-            animate={{ y: [0, -4, 0] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <ArticleHero
-              title="Blog"
-              image={latestPost.image}
-              bgColor="var(--background)"
-              cover
-              content={`“${latestPost.quote}”`}
-              info={[
-                { key: "latest-label", label: "Latest article", isLink: false },
-                { key: "latest-date", label: latestPost.date, isLink: false },
-                {
-                  key: "latest-link",
-                  label: `Read ${latestPost.title}`,
-                  href: `/blog/${latestPost.slug}`,
-                  isLink: true,
-                },
-              ]}
-            />
-          </motion.div>
+          <BlogHero
+            eyebrow="Latest article"
+            title={latestPost.title}
+            date={latestPost.date}
+            quote={`“${latestPost.quote}”`}
+            image={latestPost.image}
+            imageAlt={latestPost.visualAlt}
+            linkHref={`/blog/${latestPost.slug}`}
+            linkLabel="Read the whole thing"
+          />
 
           <section className="postList" aria-label="Blog articles">
             {blogPosts.map((post) => (
@@ -46,7 +33,7 @@ const Blog = () => {
                 <a href={`/blog/${post.slug}`}>
                   <motion.img
                     src={post.image}
-                    alt=""
+                    alt={post.visualAlt || ""}
                     whileHover={{ scale: 1.025 }}
                     transition={{ duration: 0.45, ease }}
                   />
@@ -67,16 +54,11 @@ const Blog = () => {
             align-items: stretch;
           }
 
-          .heroWrap {
-            position: relative;
-          }
-
-
           .postList {
             display: flex;
             flex-direction: column;
             gap: 32px;
-            margin-top: 48px;
+            margin-top: 16px;
             width: 100%;
           }
 
@@ -92,10 +74,11 @@ const Blog = () => {
 
           :global(.postCard) img {
             background: var(--disabled);
+            border-radius: 100%;
             height: 220px;
             object-fit: cover;
             overflow: hidden;
-            width: 100%;
+            width: 220px;
           }
 
           .postCopy {
@@ -127,10 +110,6 @@ const Blog = () => {
           }
 
           @media only screen and (max-width: 767px) {
-            .animationEcho {
-              display: none;
-            }
-
             :global(.postCard) a {
               display: flex;
               flex-direction: column;
@@ -139,6 +118,7 @@ const Blog = () => {
 
             :global(.postCard) img {
               height: 180px;
+              width: 180px;
             }
           }
         `}</style>
