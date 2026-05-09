@@ -1,0 +1,7 @@
+node_modules
+.next
+out
+coverage
+package-lock.json
+public/img/animations/*.json
+DESIGN.md

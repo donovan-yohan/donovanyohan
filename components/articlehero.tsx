@@ -1,0 +1,154 @@
+import React from "react";
+import { WorkInfo } from "../global/content";
+
+interface ArticleHeroProps {
+  title: string;
+  image?: string;
+  bgColor?: string;
+  customImageStyle?: React.CSSProperties;
+  content: string;
+  info?: WorkInfo[];
+}
+
+const ArticleHero = (props: ArticleHeroProps) => (
+  <div>
+    <div className="container">
+      {props.image && (
+        <div className="hero" style={{ backgroundColor: props.bgColor }}>
+          <img src={props.image} alt={props.title} style={props.customImageStyle} />
+        </div>
+      )}
+      {!props.image && <div className="spacer" />}
+      <div className="content">
+        <div className="wrapper">
+          <h1>
+            <span className="headerText highlightStatic">{props.title}</span>
+          </h1>
+          <div className="intro">
+            <p className="body">{props.content}</p>
+            {props.info && (
+              <ul>
+                {props.info.map(({ key, label, isLink, href }) =>
+                  isLink ? (
+                    <li key={key}>
+                      <a href={href} target="_blank" rel="noreferrer" className="highlight">
+                        {label}
+                      </a>
+                    </li>
+                  ) : (
+                    <li key={key}>{label}</li>
+                  )
+                )}
+              </ul>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style jsx>{`
+      :global(body) {
+        margin: 0;
+        font-family: "Open Sans";
+        overflow-x: hidden;
+      }
+      .container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .hero {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 56px;
+        max-height: 400px;
+        height: 33vw;
+        width: 100vw;
+        overflow: hidden;
+        opacity: 0;
+        animation: fade-in 0.1s linear 0.1s 1 forwards;
+      }
+
+      .spacer {
+        width: 100vw;
+        margin-top: 64px;
+      }
+      img {
+        height: 100%;
+        width: auto;
+      }
+
+      .content {
+        max-width: 1024px;
+        font-size: 18px;
+      }
+      .intro {
+        display: flex;
+      }
+      h1 {
+        margin: 32px 0 0 0;
+        width: fit-content;
+        height: fit-content;
+      }
+      p {
+        margin: 16px 0 0 0;
+        line-height: 2;
+      }
+      ul {
+        line-height: 2;
+        padding-left: 32px;
+        display: flex;
+        flex-direction: column;
+        flex-basis: 75%;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      ul li {
+        list-style-type: none;
+        color: var(--gray);
+      }
+      a {
+        text-decoration: none;
+        color: var(--main);
+      }
+      @keyframes fade-in {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      @media only screen and (max-width: 1024px) {
+        .content {
+          font-size: 18px;
+          margin: 0 16px;
+        }
+      }
+
+      @media only screen and (max-width: 767px) {
+        .hero {
+          max-height: 50vw;
+        }
+        .spacer {
+          margin-top: 32px;
+        }
+        .intro {
+          flex-direction: column-reverse;
+        }
+        ul {
+          flex-basis: unset;
+          padding-left: 0px;
+        }
+        p {
+          margin: 0;
+        }
+      }
+    `}</style>
+  </div>
+);
+
+export default ArticleHero;

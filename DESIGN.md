@@ -153,6 +153,13 @@ spacing:
     bottom_margin: 32px
 
 layout:
+  surface_grid:
+    status: planned_next_evolution
+    type: dot grid / sketchbook registration surface
+    dot_spacing: snaps to spacing.unit (8px) and larger rhythm stops (16/24/32)
+    pointer_reactivity: dots scale subtly near cursor, then settle back into grid
+    content_alignment: page sections, cards, article blocks, and highlight strokes should anchor to grid intersections
+    motion_metaphor: framer-motion draws content into the grid instead of simply fading/sliding it in
   grid:
     type: flex
     columns: 2             # project + hobby cards on desktop
@@ -244,6 +251,16 @@ motion:
       to: 100%
 
 interaction:
+  dot_grid_surface:
+    description: |
+      The next system iteration turns the flat notebook surface into a visible
+      dot grid. The dots should feel like sketchbook registration marks: calm
+      at rest, slightly larger near the cursor, and never louder than the
+      highlighter or text. Content should feel drawn into this grid using
+      framer-motion path/scale/reveal choreography.
+    pointer_radius: subtle local influence only; avoid a spotlight/blob effect
+    motion_priority: support readability first, sketchbook effect second
+
   highlight_marker:
     description: |
       Bold links wear a highlighter pen. A 60% tall accent block grows from
@@ -382,6 +399,12 @@ button pills — the way a designer labels a layer or a callout in a
 deliverable. There are no panels, no cards-on-cards, no shadows, no
 gradients-as-decoration. Everything sits flat on the paper until the cursor
 arrives, and then exactly one thing animates: the highlighter.
+
+The next evolution adds a visible dot grid to the paper, turning it from a
+blank page into a sketchbook registration surface. Dots should stay quiet at
+rest, grow only slightly near the cursor, and make page elements feel snapped
+to a shared drawing grid. Motion should use Framer Motion as a drawing tool:
+content is pulled into the grid, not just faded onto the page.
 
 ## The highlighter mark
 
