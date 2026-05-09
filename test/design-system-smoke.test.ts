@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { normalizeArticleImageSrc } from "../components/articleimage";
 import { shopdonovanyohanInfo } from "../global/content";
 import links, { projects, socialLinks, MobileWidth } from "../global/global";
+import { getAbsoluteSiteUrl, siteMetadata } from "../global/site";
 
 describe("portfolio data smoke test", () => {
   it("keeps navigation and project content available", () => {
@@ -9,6 +10,10 @@ describe("portfolio data smoke test", () => {
     expect(socialLinks.length).toBeGreaterThan(0);
     expect(projects.some((project) => project.label === "donovanyohan.com")).toBe(true);
     expect(MobileWidth).toBe(1024);
+    expect(siteMetadata.url).toBe("https://donovanyohan.com");
+    expect(getAbsoluteSiteUrl(siteMetadata.ogImagePath)).toBe(
+      "https://donovanyohan.com/ogimage.jpg"
+    );
   });
 
   it("keeps icon font glyphs on nav and social links", () => {

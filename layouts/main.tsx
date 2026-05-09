@@ -4,6 +4,7 @@ import Nav from "../components/nav";
 import Footer from "../components/footer";
 import BottomNav from "../components/bottomNav";
 import { MobileWidth } from "../global/global";
+import { getAbsoluteSiteUrl, siteMetadata } from "../global/site";
 import useSmoothScroll from "../hooks/useSmoothScroll";
 import useWindowWidth from "../hooks/useWindowWidth";
 
@@ -50,27 +51,19 @@ const Main = (props: MainProps) => {
   return (
     <div>
       <Head>
-        <title>Donovan Yohan - UI/UX Designer &amp; Web Developer</title>
-        <meta
-          name="description"
-          content="Hi, I'm Donovan Yohan! I'm a UI & UX designer and a full stack developer."
-        />
-        <meta name="theme-color" content="#FFFFFF" />
-        <meta
-          key="og:title"
-          property="og:title"
-          content="Donovan Yohan - UI/UX Designer & Web Developer"
-        />
-        <meta
-          key="og:description"
-          property="og:description"
-          content="Hi, I'm Donovan Yohan! I'm a UI & UX designer and a full stack developer."
-        />
+        <title>{siteMetadata.title}</title>
+        <meta name="description" content={siteMetadata.description} />
+        <meta name="theme-color" content={siteMetadata.themeColor} />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta key="og:title" property="og:title" content={siteMetadata.title} />
+        <meta key="og:description" property="og:description" content={siteMetadata.description} />
         <meta
           key="og:image"
           property="og:image"
-          content="https://donovanyohan.donovanyohan.now.sh/ogimage.jpg"
+          content={getAbsoluteSiteUrl(siteMetadata.ogImagePath)}
         />
+        <meta key="og:url" property="og:url" content={siteMetadata.url} />
+        <meta key="twitter:card" name="twitter:card" content="summary_large_image" />
       </Head>
       <Nav breadcrumbs={props.breadcrumbs} isPhone={windowWidth !== null && windowWidth <= 425} />
       {props.children}

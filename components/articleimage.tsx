@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 interface ArticleImageProps {
   image?: string;
@@ -46,10 +47,26 @@ const ArticleImage = (props: ArticleImageProps) => {
   return (
     <div className="container">
       <div className="image">
-        {!props.zoomable && <img src={image} alt={alt} />}
+        {!props.zoomable && (
+          <Image
+            className="articleImage"
+            src={image}
+            alt={alt}
+            width={1024}
+            height={430}
+            sizes="(max-width: 1024px) calc(100vw - 32px), 1024px"
+          />
+        )}
         {props.zoomable && (
           <a href={image} target="_blank" rel="noreferrer">
-            <img src={image} alt={alt} />
+            <Image
+              className="articleImage"
+              src={image}
+              alt={alt}
+              width={1024}
+              height={430}
+              sizes="(max-width: 1024px) calc(100vw - 32px), 1024px"
+            />
           </a>
         )}
       </div>
@@ -66,8 +83,9 @@ const ArticleImage = (props: ArticleImageProps) => {
           height: 100%;
           overflow: hidden;
         }
-        img {
+        .articleImage {
           width: 100%;
+          height: auto;
         }
 
         @media only screen and (max-width: 1024px) {
