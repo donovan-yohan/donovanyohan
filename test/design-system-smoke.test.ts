@@ -4,6 +4,32 @@ import { shopdonovanyohanInfo } from "../global/content";
 import links, { projects, socialLinks, MobileWidth } from "../global/global";
 import { getAbsoluteSiteUrl, siteMetadata } from "../global/site";
 
+describe("article image src normalization", () => {
+  it("keeps valid image src values and normalizes public img paths", () => {
+    expect(normalizeArticleImageSrc("/img/photos/work/dy-problem.png")).toBe(
+      "/img/photos/work/dy-problem.png"
+    );
+    expect(normalizeArticleImageSrc("img/photos/work/dy-problem.png")).toBe(
+      "/img/photos/work/dy-problem.png"
+    );
+    expect(normalizeArticleImageSrc("https://example.com/image.png")).toBe(
+      "https://example.com/image.png"
+    );
+    expect(normalizeArticleImageSrc("data:image/png;base64,abc")).toBe("data:image/png;base64,abc");
+    expect(normalizeArticleImageSrc("blob:https://example.com/image-id")).toBe(
+      "blob:https://example.com/image-id"
+    );
+  });
+
+  it("rejects empty, placeholder, and non-public relative image src values", () => {
+    expect(normalizeArticleImageSrc()).toBeNull();
+    expect(normalizeArticleImageSrc("")).toBeNull();
+    expect(normalizeArticleImageSrc("src")).toBeNull();
+    expect(normalizeArticleImageSrc("SRC")).toBeNull();
+    expect(normalizeArticleImageSrc("photos/work/example.png")).toBeNull();
+  });
+});
+
 describe("portfolio data smoke test", () => {
   it("keeps navigation and project content available", () => {
     expect(links.length).toBeGreaterThan(0);
