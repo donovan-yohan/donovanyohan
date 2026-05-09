@@ -55,7 +55,7 @@ typography:
   fonts:
     display:
       family: "Open Sans"
-      weights: [300, 400]
+      weights: [300, 400]  # loaded; 700-style uses browser-synthesized bold unless the font URL adds 700
       source: Google Fonts
       role: hero copy, body prose, headings, page titles
     ui:
@@ -169,7 +169,7 @@ layout:
     backdrop: solid background color (no blur, no shadow)
   breakpoints:
     desktop_min: 1025px
-    tablet_max:  1130px    # hero text becomes fluid
+    hero_fluid_max: 1130px # hero text/logo scale fluidly before the mobile breakpoint
     mobile_max:  1024px    # bottom nav appears, breadcrumbs underline
     small_max:   767px     # h2/headerText shrink, article columns stack
     phone_max:   450px     # hero stacks vertically
@@ -186,7 +186,7 @@ border:
   hairline:
     width: 0.5px
     style: solid
-    color: var-border (theme-dependent)
+    color: var(--border)   # maps to color.light.border / color.dark.border
     color_mobile: muted    # mobile cards use the brighter gray border
     hover_color: ink       # desktop card border darkens on hover
 
@@ -272,12 +272,15 @@ interaction:
     behavior: |
       Hover plays the Lottie forward; un-hover reverses it.
       Click triggers full-viewport color wipe (background = target theme bg)
-      that fades over 1s; data-theme attribute swaps at 320ms (mid-fade).
+      that fades over 1s; data-theme swaps at 320ms during fade-in, matching
+      the implementation timeout before the wipe reaches its opaque hold.
 
   link_text_link:
     description: |
-      Inline body links use a shorter "marker block" overlay that fades in on
-      hover (opacity 0 → 1, 200ms ease).
+      Inline body links keep a persistent non-color cue at rest: bold weight
+      plus a native underline or always-on low-opacity marker underline. Hover
+      enhances that cue with the shorter "marker block" overlay (200ms ease),
+      never replacing the resting affordance.
 
 components:
   nav_top:
@@ -306,7 +309,7 @@ components:
   article_hero:
     image_max_height: 400px (50vw on mobile)
     title_offset_top: 32px
-    intro_grid: 2 columns (prose | metadata list 75% width)
+    intro_grid: 2 columns (prose | metadata list; metadata ul flex-basis 75%)
     metadata_list_color: muted, weight bold, no bullets
   footer:
     title_style: large headline with static highlight
@@ -354,7 +357,7 @@ assets:
 
 accessibility:
   prefers_color_scheme: respected on first paint
-  link_underline: replaced by highlighter marker (large hit target, high contrast)
+  link_underline: retained or replaced only by an equivalent persistent cue for inline body links; highlighter marker is hover/touch enhancement
   hover_only_affordances_disabled_below: 1024px (cards expose their pill always)
   mobile_secondary_nav: persistent bottom bar so primary actions remain reachable
 
@@ -382,9 +385,11 @@ arrives, and then exactly one thing animates: the highlighter.
 
 ## The highlighter mark
 
-This is the entire personality of the brand. Bold links live as plain text
-until hovered; a 60%-tall block of accent color then sweeps across the word
-from 0% to 100% width over 350ms on the signature easing curve
+This is the entire personality of the brand. Chrome links can stay visually
+quiet until hovered, but inline body links must carry a persistent affordance
+at rest (bold weight plus underline or subtle marker). On hover, a 60%-tall
+block of accent color then sweeps across the word from 0% to 100% width over
+350ms on the signature easing curve
 `cubic-bezier(0.51, 0.07, 0.09, 0.95)` — quick at first, settling into the
 final position with the slightest decelerated overshoot, like a marker
 landing on paper. Section headings (`Nice to meet you!`, `Work I've done.`,
@@ -410,8 +415,9 @@ swaps the marker for a deep saturated violet (`#5A3EC8`), which reads as a
 The theme transition itself is a piece of choreography: clicking the small
 sun/moon Lottie in the top-right paints a full-viewport plane in the
 *incoming* theme's background color, fades it from 0% → 100% → 0% over a
-full second, and swaps the `data-theme` attribute at the midpoint so the
-new palette is revealed as the curtain lifts. A no-flash-of-unstyled-content
+full second, and swaps the `data-theme` attribute at 320ms during the fade-in,
+just before the wipe reaches its opaque hold. The new palette is therefore
+hidden under the curtain before it lifts. A no-flash-of-unstyled-content
 cover sits over the page on first paint, in the matching theme color, until
 React hydrates.
 
@@ -447,11 +453,11 @@ There are essentially four sizes on the page:
    journalistic.
 2. **The 28-pixel section** — used inside long-form work case studies for
    `<h2>` block headings.
-3. **The 22-pixel card title** — Open Sans Bold, tightly leaded.
+3. **The 22-pixel card title** — Open Sans bold-styled, tightly leaded.
 4. **The 16-pixel body** — Open Sans, line-height 2.0, deliberately airy.
 
-The supporting **Roboto Bold uppercase** at 16px (nav) and 12px (mobile
-bottom-nav, button pills) is the only place letters track wide
+The supporting **Roboto Bold uppercase** at 16px (nav), 14px (button pills),
+and 12px (mobile bottom-nav) is the only place letters track wide
 (`letter-spacing: 0.1em`). The juxtaposition of **light, generous Open Sans
 prose** with **tight, technical, all-caps Roboto chrome** is the second-most
 recognizable thing about the brand after the highlighter.
@@ -461,14 +467,15 @@ recognizable thing about the brand after the highlighter.
 Everything is centered in a **1024-pixel max content column**, padded
 **40px** on desktop and **16px** on mobile. Vertical rhythm snaps to an
 **8-pixel base unit**, with frequent stops at 16, 24, 32, 48 and 64. The
-nav is a fixed **62-pixel** bar on desktop, **56 px** on mobile, and on
+nav is a fixed **62-pixel** bar on desktop, **56px** on mobile, and on
 mobile a matching **56-pixel bottom navigation** appears so primary
 destinations stay reachable with one thumb.
 
 Article pages add a wide horizontal banner image at the top
 (`max-height: 400px`, height fluid at 33vw), then drop straight into the
-1024-column with prose, two-column blurb-and-outcomes blocks
-(`55% / 45%` flex), and full-bleed inline images.
+1024-column. The article hero intro keeps prose beside a metadata list whose
+`ul` uses a 75% flex-basis; later two-column blurb-and-outcomes blocks use a
+separate `55% / 45%` flex split, followed by full-bleed inline images.
 
 ## Motion language
 
