@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import Image from "next/image";
 import Icon from "../components/icon";
 import { animated, useSpring } from "@react-spring/web";
 
@@ -9,6 +10,20 @@ const PARALLAX_MULTIPLIER = 1.66;
 const PERSPECTIVE = 1300;
 const SPRING_DAMPENER = 75;
 const SCALE = 1.022;
+
+const normalizeLocalImageSrc = (src: string) => {
+  if (
+    !src ||
+    src.startsWith("/") ||
+    src.startsWith("http://") ||
+    src.startsWith("https://") ||
+    src.startsWith("data:")
+  ) {
+    return src;
+  }
+
+  return `/${src}`;
+};
 
 const getParallaxStyle = (x: number, y: number, z: number, i: number) => {
   const p = PARALLAX_OFFSET + z * i * PARALLAX_MULTIPLIER;
@@ -52,6 +67,7 @@ const Card = (props: CardProps) => {
                   key={(props.href ?? "") + layer + i}
                 >
                   <animated.div
+                    className="imageLayer"
                     style={{
                       transform: transform
                         ? transform.xyzs.to((...args: number[]) => {
@@ -61,7 +77,16 @@ const Card = (props: CardProps) => {
                         : "",
                     }}
                   >
-                    {layer && <img className="cardImage" src={layer} alt="" />}
+                    {layer && (
+                      <Image
+                        className="cardImage"
+                        src={normalizeLocalImageSrc(layer)}
+                        alt=""
+                        aria-hidden="true"
+                        fill
+                        sizes="(max-width: 425px) 100vw, (max-width: 1024px) 50vw, 512px"
+                      />
+                    )}
                   </animated.div>
                 </div>
               ))}
@@ -126,13 +151,18 @@ const Card = (props: CardProps) => {
         }
         .imageContainer {
           position: relative;
+          width: 100%;
+          height: 100%;
         }
-        .layerContainer {
+        .layerContainer,
+        .imageLayer {
           position: absolute;
+          width: 100%;
+          height: 100%;
           top: 0;
           left: 0;
         }
-        img {
+        .cardImage {
           width: 100%;
           height: 100%;
           top: 0;

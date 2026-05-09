@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { WorkInfo } from "../global/content";
 
 interface ArticleHeroProps {
@@ -15,7 +16,16 @@ const ArticleHero = (props: ArticleHeroProps) => (
     <div className="container">
       {props.image && (
         <div className="hero" style={{ backgroundColor: props.bgColor }}>
-          <img src={props.image} alt={props.title} style={props.customImageStyle} />
+          <Image
+            src={props.image}
+            alt={props.title}
+            width={1600}
+            height={900}
+            priority
+            sizes="100vw"
+            className="heroImage"
+            style={props.customImageStyle}
+          />
         </div>
       )}
       {!props.image && <div className="spacer" />}
@@ -75,7 +85,7 @@ const ArticleHero = (props: ArticleHeroProps) => (
         width: 100vw;
         margin-top: 64px;
       }
-      img {
+      .heroImage {
         height: 100%;
         width: auto;
       }

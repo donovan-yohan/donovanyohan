@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Hero from "../components/hero";
 import Card from "../components/card";
 import { MobileWidth, hobbies } from "../global/global";
@@ -13,7 +14,17 @@ const About = () => {
       <div className="pageRoot">
         <div className="pageContent">
           <Hero
-            image={<img src="img/photos/about.jpg" className="heroImage" alt="About Donovan" />}
+            image={
+              <Image
+                src="/img/photos/about.jpg"
+                width={420}
+                height={420}
+                priority
+                className="heroImage"
+                alt="About Donovan"
+                sizes="(max-width: 450px) 66vw, (max-width: 1130px) 47vw, 420px"
+              />
+            }
             text={AboutHero}
             customImageStyle={{ margin: "0px" }}
           />
