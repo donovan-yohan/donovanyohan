@@ -54,7 +54,7 @@ const Card = (props: CardProps) => {
     config: { mass: 9, tension: 775, friction: 65, precision: 0.00001 },
   }));
 
-  const content = (transform?: typeof springProps) => (
+  const content = (transform?: typeof springProps, isNestedInCardLink = false) => (
     <div className="root">
       <div className="container">
         <div className="cardWrapper">
@@ -69,6 +69,11 @@ const Card = (props: CardProps) => {
                   <animated.div
                     className="imageLayer"
                     style={{
+                      position: "absolute",
+                      width: "100%",
+                      height: "100%",
+                      top: 0,
+                      left: 0,
                       transform: transform
                         ? transform.xyzs.to((...args: number[]) => {
                             const [x, y, z] = args;
@@ -85,6 +90,10 @@ const Card = (props: CardProps) => {
                         aria-hidden="true"
                         fill
                         sizes="(max-width: 425px) 100vw, (max-width: 1024px) 50vw, 512px"
+                        style={{
+                          objectFit: "cover",
+                          transition: "0.35s ease",
+                        }}
                       />
                     )}
                   </animated.div>
@@ -92,18 +101,23 @@ const Card = (props: CardProps) => {
               ))}
             </div>
           </div>
-          {!props.disabled && !props.isExternal && (
-            <a href={props.href} className="mobileButton">
-              <span>Learn More</span>
-              <Icon icon="" size="small" />
-            </a>
-          )}
-          {!props.disabled && props.isExternal && (
-            <a href={props.href} target="_blank" rel="noreferrer" className="mobileButton">
-              <span>Learn More</span>
-              <Icon icon="" size="small" />
-            </a>
-          )}
+          {!props.disabled &&
+            (isNestedInCardLink ? (
+              <span className="mobileButton">
+                <span>Learn More</span>
+                <Icon icon="" size="small" />
+              </span>
+            ) : (
+              <a
+                href={props.href}
+                className="mobileButton"
+                target={props.isExternal ? "_blank" : undefined}
+                rel={props.isExternal ? "noreferrer" : undefined}
+              >
+                <span>Learn More</span>
+                <Icon icon="" size="small" />
+              </a>
+            ))}
           {props.disabled && (
             <span className="mobileButton disabledBar">
               <span>Contact me to learn more</span>
@@ -333,11 +347,11 @@ const Card = (props: CardProps) => {
           rel="noreferrer"
           className={props.disabled ? "disabled" : "card"}
         >
-          {content(springProps)}
+          {content(springProps, true)}
         </a>
       ) : (
         <a href={props.href} className={"card"}>
-          {content(springProps)}
+          {content(springProps, true)}
         </a>
       )}
       <style jsx>{`
