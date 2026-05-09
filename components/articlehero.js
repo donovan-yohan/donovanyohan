@@ -1,11 +1,42 @@
 import React from "react";
+import Link from "next/link";
+
+const isInternalHref = (href = "") => href.startsWith("/");
+const isExternalHref = (href = "") => /^https?:\/\//.test(href);
+
+const ArticleHeroLink = ({ href, label, openInNewTab }) => {
+  const shouldOpenInNewTab = openInNewTab ?? isExternalHref(href);
+
+  if (isInternalHref(href) && !shouldOpenInNewTab) {
+    return (
+      <Link href={href} className="highlight">
+        {label}
+      </Link>
+    );
+  }
+
+  return (
+    <a
+      href={href}
+      target={shouldOpenInNewTab ? "_blank" : undefined}
+      rel={shouldOpenInNewTab ? "noopener noreferrer" : undefined}
+      className="highlight"
+    >
+      {label}
+    </a>
+  );
+};
 
 const ArticleHero = (props) => (
   <div>
     <div className="container">
       {props.image && (
         <div className="hero" style={{ backgroundColor: props.bgColor }}>
-          <img src={props.image} />
+          <img
+            src={props.image}
+            className={props.cover ? "cover" : ""}
+            alt={props.imageAlt || props.title || ""}
+          />
         </div>
       )}
       {!props.image && <div className="spacer" />}
@@ -20,12 +51,14 @@ const ArticleHero = (props) => (
             <p className="body">{props.content}</p>
             {props.info && (
               <ul>
-                {props.info.map(({ key, label, isLink, href }) =>
+                {props.info.map(({ key, label, isLink, href, openInNewTab }) =>
                   isLink ? (
                     <li key={key}>
-                      <a href={href} target="_blank" className="highlight">
-                        {label}
-                      </a>
+                      <ArticleHeroLink
+                        href={href}
+                        label={label}
+                        openInNewTab={openInNewTab}
+                      />
                     </li>
                   ) : (
                     <li key={key}>{label}</li>
@@ -70,6 +103,11 @@ const ArticleHero = (props) => (
       img {
         height: 100%;
         width: auto;
+      }
+      img.cover {
+        height: 100%;
+        object-fit: cover;
+        width: 100%;
       }
 
       .content {

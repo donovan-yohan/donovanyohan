@@ -5,8 +5,8 @@ const links = [
     icon: "",
   },
   {
-    href: "/about",
-    label: "About",
+    href: "/blog",
+    label: "Blog",
     icon: "",
   },
 ].map((link) => {
