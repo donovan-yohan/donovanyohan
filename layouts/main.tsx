@@ -1,5 +1,6 @@
 import React from "react";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import Nav from "../components/nav";
 import Footer from "../components/footer";
 import BottomNav from "../components/bottomNav";
@@ -45,8 +46,11 @@ const cssDarkVars: Record<string, string> = {
 };
 
 const Main = (props: MainProps) => {
+  const router = useRouter();
   const windowWidth = useWindowWidth();
   useSmoothScroll();
+  const currentPath = router.asPath.split(/[?#]/)[0] || "/";
+  const canonicalUrl = getAbsoluteSiteUrl(currentPath);
 
   return (
     <div>
@@ -62,7 +66,7 @@ const Main = (props: MainProps) => {
           property="og:image"
           content={getAbsoluteSiteUrl(siteMetadata.ogImagePath)}
         />
-        <meta key="og:url" property="og:url" content={siteMetadata.url} />
+        <meta key="og:url" property="og:url" content={canonicalUrl} />
         <meta key="twitter:card" name="twitter:card" content="summary_large_image" />
       </Head>
       <Nav breadcrumbs={props.breadcrumbs} isPhone={windowWidth !== null && windowWidth <= 425} />
