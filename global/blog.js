@@ -1,4 +1,3 @@
-// Ported from /Users/donovanyohan/Documents/Programs/personal/belayer-guide/src/pages/Philosophy*.tsx
 // Reframed as personal blog posts about how my thinking on agent orchestration evolved over time.
 
 export const blogPosts = [
@@ -7,6 +6,7 @@ export const blogPosts = [
     "title": "Context Is the Constraint",
     "subtitle": "How my thinking moved from agent capability to context routing.",
     "date": "April 2026",
+    "publishedAt": "2026-04-01",
     "image": "/img/photos/blog/context-is-the-constraint.svg",
     "visualAlt": "Diagram of a context window filled with repo, memory, CI, diff, and docs blocks.",
     "quote": "The hard part isn't whether the model can do the work. It's what the model knows when it's doing it.",
@@ -179,6 +179,7 @@ export const blogPosts = [
     "title": "Three Roles, Three Phases",
     "subtitle": "A snapshot from when I started separating orchestration, repo practice, and model execution.",
     "date": "March 2026",
+    "publishedAt": "2026-03-15",
     "image": "/img/photos/blog/three-roles-three-phases.svg",
     "visualAlt": "Diagram connecting agent, harness, repo, explore, climb, and summit phases.",
     "quote": "Agentic engineering isn't one problem. It's three problems that keep getting mistaken for one.",
@@ -327,6 +328,7 @@ export const blogPosts = [
     "title": "Three Hats, One Engineer",
     "subtitle": "The first version: small bounded tools, clear handoffs, and workflows composed from workflows.",
     "date": "March 2026",
+    "publishedAt": "2026-03-01",
     "image": "/img/photos/blog/three-hats-one-engineer.svg",
     "visualAlt": "Illustration of three engineer hats labeled plan, code, and review.",
     "quote": "Every engineer wears three hats: refinement and planning, implementation, and code review.",
@@ -491,6 +493,17 @@ export const blogPosts = [
   }
 ];
 
-export const latestPost = blogPosts[0];
+const sortByPublishedAtDesc = (posts) =>
+  [...posts].sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+
+const toBlogPostSummary = ({ sections, ...post }) => post;
+
+export const blogPostSummaries = sortByPublishedAtDesc(blogPosts).map(toBlogPostSummary);
+
+export const latestPost = blogPostSummaries[0];
+
+export const getLatestPost = () => latestPost;
+
+export const getBlogPostSummaries = () => blogPostSummaries;
 
 export const getBlogPost = (slug) => blogPosts.find((post) => post.slug === slug);

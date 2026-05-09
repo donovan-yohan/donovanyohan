@@ -1,3 +1,1 @@
-import Blog from "./blog/index";
-
-export default Blog;
+export { default, getStaticProps } from "./blog/index";

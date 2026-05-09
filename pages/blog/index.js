@@ -1,12 +1,13 @@
 import React from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import BlogHero from "../../components/bloghero";
 import Main from "../../layouts/main";
-import { blogPosts, latestPost } from "../../global/blog";
+import { getBlogPostSummaries, getLatestPost } from "../../global/blog";
 
 const ease = [0.51, 0.07, 0.09, 0.95];
 
-const Blog = () => {
+const Blog = ({ posts, latestPost }) => {
   return (
     <Main breadcrumbs={[{ label: "Blog", href: "/blog" }]}>
       <div className="pageRoot">
@@ -23,14 +24,14 @@ const Blog = () => {
           />
 
           <section className="postList" aria-label="Blog articles">
-            {blogPosts.map((post) => (
+            {posts.map((post) => (
               <motion.article
                 className="postCard"
                 key={post.slug}
                 whileHover={{ x: 8 }}
                 transition={{ duration: 0.35, ease }}
               >
-                <a href={`/blog/${post.slug}`}>
+                <Link href={`/blog/${post.slug}`}>
                   <motion.img
                     src={post.image}
                     alt={post.visualAlt || ""}
@@ -43,7 +44,7 @@ const Blog = () => {
                     <p className="body">{post.subtitle}</p>
                     <span className="highlight readLink">Read article</span>
                   </div>
-                </a>
+                </Link>
               </motion.article>
             ))}
           </section>
@@ -126,5 +127,12 @@ const Blog = () => {
     </Main>
   );
 };
+
+export const getStaticProps = () => ({
+  props: {
+    posts: getBlogPostSummaries(),
+    latestPost: getLatestPost(),
+  },
+});
 
 export default Blog;

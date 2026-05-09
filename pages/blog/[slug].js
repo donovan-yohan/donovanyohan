@@ -1,9 +1,12 @@
 import React from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import BlogHero from "../../components/bloghero";
 import Article from "../../components/article";
 import Main from "../../layouts/main";
 import { blogPosts, getBlogPost } from "../../global/blog";
+
+const getSectionId = (heading) => heading.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
 const BlogPost = ({ post }) => {
   if (!post) return null;
@@ -36,8 +39,7 @@ const BlogPost = ({ post }) => {
               transition={{ duration: 0.35, ease: [0.51, 0.07, 0.09, 0.95] }}
             >
               <Article>
-                {index > 0 && <h2 id={section.heading.toLowerCase().replace(/[^a-z0-9]+/g, "-")} className="anchor"></h2>}
-                <h2>
+                <h2 id={index > 0 ? getSectionId(section.heading) : undefined}>
                   <span className="highlightStatic">{section.heading}</span>
                 </h2>
                 {section.paragraphs.map((paragraph) => (
@@ -55,7 +57,7 @@ const BlogPost = ({ post }) => {
           ))}
 
           <div className="blogNav">
-            <a href="/blog" className="highlight">Back to all articles</a>
+            <Link href="/blog" className="highlight">Back to all articles</Link>
           </div>
         </div>
 

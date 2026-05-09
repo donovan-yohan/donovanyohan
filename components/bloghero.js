@@ -1,23 +1,46 @@
 import React from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
+
+const isInternalHref = (href = "") => href.startsWith("/");
+
+const BlogHeroLink = ({ href, className, ariaLabel, children }) =>
+  isInternalHref(href) ? (
+    <Link className={className} href={href} aria-label={ariaLabel}>
+      {children}
+    </Link>
+  ) : (
+    <a
+      className={className}
+      href={href}
+      aria-label={ariaLabel}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {children}
+    </a>
+  );
 
 const BlogHero = ({ eyebrow, title, date, quote, image, imageAlt, linkHref, linkLabel }) => (
   <section className="blogHero" aria-label={title}>
     <div className="heroShell">
-      <motion.a
+      <BlogHeroLink
         className="imageLink"
         href={linkHref}
-        aria-label={linkLabel}
-        animate={{ y: [0, -4, 0] }}
-        whileHover={{ scale: 1.025, rotate: -1 }}
-        transition={{
-          y: { duration: 7, repeat: Infinity, ease: "easeInOut" },
-          scale: { duration: 0.35 },
-          rotate: { duration: 0.35 },
-        }}
+        ariaLabel={linkLabel}
       >
-        <img src={image} alt={imageAlt || ""} />
-      </motion.a>
+        <motion.img
+          src={image}
+          alt={imageAlt || ""}
+          animate={{ y: [0, -4, 0] }}
+          whileHover={{ scale: 1.025, rotate: -1 }}
+          transition={{
+            y: { duration: 7, repeat: Infinity, ease: "easeInOut" },
+            scale: { duration: 0.35 },
+            rotate: { duration: 0.35 },
+          }}
+        />
+      </BlogHeroLink>
 
       <motion.div
         className="copy"
@@ -29,9 +52,9 @@ const BlogHero = ({ eyebrow, title, date, quote, image, imageAlt, linkHref, link
         </div>
         <h1>{quote}</h1>
         {linkHref && linkLabel && (
-          <a className="highlight readLink" href={linkHref}>
+          <BlogHeroLink className="highlight readLink" href={linkHref}>
             {linkLabel}
-          </a>
+          </BlogHeroLink>
         )}
       </motion.div>
     </div>
