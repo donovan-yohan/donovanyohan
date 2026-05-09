@@ -68,10 +68,10 @@ export const shopdonovanyohanInfo: WorkInfo[] = [
   { isLink: false, label: "Full Stack", key: "" },
   { isLink: false, label: "Side Project", key: "" },
   { isLink: false, label: "December 2019 - Present", key: "" },
-  { isLink: true, href: "shop.donovanyohan.com", label: "shop.donovanyohan.com", key: "" },
+  { isLink: true, href: "https://shop.donovanyohan.com", label: "shop.donovanyohan.com", key: "" },
   {
     isLink: true,
-    href: "github.com/donovan-yohan/shopdonovanyohan",
+    href: "https://github.com/donovan-yohan/shopdonovanyohan",
     label: "View on GitHub",
     key: "",
   },

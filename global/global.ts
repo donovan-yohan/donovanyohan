@@ -21,31 +21,31 @@ export interface Project {
 export type Hobby = Project;
 
 const links: NavLink[] = [
-  { href: "/#work", label: "Work", icon: "", key: "" },
-  { href: "/about", label: "About", icon: "", key: "" },
+  { href: "/#work", label: "Work", icon: "", key: "" },
+  { href: "/about", label: "About", icon: "", key: "" },
 ].map((link) => ({ ...link, key: `nav-link-${link.href}-${link.label}` }));
 
 export default links;
 
 export const socialLinks: NavLink[] = [
-  { href: "https://www.instagram.com/donovan.yohan/", label: "Instagram", icon: "", key: "" },
+  { href: "https://www.instagram.com/donovan.yohan/", label: "Instagram", icon: "", key: "" },
   {
     href: "https://www.linkedin.com/in/donovan-yohan/",
     label: "LinkedIn",
-    icon: "",
+    icon: "",
     key: "",
   },
-  { href: "https://github.com/donovan-yohan", label: "Github", icon: "", key: "" },
+  { href: "https://github.com/donovan-yohan", label: "GitHub", icon: "", key: "" },
   {
     href: "https://www.behance.net/donovanyohan",
     label: "Behance Graphic Design",
-    icon: "",
+    icon: "",
     key: "",
   },
   {
     href: "https://www.youtube.com/donovanyohan",
     label: "YouTube Motion Graphics",
-    icon: "",
+    icon: "",
     key: "",
   },
 ].map((link) => ({ ...link, key: `nav-link-${link.href}-${link.label}` }));
@@ -244,13 +244,16 @@ export const hobbies: Hobby[] = [
 
 export const MobileWidth = 1024;
 
-export function debounce(fn: () => void, ms: number): () => void {
+export function debounce<Args extends unknown[]>(
+  fn: (...args: Args) => void,
+  ms: number
+): (...args: Args) => void {
   let timer: ReturnType<typeof setTimeout> | undefined;
-  return () => {
+  return (...args: Args) => {
     clearTimeout(timer);
     timer = setTimeout(() => {
       timer = undefined;
-      fn();
+      fn(...args);
     }, ms);
   };
 }

@@ -29,7 +29,7 @@ export default function Nav(props: NavProps) {
         <div className="homeLink">
           <li className="smallLogo">
             <a href="/">
-              <Icon size="small" link={true} icon={""} />
+              <Icon size="small" link={true} icon={""} />
             </a>
           </li>
           {(!props.breadcrumbs || !props.breadcrumbs[0]) && (

@@ -70,13 +70,13 @@ const Card = (props: CardProps) => {
           {!props.disabled && !props.isExternal && (
             <a href={props.href} className="mobileButton">
               <span>Learn More</span>
-              <Icon icon="" size="small" />
+              <Icon icon="" size="small" />
             </a>
           )}
           {!props.disabled && props.isExternal && (
             <a href={props.href} target="_blank" rel="noreferrer" className="mobileButton">
               <span>Learn More</span>
-              <Icon icon="" size="small" />
+              <Icon icon="" size="small" />
             </a>
           )}
           {props.disabled && (

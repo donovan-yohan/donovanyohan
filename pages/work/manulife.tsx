@@ -38,7 +38,7 @@ const Manulife = () => {
               brainstorming, design feedback, and establishing patterns for the first steps of our
               design system. As the sole UI/UX designer on the Manulife Mobile Group Retirement
               project, I worked with my project team to set priorities, gather requirements,
-              validate technical feasability, and deliver high-fidelity mockups uniquely for iOS and
+              validate technical feasibility, and deliver high-fidelity mockups uniquely for iOS and
               Android, as Manulife Mobile had a commitment to delivering native experience to users
               of both mobile operating systems. During my stay, some of the challenges I had to
               tackle were:
@@ -72,7 +72,10 @@ const Manulife = () => {
             </ul>
           </Article>
 
-          <ArticleImage image={"/img/photos/work/manulife-reinstating-ux.png"} />
+          <ArticleImage
+            image={"/img/photos/work/manulife-reinstating-ux.png"}
+            alt="Manulife Mobile user experience process notes"
+          />
           <Article>
             <h2 id="reinstating-ux" className="anchor"></h2>
             <h2>
@@ -87,7 +90,7 @@ const Manulife = () => {
             </p>
             <div className="articleWrapper">
               <div className="blurb">
-                <h3>Adovating for the user through research and design</h3>
+                <h3>Advocating for the user through research and design</h3>
                 <p className="body">
                   As a designer, developer, and business student I was able to work with everyone on
                   my project team and empathize with their stance, while still vying for the user
@@ -111,7 +114,10 @@ const Manulife = () => {
             </div>
           </Article>
 
-          <ArticleImage image={"/img/photos/work/manulife-making-design-matter.png"} />
+          <ArticleImage
+            image={"/img/photos/work/manulife-making-design-matter.png"}
+            alt="Manulife Mobile design brief and team alignment artifact"
+          />
           <Article>
             <h2 id="making-design-matter" className="anchor"></h2>
             <h2>
@@ -156,7 +162,10 @@ const Manulife = () => {
             </div>
           </Article>
 
-          <ArticleImage image={"/img/photos/work/manulife-finding-why.png"} />
+          <ArticleImage
+            image={"/img/photos/work/manulife-finding-why.png"}
+            alt="Manulife Mobile research notes for finding the why behind requirements"
+          />
           <Article>
             <h2 id="finding-why" className="anchor"></h2>
             <h2>
@@ -203,7 +212,10 @@ const Manulife = () => {
               </div>
             </div>
           </Article>
-          <ArticleImage image={"/img/photos/work/manulife-usability-testing.png"} />
+          <ArticleImage
+            image={"/img/photos/work/manulife-usability-testing.png"}
+            alt="Manulife Mobile remote usability testing flow"
+          />
           <Article>
             <h2 id="usability-testing" className="anchor"></h2>
             <h2>
@@ -262,8 +274,16 @@ const Manulife = () => {
               <span className="highlightStatic">Sample works</span>
             </h2>
           </Article>
-          <ArticleImage zoomable={true} image={"/img/photos/work/manulife-example1.png"} />
-          <ArticleImage zoomable={true} image={"/img/photos/work/manulife-example2.png"} />
+          <ArticleImage
+            zoomable={true}
+            image={"/img/photos/work/manulife-example1.png"}
+            alt="Manulife Mobile sample interface screen"
+          />
+          <ArticleImage
+            zoomable={true}
+            image={"/img/photos/work/manulife-example2.png"}
+            alt="Manulife Mobile sample interface flow"
+          />
           <WorkLinks type={"projects"} label={"Manulife Mobile"} />
         </div>
         <style jsx>{`

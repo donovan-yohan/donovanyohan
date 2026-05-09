@@ -11,7 +11,7 @@ const BottomNav = () => {
         <div className="navLinks">
           <li>
             <a target="_blank" href="/DonovanYohanResume.pdf" rel="noreferrer">
-              <Icon icon="" size="small" gray={true} link={true} />
+              <Icon icon="" size="small" gray={true} link={true} />
               <span>Resume</span>
             </a>
           </li>
@@ -25,7 +25,7 @@ const BottomNav = () => {
           ))}
           <li>
             <a href={contactRoute}>
-              <Icon icon="" size="small" gray={true} link={true} />
+              <Icon icon="" size="small" gray={true} link={true} />
               <span>Contact</span>
             </a>
           </li>
