@@ -11,6 +11,20 @@ const PERSPECTIVE = 1300;
 const SPRING_DAMPENER = 75;
 const SCALE = 1.022;
 
+const normalizeLocalImageSrc = (src: string) => {
+  if (
+    !src ||
+    src.startsWith("/") ||
+    src.startsWith("http://") ||
+    src.startsWith("https://") ||
+    src.startsWith("data:")
+  ) {
+    return src;
+  }
+
+  return `/${src}`;
+};
+
 const getParallaxStyle = (x: number, y: number, z: number, i: number) => {
   const p = PARALLAX_OFFSET + z * i * PARALLAX_MULTIPLIER;
   const xt = Math.sin(y * PARALLAX_SPRING_FACTOR) * p * PARALLAX_TRANSLATION_FACTOR;
@@ -66,7 +80,7 @@ const Card = (props: CardProps) => {
                     {layer && (
                       <Image
                         className="cardImage"
-                        src={layer}
+                        src={normalizeLocalImageSrc(layer)}
                         alt=""
                         aria-hidden="true"
                         fill
