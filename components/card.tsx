@@ -102,27 +102,18 @@ const Card = (props: CardProps) => {
             </div>
           </div>
           {!props.disabled &&
-            !props.isExternal &&
             (isNestedInCardLink ? (
               <span className="mobileButton">
                 <span>Learn More</span>
                 <Icon icon="" size="small" />
               </span>
             ) : (
-              <a href={props.href} className="mobileButton">
-                <span>Learn More</span>
-                <Icon icon="" size="small" />
-              </a>
-            ))}
-          {!props.disabled &&
-            props.isExternal &&
-            (isNestedInCardLink ? (
-              <span className="mobileButton">
-                <span>Learn More</span>
-                <Icon icon="" size="small" />
-              </span>
-            ) : (
-              <a href={props.href} target="_blank" rel="noreferrer" className="mobileButton">
+              <a
+                href={props.href}
+                className="mobileButton"
+                target={props.isExternal ? "_blank" : undefined}
+                rel={props.isExternal ? "noreferrer" : undefined}
+              >
                 <span>Learn More</span>
                 <Icon icon="" size="small" />
               </a>
