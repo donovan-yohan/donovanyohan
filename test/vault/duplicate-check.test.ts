@@ -15,6 +15,7 @@ function makeNote(slug: string, filepath: string, frontmatterSlug?: string): Vau
       title: "Test Note",
       date: "2026-05-10",
       visibility: "public",
+      type: "note",
       ...(frontmatterSlug ? { slug: frontmatterSlug } : {}),
     },
     body: "<p>body</p>",

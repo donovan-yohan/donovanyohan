@@ -53,8 +53,16 @@ export interface PreviewConfig {
  * Only meaningful when `type: work`.
  */
 export const BannerConfigSchema = z.object({
-  light: z.string().optional(),
-  dark: z.string().optional(),
+  // Public-asset paths must start with `/` so the renderer can serve them
+  // directly without relative-path ambiguity. Leak-test friendly.
+  light: z
+    .string()
+    .startsWith("/", "banner.light must be a public asset path starting with /")
+    .optional(),
+  dark: z
+    .string()
+    .startsWith("/", "banner.dark must be a public asset path starting with /")
+    .optional(),
 });
 
 export type BannerConfig = z.infer<typeof BannerConfigSchema>;
@@ -63,9 +71,19 @@ export type BannerConfig = z.infer<typeof BannerConfigSchema>;
  * BgColorConfig: light/dark hex colour for the work-page hero background.
  * Only meaningful when `type: work`.
  */
+// Hex colour validator — accepts #RGB or #RRGGBB. Rejects malformed colours
+// that would silently break the hero rendering in Phase B.
+const HEX_COLOR = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+
 export const BgColorConfigSchema = z.object({
-  light: z.string().optional(),
-  dark: z.string().optional(),
+  light: z
+    .string()
+    .regex(HEX_COLOR, "bgColor.light must be a hex colour (#RGB or #RRGGBB)")
+    .optional(),
+  dark: z
+    .string()
+    .regex(HEX_COLOR, "bgColor.dark must be a hex colour (#RGB or #RRGGBB)")
+    .optional(),
 });
 
 export type BgColorConfig = z.infer<typeof BgColorConfigSchema>;
@@ -75,7 +93,8 @@ export type BgColorConfig = z.infer<typeof BgColorConfigSchema>;
  * `href` is optional — when present the chip renders as a link.
  */
 export const WorkInfoItemSchema = z.object({
-  label: z.string(),
+  // Non-empty label so an info chip is never blank in the hero.
+  label: z.string().min(1, "info[].label cannot be empty"),
   href: z.string().optional(),
 });
 
@@ -138,7 +157,11 @@ export const VaultFrontmatterSchema = z
      * `type` — content category. Defaults to `"note"` for all existing notes.
      * `"work"` enables work-page-specific rendering in Phase B (NoteRenderer).
      */
-    type: z.enum(["note", "work"]).default("note").optional(),
+    // `.default()` already makes the field optional at the input layer; do NOT
+    // add `.optional()` after, which would cause Zod to infer `T | undefined`
+    // and effectively bypass the default when the key is missing. The
+    // discriminator must always resolve to "note" or "work" at runtime.
+    type: z.enum(["note", "work"]).default("note"),
 
     /**
      * `subtitle` — extended description shown in the work-page hero below the
