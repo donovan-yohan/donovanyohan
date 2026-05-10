@@ -1,11 +1,22 @@
-# API_CONTRACT.md — Vault → Frontend
+# API_CONTRACT.md — Vault → Frontend (proposed)
 
 The shape and guarantees the vault adapter exposes for the bullet-journal /
 notebook UI to build against. This is the load-bearing contract.
 
-> **Source of truth:** `lib/vault/schema.ts` (Zod) is canonical; this doc is the
-> human-readable mirror. If they ever disagree, the code wins; raise a PR to fix
-> this doc.
+> **Status:** PROPOSED. The implementation lands across the stacked PRs in
+> epic #30:
+> - `lib/vault/schema.ts`, `lib/vault/index.ts` — ticket #32 / PR #42
+> - `lib/vault/adapter-local.ts`, `adapter-github.ts`, `walk.ts` — ticket #33
+> - `lib/vault/render.ts` — ticket #34
+> - `pages/writing/index.tsx`, `[slug].tsx` — ticket #35
+>
+> **Source of truth (once the code lands):** `lib/vault/schema.ts` (Zod) is
+> canonical; this doc is the human-readable mirror. If they ever disagree, the
+> code wins; raise a PR to fix this doc.
+>
+> **`import/no-restricted-paths` enforcement:** the ESLint rule + plugin lands
+> with #33. Until then this contract describes the intended boundary; CI does
+> not yet enforce it.
 
 ## Public types
 
@@ -49,6 +60,15 @@ export interface VaultAdapter {
   // Slice 1+ adds:
   // getAllNotes(): Promise<VaultNote[]>;  // authed-only
 }
+
+export interface VaultConfig {
+  source: 'local' | 'github';
+  path?: string;             // when source === 'local'
+  repoUrl?: string;          // when source === 'github' (Slice 1+)
+  token?: string;            // when source === 'github' (Slice 1+)
+  // Resolved by getVaultConfig() based on env vars; throws on missing
+  // required values when NODE_ENV === 'production'.
+}
 ```
 
 ## Public API surface
@@ -62,14 +82,26 @@ import type { VaultNote } from './schema';
  * Returns all notes from the configured vault that resolved to `public`
  * via fail-closed visibility. Sorted by `frontmatter.date` descending.
  *
- * Throws DuplicateSlugError if two notes share a slug.
- * Throws if VAULT_PATH (Slice 0) or VAULT_REPO_URL+TOKEN (Slice 1) is missing
- *   in production (NODE_ENV=production).
+ * Internally memoized: the first call walks + parses the vault; subsequent
+ * calls within the same Node process return the cached result. This keeps
+ * getStaticPaths + getStaticProps amortized to O(N) total, not O(N²).
+ *
+ * Throws DuplicateSlugError if any notes share a slug.
+ * Throws VaultConfigError if VAULT_PATH (Slice 0) or VAULT_REPO_URL+TOKEN
+ *   (Slice 1) is missing in NODE_ENV=production.
  *
  * Safe to call from getStaticProps / getStaticPaths.
  * NEVER call from public client code.
  */
 export function getPublicNotes(): Promise<VaultNote[]>;
+
+/**
+ * Convenience for /writing/[slug] getStaticProps. Equivalent to
+ * `(await getPublicNotes()).find(n => n.slug === slug) ?? null`, but
+ * shares the memoized cache with getPublicNotes() so per-slug lookups
+ * are O(1) after the first walk.
+ */
+export function getNoteBySlug(slug: string): Promise<VaultNote | null>;
 
 /**
  * Throws on missing required env vars. Called inside getStaticPaths/Props
@@ -185,9 +217,9 @@ Vercel keeps every deploy in its history; rollback = re-promote a prior deploy
 
 ```ts
 class DuplicateSlugError extends Error {
-  paths: [string, string];   // both colliding files
+  paths: string[];           // all colliding files (≥2)
   slug: string;
-  resolution: 'derived' | 'frontmatter';  // how each got the slug
+  resolutions: Array<'derived' | 'frontmatter'>; // parallel to paths
 }
 
 class VaultConfigError extends Error {
@@ -214,7 +246,8 @@ class VaultParseError extends Error {
 ---
 
 If you're authoring notes (not building the frontend), see
-[dy-journal/AUTHORING.md](https://github.com/donovan-yohan/dy-journal/blob/master/AUTHORING.md).
+[dy-journal/AUTHORING.md](https://github.com/donovan-yohan/dy-journal/blob/HEAD/AUTHORING.md)
+(branch-agnostic link).
 If you're building the privacy adapter, see
 [VAULT.md](./VAULT.md) (lands with ticket #38) and
 [AGENTS.md](./AGENTS.md) for nightshift constraints.
