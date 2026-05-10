@@ -56,9 +56,11 @@ guarantees the privacy boundary makes, and how to debug when notes don't appear.
    (missing field, typo, malformed YAML, `private`, `draft`) → **private**.
 2. **Walk-then-stop-if-private.** Private notes never have their bodies parsed,
    sanitized, or have excerpts computed. Build code only touches public bodies.
-3. **Walk ignore-list.** Files under `.obsidian/`, `.trash/`, `.git/`,
-   `.github/`, `node_modules/`, `templates/` are never read. Even a public note
-   inside `.trash/` stays invisible (move it back to `notes/` to publish).
+3. **Walk ignore-list (the "P17" rule throughout this doc).** Files under
+   `.obsidian/`, `.trash/`, `.git/`, `.github/`, `node_modules/`, `templates/`
+   are never read. Even a public note inside `.trash/` stays invisible (move
+   it back to `notes/` to publish). When this doc references "P17" elsewhere,
+   it means the walk-ignore-list rule defined here.
 4. **Symlinks rejected by default.** No `vault/public.md → /etc/passwd`
    exfiltration vectors.
 5. **Tarball traversal protection.** GitHub Tarball entries with `..`, absolute
@@ -202,7 +204,7 @@ npm run dev
 # 1. Write a note in Obsidian
 # 2. Save (cmd+s)
 # 3. Commit + push from dy-journal:
-cd ~/Documents/Programs/personal/dy-journal
+cd /path/to/dy-journal
 git add . && git commit -m "post: hello world" && git push
 
 # 4. Trigger a Vercel deploy manually (Slice 0 has no webhook yet):
@@ -264,7 +266,7 @@ In `dy-journal/.git/hooks/pre-commit`:
 
 ```bash
 #!/bin/sh
-PORTFOLIO_PATH=/Users/donovanyohan/Documents/Programs/personal/donovanyohan
+PORTFOLIO_PATH=/path/to/donovanyohan
 VAULT_PATH="$(git rev-parse --show-toplevel)"
 cd "$PORTFOLIO_PATH" && npm run vault-lint -- "$VAULT_PATH"
 ```
