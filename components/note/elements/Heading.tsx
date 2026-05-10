@@ -11,7 +11,7 @@
  */
 
 import React from "react";
-import { slug } from "github-slugger";
+import { useSlugger } from "../hooks/useSlugger";
 
 interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
   level: 1 | 2 | 3 | 4 | 5 | 6;
@@ -33,8 +33,11 @@ function extractText(node: React.ReactNode): string {
 }
 
 export function Heading({ level, variant = "default", children, id, className, ...rest }: HeadingProps) {
-  // Derive slug from text content if hast did not already provide an id.
-  const derivedId = id ?? slug(extractText(children));
+  // Per-note Slugger so repeated heading texts get unique IDs
+  // (introduction, introduction-1, introduction-2, ...). NoteRenderer
+  // provides one instance per render via SluggerContext.
+  const slugger = useSlugger();
+  const derivedId = id ?? slugger.slug(extractText(children));
 
   const Tag = `h${level}` as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 

@@ -1,13 +1,19 @@
 /**
  * CodeBlock.tsx — renders fenced code blocks (<pre><code>) for vault note content.
  *
- * Language is derived from the rehype hast className (e.g. "language-typescript").
- * Syntax highlighting is intentionally absent in Phase B; this component leaves
- * a clean extension point for shiki (or similar) in a future phase:
- *   TODO(Phase E): integrate shiki for server-side syntax highlighting.
- *   The `lang` prop and `language-${lang}` className are the hook points.
+ * The inner <code> element is rendered by InlineCode (the mapped `code` component)
+ * which preserves the `language-X` className emitted by remark-rehype. Block-vs-inline
+ * styling is distinguished via the CSS selector `.note-pre .note-inline-code` so
+ * fenced blocks reset the inline pill styling automatically.
  *
- * No eslint-disable needed — this is valid JSX with no restricted patterns.
+ * The previous version tried to clone the React child to rewrite className, but
+ * the child's element type at this point is the InlineCode component reference
+ * (not the string "code"), so the `el.type !== "code"` guard always tripped and
+ * the language was lost. The right place to thread language is a remark plugin
+ * that annotates the hast before rendering, or `passNode: true` from rehype-react.
+ *
+ * TODO(Phase E): integrate shiki for server-side syntax highlighting. The
+ * `language-X` className on the inner <code> is the hook point.
  */
 
 import React from "react";
@@ -16,40 +22,10 @@ interface CodeBlockProps extends React.HTMLAttributes<HTMLPreElement> {
   children?: React.ReactNode;
 }
 
-/** Extracts the language identifier from a rehype className like "language-typescript". */
-function extractLang(className?: string): string {
-  if (!className) return "text";
-  const classes = className.split(" ");
-  for (const cls of classes) {
-    if (cls.startsWith("language-")) {
-      return cls.replace("language-", "");
-    }
-  }
-  return "text";
-}
-
-/**
- * Extracts className from child <code> element so we can thread the lang
- * through from the hast node. rehype emits <pre><code class="language-X">.
- */
-function getChildCodeLang(children: React.ReactNode): string {
-  if (!React.isValidElement(children)) return "text";
-  const el = children as React.ReactElement<{ className?: string }>;
-  if (el.type !== "code") return "text";
-  return extractLang(el.props.className);
-}
-
 export function CodeBlock({ children, className, ...rest }: CodeBlockProps) {
-  const lang = getChildCodeLang(children);
-
   return (
     <pre className={`note-pre ${className ?? ""}`.trim()} {...rest}>
-      {/* Re-wrap child code node with the language className for future shiki hook */}
-      {React.isValidElement(children)
-        ? React.cloneElement(children as React.ReactElement<{ className?: string }>, {
-            className: `note-code language-${lang}`,
-          })
-        : children}
+      {children}
       <style jsx>{`
         .note-pre {
           background-color: var(--disabled, #ededed);
@@ -60,11 +36,12 @@ export function CodeBlock({ children, className, ...rest }: CodeBlockProps) {
           line-height: 1.6;
           margin: 1em 0;
         }
-        :global(.note-code) {
-          font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-          color: var(--main, #000000);
+        /* Reset the inline-code pill styling inside a fenced block. */
+        .note-pre :global(.note-inline-code) {
           background: none;
           padding: 0;
+          border-radius: 0;
+          font-size: inherit;
         }
       `}</style>
     </pre>

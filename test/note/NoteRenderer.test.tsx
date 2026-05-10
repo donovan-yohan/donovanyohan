@@ -169,4 +169,55 @@ describe("NoteRenderer", () => {
     // Second paragraph should NOT have drop-cap class
     expect(paragraphs[1]?.className).not.toContain("note-p--drop-cap");
   });
+
+  // ── Regressions (PR #52 bot review) ──────────────────────────────────────
+
+  it("duplicate heading texts get unique anchor IDs via shared Slugger", () => {
+    // Regression: github-slugger's static `slug()` has no state, so two
+    // `<h2>Introduction</h2>` headings collide on the same id. NoteRenderer
+    // now provides a per-note Slugger instance through SluggerContext.
+    const note = makeNote({
+      body:
+        "<h2>Introduction</h2><p>first</p>" +
+        "<h2>Introduction</h2><p>second</p>" +
+        "<h2>Introduction</h2><p>third</p>",
+    });
+    const { container } = render(<NoteRenderer note={note} />);
+    const ids = Array.from(container.querySelectorAll("h2")).map((h) => h.id);
+    expect(ids).toEqual(["introduction", "introduction-1", "introduction-2"]);
+  });
+
+  it("mailto: link does NOT get target=_blank", () => {
+    // mailto/tel/sms protocol handlers invoke external apps; opening them
+    // in a new tab is hostile UX.
+    const note = makeNote({
+      body: '<p><a href="mailto:hi@example.com">say hi</a></p>',
+    });
+    const { container } = render(<NoteRenderer note={note} />);
+    const anchor = container.querySelector('a[href^="mailto:"]');
+    expect(anchor).toBeTruthy();
+    expect(anchor?.getAttribute("target")).toBeNull();
+    expect(anchor?.getAttribute("rel")).toBeNull();
+  });
+
+  it("tel: link does NOT get target=_blank", () => {
+    const note = makeNote({
+      body: '<p><a href="tel:+15555550100">call</a></p>',
+    });
+    const { container } = render(<NoteRenderer note={note} />);
+    const anchor = container.querySelector('a[href^="tel:"]');
+    expect(anchor).toBeTruthy();
+    expect(anchor?.getAttribute("target")).toBeNull();
+  });
+
+  it("external http link still opens in new tab with safe rel", () => {
+    const note = makeNote({
+      body: '<p><a href="https://example.com/elsewhere">elsewhere</a></p>',
+    });
+    const { container } = render(<NoteRenderer note={note} />);
+    const anchor = container.querySelector('a[href="https://example.com/elsewhere"]');
+    expect(anchor).toBeTruthy();
+    expect(anchor?.getAttribute("target")).toBe("_blank");
+    expect(anchor?.getAttribute("rel")).toBe("noopener noreferrer");
+  });
 });

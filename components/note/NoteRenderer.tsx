@@ -22,9 +22,11 @@
  */
 
 import React, { useMemo } from "react";
+import GithubSlugger from "github-slugger";
 import type { VaultNote } from "../../lib/vault/schema";
 import type { ComponentMap } from "./defaultComponents";
 import { useResolvedComponents } from "./hooks/useResolvedComponents";
+import { SluggerContext } from "./hooks/useSlugger";
 import { parseAndRender } from "./buildProcessor";
 import { Paragraph } from "./elements/Paragraph";
 import { DropCap } from "./variants/DropCap";
@@ -88,25 +90,42 @@ export function NoteRenderer({ note, overrides }: NoteRendererProps) {
     return { ...baseComponents, p: dropCapP };
   }, [baseComponents, useDropCap]);
 
-  // Prepare HTML: mark first paragraph if drop-cap is enabled.
-  const html = useDropCap ? markFirstParagraph(note.body) : note.body;
+  // Memoize HTML preprocessing — `note.body` can be sizeable and the regex
+  // walk is wasteful on every re-render.
+  const html = useMemo(
+    () => (useDropCap ? markFirstParagraph(note.body) : note.body),
+    [note.body, useDropCap],
+  );
 
-  const tree = parseAndRender(html, components);
+  // Memoize the parsed + rendered React tree. The processor itself is also
+  // memoized per-components-map (see buildProcessor.ts) so this just avoids
+  // re-walking the parser when neither input changes.
+  const tree = useMemo(
+    () => parseAndRender(html, components),
+    [html, components],
+  );
+
+  // A fresh Slugger per render of this note so duplicate heading texts
+  // within the note get unique IDs (introduction, introduction-1, ...).
+  // Tied to note.slug so the Slugger doesn't leak state across navigations.
+  const slugger = useMemo(() => new GithubSlugger(), [note.slug]);
 
   return (
-    <article
-      data-slug={note.slug}
-      data-type={noteType}
-      style={
-        {
-          // CSS vars consumed by child components for accent colour theming.
-          // Defaults fall back to the site-wide --accent and transparent.
-          ["--note-accent" as string]: note.preview.accent ?? "var(--highlight, #ffef00)",
-          ["--note-tint" as string]: note.preview.tint ?? "transparent",
-        } as React.CSSProperties
-      }
-    >
-      {tree}
-    </article>
+    <SluggerContext.Provider value={slugger}>
+      <article
+        data-slug={note.slug}
+        data-type={noteType}
+        style={
+          {
+            // CSS vars consumed by child components for accent colour theming.
+            // Defaults fall back to the site-wide --accent and transparent.
+            ["--note-accent" as string]: note.preview.accent ?? "var(--highlight, #ffef00)",
+            ["--note-tint" as string]: note.preview.tint ?? "transparent",
+          } as React.CSSProperties
+        }
+      >
+        {tree}
+      </article>
+    </SluggerContext.Provider>
   );
 }
