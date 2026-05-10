@@ -233,8 +233,8 @@ Output looks like:
 [private] notes/draft-rough-thoughts.md       (visibility: draft → not public)
 [private] notes/malformed-frontmatter.md      (yaml parse error)
 [error] notes/duplicate-slug.md               (collides with notes/other.md)
-[ignored] .trash/old-public.md                (excluded by walk allowlist)
-[ignored] .obsidian/workspace.json            (excluded by walk allowlist)
+[ignored] .trash/old-public.md                (excluded by walk ignore-list)
+[ignored] .obsidian/workspace.json            (excluded by walk ignore-list)
 
 Summary: 1 public, 3 private, 1 error, 2 ignored
 ```
