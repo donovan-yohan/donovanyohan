@@ -1,0 +1,37 @@
+__fixtures__/vault/notes/private-note.md
+  s_b83e36f228a848::t_32f19fda05894c 1-7
+__fixtures__/vault/notes/no-visibility.md
+  s_b83e36f228a848::t_8c099040aa2e60 1-6
+__fixtures__/vault/notes/hello-world.md
+  s_b83e36f228a848::t_5c411b043818cc 1-7
+test/vault/vault-lint.test.ts
+  s_b83e36f228a848::t_f302aa333c74e7 1-311,315-413,417-487,491-515
+  s_b83e36f228a848::t_d985bc477d75b5 414-416
+  s_b83e36f228a848::t_990975dc0a4cba 488-490
+  s_b83e36f228a848::t_eac2aff53acef4 312-314
+package-lock.json
+  ai_agent 26,35,555-996,2592-2598,4287-4328,7950-7969,8989-9170,10033-10038,11091-11124,13401-13410
+package.json
+  s_b83e36f228a848::t_5c8b9ce3f7b599 15
+  s_b83e36f228a848::t_d5174c0f1e3fd2 34
+  s_b83e36f228a848::t_5fb1ac0983b3ba 43
+scripts/vault-lint.ts
+  s_b83e36f228a848::t_fe01668e36e990 1-105,107,109-414
+  s_b83e36f228a848::t_3685a509425743 106,108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "0b771174f8cb1d66aa85d78ef44c39f9e7caeec6",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
