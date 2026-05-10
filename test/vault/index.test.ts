@@ -127,3 +127,90 @@ describe("getVaultConfig — production env enforcement", () => {
     }
   });
 });
+
+describe("P20 forker-friendly env relaxation", () => {
+  function withEnv(
+    overrides: Record<string, string | undefined>,
+    fn: () => void | Promise<void>,
+  ): void | Promise<void> {
+    const saved: Record<string, string | undefined> = {};
+    for (const k of Object.keys(overrides)) {
+      saved[k] = process.env[k];
+      const v = overrides[k];
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
+    const restore = () => {
+      for (const k of Object.keys(saved)) {
+        const v = saved[k];
+        if (v === undefined) delete process.env[k];
+        else process.env[k] = v;
+      }
+    };
+    try {
+      const result = fn();
+      if (result instanceof Promise) {
+        return result.finally(restore);
+      }
+      restore();
+    } catch (err) {
+      restore();
+      throw err;
+    }
+  }
+
+  it("returns null when neither VAULT_SOURCE nor VAULT_PATH is set in production", async () => {
+    const { getVaultConfig } = await import("../../lib/vault/index");
+    await withEnv(
+      {
+        NODE_ENV: "production",
+        VAULT_SOURCE: undefined,
+        VAULT_PATH: undefined,
+      },
+      () => {
+        const cfg = getVaultConfig();
+        expect(cfg).toBeNull();
+      },
+    );
+  });
+
+  it("still throws VaultConfigError when VAULT_SOURCE=github but token is missing in production", async () => {
+    const { getVaultConfig } = await import("../../lib/vault/index");
+    const { VaultConfigError } = await import("../../lib/vault/errors");
+    await withEnv(
+      {
+        NODE_ENV: "production",
+        VAULT_SOURCE: "github",
+        VAULT_REPO_URL: "https://github.com/foo/bar",
+        VAULT_GITHUB_TOKEN: undefined,
+      },
+      () => {
+        expect(() => getVaultConfig()).toThrow(VaultConfigError);
+      },
+    );
+  });
+
+  it("getPublicNotes returns [] when getVaultConfig returns null", async () => {
+    const { getPublicNotes, __resetVaultCache__ } = await import(
+      "../../lib/vault/index"
+    );
+    // __resetVaultCache__ requires NODE_ENV=test; reset BEFORE the env swap
+    // so the call to getPublicNotes inside the env block sees a fresh cache.
+    __resetVaultCache__();
+    try {
+      await withEnv(
+        {
+          NODE_ENV: "production",
+          VAULT_SOURCE: undefined,
+          VAULT_PATH: undefined,
+        },
+        async () => {
+          const notes = await getPublicNotes();
+          expect(notes).toEqual([]);
+        },
+      );
+    } finally {
+      __resetVaultCache__();
+    }
+  });
+});
