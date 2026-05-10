@@ -1,0 +1,19 @@
+.env.example
+  s_b83e36f228a848::t_930e0885e9261e 1-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "b99651187bdbd8035ec98bdee94a819b5f38e732",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
