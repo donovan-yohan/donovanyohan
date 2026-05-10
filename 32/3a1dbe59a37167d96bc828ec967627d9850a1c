@@ -1,0 +1,23 @@
+test/vault/index.test.ts
+  s_b83e36f228a848::t_31d7f2f807f748 197-214
+  s_b83e36f228a848::t_fc76ffb9c3dd57 130-196,215-216
+lib/vault/index.ts
+  s_b83e36f228a848::t_d57f6b4f061290 39-40,43-60,69,83
+  s_b83e36f228a848::t_c1e546b8c20523 115-118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "323a1dbe59a37167d96bc828ec967627d9850a1c",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
