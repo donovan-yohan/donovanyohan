@@ -1,11 +1,22 @@
-# API_CONTRACT.md — Vault → Frontend
+# API_CONTRACT.md — Vault → Frontend (proposed)
 
 The shape and guarantees the vault adapter exposes for the bullet-journal /
 notebook UI to build against. This is the load-bearing contract.
 
-> **Source of truth:** `lib/vault/schema.ts` (Zod) is canonical; this doc is the
-> human-readable mirror. If they ever disagree, the code wins; raise a PR to fix
-> this doc.
+> **Status:** PROPOSED. The implementation lands across the stacked PRs in
+> epic #30:
+> - `lib/vault/schema.ts`, `lib/vault/index.ts` — ticket #32 / PR #42
+> - `lib/vault/adapter-local.ts`, `adapter-github.ts`, `walk.ts` — ticket #33
+> - `lib/vault/render.ts` — ticket #34
+> - `pages/writing/index.tsx`, `[slug].tsx` — ticket #35
+>
+> **Source of truth (once the code lands):** `lib/vault/schema.ts` (Zod) is
+> canonical; this doc is the human-readable mirror. If they ever disagree, the
+> code wins; raise a PR to fix this doc.
+>
+> **`import/no-restricted-paths` enforcement:** the ESLint rule + plugin lands
+> with #33. Until then this contract describes the intended boundary; CI does
+> not yet enforce it.
 
 ## Public types
 
@@ -235,7 +246,8 @@ class VaultParseError extends Error {
 ---
 
 If you're authoring notes (not building the frontend), see
-[dy-journal/AUTHORING.md](https://github.com/donovan-yohan/dy-journal/blob/master/AUTHORING.md).
+[dy-journal/AUTHORING.md](https://github.com/donovan-yohan/dy-journal/blob/HEAD/AUTHORING.md)
+(branch-agnostic link).
 If you're building the privacy adapter, see
 [VAULT.md](./VAULT.md) (lands with ticket #38) and
 [AGENTS.md](./AGENTS.md) for nightshift constraints.
