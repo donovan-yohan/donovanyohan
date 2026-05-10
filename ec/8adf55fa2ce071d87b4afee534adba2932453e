@@ -1,0 +1,34 @@
+pages/writing/index.tsx
+  s_b83e36f228a848::t_d2fe975ef4c9d7 8
+  s_b83e36f228a848::t_cde586f0ac6695 18-19
+  s_b83e36f228a848::t_15a082a012e6b2 1-7,9-17,20-63
+pages/writing/[slug].tsx
+  s_b83e36f228a848::t_3d5853ed15becb 1-7,9-13,16-72
+  s_b83e36f228a848::t_ebf67230e13502 8
+  s_b83e36f228a848::t_737b1c74361701 14-15
+scripts/record-build-sha.ts
+  s_b83e36f228a848::t_1f3685b8ef5af6 1-64
+global/global.ts
+  s_b83e36f228a848::t_d3ed53c3aafdac 26
+test/vault/routes.test.ts
+  s_b83e36f228a848::t_b27fda5b56e495 1-174,176-179,183,188-191,196-197,281
+  s_b83e36f228a848::t_f00faca40e6519 175,180-182,184-187
+  s_b83e36f228a848::t_6b6d110ecf86ba 192-195,198-205,207,209-280
+  s_b83e36f228a848::t_832d3fbcf4a8d2 206,208
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "ec8adf55fa2ce071d87b4afee534adba2932453e",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
