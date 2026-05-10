@@ -1,0 +1,31 @@
+components/note/elements/Link.tsx
+  s_b83e36f228a848::t_6178eb317d174a 4,6-9,22-39,41,45,47,49-50,54-69,71-72,75-80,84,86,89-94,97-109,114,126
+components/note/elements/CodeBlock.tsx
+  s_b83e36f228a848::t_457ad82cbb14bd 4-7,9-16,28,39-40,43-44
+test/note/NoteRenderer.test.tsx
+  s_b83e36f228a848::t_86d1fbd6248ee4 172-222
+components/note/hooks/useSlugger.ts
+  s_b83e36f228a848::t_e6b02da99ccae6 1-28
+components/note/elements/Heading.tsx
+  s_b83e36f228a848::t_9707530f21855a 14
+  s_b83e36f228a848::t_3892d6c9b7a630 36-40
+components/note/NoteRenderer.tsx
+  s_b83e36f228a848::t_5e829286fd5659 93-106,108-111,114-129
+  s_b83e36f228a848::t_8fb938ada043d4 25,29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "785a838f613882ed3b0113a99702f4b4b3e56141",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
