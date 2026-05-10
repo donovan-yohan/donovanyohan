@@ -17,7 +17,10 @@
     "check": "npm run lint && npm run typecheck && npm run test:run && npm run build && npm run leak-test"
   },
   "dependencies": {
+    "@chenglou/pretext": "^0.0.6",
     "@react-spring/web": "^10.0.3",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
     "fast-glob": "^3.3.3",
     "framer-motion": "12.38.0",
     "gray-matter": "^4.0.3",
@@ -35,6 +38,7 @@
     "remark-rehype": "^11.1.2",
     "styled-jsx": "^5.1.7",
     "tar": "^7.5.15",
+    "three": "^0.184.0",
     "unified": "^11.0.5",
     "zod": "^3.25.76"
   },
@@ -49,6 +53,7 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@types/tar": "^6.1.13",
+    "@types/three": "^0.184.1",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.6",
