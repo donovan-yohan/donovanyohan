@@ -1,0 +1,31 @@
+lib/vault/index.ts
+  s_b83e36f228a848::t_08e5819a75a016 27-32
+scripts/record-build-sha.ts
+  s_b83e36f228a848::t_2a1d50b3e441fe 50-61
+  s_b83e36f228a848::t_22b85dc04461a9 20
+pages/writing/[slug].tsx
+  s_b83e36f228a848::t_a3e66df1458bfc 8-10,14,16-17,46,49-52,55-60,62-63,65-80
+test/vault/routes.test.ts
+  s_b83e36f228a848::t_c118f2fdd1773d 238-241,243
+  s_b83e36f228a848::t_034fa86129ff0e 269
+eslint.config.mjs
+  s_b83e36f228a848::t_23f2cbfc8c93ed 25-29,35-41,48-49,54-55
+pages/writing/index.tsx
+  s_b83e36f228a848::t_56962d809e9bbe 8-10,18,20-21,42,53-56,58-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "c6bc94d7334282f646866606f89a3ea79626f076",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
