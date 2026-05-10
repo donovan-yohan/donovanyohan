@@ -1,0 +1,113 @@
+lib/vault/wikilinks.ts
+  s_b83e36f228a848::t_5acf6152b20819 1-80
+test/vault/duplicate-check.test.ts
+  s_b83e36f228a848::t_5de4c9f0bdbfb2 6-8
+  s_b83e36f228a848::t_e59760ff8adabc 1-5,9-147
+__fixtures__/vault/note-private-1.md
+  ai_agent 1-9
+__fixtures__/vault/leak-canary.md
+  ai_agent 1-9
+__fixtures__/vault/symlink-escape.md
+  ai_agent 1
+__fixtures__/vault/templates/daily-template.md
+  ai_agent 1-9
+package-lock.json
+  ai_agent 12,14,17,20-25,27-28,40,44,1335-1346,1426-1455,2186-2194,2209-2217,2232-2246,2277-2303,2534-2539,3255-3264,3436-3445,3486-3524,3551-3560,3717-3729,3792-3804,4351-4435,4578-4591,4657-4674,4683-4685,4692,5041-5077,5172-5222,5236-5245,5453-5461,5571-5582,5911-5919,6238-6247,6308-7075,7078-7091,7093-7097,7100-7114,7116-7130,7181-7201,7376-7382,7746-7755,7865-7975,8178-8190,8413-8428,8577-8590,8601-8609,8679-8703,8837-8856,9024-9122,9125-9128,9131-9133,9136-9137,9140-9143,9145-9151,9230-9257,9719-9728,10425-10432,10499-10522,10585,10925-10932,10945-10952,10965-10977,11003-11025,11149-11153,11571-11575,11669-11673,11701-11720,11741-11745,11854-11861,11893,11901-11908,12342-12410,12476-12480,12526-12538,12546-12548,12554,12773-12802,12857-12892,12902-12906,13034-13038,13042,13089,13101-13105,13323-13327,13465-13469,13517-13521,13528-13684,13694-13991,14023-14035,14052,14129-14133,14312,14361-14365,14375,14430-14505,14541,14632-14640,14793-14802,14911-14919,14926-14930,14966-14984,15069-15078,15218-15274,15322-15339,15562-15566
+test/vault/adapter-local.test.ts
+  s_b83e36f228a848::t_85a51bfe423382 46-49,51,53-55
+  s_b83e36f228a848::t_6f577c8afe1105 14
+  s_b83e36f228a848::t_e599717622076f 1
+  s_b83e36f228a848::t_bfea2b169fe743 2-13,15,17-45,50,52,56-161
+  s_b83e36f228a848::t_4ff618327d31f8 16
+__fixtures__/vault/note-private-2.md
+  ai_agent 1-8
+lib/vault/index.ts
+  s_b83e36f228a848::t_3ae0a0f4fe24c4 1-161
+__fixtures__/dy-journal-snapshot/notes/private-q3-planning.md
+  s_b83e36f228a848::t_f494a52debab5f 1-13
+test/vault/walk.test.ts
+  s_b83e36f228a848::t_1b0494da370499 13
+  s_b83e36f228a848::t_c9021e3b5920b2 1
+  s_b83e36f228a848::t_2bbcbdcc4fda38 2-12,14-33,38-84
+  s_b83e36f228a848::t_1fd7e8fbb2fe8a 34-37
+__fixtures__/vault/.obsidian/workspace.json
+  ai_agent 1
+lib/vault/adapter-local.ts
+  s_b83e36f228a848::t_b575ed6e94a6a7 1-213
+package.json
+  s_b83e36f228a848::t_b7a77f966fdd47 34
+  s_b83e36f228a848::t_379899b7519fc0 29,31,35
+  s_b83e36f228a848::t_cedd5a3aff38b6 19,21,24
+  s_b83e36f228a848::t_b45f2a8ce3b188 27-28,30,32
+  s_b83e36f228a848::t_5d00012b4b22dc 47
+  s_b83e36f228a848::t_b7c5a6e3107a65 51
+__fixtures__/vault/malformed-frontmatter.md
+  ai_agent 1-10
+__fixtures__/vault/note-public-3.md
+  ai_agent 1-9
+__fixtures__/vault/note-public-2.md
+  ai_agent 1-12
+test/vault/wikilinks.test.ts
+  s_b83e36f228a848::t_cca7d67415275b 82
+  s_b83e36f228a848::t_41cfaba2caf845 1-7,9-81,83-116
+  s_b83e36f228a848::t_96e1bc1b6b4522 8
+__fixtures__/vault/note-public-1.md
+  ai_agent 1-9
+test/vault/index.test.ts
+  s_b83e36f228a848::t_2cdbf19f9c3079 14,104-106,117-118,121-122,127
+  s_b83e36f228a848::t_080ef65b0fc56f 25,35,53,98
+  s_b83e36f228a848::t_b918b447dead04 39,57
+  s_b83e36f228a848::t_1d4e3ee5a25393 113-116,123-126
+  s_b83e36f228a848::t_ebc9fc83316fc7 112,119-120
+  s_b83e36f228a848::t_78a1c02960017b 2-13,15-24,26-34,36-38,40-52,54-56,58-70,72-75,77-82,84-88,90-97,99-103,107-111,128-129
+  s_b83e36f228a848::t_5ff10c98d6de5b 1
+  s_b83e36f228a848::t_90c34051f45fc7 71,76,83,89
+test/vault/integration-dy-journal.test.ts
+  s_b83e36f228a848::t_baaa0a7710446a 2-14,16-60
+  s_b83e36f228a848::t_427ef40c89009d 1
+  s_b83e36f228a848::t_2b15984cb82883 15
+eslint.config.mjs
+  s_b83e36f228a848::t_8f596709280393 5,23-52
+lib/vault/duplicate-check.ts
+  s_b83e36f228a848::t_ac9e9ebcbcfcba 1-62
+__fixtures__/dy-journal-snapshot/notes/2026-05-10-hello-world.md
+  s_b83e36f228a848::t_f494a52debab5f 1-15
+lib/vault/walk.ts
+  s_b83e36f228a848::t_d52c4d336d94cd 1-46,48-97
+  s_b83e36f228a848::t_f382a268044d52 47
+lib/vault/errors.ts
+  s_b83e36f228a848::t_fa7074b671d285 1-88
+lib/vault/schema.ts
+  s_b83e36f228a848::t_15f04969ebe304 100-142
+__fixtures__/dy-journal-snapshot/notes/draft-rough-thoughts.md
+  s_b83e36f228a848::t_f494a52debab5f 1-9
+__fixtures__/vault/.trash/old-public.md
+  ai_agent 1-9
+lib/vault/adapter-github.ts
+  s_b83e36f228a848::t_a16f1cc29b53f6 267-268,273
+  s_b83e36f228a848::t_04f99c6db8250d 260,266,272
+  s_b83e36f228a848::t_a694dc9df0028f 326,329-337
+  s_b83e36f228a848::t_e550843c560501 1-259,264-265,269-270,274-325,327-328,338-362
+  s_b83e36f228a848::t_62ef2e12ca28f0 261-263,271
+test/vault/adapter-github.test.ts
+  s_b83e36f228a848::t_82ddb6808a5682 5,15-17,26,30,33,35-95,107-113,139-140,156-159,175-179,190,192,243-244,260-261,272-273
+  s_b83e36f228a848::t_1bbdf13d98a6cc 2-4,6-14,19-25,27-29,31-32,34,96-106,114-138,141-155,160-174,180-189,191,193-242,245-259,262-271,274-291
+  s_b83e36f228a848::t_3d3756af8af868 18
+  s_b83e36f228a848::t_edae22da89ad3a 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "e6a5fefeb8c1f4a583258a08ade52e85e691a22b",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
