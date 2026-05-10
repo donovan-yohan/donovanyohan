@@ -65,12 +65,15 @@ export const VaultFrontmatterSchema = z
     title: z.string().min(1),
 
     date: z.preprocess(
-      (v) =>
-        v instanceof Date
-          ? v.toISOString().slice(0, 10)
-          : typeof v === "string"
-            ? v
-            : v,
+      (v) => {
+        // Invalid Date (e.g. `new Date('not-a-date')`) returns NaN from getTime();
+        // calling toISOString() on it throws RangeError. Guard explicitly so the
+        // value flows through to the regex check (which will reject it → private).
+        if (v instanceof Date) {
+          return Number.isNaN(v.getTime()) ? v : v.toISOString().slice(0, 10);
+        }
+        return v;
+      },
       z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
     ),
 

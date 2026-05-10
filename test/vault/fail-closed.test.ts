@@ -141,4 +141,18 @@ describe("resolveVisibility — fail-closed privacy boundary (P10)", () => {
       }),
     ).toBe("public");
   });
+
+  it("{ title: 'X', date: new Date('not-a-date'), visibility: 'public' } → private (invalid Date does not throw)", () => {
+    // Regression for gemini #42: calling toISOString() on an invalid Date
+    // (one whose getTime() returns NaN) used to throw RangeError. The
+    // preprocess should return the invalid Date untouched so the regex
+    // step rejects it cleanly → fail-closed to private.
+    expect(
+      resolveVisibility({
+        title: "X",
+        date: new Date("not-a-date"),
+        visibility: "public",
+      }),
+    ).toBe("private");
+  });
 });

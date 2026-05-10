@@ -78,10 +78,10 @@ function slugifyFilename(filename: string): string {
   // 4. Lowercase
   const lower = ascii.toLowerCase();
 
-  // 4b. Remove apostrophes / single quotes so contractions collapse without
-  //     a separating dash (e.g. "What's" → "whats" not "what-s").
-  //     Apostrophe is ASCII (0x27) so it survived the non-ASCII filter above.
-  const noApostrophe = lower.replace(/[''']/g, "");
+  // 4b. Remove apostrophes so contractions collapse without a separating dash
+  //     (e.g. "What's" → "whats" not "what-s"). The non-ASCII filter on line 76
+  //     already stripped curly quotes; only the ASCII apostrophe (0x27) remains.
+  const noApostrophe = lower.replace(/'/g, "");
 
   // 5. Replace whitespace and punctuation runs with a single dash.
   //    Punctuation here = anything that is NOT alphanumeric or already a dash.
@@ -91,5 +91,12 @@ function slugifyFilename(filename: string): string {
   const collapsed = dashed.replace(/-{2,}/g, "-");
 
   // 7. Trim leading/trailing dashes
-  return collapsed.replace(/^-+|-+$/g, "");
+  const trimmed = collapsed.replace(/^-+|-+$/g, "");
+
+  // 8. Empty-result guard: a filename consisting entirely of non-ASCII
+  //    characters or punctuation (e.g. "🚀🔥🎉.md") collapses to "". Caller
+  //    must handle this — the schema's slug regex will reject empty strings,
+  //    so the note resolves to private (fail-closed). Build-time
+  //    duplicate-slug check catches repeated empties as collisions.
+  return trimmed;
 }
