@@ -49,6 +49,15 @@ export interface VaultAdapter {
   // Slice 1+ adds:
   // getAllNotes(): Promise<VaultNote[]>;  // authed-only
 }
+
+export interface VaultConfig {
+  source: 'local' | 'github';
+  path?: string;             // when source === 'local'
+  repoUrl?: string;          // when source === 'github' (Slice 1+)
+  token?: string;            // when source === 'github' (Slice 1+)
+  // Resolved by getVaultConfig() based on env vars; throws on missing
+  // required values when NODE_ENV === 'production'.
+}
 ```
 
 ## Public API surface
@@ -62,14 +71,26 @@ import type { VaultNote } from './schema';
  * Returns all notes from the configured vault that resolved to `public`
  * via fail-closed visibility. Sorted by `frontmatter.date` descending.
  *
- * Throws DuplicateSlugError if two notes share a slug.
- * Throws if VAULT_PATH (Slice 0) or VAULT_REPO_URL+TOKEN (Slice 1) is missing
- *   in production (NODE_ENV=production).
+ * Internally memoized: the first call walks + parses the vault; subsequent
+ * calls within the same Node process return the cached result. This keeps
+ * getStaticPaths + getStaticProps amortized to O(N) total, not O(N²).
+ *
+ * Throws DuplicateSlugError if any notes share a slug.
+ * Throws VaultConfigError if VAULT_PATH (Slice 0) or VAULT_REPO_URL+TOKEN
+ *   (Slice 1) is missing in NODE_ENV=production.
  *
  * Safe to call from getStaticProps / getStaticPaths.
  * NEVER call from public client code.
  */
 export function getPublicNotes(): Promise<VaultNote[]>;
+
+/**
+ * Convenience for /writing/[slug] getStaticProps. Equivalent to
+ * `(await getPublicNotes()).find(n => n.slug === slug) ?? null`, but
+ * shares the memoized cache with getPublicNotes() so per-slug lookups
+ * are O(1) after the first walk.
+ */
+export function getNoteBySlug(slug: string): Promise<VaultNote | null>;
 
 /**
  * Throws on missing required env vars. Called inside getStaticPaths/Props
@@ -185,9 +206,9 @@ Vercel keeps every deploy in its history; rollback = re-promote a prior deploy
 
 ```ts
 class DuplicateSlugError extends Error {
-  paths: [string, string];   // both colliding files
+  paths: string[];           // all colliding files (≥2)
   slug: string;
-  resolution: 'derived' | 'frontmatter';  // how each got the slug
+  resolutions: Array<'derived' | 'frontmatter'>; // parallel to paths
 }
 
 class VaultConfigError extends Error {

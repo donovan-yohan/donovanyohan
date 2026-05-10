@@ -35,9 +35,11 @@ ticket #38) for the operator-side contract.
   Any change here MUST extend the table, not relax it.
 - **`lib/vault/schema.ts`** — never relax `default('private')`, never remove
   `passthrough()`, never change the `visibility` enum.
-- **`lib/vault/walk.ts`** — never weaken the allowlist
-  (`.obsidian/`, `.trash/`, `.git/`, `.github/`, `node_modules/`, `templates/`),
-  never change `followSymbolicLinks: false`.
+- **`lib/vault/walk.ts`** — never weaken the path **ignore-list** — directories
+  that MUST be excluded from the walk: `.obsidian/`, `.trash/`, `.git/`,
+  `.github/`, `node_modules/`, `templates/`. (The allowed-glob is `**/*.md`;
+  these directories are subtracted from it.) Never change
+  `followSymbolicLinks: false`.
 - **`schema.ts` and `fail-closed.ts` are co-owned**. Do not split them across
   parallel worktrees. They must change atomically.
 - **Public route imports MUST come from `lib/vault/index.ts`**. Never import
