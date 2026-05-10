@@ -1,0 +1,25 @@
+API_CONTRACT.md
+  s_b83e36f228a848::t_2b553c4160c184 38-54,61-71
+VAULT.md
+  s_b83e36f228a848::t_277e744062882e 125-144
+lib/vault/index.ts
+  s_b83e36f228a848::t_633a145e8a3440 27-34
+lib/vault/schema.ts
+  s_b83e36f228a848::t_01d945de5a08ca 20,51-83,96-99,131-174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "7b592383febc2de1b6fb6cc854ba26d02085e8d6",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
