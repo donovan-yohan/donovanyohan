@@ -1,0 +1,23 @@
+AGENTS.md
+  s_b83e36f228a848::t_b6d00d99e4a06a 62,64,67-87
+  s_b83e36f228a848::t_b22c68851bdc37 23-31,36-37
+API_CONTRACT.md
+  s_b83e36f228a848::t_391669275e4ad9 249-250
+  s_b83e36f228a848::t_635ee33bde88fc 1,6-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "10236ba359edf3a2a73d8ea74bb42b5a8091b0bd",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
