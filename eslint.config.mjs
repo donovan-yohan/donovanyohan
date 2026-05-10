@@ -2,6 +2,7 @@
 import js from "@eslint/js";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import tseslint from "typescript-eslint";
+import importPlugin from "eslint-plugin-import";
 
 export default tseslint.config(
   {
@@ -19,5 +20,34 @@ export default tseslint.config(
       "react-hooks/set-state-in-effect": "off",
       "react/no-unescaped-entities": "off",
     },
-  }
+  },
+  // Vault adapter privacy boundary: pages must import from lib/vault/index,
+  // never directly from adapter-local or adapter-github (Slice 1 rule per AGENTS.md).
+  {
+    files: ["pages/**/*.{ts,tsx}"],
+    plugins: {
+      import: importPlugin,
+    },
+    rules: {
+      "import/no-restricted-paths": [
+        "error",
+        {
+          zones: [
+            {
+              target: "pages",
+              from: "lib/vault/adapter-local",
+              message:
+                "Public pages must import vault API from 'lib/vault/index', not directly from adapter-local.",
+            },
+            {
+              target: "pages",
+              from: "lib/vault/adapter-github",
+              message:
+                "Public pages must import vault API from 'lib/vault/index', not directly from adapter-github.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 );
