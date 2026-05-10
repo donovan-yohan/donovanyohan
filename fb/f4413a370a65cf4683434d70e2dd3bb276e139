@@ -1,0 +1,36 @@
+next-env.d.ts
+  s_b83e36f228a848::t_f0c9372a2f378d 3
+package-lock.json
+  ai_agent 15,97-125,1616-1624,5412-5420,6139-6165,6225-6233,6553-6571,8309-8320,9124-9128,11514-11518,11923-11930,11957-11961,12159-12168
+pages/protected-test.tsx
+  s_b83e36f228a848::t_480f970c202ce1 3-8,13,22,24-27,41-57,61-63,65,80-81
+  s_b83e36f228a848::t_c2dbbbf138deef 1,9-10,14-15,17-18,20-21,23,28-36,38-40,58-60,68,70-79,82-84
+  s_b83e36f228a848::t_a4deda6cdf49e8 2,11-12,16,19,37,64,66-67,69
+proxy.ts
+  s_b83e36f228a848::t_562895622cdf6f 1-33
+auth.ts
+  s_b83e36f228a848::t_00bf08e89abce2 1-4
+auth.config.ts
+  s_b83e36f228a848::t_580e62d0978161 1-29
+pages/api/auth/[...nextauth].ts
+  s_b83e36f228a848::t_8d1d2da1540e60 2-3,7,14-16,26-28
+  s_b83e36f228a848::t_f25f91fc11b0d9 1,4-6,8-13,17-25,29-37
+package.json
+  s_b83e36f228a848::t_da9585c9c5348f 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "fbf4413a370a65cf4683434d70e2dd3bb276e139",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
