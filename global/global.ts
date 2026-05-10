@@ -23,6 +23,7 @@ export type Hobby = Project;
 const links: NavLink[] = [
   { href: "/#work", label: "Work", icon: "", key: "" },
   { href: "/about", label: "About", icon: "", key: "" },
+  { href: "/writing", label: "Writing", icon: "", key: "" },
 ].map((link) => ({ ...link, key: `nav-link-${link.href}-${link.label}` }));
 
 export default links;
