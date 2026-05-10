@@ -7,12 +7,21 @@
  *
  * Imports ONLY from lib/vault/index (never adapter-local or adapter-github
  * directly — ESLint import/no-restricted-paths enforces this per AGENTS.md).
+ *
+ * Rendering:
+ *   - NoteRenderer replaces the previous dangerouslySetInnerHTML block.
+ *   - When note.frontmatter.type === "work" (Phase A field, optional),
+ *     WorkHero is rendered above the note body with banner, subtitle, and
+ *     info[] from frontmatter. Gracefully absent when type is not "work".
  */
 
 import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps } from "next";
 import type { VaultNote } from "../../lib/vault/schema";
 import { getPublicNotes, getNoteBySlug } from "../../lib/vault";
+import { NoteRenderer } from "../../components/note/NoteRenderer";
+import { WorkHero } from "../../components/note/WorkHero";
+import type { WorkHeroProps } from "../../components/note/WorkHero";
 
 interface Props {
   note: VaultNote;
@@ -39,7 +48,33 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   return { props: { note } };
 };
 
+/**
+ * Extracts WorkHero props from the note's frontmatter.
+ * Phase A schema fields are accessed via optional chaining — gracefully
+ * absent when the schema hasn't been extended yet.
+ */
+function extractWorkHeroProps(note: VaultNote): WorkHeroProps {
+  const fm = note.frontmatter as VaultNote["frontmatter"] & {
+    subtitle?: string;
+    banner?: { light?: string; dark?: string };
+    bgColor?: { light?: string; dark?: string };
+    info?: Array<{ label: string; href?: string }>;
+  };
+
+  return {
+    title: fm.title,
+    subtitle: fm.subtitle,
+    banner: fm.banner,
+    bgColor: fm.bgColor,
+    info: fm.info,
+  };
+}
+
 export default function WritingSlug({ note }: Props) {
+  // Phase A: type field — optional, defaults to plain note rendering.
+  const noteType = (note.frontmatter.type as string | undefined) ?? null;
+  const isWorkType = noteType === "work";
+
   return (
     <>
       <Head>
@@ -52,20 +87,21 @@ export default function WritingSlug({ note }: Props) {
           ← Writing
         </a>
 
-        <h1>{note.frontmatter.title}</h1>
-        <time dateTime={note.frontmatter.date}>{note.frontmatter.date}</time>
+        {isWorkType ? (
+          // Work-type notes: render WorkHero above the body.
+          // WorkHero includes the title, so we don't render it again below.
+          <WorkHero {...extractWorkHeroProps(note)} />
+        ) : (
+          // Plain notes: simple header
+          <>
+            <h1>{note.frontmatter.title}</h1>
+            <time dateTime={note.frontmatter.date}>{note.frontmatter.date}</time>
+          </>
+        )}
 
-        {/*
-         * dangerouslySetInnerHTML is required here because `note.body` is
-         * pre-sanitized HTML produced by lib/vault/render.ts (which applies
-         * rehype-sanitize to strip <script>, <iframe>, onclick=, etc.).
-         * The sanitization happens upstream in the adapter pipeline (P22);
-         * rendering it as a string here is safe.
-         */}
-        <article
-          style={{ marginTop: 32 }}
-          dangerouslySetInnerHTML={{ __html: note.body }}
-        />
+        {/* NoteRenderer replaces dangerouslySetInnerHTML — the body is already
+            sanitized by rehype-sanitize in the vault adapter pipeline. */}
+        <NoteRenderer note={note} />
       </main>
     </>
   );
