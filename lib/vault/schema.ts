@@ -97,3 +97,46 @@ export type VaultFrontmatter = z.infer<typeof VaultFrontmatterSchema> & {
   // passthrough() allows extra keys; re-declare for explicit typing
   [extra: string]: unknown;
 };
+
+// ── VaultNote ─────────────────────────────────────────────────────────────────
+
+/**
+ * VaultNote — the fully-resolved public-safe representation of a vault note.
+ * Returned by `getPublicNotes()` and `getNoteBySlug()`.
+ *
+ * `body` is SANITIZED HTML (rehype-sanitize applied; wikilinks stripped).
+ * `bodyMarkdown` is the raw markdown body (sans frontmatter) for future renderers.
+ * `preview` is fully resolved — no undefined required fields.
+ */
+export interface VaultNote {
+  slug: string;
+  path: string;
+  frontmatter: VaultFrontmatter;
+  body: string;
+  bodyMarkdown: string;
+  preview: PreviewConfig;
+}
+
+/**
+ * VaultAdapter — the interface that all vault adapters implement.
+ */
+export interface VaultAdapter {
+  getPublicNotes(): Promise<VaultNote[]>;
+}
+
+/**
+ * VaultConfig — selects source and provides credentials.
+ */
+export type VaultConfig =
+  | { source: "local"; path: string }
+  | { source: "github"; repoUrl: string; token: string };
+
+/**
+ * AdapterResult — the per-file result from the adapter pipeline.
+ * Private files return a minimal result (no body data); public files
+ * return the full VaultNote.
+ */
+export type AdapterFileResult =
+  | { status: "public"; note: VaultNote }
+  | { status: "private"; path: string }
+  | { status: "error"; path: string; reason: string };
