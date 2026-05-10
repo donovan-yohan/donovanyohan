@@ -1,0 +1,23 @@
+.env.example
+  s_b83e36f228a848::t_944eb33ab646e4 5-6
+VAULT.md
+  s_b83e36f228a848::t_b93973c43c88d7 207
+  s_b83e36f228a848::t_6fd15fb84156d2 59-63
+  s_b83e36f228a848::t_ed3a40148fe5e0 269
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "17a161d27237c2e3e0a5907a45a6d4398a27fffd",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
