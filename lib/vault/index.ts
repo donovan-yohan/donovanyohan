@@ -36,9 +36,27 @@ import { VaultConfigError } from "./errors";
  * Called inside getStaticProps/getStaticPaths to enforce production env
  * without crashing unrelated routes at module-init time (P20, P25).
  */
-export function getVaultConfig(): VaultConfig {
-  const source = process.env.VAULT_SOURCE ?? "local";
+export function getVaultConfig(): VaultConfig | null {
+  const sourceEnv = process.env.VAULT_SOURCE;
   const isProduction = process.env.NODE_ENV === "production";
+
+  // Forker-friendly fallback (P20 relaxed): if NEITHER VAULT_SOURCE nor
+  // VAULT_PATH is set in production, return null so the caller can render an
+  // empty vault rather than crash. Common scenario: someone forks the
+  // template, deploys to Vercel, hasn't wired up their vault yet — the site
+  // should still build with /writing rendering the empty state.
+  if (isProduction && !sourceEnv && !process.env.VAULT_PATH) {
+    if (typeof process !== "undefined" && typeof console !== "undefined") {
+      console.warn(
+        "[vault] No vault configured (VAULT_SOURCE / VAULT_PATH unset in production). " +
+          "/writing will render empty. Set VAULT_SOURCE=local|github + the matching " +
+          "vars to publish content. See VAULT.md.",
+      );
+    }
+    return null;
+  }
+
+  const source = sourceEnv ?? "local";
 
   if (source === "github") {
     const missing: string[] = [];
@@ -48,6 +66,7 @@ export function getVaultConfig(): VaultConfig {
     if (!repoUrl) missing.push("VAULT_REPO_URL");
     if (!token) missing.push("VAULT_GITHUB_TOKEN");
 
+    // Strict enforcement still applies once you OPT IN to a source.
     if (missing.length > 0) {
       throw new VaultConfigError(missing);
     }
@@ -61,6 +80,7 @@ export function getVaultConfig(): VaultConfig {
     (isProduction ? undefined : "__fixtures__/vault");
 
   if (!vaultPath) {
+    // Reached only when VAULT_SOURCE=local was set explicitly without VAULT_PATH.
     throw new VaultConfigError(["VAULT_PATH"]);
   }
 
@@ -92,6 +112,10 @@ export async function getPublicNotes(): Promise<VaultNote[]> {
 
   cacheInflight = (async () => {
     const config = getVaultConfig();
+    // Forker-friendly: no vault configured in production → empty notes set.
+    if (config === null) {
+      return [];
+    }
     let adapter;
 
     if (config.source === "github") {
