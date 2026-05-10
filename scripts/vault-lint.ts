@@ -19,7 +19,8 @@
  *   - No eslint-disable directives anywhere.
  */
 
-import { readFileSync, readdirSync, statSync } from "fs";
+import { readFileSync, readdirSync, lstatSync } from "fs";
+import type { Dirent } from "fs";
 import { join, relative, basename } from "path";
 import { load as yamlLoad } from "js-yaml";
 import { resolveVisibility } from "../lib/vault/fail-closed.js";
@@ -38,7 +39,7 @@ interface FileResult {
 
 interface LintError {
   path: string;
-  kind: "duplicate-slug" | "schema" | "yaml";
+  kind: "duplicate-slug" | "schema" | "yaml" | "io" | "args";
   message: string;
 }
 
@@ -80,7 +81,14 @@ function parseFrontmatter(content: string): ParseResult {
   const rest = content.slice(3);
   const closeIdx = rest.search(/\n---(\n|$)/);
   if (closeIdx === -1) {
-    return { frontmatter: {}, parseError: null };
+    // Opening fence without closing fence = malformed frontmatter (not "no
+    // frontmatter"). Treating it as `{}` would silently let bad authoring
+    // pass — which conflicts with fail-closed intent. Surface it as a parse
+    // error so the lint flags it. (copilot #45)
+    return {
+      frontmatter: null,
+      parseError: "opening `---` without closing `---` fence",
+    };
   }
 
   const yamlBlock = rest.slice(0, closeIdx);
@@ -97,50 +105,98 @@ function parseFrontmatter(content: string): ParseResult {
 // ── Vault walker ──────────────────────────────────────────────────────────────
 
 /**
- * Recursively walks a directory and returns all .md file absolute paths.
- * Skips hidden directories (names starting with `.`) like .obsidian, .trash.
+ * Recursively walks a directory and returns all `.md` file absolute paths.
+ * Excludes hidden directories (`.obsidian`, `.trash`, `.git`, `.github`) plus
+ * `node_modules`, `templates` per VAULT.md walk-ignore-list.
+ *
+ * Uses `withFileTypes` to avoid an extra `lstatSync` per entry (perf).
+ * Symlinks are explicitly NOT followed — matches `lib/vault/walk.ts` policy.
+ *
+ * Returns `{ files, error }`. On readdir failure (missing dir, permissions,
+ * not a directory), `error` is set so the caller can fail loudly. (copilot #45)
  */
-function walkVault(dir: string): string[] {
-  const results: string[] = [];
+const IGNORED_DIRS = new Set([
+  ".obsidian",
+  ".trash",
+  ".git",
+  ".github",
+  "node_modules",
+  "templates",
+]);
 
-  let entries: string[];
-  try {
-    entries = readdirSync(dir, { encoding: "utf-8" });
-  } catch {
-    return results;
-  }
+interface WalkResult {
+  files: string[];
+  error: string | null;
+}
 
-  for (const entry of entries) {
-    if (entry.startsWith(".")) continue; // skip hidden (obsidian, trash, git)
+function walkVault(dir: string): WalkResult {
+  const out: string[] = [];
 
-    const fullPath = join(dir, entry);
-    let stat: ReturnType<typeof statSync>;
+  function recurse(d: string): string | null {
+    // `withFileTypes: true` returns Dirent[] which exposes
+    // isDirectory()/isFile()/isSymbolicLink() without an extra lstat per entry.
+    let entries: Dirent[];
     try {
-      stat = statSync(fullPath);
-    } catch {
-      continue;
+      entries = readdirSync(d, { withFileTypes: true }) as Dirent[];
+    } catch (err) {
+      return err instanceof Error ? err.message : String(err);
     }
 
-    if (stat.isDirectory()) {
-      results.push(...walkVault(fullPath));
-    } else if (entry.endsWith(".md")) {
-      results.push(fullPath);
+    for (const entry of entries) {
+      const name = entry.name;
+      if (IGNORED_DIRS.has(name)) continue;
+      // Skip every other dotfile / dotdir too (e.g. `.DS_Store`, `.idea/`,
+      // user-added hidden caches). Vaults rarely intend to publish dotfiles.
+      if (name.startsWith(".")) continue;
+
+      const fullPath = join(d, name);
+
+      // `withFileTypes` returns Dirent; `isSymbolicLink()` is direct, no extra
+      // syscall. Skip symlinks regardless of target — matches the
+      // `followSymbolicLinks: false` policy in lib/vault/walk.ts. (copilot #45)
+      if (entry.isSymbolicLink()) continue;
+
+      if (entry.isDirectory()) {
+        const subErr = recurse(fullPath);
+        if (subErr !== null) return subErr;
+      } else if (entry.isFile() && name.endsWith(".md")) {
+        out.push(fullPath);
+      }
     }
+    return null;
   }
 
-  return results;
+  // Verify the root is actually a directory before recursing. Handles
+  // missing dir, file-instead-of-dir, permission denied — all surface as
+  // a clear error rather than the silent "0 files walked" we used to
+  // return. (copilot #45)
+  let rootStat: ReturnType<typeof lstatSync>;
+  try {
+    rootStat = lstatSync(dir);
+  } catch (err) {
+    return { files: [], error: err instanceof Error ? err.message : String(err) };
+  }
+  if (!rootStat.isDirectory()) {
+    return { files: [], error: `not a directory: ${dir}` };
+  }
+
+  const recurseErr = recurse(dir);
+  return { files: out, error: recurseErr };
 }
 
 // ── Core lint logic ───────────────────────────────────────────────────────────
 
 /**
- * Lints a single .md file. Returns a FileResult and any errors found.
+ * Lints a single .md file. Returns a FileResult, the parsed frontmatter, and
+ * any errors found. Returning the frontmatter avoids a second read+parse pass
+ * during slug-uniqueness checks. (gemini + copilot #45)
+ *
  * Does NOT throw — all errors are captured and returned.
  */
 function lintFile(
   filePath: string,
   vaultRoot: string,
-): { result: FileResult; errors: LintError[] } {
+): { result: FileResult; errors: LintError[]; frontmatter: unknown } {
   const relPath = relative(vaultRoot, filePath);
   const errors: LintError[] = [];
 
@@ -152,7 +208,10 @@ function lintFile(
     const message = err instanceof Error ? err.message : String(err);
     return {
       result: { path: relPath, status: "error", reason: `read error: ${message}` },
-      errors: [{ path: relPath, kind: "yaml", message: `read error: ${message}` }],
+      // Use kind: "io" for read failures so downstream automation can
+      // distinguish them from actual YAML parse problems. (copilot #45)
+      errors: [{ path: relPath, kind: "io", message: `read error: ${message}` }],
+      frontmatter: null,
     };
   }
 
@@ -172,6 +231,7 @@ function lintFile(
           message: `YAML parse error: ${parseError}`,
         },
       ],
+      frontmatter: null,
     };
   }
 
@@ -200,7 +260,7 @@ function lintFile(
       }
     }
 
-    return { result: { path: relPath, status: "private", reason }, errors };
+    return { result: { path: relPath, status: "private", reason }, errors, frontmatter };
   }
 
   // Public — run full schema validation and report schema errors
@@ -222,10 +282,11 @@ function lintFile(
         reason: `schema error: ${issues}`,
       },
       errors,
+      frontmatter,
     };
   }
 
-  return { result: { path: relPath, status: "public" }, errors };
+  return { result: { path: relPath, status: "public" }, errors, frontmatter };
 }
 
 /**
@@ -233,65 +294,77 @@ function lintFile(
  * Returns structured results including per-file status and all errors.
  */
 function lintVault(vaultPath: string): LintOutput {
-  const mdFiles = walkVault(vaultPath);
+  const walked = walkVault(vaultPath);
   const fileResults: FileResult[] = [];
   const allErrors: LintError[] = [];
 
-  // Per-file slug map for duplicate detection (slug → relPath)
+  // Surface walk failure (non-existent / unreadable / not-a-directory) as a
+  // first-class error so vault-lint never silently reports OK on bad input.
+  // (copilot #45)
+  if (walked.error !== null) {
+    allErrors.push({
+      path: vaultPath,
+      kind: "io",
+      message: `walk failed: ${walked.error}`,
+    });
+    return {
+      summary: { walked: 0, public: 0, private: 0, errors: 1 },
+      files: [],
+      errors: allErrors,
+    };
+  }
+
+  // Per-file slug map: slug → relPath of the FIRST file that claimed it
   const slugMap = new Map<string, string>();
 
-  for (const filePath of mdFiles) {
+  for (const filePath of walked.files) {
     const relPath = relative(vaultPath, filePath);
-    const { result, errors } = lintFile(filePath, vaultPath);
+    const { result, errors, frontmatter } = lintFile(filePath, vaultPath);
     fileResults.push(result);
     allErrors.push(...errors);
 
-    // Slug uniqueness check — run for all files (not just public)
-    // so authors catch collisions before publishing
+    // Slug uniqueness — run for all files (not just public) so authors catch
+    // collisions before publishing. Use the parsed frontmatter from lintFile
+    // instead of re-reading the file. (gemini + copilot #45)
     if (result.status !== "error") {
       let frontmatterSlug: string | undefined;
-      try {
-        const content = readFileSync(filePath, "utf-8");
-        const { frontmatter } = parseFrontmatter(content);
-        if (
-          frontmatter !== null &&
-          typeof frontmatter === "object" &&
-          !Array.isArray(frontmatter)
-        ) {
-          const fm = frontmatter as Record<string, unknown>;
-          if (typeof fm["slug"] === "string") {
-            frontmatterSlug = fm["slug"];
-          }
+      if (
+        frontmatter !== null &&
+        typeof frontmatter === "object" &&
+        !Array.isArray(frontmatter)
+      ) {
+        const fm = frontmatter as Record<string, unknown>;
+        if (typeof fm["slug"] === "string") {
+          frontmatterSlug = fm["slug"];
         }
-      } catch {
-        // already handled by lintFile
       }
 
       const slug = deriveSlug(basename(filePath), frontmatterSlug);
       const existing = slugMap.get(slug);
       if (existing !== undefined) {
-        const dupError: LintError = {
-          path: relPath,
-          kind: "duplicate-slug",
-          message: `duplicate slug "${slug}" — also used by ${existing}`,
-        };
-        allErrors.push(dupError);
+        // Both files collide. Flag both as errors AND update both file
+        // statuses so --report and --json output stay consistent. (copilot #45)
+        const currentMsg = `duplicate slug "${slug}" — also used by ${existing}`;
+        const existingMsg = `duplicate slug "${slug}" — also used by ${relPath}`;
 
-        // Also flag the first file with the dup error if not already
-        const firstDupError: LintError = {
-          path: existing,
-          kind: "duplicate-slug",
-          message: `duplicate slug "${slug}" — also used by ${relPath}`,
-        };
-        allErrors.push(firstDupError);
+        allErrors.push({ path: relPath, kind: "duplicate-slug", message: currentMsg });
+        allErrors.push({ path: existing, kind: "duplicate-slug", message: existingMsg });
 
-        // Mark the current file as error
-        const idx = fileResults.findIndex((r) => r.path === relPath);
-        if (idx !== -1) {
-          fileResults[idx] = {
+        const currentIdx = fileResults.findIndex((r) => r.path === relPath);
+        if (currentIdx !== -1) {
+          fileResults[currentIdx] = {
             path: relPath,
             status: "error",
-            reason: dupError.message,
+            reason: currentMsg,
+          };
+        }
+
+        const existingIdx = fileResults.findIndex((r) => r.path === existing);
+        if (existingIdx !== -1) {
+          fileResults[existingIdx] = {
+            path: existing,
+            status: "error",
+            reason: existingMsg,
           };
         }
       } else {
@@ -312,15 +385,15 @@ function lintVault(vaultPath: string): LintOutput {
 
 // ── CLI entrypoint ────────────────────────────────────────────────────────────
 
+type ParsedArgs =
+  | { kind: "ok"; vaultPath: string; report: boolean; json: boolean }
+  | { kind: "error"; message: string };
+
 /**
- * Parses CLI args. Returns { vaultPath, report, json }.
- * Exits with usage message on bad args.
+ * Parses CLI args. Returns a tagged result instead of calling process.exit
+ * — keeps `main` testable without `process.exit` mocking. (gemini #45)
  */
-function parseArgs(argv: string[]): {
-  vaultPath: string;
-  report: boolean;
-  json: boolean;
-} {
+function parseArgs(argv: string[]): ParsedArgs {
   const args = argv.slice(2); // drop node + script path
   let report = false;
   let json = false;
@@ -332,22 +405,20 @@ function parseArgs(argv: string[]): {
     } else if (arg === "--json") {
       json = true;
     } else if (arg.startsWith("-")) {
-      process.stderr.write(`Unknown flag: ${arg}\n`);
-      process.stderr.write(
-        "Usage: vault-lint [--report] [--json] <vault-path>\n",
-      );
-      process.exit(1);
+      return { kind: "error", message: `Unknown flag: ${arg}` };
     } else {
       positional.push(arg);
     }
   }
 
   if (positional.length !== 1) {
-    process.stderr.write("Usage: vault-lint [--report] [--json] <vault-path>\n");
-    process.exit(1);
+    return {
+      kind: "error",
+      message: "Usage: vault-lint [--report] [--json] <vault-path>",
+    };
   }
 
-  return { vaultPath: positional[0], report, json };
+  return { kind: "ok", vaultPath: positional[0], report, json };
 }
 
 /**
@@ -355,7 +426,17 @@ function parseArgs(argv: string[]): {
  * Exported so tests can call it with synthetic argv and capture exit code.
  */
 export function main(argv: string[]): number {
-  const { vaultPath, report, json } = parseArgs(argv);
+  const parsed = parseArgs(argv);
+  if (parsed.kind === "error") {
+    process.stderr.write(parsed.message + "\n");
+    if (!parsed.message.startsWith("Usage:")) {
+      process.stderr.write(
+        "Usage: vault-lint [--report] [--json] <vault-path>\n",
+      );
+    }
+    return 1;
+  }
+  const { vaultPath, report, json } = parsed;
 
   const output = lintVault(vaultPath);
   const { summary, files, errors } = output;

@@ -1,18 +1,23 @@
 /**
  * Tests for scripts/vault-lint.ts
  *
- * Strategy: we import main() directly (the function is pure over argv and
- * returns an exit code). We swap process.stdout.write / process.stderr.write
- * to capture output, and restore them after each test. We create a temporary
- * fixture directory for each test scenario via Node's fs module.
+ * Strategy: import main() directly. After PR #45 review fixes, main() is
+ * pure over argv — parseArgs returns a tagged result rather than calling
+ * process.exit — so tests assert on the return value without exit mocking.
+ *
+ * Stdout/stderr swapped per test to capture output; temp fixture dir per
+ * scenario via Node's fs.
  *
  * Coverage:
  *   - Clean vault → exit 0
- *   - Duplicate slug → exit 1 with paths in output
- *   - Malformed-public note → exit 1
- *   - --report lists every file with status
- *   - --json emits valid JSON matching schema; no human text on stdout
+ *   - Duplicate slug → exit 1; BOTH colliding paths flagged as errors
+ *   - Malformed YAML (missing closing fence) → exit 1, kind: yaml
+ *   - Note resolving to private (missing visibility) → status=private, exit 0
+ *   - --report lists every file with status + reason
+ *   - --json emits valid JSON to stdout only; no human text on stdout
  *   - Pre-commit hook scenario: exit code propagates correctly
+ *   - Bad CLI args → exit 1 with usage on stderr (no process.exit)
+ *   - Walk failure (non-existent / not-a-directory) → exit 1, kind: io
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
@@ -510,6 +515,101 @@ No title field — schema should fail, resolves to private.
       );
 
       expect(code).toBe(0);
+    });
+  });
+
+  // ── Regressions / bot review fixes ─────────────────────────────────────────
+
+  describe("regressions (PR #45 review)", () => {
+    it("rejects opening --- without closing fence as YAML error (copilot #45)", () => {
+      const v = makeVault({});
+      writeFileSync(
+        join(v, "broken.md"),
+        "---\ntitle: Broken\nvisibility: public\n",
+      );
+      const { code, stderr } = withCapture(() =>
+        main(["node", "vault-lint.ts", v]),
+      );
+      expect(code).toBe(1);
+      expect(stderr).toMatch(/yaml/i);
+    });
+
+    it("flags BOTH files in a duplicate-slug collision (copilot #45)", () => {
+      const v = makeVault({});
+      writeFileSync(
+        join(v, "hello.md"),
+        "---\ntitle: A\ndate: 2026-05-10\nvisibility: public\nslug: shared\n---\n",
+      );
+      writeFileSync(
+        join(v, "world.md"),
+        "---\ntitle: B\ndate: 2026-05-11\nvisibility: public\nslug: shared\n---\n",
+      );
+      const { code, stdout } = withCapture(() =>
+        main(["node", "vault-lint.ts", "--json", v]),
+      );
+      expect(code).toBe(1);
+      const out = JSON.parse(stdout) as {
+        files: { path: string; status: string }[];
+        errors: { path: string; kind: string }[];
+      };
+      const errPaths = new Set(
+        out.errors
+          .filter((e) => e.kind === "duplicate-slug")
+          .map((e) => e.path),
+      );
+      expect(errPaths.has("hello.md")).toBe(true);
+      expect(errPaths.has("world.md")).toBe(true);
+      const fileStatuses = Object.fromEntries(
+        out.files.map((f) => [f.path, f.status]),
+      );
+      expect(fileStatuses["hello.md"]).toBe("error");
+      expect(fileStatuses["world.md"]).toBe("error");
+    });
+
+    it("treats non-existent vault path as walk error, not silent OK (copilot #45)", () => {
+      const ghostPath = join(tmpdir(), "vault-lint-ghost-" + Date.now());
+      const { code, stderr } = withCapture(() =>
+        main(["node", "vault-lint.ts", ghostPath]),
+      );
+      expect(code).toBe(1);
+      expect(stderr.toLowerCase()).toMatch(/io|walk|directory|enoent/);
+    });
+
+    it("returns exit 1 (not process.exit) on bad args (gemini #45)", () => {
+      const { code, stderr } = withCapture(() =>
+        main(["node", "vault-lint.ts", "--unknown-flag"]),
+      );
+      expect(code).toBe(1);
+      expect(stderr).toMatch(/Unknown flag|Usage/);
+    });
+
+    it("skips symlinks (matches lib/vault/walk.ts policy, copilot #45)", async () => {
+      const { symlinkSync, existsSync } = await import("fs");
+      const v = makeVault({});
+      writeFileSync(
+        join(v, "real.md"),
+        "---\ntitle: Real\ndate: 2026-05-10\nvisibility: public\n---\n",
+      );
+      // Create a symlink pointing to a target that exists
+      try {
+        symlinkSync(
+          join(v, "real.md"),
+          join(v, "symlink-to-real.md"),
+        );
+      } catch {
+        // Skip on platforms / FS that don't support symlinks
+        return;
+      }
+      if (!existsSync(join(v, "symlink-to-real.md"))) return;
+      const { code, stdout } = withCapture(() =>
+        main(["node", "vault-lint.ts", "--json", v]),
+      );
+      expect(code).toBe(0);
+      const out = JSON.parse(stdout) as {
+        files: { path: string }[];
+      };
+      // Only 'real.md' should appear; the symlink must be skipped
+      expect(out.files.map((f) => f.path)).toEqual(["real.md"]);
     });
   });
 });
