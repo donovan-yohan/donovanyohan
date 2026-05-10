@@ -32,6 +32,7 @@ import path from "node:path";
 import matter from "gray-matter";
 import { resolveVisibility } from "../lib/vault/fail-closed";
 import { walkVault } from "../lib/vault/walk";
+import { deriveSlug } from "../lib/vault/slug";
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -104,11 +105,16 @@ beforeAll(
         rawFrontmatter = null;
       }
       const visibility = resolveVisibility(rawFrontmatter);
-      const slug = path
-        .basename(relPath, ".md")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
+      // Derived from the same util the adapter uses so the leak test stays
+      // synchronized with actual routing. (gemini #49)
+      const fmSlug =
+        rawFrontmatter &&
+        typeof rawFrontmatter === "object" &&
+        !Array.isArray(rawFrontmatter) &&
+        typeof (rawFrontmatter as Record<string, unknown>)["slug"] === "string"
+          ? ((rawFrontmatter as Record<string, unknown>)["slug"] as string)
+          : undefined;
+      const slug = deriveSlug(path.basename(relPath, ".md"), fmSlug);
 
       if (visibility === "public") {
         publicSlugs.push(slug);
@@ -124,11 +130,33 @@ beforeAll(
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 /**
+ * Memoized cache for collectPrivateStrings.
+ *
+ * The function is invoked from multiple test cases, including inside Phase 2
+ * loops over public/private slugs. The fixture vault is small but we still
+ * walk + read every file each call. Since the fixtures don't change between
+ * test cases within a single run, cache the result. (gemini #49)
+ */
+let _cachedPrivateStrings: string[] | null = null;
+function _resetPrivateStringsCache(): void {
+  _cachedPrivateStrings = null;
+}
+
+/**
  * Collects all strings that must NOT appear in public build artifacts.
  * Covers: titles, summaries, slugs, file paths, headings, long body strings,
  * bold text, and lines with 3+ capitalized words.
+ *
+ * Memoized — repeat calls within a single test run hit the cache.
  */
 async function collectPrivateStrings(): Promise<string[]> {
+  if (_cachedPrivateStrings !== null) return _cachedPrivateStrings;
+  const result = await _collectPrivateStringsImpl();
+  _cachedPrivateStrings = result;
+  return result;
+}
+
+async function _collectPrivateStringsImpl(): Promise<string[]> {
   const strings: string[] = [];
   const vaultFiles = await walkVault(FIXTURE_VAULT);
 
