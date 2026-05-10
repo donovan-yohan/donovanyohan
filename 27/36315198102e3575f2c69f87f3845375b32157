@@ -1,0 +1,21 @@
+test/leak.test.ts
+  s_b83e36f228a848::t_0b75bbb31924db 35
+  s_b83e36f228a848::t_a02582fd230db3 133-144,149-150,153-159
+  s_b83e36f228a848::t_f4af25e736ae99 108-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "2736315198102e3575f2c69f87f3845375b32157",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
