@@ -1,0 +1,27 @@
+test/vault/render.test.ts
+  s_b83e36f228a848::t_f9f177ceac2306 148-197
+package.json
+  s_b83e36f228a848::t_ee5eafcbd63274 24,28
+lib/vault/render.ts
+  s_b83e36f228a848::t_a0074cdfa37404 4-5,10-14,18,26,32,37-46,57-58
+  s_b83e36f228a848::t_70c49b2affe648 137-141,146,148-150,152-153,155,182-187
+  s_b83e36f228a848::t_00e0e0ae814297 195-216,221-227
+package-lock.json
+  ai_agent 17,21,4999-5080,5119-5137,5151-5167,7771-7785,9099-9112,9363-9372,12615-12672,12701-12714,12723-12734,14251-14260,15116-15124,15212-15215
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "63f5e021699ebd4a8e370bf1dc3be8b2a4f24040",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
