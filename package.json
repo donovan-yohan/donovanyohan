@@ -11,8 +11,9 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
-    "test:run": "vitest run",
-    "check": "npm run lint && npm run typecheck && npm run test:run && npm run build"
+    "test:run": "vitest run --exclude test/leak.test.ts",
+    "leak-test": "vitest run test/leak.test.ts",
+    "check": "npm run lint && npm run typecheck && npm run test:run && npm run build && npm run leak-test"
   },
   "dependencies": {
     "@react-spring/web": "^10.0.3",

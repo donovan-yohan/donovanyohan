@@ -66,8 +66,8 @@ describe("LocalVaultAdapter — private notes never body-rendered", () => {
     const adapter = new LocalVaultAdapter(FIXTURE_VAULT);
     const notes = await adapter.getPublicNotes();
     for (const note of notes) {
-      expect(note.body).not.toContain("PRIVATE_LEAK_CANARY_abc123xyz");
-      expect(note.bodyMarkdown).not.toContain("PRIVATE_LEAK_CANARY_abc123xyz");
+      expect(note.body).not.toContain("PRIVATE_LEAK_CANARY_dx7q9z");
+      expect(note.bodyMarkdown).not.toContain("PRIVATE_LEAK_CANARY_dx7q9z");
     }
   });
 
