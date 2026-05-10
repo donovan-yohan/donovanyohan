@@ -503,18 +503,24 @@ No title field — schema should fail, resolves to private.
   });
 
   describe("static fixture vault", () => {
-    it("lints the __fixtures__/vault directory cleanly", () => {
+    it("flags the malformed-frontmatter fixture; otherwise scans the fixture vault cleanly", () => {
+      // The fixture vault intentionally includes malformed-frontmatter.md
+      // (a fail-closed regression fixture). vault-lint correctly returns
+      // exit 1 because that note has a YAML parse error — that's the
+      // intended behavior, not a regression.
       const fixtureVault = join(
         process.cwd(),
         "__fixtures__",
         "vault",
       );
 
-      const { code } = withCapture(() =>
+      const { code, stderr } = withCapture(() =>
         main(["node", "vault-lint.ts", fixtureVault]),
       );
 
-      expect(code).toBe(0);
+      expect(code).toBe(1);
+      expect(stderr).toMatch(/malformed-frontmatter/);
+      expect(stderr.toLowerCase()).toMatch(/yaml/);
     });
   });
 
