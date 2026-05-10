@@ -1,0 +1,42 @@
+lib/vault/schema.ts
+  s_b83e36f228a848::t_fe0704554624df 1-79,82-99
+  s_b83e36f228a848::t_2e1ad9266c03d6 80-81
+test/vault/preview-defaults.test.ts
+  s_b83e36f228a848::t_25b795417cb8a6 1-138
+package-lock.json
+  ai_agent 17-18,8139-8141,13029-13031
+test/vault/schema.test.ts
+  s_b83e36f228a848::t_390e5540c5bd29 1-154,159-221
+  s_b83e36f228a848::t_991691ccb7c98a 155-158
+lib/vault/fail-closed.ts
+  s_b83e36f228a848::t_1d5b42de158380 1-57
+lib/vault/slug.ts
+  s_b83e36f228a848::t_b0b3f1109be099 74-76
+  s_b83e36f228a848::t_a371d543c2e5a9 15-17,19
+  s_b83e36f228a848::t_37db12f3b919fd 1-14,18,20-73,77-80,86-87,89-95
+  s_b83e36f228a848::t_d13ca1311a0e10 81-85,88
+test/vault/slug.test.ts
+  s_b83e36f228a848::t_331f410b64c2e5 1-187
+lib/vault/preview-defaults.ts
+  s_b83e36f228a848::t_511de7e7b8a868 1-55
+test/vault/fail-closed.test.ts
+  s_b83e36f228a848::t_4be25c78bd4788 1-144
+package.json
+  s_b83e36f228a848::t_5a45b2951edbc9 24-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "ac188fe7ffd4941cb18b9ca029eaff4be083d4db",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
