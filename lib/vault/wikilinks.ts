@@ -17,7 +17,7 @@
  */
 
 import type { Plugin } from "unified";
-import type { Root, Text, InlineCode } from "mdast";
+import type { Root, Text } from "mdast";
 import { visit } from "unist-util-visit";
 
 // ── Regex ─────────────────────────────────────────────────────────────────────
@@ -52,7 +52,7 @@ export function stripWikilinks(markdown: string): string {
   return noEmbeds.replace(
     WIKILINK_RE,
     (_match, noteName: string, alias?: string) => {
-      return alias !== undefined ? alias : noteName.trim();
+      return alias !== undefined ? alias.trim() : noteName.trim();
     },
   );
 }
@@ -64,17 +64,14 @@ export function stripWikilinks(markdown: string): string {
  * Because it operates on the mdast Text node type, it naturally skips
  * code fences (Code) and inline code (InlineCode) — those are different
  * node types and are never visited.
+ *
+ * Note: this plugin only processes `text` nodes. Image alt text and link
+ * titles are NOT stripped (they are separate node types/fields).
  */
 export const remarkStripWikilinks: Plugin<[], Root> = () => {
   return (tree: Root) => {
     visit(tree, "text", (node: Text) => {
       node.value = stripWikilinks(node.value);
-    });
-
-    // Also strip from image alt text and link titles if they contain wikilinks,
-    // but never process InlineCode or Code nodes.
-    visit(tree, "inlineCode", (_node: InlineCode) => {
-      // No-op: explicitly do NOT process inline code nodes.
     });
   };
 };

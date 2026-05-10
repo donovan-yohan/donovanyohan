@@ -41,6 +41,19 @@ import { VaultParseError } from "./errors";
 const MAX_FILE_BYTES = 1024 * 1024;
 
 /**
+ * Shared unified processor for body HTML rendering.
+ * Frozen at module scope — stateless, safe to reuse across files.
+ */
+const markdownProcessor = unified()
+  .use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkStripWikilinks)
+  .use(remarkRehype)
+  .use(rehypeSanitize)
+  .use(rehypeStringify)
+  .freeze();
+
+/**
  * Processes a single markdown file through the vault pipeline.
  * Returns an AdapterFileResult — never throws for private/malformed cases.
  */
@@ -108,15 +121,7 @@ async function processFile(
   const slug = deriveSlug(filename, frontmatter.slug);
 
   // ── Render body HTML ───────────────────────────────────────────────────────
-  const processor = unified()
-    .use(remarkParse)
-    .use(remarkGfm)
-    .use(remarkStripWikilinks)
-    .use(remarkRehype)
-    .use(rehypeSanitize)
-    .use(rehypeStringify);
-
-  const bodyHtml = String(await processor.process(bodyMarkdown));
+  const bodyHtml = String(await markdownProcessor.process(bodyMarkdown));
 
   // ── Extract first paragraph for preview defaults ───────────────────────────
   const firstParagraph = extractFirstParagraph(bodyMarkdown);
@@ -186,26 +191,25 @@ export class LocalVaultAdapter implements VaultAdapter {
 
   async getPublicNotes(): Promise<VaultNote[]> {
     const paths = await walkVault(this.vaultRoot);
-    const publicNotes: VaultNote[] = [];
 
-    for (const relPath of paths) {
-      let result: AdapterFileResult;
-      try {
-        result = await processFile(this.vaultRoot, relPath);
-      } catch (err) {
-        // VaultParseError (public-but-malformed) — re-throw
-        if (err instanceof VaultParseError) {
-          throw err;
+    // Process all files in parallel — each processFile call is independent I/O
+    const results = await Promise.all(
+      paths.map(async (relPath) => {
+        try {
+          return await processFile(this.vaultRoot, relPath);
+        } catch (err) {
+          if (err instanceof VaultParseError) throw err;
+          console.error(`[vault] Unexpected error processing ${relPath}:`, err);
+          return null;
         }
-        // Other unexpected errors — log and skip
-        console.error(`[vault] Unexpected error processing ${relPath}:`, err);
-        continue;
-      }
+      }),
+    );
 
-      if (result.status === "public") {
+    const publicNotes: VaultNote[] = [];
+    for (const result of results) {
+      if (result?.status === "public") {
         publicNotes.push(result.note);
       }
-      // private and error results are intentionally ignored here
     }
 
     return publicNotes;

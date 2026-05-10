@@ -50,48 +50,49 @@ export async function walkVault(vaultRoot: string): Promise<string[]> {
     onlyFiles: true,
   });
 
-  const accepted: string[] = [];
+  const normalizedRoot = rootReal.endsWith(path.sep)
+    ? rootReal
+    : rootReal + path.sep;
 
-  for (const rel of raw) {
-    const abs = path.join(rootReal, rel);
+  // Parallelize lstat + realpath security checks across all candidates
+  const accepted = (
+    await Promise.all(
+      raw.map(async (rel) => {
+        const abs = path.join(rootReal, rel);
 
-    // lstat the result — never follow symlinks here
-    let stat;
-    try {
-      stat = await lstat(abs);
-    } catch {
-      // File disappeared between glob and lstat — skip silently
-      continue;
-    }
+        // lstat the result — never follow symlinks here
+        let stat;
+        try {
+          stat = await lstat(abs);
+        } catch {
+          // File disappeared between glob and lstat — skip silently
+          return null;
+        }
 
-    // Reject symlinks (covers both fast-glob follow=false oversight and
-    // any future edge case)
-    if (stat.isSymbolicLink()) {
-      continue;
-    }
+        // Reject symlinks (covers both fast-glob follow=false oversight and
+        // any future edge case)
+        if (stat.isSymbolicLink()) {
+          return null;
+        }
 
-    // Resolve the real path to catch any absolute or relative symlink tricks
-    let realAbs: string;
-    try {
-      realAbs = await realpath(abs);
-    } catch {
-      // realpath fails on broken symlinks — reject
-      continue;
-    }
+        // Resolve the real path to catch any absolute or relative symlink tricks
+        let realAbs: string;
+        try {
+          realAbs = await realpath(abs);
+        } catch {
+          // realpath fails on broken symlinks — reject
+          return null;
+        }
 
-    // Boundary check: resolved path must be inside the vault root
-    const normalizedRoot = rootReal.endsWith(path.sep)
-      ? rootReal
-      : rootReal + path.sep;
-    if (
-      realAbs !== rootReal &&
-      !realAbs.startsWith(normalizedRoot)
-    ) {
-      continue;
-    }
+        // Boundary check: resolved path must be inside the vault root
+        if (realAbs !== rootReal && !realAbs.startsWith(normalizedRoot)) {
+          return null;
+        }
 
-    accepted.push(rel);
-  }
+        return rel;
+      }),
+    )
+  ).filter((rel): rel is string => rel !== null);
 
   return accepted;
 }

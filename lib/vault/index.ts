@@ -6,13 +6,13 @@
  * enforces this via eslint.config.mjs).
  *
  * Exports:
- *   - getVaultConfig()   — reads env, throws VaultConfigError if missing
- *                          required values in NODE_ENV=production
+ *   - getVaultConfig()   — reads env, throws VaultConfigError if required
+ *                          env vars are missing whenever VAULT_SOURCE is set
  *   - getPublicNotes()   — memoized (per-process), adapter-selected,
  *                          sorted by date desc; throws DuplicateSlugError
  *                          on slug collision
  *   - getNoteBySlug()    — uses memoized cache; returns null for unknown slugs
- *   - __resetVaultCache__ — exported ONLY in NODE_ENV=test for test isolation
+ *   - __resetVaultCache__ — exported unconditionally; throws unless NODE_ENV==='test'
  *
  * Per P25: No I/O, no env validation at module init. All side effects
  * occur inside explicitly-called functions.
@@ -29,11 +29,13 @@ import { VaultConfigError } from "./errors";
 /**
  * Reads env vars and returns the vault config.
  *
- * In NODE_ENV=production, throws VaultConfigError if required env vars
- * are missing. In development, falls back to __fixtures__/vault/ for
- * VAULT_SOURCE=local.
+ * Throws VaultConfigError whenever VAULT_SOURCE is explicitly set and the
+ * required env vars for that source are missing — regardless of NODE_ENV.
+ * In development, falls back to __fixtures__/vault/ for VAULT_SOURCE=local
+ * when VAULT_PATH is not set. Returns null in production when neither
+ * VAULT_SOURCE nor VAULT_PATH is configured (forker-friendly empty vault).
  *
- * Called inside getStaticProps/getStaticPaths to enforce production env
+ * Called inside getStaticProps/getStaticPaths to enforce env validation
  * without crashing unrelated routes at module-init time (P20, P25).
  */
 export function getVaultConfig(): VaultConfig | null {
@@ -46,11 +48,28 @@ export function getVaultConfig(): VaultConfig | null {
   // template, deploys to Vercel, hasn't wired up their vault yet — the site
   // should still build with /writing rendering the empty state.
   if (isProduction && !sourceEnv && !process.env.VAULT_PATH) {
-    if (typeof process !== "undefined" && typeof console !== "undefined") {
+    // Loud build-log warning so misconfig is debuggable later. Vercel build
+    // logs are searchable; the [vault] prefix is the grep handle. The full
+    // banner is intentionally noisy so operators don't miss it scrolling past.
+    if (typeof console !== "undefined") {
       console.warn(
-        "[vault] No vault configured (VAULT_SOURCE / VAULT_PATH unset in production). " +
-          "/writing will render empty. Set VAULT_SOURCE=local|github + the matching " +
-          "vars to publish content. See VAULT.md.",
+        "\n" +
+          "═══════════════════════════════════════════════════════════════════\n" +
+          "  [vault] WARNING: no vault source configured in production\n" +
+          "  ────────────────────────────────────────────────────────────────\n" +
+          "  Neither VAULT_SOURCE nor VAULT_PATH is set in this build.\n" +
+          "  Falling back to empty notes set; /writing will render the empty\n" +
+          "  state. This is the safe default for un-configured forks but is\n" +
+          "  almost certainly wrong for a real deployment.\n" +
+          "\n" +
+          "  To publish notes, set:\n" +
+          "    VAULT_SOURCE=local   + VAULT_PATH=/abs/path/to/vault\n" +
+          "  or\n" +
+          "    VAULT_SOURCE=github  + VAULT_REPO_URL=https://github.com/u/r\n" +
+          "                         + VAULT_GITHUB_TOKEN=ghp_...\n" +
+          "\n" +
+          "  See VAULT.md for the full setup walkthrough.\n" +
+          "═══════════════════════════════════════════════════════════════════\n",
       );
     }
     return null;
@@ -173,8 +192,8 @@ export async function getNoteBySlug(slug: string): Promise<VaultNote | null> {
 
 /**
  * Resets the in-process memoization cache.
- * Only exported in NODE_ENV === 'test' to allow test isolation.
- * DO NOT import or call this in production code.
+ * Exported unconditionally (ESM cannot conditionally export), but throws
+ * unless NODE_ENV === 'test'. DO NOT import or call this in production code.
  */
 export function __resetVaultCache__(): void {
   if (process.env.NODE_ENV !== "test") {

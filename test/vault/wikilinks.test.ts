@@ -99,6 +99,26 @@ describe("stripWikilinks — code fence preservation (plain string)", () => {
   });
 });
 
+describe("stripWikilinks — alias whitespace trimming", () => {
+  it("trims leading/trailing whitespace from alias in [[target| alias ]]", () => {
+    expect(stripWikilinks("[[my-note| alias with spaces ]]")).toBe(
+      "alias with spaces",
+    );
+  });
+
+  it("trims leading space from alias in [[target| alias]]", () => {
+    expect(stripWikilinks("[[my-note| the note]]")).toBe("the note");
+  });
+
+  it("trims trailing space from alias in [[target|alias ]]", () => {
+    expect(stripWikilinks("[[my-note|the note ]]")).toBe("the note");
+  });
+
+  it("does not alter alias with no surrounding whitespace", () => {
+    expect(stripWikilinks("[[my-note|clean alias]]")).toBe("clean alias");
+  });
+});
+
 describe("stripWikilinks — edge cases", () => {
   it("handles empty string", () => {
     expect(stripWikilinks("")).toBe("");

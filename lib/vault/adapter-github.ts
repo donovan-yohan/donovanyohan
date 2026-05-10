@@ -40,6 +40,19 @@ import rehypeStringify from "rehype-stringify";
 import matter from "gray-matter";
 import path from "node:path";
 
+/**
+ * Shared unified processor for body HTML rendering.
+ * Frozen at module scope — stateless, safe to reuse across entries.
+ */
+const markdownProcessor = unified()
+  .use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkStripWikilinks)
+  .use(remarkRehype)
+  .use(rehypeSanitize)
+  .use(rehypeStringify)
+  .freeze();
+
 /** Glob ignore prefixes for tarball entries (mirrors walk.ts IGNORE_PATTERNS). */
 const IGNORE_PREFIXES = [
   ".obsidian/",
@@ -85,14 +98,24 @@ function isIgnoredPath(relPath: string): boolean {
 /**
  * Returns true if the tarball entry path is safe to process.
  * Rejects: absolute paths, traversal, unsafe types.
+ *
+ * Uses segment-aware traversal detection: splits on "/" and rejects any
+ * segment that is empty (double-slash) or a dot-dot component ("..").
+ * Single-dot segments (".") are also rejected as they are redundant and
+ * can mask traversal in downstream consumers.
+ * This is more precise than `rawPath.includes("..")` which would
+ * incorrectly reject legitimate filenames like "foo..bar.md".
  */
 function isEntryPathSafe(rawPath: string, entryType: string): boolean {
   // Reject unsafe entry types
   if (UNSAFE_ENTRY_TYPES.has(entryType)) return false;
   // Reject absolute paths
   if (rawPath.startsWith("/")) return false;
-  // Reject traversal
-  if (rawPath.includes("..")) return false;
+  // Segment-aware traversal check: reject empty, ".", or ".." segments
+  const segments = rawPath.split("/");
+  for (const seg of segments) {
+    if (seg === "" || seg === "." || seg === "..") return false;
+  }
   return true;
 }
 
@@ -171,15 +194,7 @@ async function processTarEntry(
   const filename = path.basename(relPath);
   const slug = deriveSlug(filename, frontmatter.slug);
 
-  const processor = unified()
-    .use(remarkParse)
-    .use(remarkGfm)
-    .use(remarkStripWikilinks)
-    .use(remarkRehype)
-    .use(rehypeSanitize)
-    .use(rehypeStringify);
-
-  const bodyHtml = String(await processor.process(bodyMarkdown));
+  const bodyHtml = String(await markdownProcessor.process(bodyMarkdown));
   const firstParagraph = extractFirstParagraph(bodyMarkdown);
 
   const preview = applyPreviewDefaults(frontmatter.preview, {
@@ -266,6 +281,8 @@ export class GitHubVaultAdapter implements VaultAdapter {
       // Pass explicit compression flags to avoid brotli/zstd sniff ambiguity
       // that can block the parser if buffers are small.
       // Note: tar v7 uses `onReadEntry`, not `onentry`.
+      // onReadEntry is registered as a synchronous event listener; tar.Parser
+      // does not await its return value, so we use event-based data collection.
       const parser = new tar.Parser({
         strict: true,
         gzip: isGzip,
@@ -282,14 +299,8 @@ export class GitHubVaultAdapter implements VaultAdapter {
 
           const relPath = stripTarballPrefix(rawPath);
 
-          // Must be a .md file
-          if (!relPath.endsWith(".md")) {
-            entry.resume();
-            return;
-          }
-
-          // Apply ignore-list
-          if (isIgnoredPath(relPath)) {
+          // Must be a .md file and not ignored
+          if (!relPath.endsWith(".md") || isIgnoredPath(relPath)) {
             entry.resume();
             return;
           }
@@ -326,8 +337,8 @@ export class GitHubVaultAdapter implements VaultAdapter {
       parser.on("end", resolve);
       parser.on("error", reject);
 
-      // tar.Parser extends EventEmitter (not stream.Writable), so use pipe
-      // via the EventEmitter-compatible write() interface
+      // tar.Parser exposes write()/end() but is not a stream.Writable, so
+      // we cannot use readable.pipe(). Use manual data forwarding instead.
       readable.on("data", (chunk: Buffer) => {
         parser.write(chunk);
       });
