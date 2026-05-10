@@ -1,0 +1,74 @@
+components/note/elements/ListItem.tsx
+  s_b83e36f228a848::t_da0c4577e8e103 1-22
+components/note/variants/PullQuote.tsx
+  s_b83e36f228a848::t_97eaa8e200bcf8 1-53
+components/note/variants/HighlighterLink.tsx
+  s_b83e36f228a848::t_ef424c85c72eed 1-56
+test/note/NoteRenderer.test.tsx
+  s_b83e36f228a848::t_62c1fafe896fe1 1-15,17-172
+  s_b83e36f228a848::t_f5601f479152b5 16
+package.json
+  s_b83e36f228a848::t_c9a795cce61e29 23,30,32
+package-lock.json
+  ai_agent 14,21,23,2657-2665,3980-3989,5143-5152,5511-5516,5704-5745,5866-5892,6012-6017,6033-6056,6202-6211,6278-6287,7253-7312,8427-8451,8719-8733,8749-8763,9535-9552,12085-12093,12872-12876,13700-13704,13942-13946,14062-14089,14176-14197,14274-14278,14290-14303,14392-14396,14437-14441,15004-15048,15684-15704,15864-15873,15884-15893,16410-16424
+components/note/elements/Paragraph.tsx
+  s_b83e36f228a848::t_1c3c2da11e494b 1-48
+components/note/variants/DropCap.tsx
+  s_b83e36f228a848::t_e17686246a743f 1-28
+test/note/WorkHero.test.tsx
+  s_b83e36f228a848::t_5abec46a242ffd 1-115
+components/note/NoteRenderer.tsx
+  s_b83e36f228a848::t_1be2edd8ceffea 79-82
+  s_b83e36f228a848::t_5bac2546df6168 15-17,24,36-47,59-60,66-70,74-78,83,85,87-89,91-92,94
+  s_b83e36f228a848::t_2ebe1099577f0b 1-14,18-23,25-35,48-58,61-65,71-73,84,86,90,93,95-112
+components/note/elements/Heading.tsx
+  s_b83e36f228a848::t_d87599b0831bfd 1-80
+components/note/defaultComponents.ts
+  s_b83e36f228a848::t_b4157ddd88630e 1-81
+components/note/elements/Link.tsx
+  s_b83e36f228a848::t_08b3c8387c40c5 1-100
+components/note/elements/Image.tsx
+  s_b83e36f228a848::t_db95ac14d2bd3f 65-68
+  s_b83e36f228a848::t_204e2974de908d 1-64,69-80
+components/note/elements/InlineCode.tsx
+  s_b83e36f228a848::t_d26d9d01033996 1-32
+components/note/elements/CodeBlock.tsx
+  s_b83e36f228a848::t_ad4a9dd9ba0869 1-72
+components/note/variants/TableOfContents.tsx
+  s_b83e36f228a848::t_902fba4e7977bd 1-66
+components/note/buildProcessor.ts
+  s_b83e36f228a848::t_e164bda598c464 33-34,37,41,52,56-59,61-62,70,80,97,100
+  s_b83e36f228a848::t_f1f64cb99d5ffa 1-29,31-32,35-36,38-40,42-47,63-69,71-79,81-96,98-99,101
+  s_b83e36f228a848::t_d190c061e793c6 48-51,53-55,60
+  s_b83e36f228a848::t_1e0cec97ff8e3e 30
+components/note/hooks/useResolvedComponents.ts
+  s_b83e36f228a848::t_c86ecf8e30fa34 1-97
+components/note/elements/Blockquote.tsx
+  s_b83e36f228a848::t_366eb968a0be5c 1-30
+components/note/WorkHero.tsx
+  s_b83e36f228a848::t_eca7628a58d5d4 1-207
+components/note/index.ts
+  s_b83e36f228a848::t_8f6f57167e9ebe 1-30
+components/note/elements/List.tsx
+  s_b83e36f228a848::t_0d5291a94e55a6 1-43
+pages/writing/[slug].tsx
+  s_b83e36f228a848::t_aa36e2f5cc9ff5 10-15,22-24,51-72,74-77,90-100,102-104
+components/note/elements/Table.tsx
+  s_b83e36f228a848::t_7c403d2e527faa 1-86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "23e088abaa8bdeaad0c0a61e5c6b9ef657533432",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
