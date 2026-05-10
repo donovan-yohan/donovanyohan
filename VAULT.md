@@ -122,6 +122,26 @@ preview:                     # OPTIONAL, all sub-fields optional
   excerpt: First-paragraph override
   image: /img/hero.png       # when kind: image
 mood: focused                # arbitrary passthrough — preserved but ignored
+
+# Work-type fields (Phase A) — only meaningful when type: work
+type: work                   # OPTIONAL; 'note' (default) | 'work'
+subtitle: |                  # OPTIONAL; hero description text
+  Extended description shown below the title in the work-page hero.
+banner:                      # OPTIONAL; hero banner image paths
+  light: /img/photos/hero.png
+  dark: /img/photos/hero-dark.png
+bgColor:                     # OPTIONAL; hero background colour
+  light: "#05AC5B"
+  dark: "#038a49"
+info:                        # OPTIONAL; metadata chips in the hero
+  - label: UI/UX Designer
+  - label: Co-op
+  - label: September - May 2020
+  - label: View on App Store
+    href: https://apps.apple.com/ca/app/manulife-mobile/id1214009312
+render:                      # OPTIONAL; renderer hint map (Phase B NoteRenderer)
+  h2: highlighter            # maps element selector → named preset
+  blockquote: pull-quote
 ---
 
 Body markdown here.

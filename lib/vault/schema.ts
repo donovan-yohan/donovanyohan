@@ -17,6 +17,7 @@ import { z } from "zod";
 
 export type Visibility = "public" | "private";
 export type PreviewKind = "text" | "image" | "quote" | "embed";
+export type NoteType = "note" | "work";
 
 // ── Sub-schemas ───────────────────────────────────────────────────────────────
 
@@ -47,6 +48,39 @@ export interface PreviewConfig {
   image?: string;
 }
 
+/**
+ * BannerConfig: light/dark image paths for the work-page hero banner.
+ * Only meaningful when `type: work`.
+ */
+export const BannerConfigSchema = z.object({
+  light: z.string().optional(),
+  dark: z.string().optional(),
+});
+
+export type BannerConfig = z.infer<typeof BannerConfigSchema>;
+
+/**
+ * BgColorConfig: light/dark hex colour for the work-page hero background.
+ * Only meaningful when `type: work`.
+ */
+export const BgColorConfigSchema = z.object({
+  light: z.string().optional(),
+  dark: z.string().optional(),
+});
+
+export type BgColorConfig = z.infer<typeof BgColorConfigSchema>;
+
+/**
+ * WorkInfoItem: a single metadata chip displayed in the work-page hero.
+ * `href` is optional — when present the chip renders as a link.
+ */
+export const WorkInfoItemSchema = z.object({
+  label: z.string(),
+  href: z.string().optional(),
+});
+
+export type WorkInfoItem = z.infer<typeof WorkInfoItemSchema>;
+
 // ── Main frontmatter schema ───────────────────────────────────────────────────
 
 /**
@@ -59,6 +93,10 @@ export interface PreviewConfig {
  *   - JS `Date` (from YAML auto-parse) → ISO `YYYY-MM-DD` string
  *   - Strings → passed through as-is for regex validation
  *   - Anything else → passed through (will fail regex, so resolves to private)
+ *
+ * Work-type fields (`type`, `subtitle`, `banner`, `bgColor`, `info`, `render`)
+ *   are all optional and backwards-compatible. Existing note fixtures that omit
+ *   them continue to validate unchanged.
  */
 export const VaultFrontmatterSchema = z
   .object({
@@ -90,6 +128,50 @@ export const VaultFrontmatterSchema = z
     visibility: z.enum(["public", "private"]).default("private"),
 
     preview: PreviewConfigSchema.optional(),
+
+    // ── Work-type fields (Layer B, Phase A) ────────────────────────────────
+    // All optional. Backwards-compatible: existing notes that omit them are
+    // unaffected. Only meaningful when `type: work`; ignored by the note
+    // renderer for `type: note` (default).
+
+    /**
+     * `type` — content category. Defaults to `"note"` for all existing notes.
+     * `"work"` enables work-page-specific rendering in Phase B (NoteRenderer).
+     */
+    type: z.enum(["note", "work"]).default("note").optional(),
+
+    /**
+     * `subtitle` — extended description shown in the work-page hero below the
+     * title. Equivalent to the `content` prop on `<ArticleHero>`.
+     */
+    subtitle: z.string().optional(),
+
+    /**
+     * `banner` — hero banner image paths. `light` and `dark` each accept a
+     * public asset path (e.g. `/img/photos/manulifebanner.png`).
+     */
+    banner: BannerConfigSchema.optional(),
+
+    /**
+     * `bgColor` — hero background colour. Accepts hex strings
+     * (e.g. `"#05AC5B"`). Phase B maps these to CSS custom properties.
+     */
+    bgColor: BgColorConfigSchema.optional(),
+
+    /**
+     * `info` — ordered list of metadata chips for the work-page hero.
+     * Items without `href` render as plain text; items with `href` render
+     * as links. Equivalent to the `info` prop on `<ArticleHero>`.
+     */
+    info: z.array(WorkInfoItemSchema).optional(),
+
+    /**
+     * `render` — renderer hint map (Layer B per spec).
+     * Maps element selectors to named render presets so Phase B's NoteRenderer
+     * can apply visual treatments without baking them into markdown.
+     * Example: `{ h2: "highlighter", blockquote: "pull-quote" }`.
+     */
+    render: z.record(z.string(), z.string()).optional(),
   })
   .passthrough();
 
