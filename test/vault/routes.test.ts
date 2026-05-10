@@ -235,9 +235,12 @@ describe("ESLint import/no-restricted-paths rule", () => {
         overrideConfigFile: "eslint.config.mjs",
       });
 
-      // A page that directly imports the adapter — must produce a lint error
+      // A page that directly imports the adapter — must produce a lint error.
+      // pages/writing/foo.tsx is two levels deep, so the relative path back to
+      // the repo's lib/ is ../../lib (was ../../, which would have resolved to
+      // pages/lib — making the test fixture not actually exercise the rule).
       const code = [
-        "import { LocalVaultAdapter } from '../lib/vault/adapter-local';",
+        "import { LocalVaultAdapter } from '../../lib/vault/adapter-local';",
         "export default function Page() { return null; }",
       ].join("\n");
 
@@ -263,7 +266,7 @@ describe("ESLint import/no-restricted-paths rule", () => {
       });
 
       const code = [
-        "import { GitHubVaultAdapter } from '../lib/vault/adapter-github';",
+        "import { GitHubVaultAdapter } from '../../lib/vault/adapter-github';",
         "export default function Page() { return null; }",
       ].join("\n");
 

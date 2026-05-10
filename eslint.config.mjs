@@ -22,11 +22,22 @@ export default tseslint.config(
     },
   },
   // Vault adapter privacy boundary: pages must import from lib/vault/index,
-  // never directly from adapter-local or adapter-github (Slice 1 rule per AGENTS.md).
+  // never directly from adapter-local or adapter-github (AGENTS.md load-bearing rule).
+  // The import-plugin needs a resolver to compare imports against the `from`
+  // path; we use the node resolver (built into eslint-plugin-import) and ask
+  // it to recognize TS extensions so `import "../../lib/vault/adapter-local"`
+  // resolves to the .ts file on disk.
   {
     files: ["pages/**/*.{ts,tsx}"],
     plugins: {
       import: importPlugin,
+    },
+    settings: {
+      "import/resolver": {
+        node: {
+          extensions: [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"],
+        },
+      },
     },
     rules: {
       "import/no-restricted-paths": [
@@ -34,14 +45,14 @@ export default tseslint.config(
         {
           zones: [
             {
-              target: "pages",
-              from: "lib/vault/adapter-local",
+              target: "./pages",
+              from: "./lib/vault/adapter-local.ts",
               message:
                 "Public pages must import vault API from 'lib/vault/index', not directly from adapter-local.",
             },
             {
-              target: "pages",
-              from: "lib/vault/adapter-github",
+              target: "./pages",
+              from: "./lib/vault/adapter-github.ts",
               message:
                 "Public pages must import vault API from 'lib/vault/index', not directly from adapter-github.",
             },

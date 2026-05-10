@@ -17,7 +17,7 @@
  * or a build command that runs this script before `next build`.
  */
 
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 
 function main() {
@@ -47,10 +47,18 @@ function main() {
   }
 
   try {
-    const sha = execSync(`git -C "${vaultPath}" rev-parse --short HEAD`, {
-      encoding: "utf8",
-      stdio: ["pipe", "pipe", "pipe"],
-    }).trim();
+    // execFileSync (not execSync) — argv array passed directly to git without
+    // a shell, so vaultPath cannot inject shell metacharacters / command
+    // chaining. Eliminates the command-injection vector flagged by gemini
+    // security-high + Copilot review on PR #47.
+    const sha = execFileSync(
+      "git",
+      ["-C", vaultPath, "rev-parse", "--short", "HEAD"],
+      {
+        encoding: "utf8",
+        stdio: ["pipe", "pipe", "pipe"],
+      },
+    ).trim();
     process.stdout.write(sha + "\n");
   } catch {
     // Vault path may not be a git repo (e.g. tarball extract). Fall back gracefully.

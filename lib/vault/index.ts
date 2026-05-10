@@ -24,6 +24,12 @@ import { GitHubVaultAdapter } from "./adapter-github";
 import { assertNoDuplicateSlugs } from "./duplicate-check";
 import { VaultConfigError } from "./errors";
 
+// Re-export public types so pages/** can import everything from the
+// barrel — never reaching past lib/vault/index.ts into adapter or schema
+// modules directly. Enforced by ESLint import/no-restricted-paths.
+export type { VaultNote, VaultConfig } from "./schema";
+export type { Visibility, PreviewConfig, VaultFrontmatter } from "./schema";
+
 // ── Config ────────────────────────────────────────────────────────────────────
 
 /**

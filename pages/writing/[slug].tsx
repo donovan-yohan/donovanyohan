@@ -5,14 +5,16 @@
  * of unknown slugs at request time, which is a privacy-edge attack vector.
  * Only build-time-enumerated public slugs are reachable.
  *
- * Imports ONLY from lib/vault/index (never adapter-local or adapter-github
- * directly — ESLint import/no-restricted-paths enforces this per AGENTS.md).
+ * Imports ONLY from lib/vault (the barrel) — never adapter-local, adapter-github,
+ * or schema directly. ESLint import/no-restricted-paths enforces this per
+ * AGENTS.md "Vault adapter — load-bearing privacy code".
  */
 
 import Head from "next/head";
+import Link from "next/link";
 import type { GetStaticPaths, GetStaticProps } from "next";
-import type { VaultNote } from "../../lib/vault/schema";
-import { getPublicNotes, getNoteBySlug } from "../../lib/vault";
+import Main from "../../layouts/main";
+import { getPublicNotes, getNoteBySlug, type VaultNote } from "../../lib/vault";
 
 interface Props {
   note: VaultNote;
@@ -41,32 +43,40 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
 export default function WritingSlug({ note }: Props) {
   return (
-    <>
+    <Main breadcrumbs={[{ label: "Writing", href: "/writing" }]}>
       <Head>
         <title>{note.frontmatter.title} — Donovan Yohan</title>
-        <meta name="description" content={note.preview.excerpt ?? note.frontmatter.title} />
+        <meta
+          name="description"
+          content={note.preview.excerpt ?? note.frontmatter.title}
+        />
       </Head>
 
-      <main style={{ maxWidth: 720, margin: "0 auto", padding: "80px 24px 48px" }}>
-        <a href="/writing" style={{ display: "block", marginBottom: 32 }}>
-          ← Writing
-        </a>
+      <div className="pageRoot">
+        <div className="pageContent">
+          <article style={{ maxWidth: 720, margin: "0 auto", padding: "32px 0 48px" }}>
+            <Link href="/writing" style={{ display: "block", marginBottom: 32 }}>
+              ← Writing
+            </Link>
 
-        <h1>{note.frontmatter.title}</h1>
-        <time dateTime={note.frontmatter.date}>{note.frontmatter.date}</time>
+            <h1>{note.frontmatter.title}</h1>
+            <time dateTime={note.frontmatter.date}>{note.frontmatter.date}</time>
 
-        {/*
-         * dangerouslySetInnerHTML is required here because `note.body` is
-         * pre-sanitized HTML produced by lib/vault/render.ts (which applies
-         * rehype-sanitize to strip <script>, <iframe>, onclick=, etc.).
-         * The sanitization happens upstream in the adapter pipeline (P22);
-         * rendering it as a string here is safe.
-         */}
-        <article
-          style={{ marginTop: 32 }}
-          dangerouslySetInnerHTML={{ __html: note.body }}
-        />
-      </main>
-    </>
+            {/*
+             * dangerouslySetInnerHTML is required because note.body is
+             * pre-sanitized HTML. Sanitization happens upstream in the adapter
+             * pipeline — see lib/vault/adapter-local.ts and
+             * lib/vault/adapter-github.ts (both use the rehype-sanitize
+             * defaultSchema after stripping wikilinks). The sanitized-HTML
+             * contract is documented on VaultNote.body in lib/vault/schema.ts.
+             */}
+            <div
+              style={{ marginTop: 32 }}
+              dangerouslySetInnerHTML={{ __html: note.body }}
+            />
+          </article>
+        </div>
+      </div>
+    </Main>
   );
 }
