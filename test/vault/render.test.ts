@@ -145,4 +145,54 @@ describe("renderMarkdown", () => {
     const html = await renderMarkdown("   \n  ");
     expect(html).toBe("");
   });
+
+  // ── Regressions / bot review fixes ────────────────────────────────────────
+
+  it("text containing ONLY a stripped embed produces no text node leak (gemini #43)", async () => {
+    // Regression: previously, a text node containing only `![[image.png]]`
+    // would have results.length === 0 and the original raw wikilink would be
+    // pushed back as a fallback. Now: matched flag tracks the strip; result
+    // is empty (the text node disappears entirely).
+    const html = await renderMarkdown("![[image.png]]");
+    expect(html).not.toContain("[[");
+    expect(html).not.toContain("image.png");
+  });
+
+  it("strips known-leaking inline HTML the spec promises (rehype-raw + sanitize)", async () => {
+    // Without rehype-raw, remark-rehype defaults silently DROP raw HTML before
+    // sanitize runs — meaning <script>alert(1)</script> would not be in the
+    // output but ALSO would not be inspected by the sanitizer. With rehype-raw,
+    // raw HTML reaches sanitize as actual hast nodes and is pruned by schema.
+    // This test is the proof. (copilot #43)
+    const html = await renderMarkdown(
+      "<p>safe text</p><script>alert(1)</script><span onmouseover='evil()'>x</span>",
+    );
+    expect(html).toContain("safe text");
+    expect(html).toContain("<p>");
+    expect(html).not.toContain("<script");
+    expect(html).not.toContain("onmouseover");
+    expect(html).not.toContain("alert(1)");
+    expect(html).not.toContain("evil()");
+  });
+
+  it("renders concurrently without cross-call regex state corruption", async () => {
+    // Per-call RegExp instance prevents shared lastIndex mutation under
+    // concurrent renderMarkdown calls. (gemini + copilot #43)
+    const inputs = [
+      "[[a]] one",
+      "[[b|alias]] two",
+      "[[c#h]] three",
+      "[[d^id]] four",
+      "![[e.png]] five",
+      "plain six",
+    ];
+    const results = await Promise.all(inputs.map((s) => renderMarkdown(s)));
+    expect(results[0]).toContain("a one");
+    expect(results[1]).toContain("alias two");
+    expect(results[2]).toContain("c three");
+    expect(results[3]).toContain("d four");
+    expect(results[4]).toContain("five");
+    expect(results[4]).not.toContain("e.png");
+    expect(results[5]).toContain("plain six");
+  });
 });

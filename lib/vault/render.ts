@@ -1,18 +1,21 @@
 /**
  * Renders markdown body to sanitized HTML.
  *
- * Pipeline: remark → remark-gfm → strip wikilinks (in remark AST) → remark-rehype
- *          → rehype-sanitize → rehype-stringify
+ * Pipeline: remark-parse → remark-gfm → strip wikilinks → remark-rehype
+ *          (allowDangerousHtml) → rehype-raw → rehype-sanitize → rehype-stringify
  *
  * - GFM features supported: tables, strikethrough, task lists, autolinks
  * - Wikilinks ([[note]], [[note|alias]], [[note#h]], [[note^id]], ![[embed]])
  *   stripped to plain text BEFORE HTML conversion (so they're never in output)
- * - HTML in markdown (raw <script>, <iframe>, onclick=) is sanitized away
- *   per rehype-sanitize default schema
+ * - Raw HTML in markdown is parsed (rehype-raw) then sanitized per
+ *   rehype-sanitize defaultSchema. Default `remark-rehype` would silently DROP
+ *   raw HTML before sanitize ran — we explicitly allow it through then sanitize.
+ *   Result: <script>, <iframe>, onclick= and other unsafe forms are stripped;
+ *   safe inline HTML (e.g. <em>, <a href>) is preserved.
  * - Code fences and inline code preserve literal wikilink syntax
  *
  * P18: Wikilink handling — Obsidian-syntax-aware strip.
- * P19: HTML sanitization via rehype-sanitize defaultSchema.
+ * P19: HTML sanitization via rehype-sanitize defaultSchema (with rehype-raw).
  * P25: No I/O, no throws, no env access at module init.
  */
 
@@ -20,22 +23,27 @@ import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
+import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify";
 import type { Root, Text, PhrasingContent } from "mdast";
 import type { Plugin } from "unified";
 
-// ── Wikilink regex ────────────────────────────────────────────────────────────
+// ── Wikilink regex (template; NOT executed directly) ──────────────────────────
 //
 // Matches Obsidian wikilink forms at AST-text level (code fences/inline code
 // are never visited, preserving literal wikilink syntax there).
 //
-// Capture groups:
-//   1 — embed prefix `!` (if present)
-//   2 — target (before `|`, `#`, `^`)
-//   3 — alias after `|` (optional)
-//   4 — heading fragment after `#` (optional)
-//   5 — block id after `^` (optional)
+// Source pattern is kept as a string and a fresh `RegExp` instance is created
+// per call site to avoid `lastIndex` mutation under concurrent renderMarkdown
+// calls. We use `String.prototype.matchAll` on a non-global instance.
+//
+// Capture groups (as ordered by the destructuring at the call site):
+//   [1] embed   — leading `!` if present (`![[...]]` is an embed)
+//   [2] target  — text before `#`, `^`, or `|`
+//   [3] heading — fragment after `#` (optional)
+//   [4] blockId — fragment after `^` (optional)
+//   [5] alias   — fragment after `|` (optional)
 //
 // Examples:
 //   [[note]]           → target=note, no alias
@@ -46,8 +54,8 @@ import type { Plugin } from "unified";
 //
 // TODO(#33): dedupe with lib/vault/wikilinks.ts when both PRs merge.
 
-const WIKILINK_RE =
-  /(!?)\[\[([^\]|#^]+?)(?:#([^\]|^]+))?(?:\^([^\]|#]+))?(?:\|([^\]]+))?\]\]/g;
+const WIKILINK_PATTERN =
+  String.raw`(!?)\[\[([^\]|#^]+?)(?:#([^\]|^]+))?(?:\^([^\]|#]+))?(?:\|([^\]]+))?\]\]`;
 
 /**
  * Resolves the display text for a parsed wikilink.
@@ -126,17 +134,25 @@ function visitText(node: Root | PhrasingContent | { type: string; children?: unk
 /**
  * Splits a raw text value into an array of mdast Text nodes, replacing each
  * wikilink with its display text (or empty, for embeds).
+ *
+ * Uses a per-call `RegExp` instance (not a shared module-level regex) so
+ * concurrent `renderMarkdown` calls cannot interfere via `lastIndex`. Tracks
+ * an explicit `matched` flag so an input that contained ONLY a stripped
+ * embed still produces an empty result set (not the original raw string).
  */
 function expandWikilinksInText(value: string): Text[] {
   const results: Text[] = [];
   let lastIndex = 0;
+  let matched = false;
 
-  WIKILINK_RE.lastIndex = 0;
-  let match: RegExpExecArray | null;
+  // Per-call regex instance — no shared lastIndex mutation across concurrent
+  // renderMarkdown calls (gemini #43, copilot concurrency note).
+  const re = new RegExp(WIKILINK_PATTERN, "g");
 
-  while ((match = WIKILINK_RE.exec(value)) !== null) {
+  for (const match of value.matchAll(re)) {
+    matched = true;
     const [full, embed, target, heading, blockId, alias] = match;
-    const start = match.index;
+    const start = match.index ?? 0;
 
     // Text before this wikilink
     if (start > lastIndex) {
@@ -163,9 +179,12 @@ function expandWikilinksInText(value: string): Text[] {
     results.push({ type: "text", value: value.slice(lastIndex) });
   }
 
-  // If no wikilinks matched, return the original value as a single node
-  if (results.length === 0) {
-    results.push({ type: "text", value });
+  // If NO wikilinks matched, return the original value as a single node.
+  // If wikilinks DID match but all were stripped (e.g. text was just an
+  // embed `![[image.png]]`), return an empty array — do NOT push the raw
+  // input back. (gemini #43 logic-bug fix.)
+  if (!matched) {
+    return [{ type: "text", value }];
   }
 
   return results;
@@ -173,31 +192,45 @@ function expandWikilinksInText(value: string): Text[] {
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
+// Pre-configured + frozen processor reused across renderMarkdown calls.
+// Module-level so plugin registration only happens once. Per unified docs:
+// `freeze()` makes the processor reusable; `process()` is safe to call
+// concurrently because it allocates fresh state per invocation. (gemini #43
+// performance note.)
+const processor = unified()
+  .use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkStripWikilinks)
+  // allowDangerousHtml: lets raw HTML pass through to rehype-raw + sanitize
+  // instead of being silently dropped by the default mdast→hast bridge.
+  // Otherwise <script>, <iframe>, etc. would never reach the sanitizer
+  // (because remark-rehype would have already deleted them) — meaning the
+  // "sanitization" guarantee in our docs would be vacuous. (copilot #43)
+  .use(remarkRehype, { allowDangerousHtml: true })
+  // Parse the raw HTML strings (now in hast as `raw` nodes) into actual
+  // hast element nodes so rehype-sanitize can inspect and prune them.
+  .use(rehypeRaw)
+  .use(rehypeSanitize)
+  .use(rehypeStringify)
+  .freeze();
+
 /**
  * Renders a markdown body string to sanitized HTML.
  *
  * Pipeline:
- *   1. remark (parse markdown → mdast)
- *   2. remark-gfm (GFM extensions: tables, strikethrough, task lists, autolinks)
- *   3. remarkStripWikilinks (strip Obsidian wikilink syntax in text nodes)
- *   4. remark-rehype (mdast → hast)
- *   5. rehype-sanitize (remove unsafe HTML per defaultSchema)
- *   6. rehype-stringify (hast → HTML string)
+ *   1. remark-parse           — markdown → mdast
+ *   2. remark-gfm             — GFM extensions: tables, strikethrough, tasks
+ *   3. remarkStripWikilinks   — strip Obsidian wikilink syntax in text nodes
+ *   4. remark-rehype          — mdast → hast (allowDangerousHtml: true)
+ *   5. rehype-raw             — parse raw-HTML hast nodes into element nodes
+ *   6. rehype-sanitize        — remove unsafe HTML per defaultSchema
+ *   7. rehype-stringify       — hast → HTML string
  *
  * @param body - Raw markdown string (may be empty).
  * @returns Sanitized HTML string. Empty input returns empty string.
  */
 export async function renderMarkdown(body: string): Promise<string> {
   if (body.trim() === "") return "";
-
-  const processor = unified()
-    .use(remarkParse)
-    .use(remarkGfm)
-    .use(remarkStripWikilinks)
-    .use(remarkRehype)
-    .use(rehypeSanitize)
-    .use(rehypeStringify);
-
   const result = await processor.process(body);
   return String(result);
 }
