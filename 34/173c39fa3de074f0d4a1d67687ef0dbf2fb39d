@@ -1,0 +1,36 @@
+test/vault/vault-lint.test.ts
+  s_b83e36f228a848::t_bcbcdebe8c686b 525,538,588
+  s_b83e36f228a848::t_094831652efa03 4-9,13-17,19-20
+  s_b83e36f228a848::t_060f8016c960e7 520-524,526-537,539-587,589-614
+package-lock.json
+  ai_agent 33
+package.json
+  s_b83e36f228a848::t_d8a485342e2eee 41
+scripts/vault-lint.ts
+  s_b83e36f228a848::t_9f941d8e902f93 136-138,140
+  s_b83e36f228a848::t_4718237d3798bd 23
+  s_b83e36f228a848::t_c50c2a85256699 234
+  s_b83e36f228a848::t_6ee64bc9062717 84-91
+  s_b83e36f228a848::t_59e7fb0ba87f55 297,301-317,320,322,326-328,331-338,345-355,358-367
+  s_b83e36f228a848::t_cf665f694834a0 108-116,118-130,132-133,135,141-142,145-164,166,169-184
+  s_b83e36f228a848::t_d87fdb9d7cad59 190-193,199,211-214
+  s_b83e36f228a848::t_2b67e5acda1585 388-391,393-394,396,408,415-418,421,429-439
+  s_b83e36f228a848::t_a6765ca5483f6e 22,42
+  s_b83e36f228a848::t_aed00ac694315a 263,285,289
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "34173c39fa3de074f0d4a1d67687ef0dbf2fb39d",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
