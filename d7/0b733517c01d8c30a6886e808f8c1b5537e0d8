@@ -1,0 +1,22 @@
+package.json
+  s_b83e36f228a848::t_e0118d09bb74b3 41
+  s_b83e36f228a848::t_2c967901d3c857 20,22-23,56
+pages/index.tsx
+  s_b83e36f228a848::t_2c967901d3c857 1-5,7-60,63-82,84-241,243-262,264,266-286,288-321,323-351,353-410,412-418,420-453,455-463
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "d70b733517c01d8c30a6886e808f8c1b5537e0d8",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
