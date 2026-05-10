@@ -24,6 +24,14 @@ import { GitHubVaultAdapter } from "./adapter-github";
 import { assertNoDuplicateSlugs } from "./duplicate-check";
 import { VaultConfigError } from "./errors";
 
+// Re-export new work-type types so consumers can import from lib/vault.
+export type {
+  NoteType,
+  BannerConfig,
+  BgColorConfig,
+  WorkInfoItem,
+} from "./schema";
+
 // ── Config ────────────────────────────────────────────────────────────────────
 
 /**

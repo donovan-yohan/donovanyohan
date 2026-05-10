@@ -17,6 +17,7 @@ import { z } from "zod";
 
 export type Visibility = "public" | "private";
 export type PreviewKind = "text" | "image" | "quote" | "embed";
+export type NoteType = "note" | "work";
 
 // ── Sub-schemas ───────────────────────────────────────────────────────────────
 
@@ -47,6 +48,58 @@ export interface PreviewConfig {
   image?: string;
 }
 
+/**
+ * BannerConfig: light/dark image paths for the work-page hero banner.
+ * Only meaningful when `type: work`.
+ */
+export const BannerConfigSchema = z.object({
+  // Public-asset paths must start with `/` so the renderer can serve them
+  // directly without relative-path ambiguity. Leak-test friendly.
+  light: z
+    .string()
+    .startsWith("/", "banner.light must be a public asset path starting with /")
+    .optional(),
+  dark: z
+    .string()
+    .startsWith("/", "banner.dark must be a public asset path starting with /")
+    .optional(),
+});
+
+export type BannerConfig = z.infer<typeof BannerConfigSchema>;
+
+/**
+ * BgColorConfig: light/dark hex colour for the work-page hero background.
+ * Only meaningful when `type: work`.
+ */
+// Hex colour validator — accepts #RGB or #RRGGBB. Rejects malformed colours
+// that would silently break the hero rendering in Phase B.
+const HEX_COLOR = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+
+export const BgColorConfigSchema = z.object({
+  light: z
+    .string()
+    .regex(HEX_COLOR, "bgColor.light must be a hex colour (#RGB or #RRGGBB)")
+    .optional(),
+  dark: z
+    .string()
+    .regex(HEX_COLOR, "bgColor.dark must be a hex colour (#RGB or #RRGGBB)")
+    .optional(),
+});
+
+export type BgColorConfig = z.infer<typeof BgColorConfigSchema>;
+
+/**
+ * WorkInfoItem: a single metadata chip displayed in the work-page hero.
+ * `href` is optional — when present the chip renders as a link.
+ */
+export const WorkInfoItemSchema = z.object({
+  // Non-empty label so an info chip is never blank in the hero.
+  label: z.string().min(1, "info[].label cannot be empty"),
+  href: z.string().optional(),
+});
+
+export type WorkInfoItem = z.infer<typeof WorkInfoItemSchema>;
+
 // ── Main frontmatter schema ───────────────────────────────────────────────────
 
 /**
@@ -59,6 +112,10 @@ export interface PreviewConfig {
  *   - JS `Date` (from YAML auto-parse) → ISO `YYYY-MM-DD` string
  *   - Strings → passed through as-is for regex validation
  *   - Anything else → passed through (will fail regex, so resolves to private)
+ *
+ * Work-type fields (`type`, `subtitle`, `banner`, `bgColor`, `info`, `render`)
+ *   are all optional and backwards-compatible. Existing note fixtures that omit
+ *   them continue to validate unchanged.
  */
 export const VaultFrontmatterSchema = z
   .object({
@@ -90,6 +147,54 @@ export const VaultFrontmatterSchema = z
     visibility: z.enum(["public", "private"]).default("private"),
 
     preview: PreviewConfigSchema.optional(),
+
+    // ── Work-type fields (Layer B, Phase A) ────────────────────────────────
+    // All optional. Backwards-compatible: existing notes that omit them are
+    // unaffected. Only meaningful when `type: work`; ignored by the note
+    // renderer for `type: note` (default).
+
+    /**
+     * `type` — content category. Defaults to `"note"` for all existing notes.
+     * `"work"` enables work-page-specific rendering in Phase B (NoteRenderer).
+     */
+    // `.default()` already makes the field optional at the input layer; do NOT
+    // add `.optional()` after, which would cause Zod to infer `T | undefined`
+    // and effectively bypass the default when the key is missing. The
+    // discriminator must always resolve to "note" or "work" at runtime.
+    type: z.enum(["note", "work"]).default("note"),
+
+    /**
+     * `subtitle` — extended description shown in the work-page hero below the
+     * title. Equivalent to the `content` prop on `<ArticleHero>`.
+     */
+    subtitle: z.string().optional(),
+
+    /**
+     * `banner` — hero banner image paths. `light` and `dark` each accept a
+     * public asset path (e.g. `/img/photos/manulifebanner.png`).
+     */
+    banner: BannerConfigSchema.optional(),
+
+    /**
+     * `bgColor` — hero background colour. Accepts hex strings
+     * (e.g. `"#05AC5B"`). Phase B maps these to CSS custom properties.
+     */
+    bgColor: BgColorConfigSchema.optional(),
+
+    /**
+     * `info` — ordered list of metadata chips for the work-page hero.
+     * Items without `href` render as plain text; items with `href` render
+     * as links. Equivalent to the `info` prop on `<ArticleHero>`.
+     */
+    info: z.array(WorkInfoItemSchema).optional(),
+
+    /**
+     * `render` — renderer hint map (Layer B per spec).
+     * Maps element selectors to named render presets so Phase B's NoteRenderer
+     * can apply visual treatments without baking them into markdown.
+     * Example: `{ h2: "highlighter", blockquote: "pull-quote" }`.
+     */
+    render: z.record(z.string(), z.string()).optional(),
   })
   .passthrough();
 

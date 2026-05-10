@@ -35,12 +35,40 @@ export interface PreviewConfig {
   image?: string;           // path/URL when kind === 'image'
 }
 
+export type NoteType = 'note' | 'work';
+
+export interface BannerConfig {
+  light?: string;           // public asset path (e.g. '/img/photos/manulifebanner.png')
+  dark?: string;
+}
+
+export interface BgColorConfig {
+  light?: string;           // hex colour (e.g. '#05AC5B')
+  dark?: string;
+}
+
+export interface WorkInfoItem {
+  label: string;            // displayed text
+  href?: string;            // when present, renders as a link
+}
+
 export interface VaultFrontmatter {
   title: string;
   date: string;             // YYYY-MM-DD (Date object coerced to ISO; see P24)
   slug?: string;            // optional override; otherwise derived from filename
   visibility: Visibility;
   preview?: Partial<PreviewConfig>;
+
+  // Work-type fields (Phase A / feat/vault-work-schema)
+  // All optional and backwards-compatible — omitting them leaves existing notes
+  // unaffected. Only meaningful when type === 'work'.
+  type?: NoteType;          // default 'note'
+  subtitle?: string;        // hero description (equivalent to <ArticleHero content>)
+  banner?: BannerConfig;    // hero banner image paths
+  bgColor?: BgColorConfig;  // hero background colour
+  info?: WorkInfoItem[];    // metadata chips in the hero
+  render?: Record<string, string>; // renderer hint map; e.g. { h2: 'highlighter' }
+
   // Passthrough: extra frontmatter keys (e.g. `mood`, `weather`) are preserved
   // but ignored by the publishing pipeline.
   [extra: string]: unknown;
