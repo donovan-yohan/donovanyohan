@@ -1,0 +1,19 @@
+pages/writing/index.tsx
+  s_b83e36f228a848::t_430a2d6a14e2ce 19,24,31-35,38,46-48,55-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "9ae47259d7c65b9a3b59a682646f1f710017b58c",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
