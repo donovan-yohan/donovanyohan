@@ -1,0 +1,24 @@
+test/vault/duplicate-check.test.ts
+  s_b83e36f228a848::t_c558ffebf5b394 18
+lib/vault/schema.ts
+  s_b83e36f228a848::t_8bd92f4bc8039e 96-97
+  s_b83e36f228a848::t_5d0d0959644481 74-77,79-86
+  s_b83e36f228a848::t_fc1d4f38d4e059 160-164
+  s_b83e36f228a848::t_f68cfbd2a01058 56-65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "2c174bb34aa15132c244bc34fe63b935f9dbc063",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
