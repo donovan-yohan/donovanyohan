@@ -1,0 +1,47 @@
+test/vault/wikilinks.test.ts
+  s_b83e36f228a848::t_76b28c7cdaa920 102-121
+lib/vault/walk.ts
+  s_b83e36f228a848::t_7a8a2301b26216 53-55,57-61,63-70,72-76,78-85,87-90,92-95
+lib/vault/wikilinks.ts
+  s_b83e36f228a848::t_6d28c26899b5a4 55
+  s_b83e36f228a848::t_5ca6d72fac7001 67-69
+  s_b83e36f228a848::t_4413bee9bf68d6 20
+test/vault/adapter-github.test.ts
+  s_b83e36f228a848::t_c7e7f75ba6b6f2 278-321
+lib/vault/index.ts
+  s_b83e36f228a848::t_2cdb076ca20056 9-10
+  s_b83e36f228a848::t_7f42c74d832f27 32-36,38
+  s_b83e36f228a848::t_864176628c06fb 51-54,56-72
+  s_b83e36f228a848::t_1e19d9489509f1 195-196
+  s_b83e36f228a848::t_851827de7bf792 15
+lib/vault/adapter-local.ts
+  s_b83e36f228a848::t_8a063f6989eeff 195-203,205-206,208-210
+  s_b83e36f228a848::t_12458e57ac457b 124
+  s_b83e36f228a848::t_f6590976f3e51c 44-55
+lib/vault/adapter-github.ts
+  s_b83e36f228a848::t_1bdd14cba7c37a 43-55
+  s_b83e36f228a848::t_f81262c5657965 284-285
+  s_b83e36f228a848::t_f66a8dd4fc2a66 302-303
+  s_b83e36f228a848::t_5d7cf5a30be3e4 340-341
+  s_b83e36f228a848::t_5216f0453af880 197
+  s_b83e36f228a848::t_10cb19eefa3e38 101-107,114-118
+package.json
+  s_b83e36f228a848::t_b4feec22d20dbb 35
+  s_b83e36f228a848::t_db2f630a35160b 54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "a5730a5fa12cf56c543f40cf93e3e95863e73d19",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
