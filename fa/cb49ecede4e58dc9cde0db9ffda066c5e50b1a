@@ -1,0 +1,27 @@
+test/vault/adapter-local.test.ts
+  s_b83e36f228a848::t_893bcb73e56026 69-70
+package.json
+  s_b83e36f228a848::t_893bcb73e56026 15-16
+  s_b83e36f228a848::t_47c6fe711da14c 14
+test/leak.test.ts
+  s_b83e36f228a848::t_17511ba947c470 1-58,61-809
+  s_b83e36f228a848::t_8012e2b1526705 59-60
+__fixtures__/vault/leak-canary.md
+  s_b83e36f228a848::t_893bcb73e56026 2,7-8,10-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "facb49ecede4e58dc9cde0db9ffda066c5e50b1a",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
