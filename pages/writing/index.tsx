@@ -16,21 +16,26 @@
 import Head from "next/head";
 import type { GetStaticProps } from "next";
 import type { VaultNote } from "../../lib/vault/schema";
-import { getPublicNotes } from "../../lib/vault";
+import { getPublicNotes, getVaultConfig } from "../../lib/vault";
 
 interface Props {
   notes: VaultNote[];
   vaultSha: string;
+  vaultConfigured: boolean;
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const notes = await getPublicNotes();
   // Notes are already sorted by date desc in getPublicNotes()
   const vaultSha = process.env.BUILD_VAULT_SHA ?? "dev";
-  return { props: { notes, vaultSha } };
+  // P20-relaxed signal: when no vault is configured in production, the
+  // empty-state copy explains it (and the build log already warns loudly).
+  // getVaultConfig() returns null in that case.
+  const vaultConfigured = getVaultConfig() !== null;
+  return { props: { notes, vaultSha, vaultConfigured } };
 };
 
-export default function WritingIndex({ notes, vaultSha }: Props) {
+export default function WritingIndex({ notes, vaultSha, vaultConfigured }: Props) {
   return (
     <>
       <Head>
@@ -38,13 +43,24 @@ export default function WritingIndex({ notes, vaultSha }: Props) {
         <meta name="description" content="Notes and writing by Donovan Yohan." />
         {/* P29: records the dy-journal HEAD SHA at build time for build artifact versioning */}
         <meta name="vault-sha" content={vaultSha} />
+        {!vaultConfigured && (
+          <meta name="vault-status" content="unconfigured" />
+        )}
       </Head>
 
       <main style={{ maxWidth: 720, margin: "0 auto", padding: "80px 24px 48px" }}>
         <h1>Writing</h1>
 
         {notes.length === 0 ? (
-          <p>No notes published yet.</p>
+          // Three debug channels when vault is unconfigured:
+          //  - build log: console.warn banner from getVaultConfig()
+          //  - rendered HTML: <meta name="vault-status" content="unconfigured">
+          //  - visible page text: the explanatory copy below
+          <p>
+            {vaultConfigured
+              ? "No notes published yet."
+              : "No notes published yet — vault not configured. See VAULT.md."}
+          </p>
         ) : (
           <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
             {notes.map((note) => (
