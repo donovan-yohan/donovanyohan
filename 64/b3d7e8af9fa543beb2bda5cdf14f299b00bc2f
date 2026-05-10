@@ -1,0 +1,22 @@
+package.json
+  s_b83e36f228a848::t_5c8b9ce3f7b599 16
+  s_b83e36f228a848::t_d8a485342e2eee 56
+  s_b83e36f228a848::t_5fb1ac0983b3ba 59
+  s_b83e36f228a848::t_d5174c0f1e3fd2 47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "64b3d7e8af9fa543beb2bda5cdf14f299b00bc2f",
+  "prompts": {},
+  "sessions": {
+    "s_b83e36f228a848": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a865252-dc2b-46d9-b329-e8dde6807d27",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
