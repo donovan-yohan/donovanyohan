@@ -168,7 +168,7 @@ interface Props {
 
 ```tsx
 // pages/writing/[slug].tsx
-import { getPublicNotes } from '@/lib/vault';
+import { getNoteBySlug, getPublicNotes } from '@/lib/vault';
 
 export const getStaticPaths = async () => {
   const notes = await getPublicNotes();
@@ -179,8 +179,7 @@ export const getStaticPaths = async () => {
 };
 
 export const getStaticProps = async ({ params }) => {
-  const notes = await getPublicNotes();
-  const note = notes.find((n) => n.slug === params.slug);
+  const note = await getNoteBySlug(params.slug);
   if (!note) return { notFound: true };
   return { props: { note } };
 };

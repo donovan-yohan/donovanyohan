@@ -51,9 +51,10 @@ the operator-side contract.
 - **`schema.ts` and `fail-closed.ts` are co-owned**. Do not split them across
   parallel worktrees. They must change atomically.
 - **Public route imports MUST come from `lib/vault/index.ts`**. Never import
-  `adapter-local`, `adapter-github` directly from pages. ESLint
-  `import/no-restricted-paths` enforces this.
-- **No `eslint-disable` allowed in `lib/vault/**`**. CI greps for it and fails.
+  `adapter-local`, `adapter-github` directly from pages. The ESLint
+  `import/no-restricted-paths` enforcement lands with ticket #33.
+- **No `eslint-disable` allowed in `lib/vault/**`**. The CI grep that enforces
+  this lands with ticket #37.
 - **The leak test in CI must pass before any merge**. If it fails, the right
   response is to fix the leak — not silence the test.
 - **No module-init side effects** in `lib/vault/*`. No I/O, no env validation,
