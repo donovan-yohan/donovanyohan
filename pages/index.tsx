@@ -84,7 +84,11 @@ const SketchedSvgLogo = ({ className }: SketchedSvgLogoProps) => {
         ))}
       </svg>
       <div className={`sketchLogoHatch ${hatched ? "is-on" : ""}`} aria-hidden>
-        <HatchScene mask={{ kind: "svg", src: "/img/dy.svg" }} padding={48} />
+        <HatchScene
+          mask={{ kind: "svg", src: "/img/dy.svg" }}
+          height="100%"
+          padding={0}
+        />
       </div>
       <style jsx>{`
         .sketchLogo {
@@ -111,6 +115,114 @@ const SketchedSvgLogo = ({ className }: SketchedSvgLogoProps) => {
           transition: opacity ${HATCH_FADE_MS}ms ease;
         }
         .sketchLogoHatch.is-on {
+          opacity: 1;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+interface SketchedHatchTextProps {
+  text: string;
+  delayMs?: number;
+  fontFamily?: string;
+  fontWeight?: number;
+  widthChars?: number;
+}
+
+const SketchedHatchText = ({
+  text,
+  delayMs = 0,
+  fontFamily = "Geist Mono, ui-monospace, monospace",
+  fontWeight = 800,
+  widthChars,
+}: SketchedHatchTextProps) => {
+  const [hatched, setHatched] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setHatched(true), delayMs + SKETCH_DURATION_MS);
+    return () => window.clearTimeout(t);
+  }, [delayMs]);
+
+  const fontSize = 200;
+  const charW = fontSize * 0.62;
+  const effectiveChars = widthChars ?? text.length;
+  const vbW = Math.max(60, effectiveChars * charW);
+  // vbH = cap height (≈ 0.7 × fontSize) so the viewBox tightly wraps the
+  // caps. With dominantBaseline="text-before-edge" and y=0, caps sit at y=0
+  // and the baseline lands at y=fontSize — well outside vbH, which is fine
+  // since DONOVAN/YOHAN have no descenders.
+  const vbH = fontSize * 0.7;
+
+  return (
+    <div className="sketchHatchText">
+      <svg
+        viewBox={`0 0 ${vbW} ${vbH}`}
+        preserveAspectRatio="xMinYMid meet"
+        className={`sketchHatchTextSvg ${hatched ? "is-off" : ""}`}
+        aria-hidden
+      >
+        <text
+          x={vbW * 0.012}
+          y={vbH}
+          textAnchor="start"
+          fontFamily={fontFamily}
+          fontWeight={fontWeight}
+          fontSize={fontSize}
+          letterSpacing={-8}
+          fill="none"
+          stroke="var(--ink)"
+          strokeWidth={3}
+          style={{
+            strokeDasharray: 8000,
+            strokeDashoffset: 8000,
+            animation: `sketchDraw ${SKETCH_DURATION_MS}ms ${delayMs}ms ease-out forwards`,
+          }}
+        >
+          {text}
+        </text>
+      </svg>
+      <div
+        className={`sketchHatchTextHatch ${hatched ? "is-on" : ""}`}
+        aria-hidden
+      >
+        <HatchScene
+          mask={{
+            kind: "text",
+            text,
+            fontFamily: "Geist Mono",
+            fontWeight,
+            align: "start",
+            widthChars: effectiveChars,
+          }}
+          height="100%"
+          padding={6}
+        />
+      </div>
+      <style jsx>{`
+        .sketchHatchText {
+          position: relative;
+          width: 100%;
+          height: 100%;
+        }
+        .sketchHatchTextSvg {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          display: block;
+          opacity: 1;
+          transition: opacity ${HATCH_FADE_MS}ms ease;
+        }
+        .sketchHatchTextSvg.is-off {
+          opacity: 0;
+        }
+        .sketchHatchTextHatch {
+          position: absolute;
+          inset: 0;
+          opacity: 0;
+          transition: opacity ${HATCH_FADE_MS}ms ease;
+        }
+        .sketchHatchTextHatch.is-on {
           opacity: 1;
         }
       `}</style>
@@ -270,23 +382,17 @@ const Index = () => {
               <SketchedSvgLogo />
             </Box>
             <Box className="nameSlot">
-              <SketchedText
-                text="DONOVAN"
-                delayMs={150}
-                fillKind="hatch"
-                widthChars={7}
-              />
-              <SketchedText
-                text="YOHAN"
-                delayMs={350}
-                fillKind="hatch"
-                widthChars={7}
-              />
+              <Box className="nameRow">
+                <SketchedHatchText text="DONOVAN" delayMs={150} widthChars={7} />
+              </Box>
+              <Box className="nameRow">
+                <SketchedHatchText text="YOHAN" delayMs={350} widthChars={7} />
+              </Box>
             </Box>
           </Box>
 
           <Box className="heroRight">
-            <p className={`heroLine ${cp400.className}`}>
+            <div className={`heroLine ${cp400.className}`}>
               <SketchedText
                 text="Senior full-stack engineer."
                 delayMs={500}
@@ -295,8 +401,8 @@ const Index = () => {
                 letterSpacing={-2}
                 fillKind="ink"
               />
-            </p>
-            <p className={`heroLine ${cp400.className}`}>
+            </div>
+            <div className={`heroLine ${cp400.className}`}>
               <SketchedText
                 text="Building agentic systems"
                 delayMs={1000}
@@ -305,8 +411,8 @@ const Index = () => {
                 letterSpacing={-2}
                 fillKind="ink"
               />
-            </p>
-            <p className={`heroLine ${cp400.className}`}>
+            </div>
+            <div className={`heroLine ${cp400.className}`}>
               <SketchedText
                 text="that ship faster than they break."
                 delayMs={1400}
@@ -315,7 +421,7 @@ const Index = () => {
                 letterSpacing={-2}
                 fillKind="ink"
               />
-            </p>
+            </div>
           </Box>
         </Box>
       </Box>
@@ -411,7 +517,7 @@ const Index = () => {
 
         .hero {
           display: grid;
-          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
           gap: 64px;
           align-items: center;
           width: 100%;
@@ -420,20 +526,32 @@ const Index = () => {
         .heroLeft {
           display: grid;
           grid-template-columns: auto minmax(0, 1fr);
-          gap: 24px;
-          align-items: center;
+          gap: 32px;
+          align-items: start;
           min-width: 0;
         }
         .logoSlot {
-          width: clamp(140px, 18vw, 220px);
+          width: clamp(220px, 28vw, 380px);
           flex-shrink: 0;
         }
         .nameSlot {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 4px;
           min-width: 0;
           width: 100%;
+          /* Push the name stack down to sit next to the top of the y-stem in
+             the DY logo. */
+          margin-top: 108px;
+        }
+        .nameRow {
+          position: relative;
+          width: 100%;
+          /* Slightly taller than the pure cap-aspect (6/1) so each row has
+             a small vertical buffer above/below the letters — Canvas mask
+             centres the caps, SVG uses preserveAspectRatio="xMinYMid meet"
+             which also centres. */
+          aspect-ratio: 5 / 1;
         }
 
         .heroRight {
@@ -453,10 +571,10 @@ const Index = () => {
             gap: 32px;
           }
           .heroLeft {
-            grid-template-columns: 100px 1fr;
+            grid-template-columns: 160px 1fr;
           }
           .logoSlot {
-            width: 100px;
+            width: 160px;
           }
         }
       `}</style>

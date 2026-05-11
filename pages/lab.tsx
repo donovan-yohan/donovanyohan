@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import Head from "next/head";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Geist_Mono, Crimson_Pro } from "next/font/google";
 import { Box, Card, Grid, MarginAnchor, Stack } from "../components/lab/system";
 
@@ -35,6 +35,212 @@ const Section = ({ num, label, title, lead, children }: SectionProps) => (
     </div>
   </section>
 );
+
+interface ShaderSliderProps {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  desc: string;
+  format?: (v: number) => string;
+  monoClass: string;
+  serifClass: string;
+  onChange: (v: number) => void;
+}
+
+const ShaderSlider = ({
+  label,
+  value,
+  min,
+  max,
+  step,
+  desc,
+  format,
+  monoClass,
+  serifClass,
+  onChange,
+}: ShaderSliderProps) => (
+  <Stack gap={0}>
+    <Stack direction="row" justify="between" align="center" gap={1}>
+      <span className={`sliderLabel ${monoClass}`}>{label}</span>
+      <span className={`sliderValue ${monoClass}`}>
+        {format ? format(value) : value.toFixed(3)}
+      </span>
+    </Stack>
+    <input
+      type="range"
+      className="sliderInput"
+      min={min}
+      max={max}
+      step={step}
+      value={value}
+      onChange={(e) => onChange(parseFloat(e.target.value))}
+    />
+    <p className={`sliderDesc ${serifClass}`}>{desc}</p>
+  </Stack>
+);
+
+interface HatchPlaygroundProps {
+  monoClass: string;
+  serifClass: string;
+}
+
+const HatchPlayground = ({ monoClass, serifClass }: HatchPlaygroundProps) => {
+  const [hatchScale, setHatchScale] = useState(16);
+  const [halfWidthV, setHalfWidthV] = useState(0.07);
+  const [mouseRadius, setMouseRadius] = useState(600);
+  const [baseDensity, setBaseDensity] = useState(0);
+  const [outlineWidth, setOutlineWidth] = useState(0.5);
+  const [padding, setPadding] = useState(24);
+  const [fadeWidth, setFadeWidth] = useState(0.5);
+  const [thicknessJitter, setThicknessJitter] = useState(0.59);
+  const [lineWobble, setLineWobble] = useState(0.89);
+  const [peakDensity, setPeakDensity] = useState(1);
+
+  return (
+    <Grid cols={2} gap={1}>
+      <Card>
+        <Stack gap={1}>
+          <span className={`shaderLabel ${monoClass}`}>preview · dy</span>
+          <HatchScene
+            mask={{ kind: "svg", src: "/img/dy.svg" }}
+            height={416}
+            hatchScale={hatchScale}
+            halfWidthV={halfWidthV}
+            mouseRadius={mouseRadius}
+            baseDensity={baseDensity}
+            outlineWidth={outlineWidth}
+            padding={padding}
+            fadeWidth={fadeWidth}
+            thicknessJitter={thicknessJitter}
+            lineWobble={lineWobble}
+            peakDensity={peakDensity}
+          />
+        </Stack>
+      </Card>
+      <Card>
+        <Stack gap={2}>
+          <span className={`shaderLabel ${monoClass}`}>uniforms</span>
+          <ShaderSlider
+            label="hatchScale"
+            value={hatchScale}
+            min={4}
+            max={32}
+            step={1}
+            format={(v) => `${v} px`}
+            desc="Pixels per v-unit. Larger = wider line spacing and bigger crosses; smaller = tighter, denser-looking pattern."
+            monoClass={monoClass}
+            serifClass={serifClass}
+            onChange={setHatchScale}
+          />
+          <ShaderSlider
+            label="halfWidthV"
+            value={halfWidthV}
+            min={0.02}
+            max={0.15}
+            step={0.005}
+            desc="Line half-width in v-space (the same coordinate the line grid is laid out on). Identical across every subdivision level, so every drawn line is the same thickness."
+            monoClass={monoClass}
+            serifClass={serifClass}
+            onChange={setHalfWidthV}
+          />
+          <ShaderSlider
+            label="mouseRadius"
+            value={mouseRadius}
+            min={50}
+            max={600}
+            step={10}
+            format={(v) => `${v} px`}
+            desc="Cursor influence radius in render-buffer pixels. Inside the radius, density rises smoothly toward the cursor; outside, only the base level shows."
+            monoClass={monoClass}
+            serifClass={serifClass}
+            onChange={setMouseRadius}
+          />
+          <ShaderSlider
+            label="baseDensity"
+            value={baseDensity}
+            min={0}
+            max={1}
+            step={0.05}
+            desc="Idle density floor. 0 keeps the rest state at the sparsest level-0 spacing; raising it pre-activates the next subdivision levels everywhere, even with no cursor."
+            monoClass={monoClass}
+            serifClass={serifClass}
+            onChange={setBaseDensity}
+          />
+          <ShaderSlider
+            label="peakDensity"
+            value={peakDensity}
+            min={0}
+            max={1}
+            step={0.05}
+            desc="Density ceiling at the cursor's centre. 1 = all subdivision levels reachable; lower = caps how many levels can ever activate, so hovering still leaves some sparsity. Always coerced to be at least baseDensity."
+            monoClass={monoClass}
+            serifClass={serifClass}
+            onChange={setPeakDensity}
+          />
+          <ShaderSlider
+            label="fadeWidth"
+            value={fadeWidth}
+            min={0}
+            max={0.5}
+            step={0.005}
+            desc="How gradually each subdivision level fades in around its activation threshold. 0 = hard pop-in; larger = lines have long faded tails as the proximity field crosses each level. Base lines stay crisp regardless."
+            monoClass={monoClass}
+            serifClass={serifClass}
+            onChange={setFadeWidth}
+          />
+          <ShaderSlider
+            label="thicknessJitter"
+            value={thicknessJitter}
+            min={0}
+            max={2}
+            step={0.01}
+            desc="Per-line thickness variation. Each line picks a constant multiplier in 1 ± jitter, so neighbouring strokes feel slightly heavier or lighter — like uneven pen pressure — without breaking uniformity along a single line."
+            monoClass={monoClass}
+            serifClass={serifClass}
+            onChange={setThicknessJitter}
+          />
+          <ShaderSlider
+            label="lineWobble"
+            value={lineWobble}
+            min={0}
+            max={2}
+            step={0.01}
+            desc="Slight per-line drift along its length, driven by smooth value noise. Lines bend gently like a pen wandering off true; amplitude is clamped under the line spacing so neighbours never cross — strokes stay parallel."
+            monoClass={monoClass}
+            serifClass={serifClass}
+            onChange={setLineWobble}
+          />
+          <ShaderSlider
+            label="outlineWidth"
+            value={outlineWidth}
+            min={0.5}
+            max={6}
+            step={0.25}
+            format={(v) => `${v.toFixed(2)} px`}
+            desc="Distance (in pixels) the outline pass samples its neighbor texels. Larger = thicker, softer outline; smaller = a tight crisp ring on the mask."
+            monoClass={monoClass}
+            serifClass={serifClass}
+            onChange={setOutlineWidth}
+          />
+          <ShaderSlider
+            label="padding"
+            value={padding}
+            min={0}
+            max={64}
+            step={1}
+            format={(v) => `${v} px`}
+            desc="Padding inside the mask canvas before the glyph is drawn. 0 makes the glyph touch the edges; higher values float it inset with breathing room."
+            monoClass={monoClass}
+            serifClass={serifClass}
+            onChange={setPadding}
+          />
+        </Stack>
+      </Card>
+    </Grid>
+  );
+};
 
 const Lab = () => {
   const dotAnchorRef = useRef<HTMLDivElement>(null);
@@ -133,11 +339,24 @@ const Lab = () => {
             </Grid>
           </Section>
 
-          {/* §02 — Engineering notebook */}
+          {/* §02 — Hatch shader playground */}
           <Section
             num="02"
+            label="SHADER · PLAYGROUND"
+            title="02 — Hatch shader · live playground"
+            lead="Drag any slider to drive the corresponding uniform on the hatch material in real time. Move the cursor over the preview to see how mouseRadius shapes the proximity field."
+          >
+            <HatchPlayground
+              monoClass={gm500.className}
+              serifClass={cp400.className}
+            />
+          </Section>
+
+          {/* §03 — Engineering notebook */}
+          <Section
+            num="03"
             label="NOTEBOOK · INDEXED"
-            title="02 — Indexed engineering notebook"
+            title="03 — Indexed engineering notebook"
             lead="Sticky big-bold month headers. Bullet-journal filter chips counting by type. Entries on a 12-column 16px grid with per-card span, accent, and tint pre-defined so each card can carry its own brand colour and highlight."
           >
             <Notebook
@@ -376,6 +595,49 @@ const Lab = () => {
           height: 416px;
           object-fit: contain;
           padding: 32px;
+        }
+
+        .sliderLabel {
+          font-size: 11px;
+          letter-spacing: 0.10em;
+          text-transform: uppercase;
+          color: var(--ink);
+        }
+        .sliderValue {
+          font-size: 11px;
+          letter-spacing: 0.05em;
+          color: var(--ink-mute);
+        }
+        .sliderInput {
+          appearance: none;
+          width: 100%;
+          height: 2px;
+          background: var(--rule);
+          border-radius: 2px;
+          margin: 6px 0;
+          cursor: pointer;
+        }
+        .sliderInput::-webkit-slider-thumb {
+          appearance: none;
+          width: 14px;
+          height: 14px;
+          background: var(--ink);
+          border-radius: 50%;
+          cursor: pointer;
+        }
+        .sliderInput::-moz-range-thumb {
+          width: 14px;
+          height: 14px;
+          background: var(--ink);
+          border: none;
+          border-radius: 50%;
+          cursor: pointer;
+        }
+        .sliderDesc {
+          font-size: 13px;
+          line-height: 1.45;
+          color: var(--ink-mute);
+          margin: 0;
         }
 
         .footer {

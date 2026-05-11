@@ -1,14 +1,25 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import * as THREE from "three";
 
 type Mask =
-  | { kind: "text"; text: string; fontFamily: string; fontWeight?: number }
+  | {
+      kind: "text";
+      text: string;
+      fontFamily: string;
+      fontWeight?: number;
+      align?: "start" | "center";
+      /** Reference width (in monospace 'M' widths) used for the auto-shrink
+       *  fit. Useful when several text masks need the same letter size — e.g.
+       *  pass `widthChars: 7` for both "DONOVAN" and "YOHAN" so the auto-shrink
+       *  treats them as if they were the same length. */
+      widthChars?: number;
+    }
   | { kind: "svg"; src: string };
 
 interface HatchSceneProps {
   mask: Mask;
-  height?: number;
+  height?: number | string;
   inkColor?: string;
   paperColor?: string;
   hatchScale?: number;
@@ -16,6 +27,11 @@ interface HatchSceneProps {
   padding?: number;
   outlineWidth?: number;
   baseDensity?: number;
+  halfWidthV?: number;
+  fadeWidth?: number;
+  thicknessJitter?: number;
+  lineWobble?: number;
+  peakDensity?: number;
 }
 
 const vertexShader = /* glsl */ `
@@ -40,6 +56,11 @@ const fragmentShader = /* glsl */ `
   uniform float uMouseRadius;
   uniform float uOutlineWidth;
   uniform float uBaseDensity;
+  uniform float uHalfWidthV;
+  uniform float uFadeWidth;
+  uniform float uThicknessJitter;
+  uniform float uLineWobble;
+  uniform float uPeakDensity;
 
   // CanvasTexture defaults to flipY=true so screen and canvas share orientation.
   float maskAt(vec2 uv) {
@@ -50,16 +71,68 @@ const fragmentShader = /* glsl */ `
     return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
   }
 
-  // Hand-drawn-feel hatching line at given angle.
-  // freq = lines per uHatchScale unit. thickness = line half-width (0..0.5).
-  float hatchLine(vec2 p, float angle, float freq, float thickness) {
+  // Smooth value noise — used for slow per-line position wobble along the
+  // line's length. Smaller-than-line-spacing amplitude keeps lines parallel.
+  float vnoise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+  }
+
+  // Hatching line at given angle. All lines are drawn on a single fixed grid
+  // (freq = 4 lines per uHatchScale unit). Each line's reveal threshold is
+  // determined by which fractal-subdivision level it belongs to, so as density
+  // rises new lines insert exactly halfway between existing ones:
+  //   density 0    → 1 line per period (every 8th)   — spacing 2
+  //   density 1/3  → 2 lines per period (every 4th)  — spacing 1
+  //   density 2/3  → 4 lines per period (every 2nd)  — spacing 0.5
+  //   density 1    → 8 lines per period (every line) — spacing 0.25
+  float hatchLine(vec2 p, float angle, float halfWidthV, float density) {
+    const float freq = 4.0;
     float c = cos(angle);
     float s = sin(angle);
     float v = p.x * c + p.y * s;
-    // small organic wobble along the line direction
-    float wobble = (hash(vec2(floor(v * freq), floor((p.x * -s + p.y * c) * freq * 0.3))) - 0.5) * 0.05;
-    float wave = abs(fract(v * freq + wobble) - 0.5) * 2.0;
-    return 1.0 - smoothstep(thickness, thickness + 0.05, wave);
+    float u = p.x * -s + p.y * c;   // distance along the line
+
+    float lineIdx = floor(v * freq);
+    float m8 = mod(lineIdx, 8.0);
+
+    // Per-line slight wobble in v, smoothly varying along u. Amplitude is
+    // clamped well below the line spacing (1.0 in v*freq) so neighbours
+    // never visually cross — lines stay parallel.
+    float wob = (vnoise(vec2(u * 0.6 + lineIdx * 7.3, lineIdx * 1.7)) - 0.5)
+                * uLineWobble * 0.45;
+
+    // Per-line thickness jitter — each line gets a constant multiplier in
+    // [1 - j, 1 + j]. Constant along its length so the line keeps a uniform
+    // width but neighbouring lines look slightly different.
+    float tJitter = (hash(vec2(lineIdx, angle * 7.1)) - 0.5) * 2.0
+                    * uThicknessJitter;
+
+    // Subdivision-level → activation threshold. Level 0 anchored at -1 so it
+    // is always fully visible regardless of density; the higher levels have
+    // wide thresholds so an idle base density never accidentally bleeds into
+    // partial-alpha level-1 lines.
+    float threshold =
+      m8 < 0.5                            ? -1.0 :
+      (abs(m8 - 4.0) < 0.5)               ?  0.35 :
+      (abs(m8 - 2.0) < 0.5
+        || abs(m8 - 6.0) < 0.5)           ?  0.65 :
+                                             0.90;
+    // Level 0 sits at threshold = -1 so its smoothstep is fully saturated for
+    // any density >= 0 regardless of uFadeWidth — base lines never fade.
+    float keep = smoothstep(threshold, threshold + max(uFadeWidth, 0.0001), density);
+
+    float thresh = halfWidthV * freq * (1.0 + tJitter);
+    float aa = thresh * 0.30;
+    float wave = abs(fract(v * freq + wob) - 0.5) * 2.0;
+    float line = 1.0 - smoothstep(thresh, thresh + aa, wave);
+    return line * keep;
   }
 
   void main() {
@@ -89,28 +162,21 @@ const fragmentShader = /* glsl */ `
     proximity *= uMouseActive;
 
     // Combined "darkness" — base density (visible without cursor) plus
-    // proximity boost. 0..1 ramp drives layered cross-hatch.
-    float darkness = clamp(uBaseDensity + proximity * (1.0 - uBaseDensity), 0.0, 1.0);
+    // proximity boost capped at uPeakDensity (the max density the cursor can
+    // push the local field to). 0..1 ramp drives the layered cross-hatch.
+    float peak = max(uPeakDensity, uBaseDensity);
+    float darkness = clamp(uBaseDensity + proximity * (peak - uBaseDensity), 0.0, 1.0);
 
-    // --- 4 hatch directions, each fading in across a smooth proximity window ---
+    // --- Cross-hatch: two diagonals, both drawn on a single freq-4 grid with
+    // fractal-subdivision reveal driven by darkness. See hatchLine for the
+    // exact level ordering. Lines never move; new lines insert at the
+    // halfway points of the previous subdivision step.
     vec2 hp = pixel / uHatchScale;
 
-    // Direction 1: -45° (primary). Always at least faintly present once darkness > 0.
-    float h1 = hatchLine(hp, radians(-45.0), 0.5, 0.08);
-    // Direction 2: 45° (cross-hatch — the core "X" pattern).
-    float h2 = hatchLine(hp, radians( 45.0), 0.5, 0.08);
-    // Direction 3: 0° horizontal — adds the dense triple layer.
-    float h3 = hatchLine(hp, radians(  0.0), 0.5, 0.08);
-    // Direction 4: 90° vertical — densest fill.
-    float h4 = hatchLine(hp, radians( 90.0), 0.5, 0.08);
+    float h1 = hatchLine(hp, radians(-45.0), uHalfWidthV, darkness);
+    float h2 = hatchLine(hp, radians( 45.0), uHalfWidthV, darkness);
 
-    float l1 = h1 * smoothstep(0.00, 0.20, darkness);
-    float l2 = h2 * smoothstep(0.25, 0.50, darkness);
-    float l3 = h3 * smoothstep(0.50, 0.75, darkness);
-    float l4 = h4 * smoothstep(0.75, 0.98, darkness);
-
-    float hatch = max(max(l1, l2), max(l3, l4));
-    hatch *= inside;
+    float hatch = max(h1, h2) * inside;
 
     float ink = max(outline, hatch);
     gl_FragColor = vec4(uInk, ink);
@@ -123,7 +189,9 @@ const buildTextCanvas = (
   fontWeight: number,
   width: number,
   height: number,
-  padding: number
+  padding: number,
+  align: "start" | "center" = "center",
+  widthChars?: number
 ) => {
   const canvas = document.createElement("canvas");
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -135,17 +203,28 @@ const buildTextCanvas = (
   ctx.clearRect(0, 0, width, height);
 
   const usableW = width - padding * 2;
-  let fontSize = Math.floor(height * 0.7);
+  // Start with fontSize sized so the *cap height* fills the container
+  // (cap height ≈ 0.7 × fontSize in most fonts), then shrink if the
+  // reference text overflows the usable width.
+  let fontSize = Math.floor((height - padding * 2) / 0.7);
   ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-  while (ctx.measureText(text).width > usableW && fontSize > 12) {
+  const measureRef = () =>
+    widthChars && widthChars > 0
+      ? ctx.measureText("M").width * widthChars
+      : ctx.measureText(text).width;
+  while (measureRef() > usableW && fontSize > 12) {
     fontSize -= 2;
     ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
   }
 
   ctx.fillStyle = "rgba(20,18,12,1)";
-  ctx.textBaseline = "middle";
-  ctx.textAlign = "center";
-  ctx.fillText(text, width / 2, height / 2);
+  // Alphabetic baseline + explicit y. Caps are centred vertically inside the
+  // canvas (matches SVG's preserveAspectRatio="xMinYMid meet" centring).
+  ctx.textBaseline = "alphabetic";
+  ctx.textAlign = align === "start" ? "left" : "center";
+  const x = align === "start" ? padding : width / 2;
+  const capHeight = fontSize * 0.7;
+  ctx.fillText(text, x, (height + capHeight) / 2);
   return canvas;
 };
 
@@ -197,6 +276,11 @@ interface PlaneProps {
   padding: number;
   outlineWidth: number;
   baseDensity: number;
+  halfWidthV: number;
+  fadeWidth: number;
+  thicknessJitter: number;
+  lineWobble: number;
+  peakDensity: number;
 }
 
 const HatchPlane = ({
@@ -207,6 +291,11 @@ const HatchPlane = ({
   padding,
   outlineWidth,
   baseDensity,
+  halfWidthV,
+  fadeWidth,
+  thicknessJitter,
+  lineWobble,
+  peakDensity,
 }: PlaneProps) => {
   const matRef = useRef<THREE.ShaderMaterial>(null);
   const { size, gl } = useThree();
@@ -229,7 +318,9 @@ const HatchPlane = ({
           mask.fontWeight ?? 500,
           w,
           h,
-          padding
+          padding,
+          mask.align ?? "center",
+          mask.widthChars
         );
       } else {
         canvas = await buildSvgCanvas(mask.src, w, h, padding);
@@ -252,6 +343,8 @@ const HatchPlane = ({
     mask.kind === "text" ? mask.text : mask.src,
     mask.kind === "text" ? mask.fontFamily : "",
     mask.kind === "text" ? mask.fontWeight : 0,
+    mask.kind === "text" ? mask.align : "",
+    mask.kind === "text" ? mask.widthChars : 0,
     size.width,
     size.height,
     padding,
@@ -267,14 +360,14 @@ const HatchPlane = ({
       mouseRef.current.y = (rect.height - (e.clientY - rect.top)) * dpr;
       mouseActiveRef.current = 1;
     };
-    const onLeave = () => {
+    const onBlur = () => {
       mouseActiveRef.current = 0;
     };
-    canvas.addEventListener("pointermove", onMove);
-    canvas.addEventListener("pointerleave", onLeave);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("blur", onBlur);
     return () => {
-      canvas.removeEventListener("pointermove", onMove);
-      canvas.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("blur", onBlur);
     };
   }, [gl]);
 
@@ -290,6 +383,11 @@ const HatchPlane = ({
       uMouseRadius: { value: mouseRadius },
       uOutlineWidth: { value: outlineWidth },
       uBaseDensity: { value: baseDensity },
+      uHalfWidthV: { value: halfWidthV },
+      uFadeWidth: { value: fadeWidth },
+      uThicknessJitter: { value: thicknessJitter },
+      uLineWobble: { value: lineWobble },
+      uPeakDensity: { value: peakDensity },
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
@@ -310,6 +408,21 @@ const HatchPlane = ({
   useEffect(() => {
     if (matRef.current) matRef.current.uniforms.uBaseDensity.value = baseDensity;
   }, [baseDensity]);
+  useEffect(() => {
+    if (matRef.current) matRef.current.uniforms.uHalfWidthV.value = halfWidthV;
+  }, [halfWidthV]);
+  useEffect(() => {
+    if (matRef.current) matRef.current.uniforms.uFadeWidth.value = fadeWidth;
+  }, [fadeWidth]);
+  useEffect(() => {
+    if (matRef.current) matRef.current.uniforms.uThicknessJitter.value = thicknessJitter;
+  }, [thicknessJitter]);
+  useEffect(() => {
+    if (matRef.current) matRef.current.uniforms.uLineWobble.value = lineWobble;
+  }, [lineWobble]);
+  useEffect(() => {
+    if (matRef.current) matRef.current.uniforms.uPeakDensity.value = peakDensity;
+  }, [peakDensity]);
 
   useEffect(() => {
     if (!matRef.current) return;
@@ -344,14 +457,23 @@ const HatchScene = ({
   height = 240,
   inkColor = "#1a1814",
   paperColor = "transparent",
-  hatchScale = 8,
-  mouseRadius = 280,
+  hatchScale = 16,
+  mouseRadius = 600,
   padding = 24,
-  outlineWidth = 2,
-  baseDensity = 0.32,
+  outlineWidth = 0.5,
+  baseDensity = 0,
+  halfWidthV = 0.07,
+  fadeWidth = 0.5,
+  thicknessJitter = 0.59,
+  lineWobble = 0.89,
+  peakDensity = 1.0,
 }: HatchSceneProps) => {
+  const fill = height === "100%";
+  const wrapperStyle: CSSProperties = fill
+    ? { position: "absolute", inset: 0, background: paperColor }
+    : { width: "100%", height, position: "relative", background: paperColor };
   return (
-    <div style={{ width: "100%", height, position: "relative", background: paperColor }}>
+    <div style={wrapperStyle}>
       <Canvas
         orthographic
         gl={{ alpha: true, antialias: true, premultipliedAlpha: false }}
@@ -366,6 +488,11 @@ const HatchScene = ({
           padding={padding}
           outlineWidth={outlineWidth}
           baseDensity={baseDensity}
+          halfWidthV={halfWidthV}
+          fadeWidth={fadeWidth}
+          thicknessJitter={thicknessJitter}
+          lineWobble={lineWobble}
+          peakDensity={peakDensity}
         />
       </Canvas>
     </div>
