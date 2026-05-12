@@ -32,6 +32,10 @@ interface HatchSceneProps {
   thicknessJitter?: number;
   lineWobble?: number;
   peakDensity?: number;
+  /** Duration (ms) for the per-line "pencil draw-on" intro. 0 disables. */
+  introMs?: number;
+  /** Delay (ms) before the intro starts. */
+  introDelayMs?: number;
 }
 
 const vertexShader = /* glsl */ `
@@ -61,6 +65,7 @@ const fragmentShader = /* glsl */ `
   uniform float uThicknessJitter;
   uniform float uLineWobble;
   uniform float uPeakDensity;
+  uniform float uIntro; // 0..1 pencil-draw-on progress
 
   // CanvasTexture defaults to flipY=true so screen and canvas share orientation.
   float maskAt(vec2 uv) {
@@ -132,24 +137,48 @@ const fragmentShader = /* glsl */ `
     float aa = thresh * 0.30;
     float wave = abs(fract(v * freq + wob) - 0.5) * 2.0;
     float line = 1.0 - smoothstep(thresh, thresh + aa, wave);
-    return line * keep;
+
+    // Per-line pencil draw-on: each line picks a staggered start and a draw
+    // direction from a hash. The line is revealed progressively along its
+    // length (u axis) as uIntro grows from 0 to 1. uIntro >= 1 means done —
+    // reveal is forced to 1 so mid-frame uIntro never gates the steady state.
+    float introStagger = hash(vec2(lineIdx + 17.3, angle * 3.7)) * 0.6;
+    float introDur = 0.4;
+    float lineIntro = clamp((uIntro - introStagger) / introDur, 0.0, 1.0);
+    float dir = (hash(vec2(lineIdx + 5.0, angle * 11.1)) > 0.5) ? 1.0 : -1.0;
+    // Normalise u to [0,1] using the screen diagonal as a generous extent.
+    float diag = length(uResolution);
+    float uNorm = clamp((u + diag) / (2.0 * diag), 0.0, 1.0);
+    float drawnAt = dir > 0.0 ? uNorm : (1.0 - uNorm);
+    float reveal = uIntro >= 1.0 ? 1.0 : step(drawnAt, lineIntro);
+
+    return line * keep * reveal;
   }
 
   void main() {
     vec2 uv = vUv;
     vec2 pixel = uv * uResolution;
 
-    float m = maskAt(uv);
+    // Pencil wobble on the silhouette: displace mask-sample UV with smooth
+    // low-frequency noise so the hatched/outlined edges share the same
+    // hand-drawn jitter as the SVG outline strokes (which use feTurbulence
+    // displacement). Amplitude is small enough to read as "wavering ink",
+    // not "distorted glyph".
+    float nx = vnoise(uv * 22.0) - 0.5;
+    float ny = vnoise(uv * 22.0 + vec2(13.7, 7.2)) - 0.5;
+    vec2 wobbleUv = uv + vec2(nx, ny) * 0.008;
+
+    float m = maskAt(wobbleUv);
 
     // --- Outline (always visible) ---
     // Multi-sample neighbor differences to draw a robust ring around the mask.
     vec2 px = vec2(uOutlineWidth) / uResolution;
-    float mn = maskAt(uv + vec2(0.0, px.y));
-    float ms = maskAt(uv - vec2(0.0, px.y));
-    float me = maskAt(uv + vec2(px.x, 0.0));
-    float mw = maskAt(uv - vec2(px.x, 0.0));
-    float mne = maskAt(uv + px);
-    float msw = maskAt(uv - px);
+    float mn = maskAt(wobbleUv + vec2(0.0, px.y));
+    float ms = maskAt(wobbleUv - vec2(0.0, px.y));
+    float me = maskAt(wobbleUv + vec2(px.x, 0.0));
+    float mw = maskAt(wobbleUv - vec2(px.x, 0.0));
+    float mne = maskAt(wobbleUv + px);
+    float msw = maskAt(wobbleUv - px);
     float gradient = abs(m - mn) + abs(m - ms) + abs(m - me) + abs(m - mw)
                    + abs(m - mne) * 0.5 + abs(m - msw) * 0.5;
     float outline = clamp(gradient * 0.6, 0.0, 1.0);
@@ -281,6 +310,8 @@ interface PlaneProps {
   thicknessJitter: number;
   lineWobble: number;
   peakDensity: number;
+  introMs: number;
+  introDelayMs: number;
 }
 
 const HatchPlane = ({
@@ -296,12 +327,15 @@ const HatchPlane = ({
   thicknessJitter,
   lineWobble,
   peakDensity,
+  introMs,
+  introDelayMs,
 }: PlaneProps) => {
   const matRef = useRef<THREE.ShaderMaterial>(null);
   const { size, gl } = useThree();
   const mouseRef = useRef(new THREE.Vector2(-9999, -9999));
   const mouseActiveRef = useRef(0);
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
+  const introStartRef = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -388,6 +422,7 @@ const HatchPlane = ({
       uThicknessJitter: { value: thicknessJitter },
       uLineWobble: { value: lineWobble },
       uPeakDensity: { value: peakDensity },
+      uIntro: { value: introMs > 0 ? 0 : 1 },
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
@@ -436,6 +471,20 @@ const HatchPlane = ({
     matRef.current.uniforms.uResolution.value.set(size.width * dpr, size.height * dpr);
     matRef.current.uniforms.uMouse.value.copy(mouseRef.current);
     matRef.current.uniforms.uMouseActive.value = mouseActiveRef.current;
+
+    // Pencil draw-on intro. Wait for the mask texture so the reveal is
+    // synchronised with the outline appearing.
+    if (introMs > 0 && texture) {
+      if (introStartRef.current === null) {
+        introStartRef.current = state.clock.elapsedTime * 1000;
+      }
+      const elapsed =
+        state.clock.elapsedTime * 1000 - introStartRef.current - introDelayMs;
+      const intro = Math.max(0, Math.min(1, elapsed / introMs));
+      matRef.current.uniforms.uIntro.value = intro;
+    } else {
+      matRef.current.uniforms.uIntro.value = 1;
+    }
   });
 
   return (
@@ -467,6 +516,8 @@ const HatchScene = ({
   thicknessJitter = 0.59,
   lineWobble = 0.89,
   peakDensity = 1.0,
+  introMs = 1300,
+  introDelayMs = 0,
 }: HatchSceneProps) => {
   const fill = height === "100%";
   const wrapperStyle: CSSProperties = fill
@@ -493,6 +544,8 @@ const HatchScene = ({
           thicknessJitter={thicknessJitter}
           lineWobble={lineWobble}
           peakDensity={peakDensity}
+          introMs={introMs}
+          introDelayMs={introDelayMs}
         />
       </Canvas>
     </div>
