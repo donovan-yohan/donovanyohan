@@ -34,7 +34,7 @@ import { VaultFrontmatterSchema } from "./schema";
 import type { VaultNote, VaultAdapter, AdapterFileResult } from "./schema";
 import { deriveSlug } from "./slug";
 import { applyPreviewDefaults } from "./preview-defaults";
-import { remarkStripWikilinks } from "./wikilinks";
+import { remarkStripWikilinks, stripWikilinks } from "./wikilinks";
 import { VaultParseError } from "./errors";
 
 /** 1MB size cap on individual vault files. */
@@ -168,9 +168,11 @@ function extractFirstParagraph(markdown: string): string {
     paragraphLines.push(trimmed);
   }
 
-  // Strip basic inline markdown
-  return paragraphLines
-    .join(" ")
+  // Strip basic inline markdown + Obsidian wikilinks so the fallback excerpt
+  // is plain readable text (P18 — never leak raw [[wikilink]] syntax into a
+  // card preview).
+  const joined = paragraphLines.join(" ");
+  return stripWikilinks(joined)
     .replace(/\*\*([^*]+)\*\*/g, "$1")
     .replace(/\*([^*]+)\*/g, "$1")
     .replace(/`([^`]+)`/g, "$1")

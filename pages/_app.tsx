@@ -1,58 +1,57 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { AppProps } from "next/app";
-import Context from "../components/context";
+import Context, { type ThemeContextValue } from "../components/context";
 
+type Theme = "light" | "dark";
+
+/**
+ * Theme is owned here so every page reads the same value. Resolution order
+ * on mount: explicit `localStorage["theme"]` first, then the system
+ * `prefers-color-scheme: dark` query. Once the user clicks the toggle we
+ * persist their choice — system preference no longer overrides it.
+ */
 export default function MyApp({ Component, pageProps }: AppProps) {
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    if (mediaQuery.matches) {
-      document.documentElement.setAttribute("data-theme", "dark");
-      setTheme("dark");
+    if (typeof window === "undefined") return;
+    let initial: Theme;
+    try {
+      const stored = localStorage.getItem("theme") as Theme | null;
+      if (stored === "light" || stored === "dark") {
+        initial = stored;
+      } else {
+        initial = window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+      }
+    } catch {
+      initial = window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
     }
+    setTheme(initial);
+    document.documentElement.setAttribute("data-theme", initial);
   }, []);
 
-  const toggleTheme = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => {
+      const next: Theme = prev === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      try {
+        localStorage.setItem("theme", next);
+      } catch {
+        /* localStorage unavailable; theme just won't persist this session */
+      }
+      return next;
+    });
+  }, []);
 
-    const transition = document.createElement("div");
-    transition.setAttribute("id", "transition");
-    transition.style.backgroundColor = newTheme === "dark" ? "black" : "white";
-    document.body.appendChild(transition);
-
-    window.setTimeout(() => {
-      document.documentElement.setAttribute("data-theme", newTheme);
-    }, 320);
-    window.setTimeout(() => {
-      setTheme(newTheme);
-    }, 320);
-    window.setTimeout(() => {
-      document.getElementById("transition")?.remove();
-    }, 1000);
-  };
+  const value: ThemeContextValue = { theme, toggleTheme };
 
   return (
-    <Context.Provider value={{ theme, toggleTheme }}>
-      <div
-        className="fouc"
-        style={{
-          position: "fixed",
-          width: "100%",
-          height: "100%",
-          top: "0",
-          left: "0",
-          backgroundColor: theme == "light" ? "white" : "black",
-        }}
-      />
+    <Context.Provider value={value}>
       <Component {...pageProps} />
-      <style jsx global>
-        {`
-          .fouc {
-            display: none;
-          }
-        `}
-      </style>
     </Context.Provider>
   );
 }

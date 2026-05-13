@@ -36,6 +36,31 @@ interface HatchSceneProps {
   introMs?: number;
   /** Delay (ms) before the intro starts. */
   introDelayMs?: number;
+  /**
+   * `binary` (default) treats the mask as an alpha silhouette — hatching
+   * only renders inside opaque regions. `luminance` reads the mask's red
+   * channel as a grayscale density map: darker source pixels push more
+   * cross-hatching at that location, regardless of alpha.
+   */
+  densityMode?: "binary" | "luminance";
+  /** Multiplier applied to (1 - luminance) when densityMode = "luminance". */
+  luminanceBoost?: number;
+  /**
+   * Intensity (0..1) of the inverse-proximity "flashlight" effect. In
+   * luminance mode, this value scales how much density the cursor can
+   * *subtract* under it — 0 disables it (cursor has no effect), 1 lets
+   * the cursor fully erase hatching at its centre. Use small values
+   * (~0.25-0.4) paired with a wide mouseRadius for a subtle glow.
+   * Has no effect in binary mode.
+   */
+  invertProximity?: number;
+  /**
+   * Fires once when the intro animation's first frame actually emits
+   * uIntro > 0 — i.e. mask texture has loaded AND introDelayMs has
+   * elapsed. Use this to gate UI that should only reveal once ink is
+   * being laid down (e.g. fading a covering overlay).
+   */
+  onIntroStart?: () => void;
 }
 
 const vertexShader = /* glsl */ `
@@ -66,10 +91,21 @@ const fragmentShader = /* glsl */ `
   uniform float uLineWobble;
   uniform float uPeakDensity;
   uniform float uIntro; // 0..1 pencil-draw-on progress
+  uniform float uDensityMode; // 0 = binary alpha mask, 1 = luminance density map
+  uniform float uLuminanceBoost; // multiplier applied to (1 - luminance)
+  uniform float uInvertProximity; // 0 = cursor adds density, 1 = cursor removes it
 
   // CanvasTexture defaults to flipY=true so screen and canvas share orientation.
+  // In binary mode we read alpha (silhouette mask). In luminance mode we read
+  // the red channel as a grayscale density signal — darker pixels in the
+  // source push more cross-hatching at that location.
   float maskAt(vec2 uv) {
-    return texture2D(uMask, uv).a;
+    vec4 t = texture2D(uMask, uv);
+    return t.a;
+  }
+  float lumAt(vec2 uv) {
+    vec4 t = texture2D(uMask, uv);
+    return t.r;
   }
 
   float hash(vec2 p) {
@@ -119,18 +155,19 @@ const fragmentShader = /* glsl */ `
     float tJitter = (hash(vec2(lineIdx, angle * 7.1)) - 0.5) * 2.0
                     * uThicknessJitter;
 
-    // Subdivision-level → activation threshold. Level 0 anchored at -1 so it
-    // is always fully visible regardless of density; the higher levels have
-    // wide thresholds so an idle base density never accidentally bleeds into
-    // partial-alpha level-1 lines.
+    // Subdivision-level → activation threshold. In binary mode, level 0
+    // is anchored at -1 so it stays visible for any density >= 0 (the
+    // hatch never disappears completely inside the mask). In luminance
+    // mode every level — including level 0 — must scale with density so
+    // that pure-white source pixels (density 0) render with ZERO ink at
+    // all and pure-black pixels saturate the densest level.
+    float level0Threshold = uDensityMode > 0.5 ? 0.0 : -1.0;
     float threshold =
-      m8 < 0.5                            ? -1.0 :
+      m8 < 0.5                            ? level0Threshold :
       (abs(m8 - 4.0) < 0.5)               ?  0.35 :
       (abs(m8 - 2.0) < 0.5
         || abs(m8 - 6.0) < 0.5)           ?  0.65 :
                                              0.90;
-    // Level 0 sits at threshold = -1 so its smoothstep is fully saturated for
-    // any density >= 0 regardless of uFadeWidth — base lines never fade.
     float keep = smoothstep(threshold, threshold + max(uFadeWidth, 0.0001), density);
 
     float thresh = halfWidthV * freq * (1.0 + tJitter);
@@ -183,18 +220,37 @@ const fragmentShader = /* glsl */ `
                    + abs(m - mne) * 0.5 + abs(m - msw) * 0.5;
     float outline = clamp(gradient * 0.6, 0.0, 1.0);
 
-    float inside = step(0.5, m);
-
-    // --- Cursor proximity drives hatching density ---
+    // --- Cursor proximity ---
     float distToMouse = distance(pixel, uMouse);
     float proximity = 1.0 - smoothstep(0.0, uMouseRadius, distToMouse);
     proximity *= uMouseActive;
 
+    // The 'inside' term gates whether hatching renders at this pixel. In
+    // binary mode we step the mask alpha at 0.5. In luminance mode the
+    // whole image is hatchable — density modulates per pixel instead of
+    // toggling on/off.
+    float inside = uDensityMode > 0.5 ? 1.0 : step(0.5, m);
+
     // Combined "darkness" — base density (visible without cursor) plus
-    // proximity boost capped at uPeakDensity (the max density the cursor can
-    // push the local field to). 0..1 ramp drives the layered cross-hatch.
+    // proximity boost capped at uPeakDensity (the max density the cursor
+    // can push the local field to). In luminance mode, the per-pixel map
+    // value (1 - source brightness) becomes the base; the cursor can
+    // still push that local pixel toward the peak density on top.
     float peak = max(uPeakDensity, uBaseDensity);
-    float darkness = clamp(uBaseDensity + proximity * (peak - uBaseDensity), 0.0, 1.0);
+    float darkness;
+    if (uDensityMode > 0.5) {
+      // Pure per-pixel density from the grayscale source. White pixels
+      // (lum = 1) → darkness 0 → no hatching at all. Black pixels
+      // (lum = 0) → darkness uLuminanceBoost → full density. When the
+      // invert-proximity flag is set, the cursor *subtracts* density in
+      // a radius — acting like a flashlight that erases hatching under
+      // the mouse — letting users light up portions of the source.
+      float lum = lumAt(wobbleUv);
+      float lumDark = clamp((1.0 - lum) * uLuminanceBoost, 0.0, 1.0);
+      darkness = clamp(lumDark - proximity * uInvertProximity, 0.0, 1.0);
+    } else {
+      darkness = clamp(uBaseDensity + proximity * (peak - uBaseDensity), 0.0, 1.0);
+    }
 
     // --- Cross-hatch: two diagonals, both drawn on a single freq-4 grid with
     // fractal-subdivision reveal driven by darkness. See hatchLine for the
@@ -312,6 +368,10 @@ interface PlaneProps {
   peakDensity: number;
   introMs: number;
   introDelayMs: number;
+  densityMode: "binary" | "luminance";
+  luminanceBoost: number;
+  invertProximity: number;
+  onIntroStart?: () => void;
 }
 
 const HatchPlane = ({
@@ -329,6 +389,10 @@ const HatchPlane = ({
   peakDensity,
   introMs,
   introDelayMs,
+  densityMode,
+  luminanceBoost,
+  invertProximity,
+  onIntroStart,
 }: PlaneProps) => {
   const matRef = useRef<THREE.ShaderMaterial>(null);
   const { size, gl } = useThree();
@@ -336,6 +400,7 @@ const HatchPlane = ({
   const mouseActiveRef = useRef(0);
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
   const introStartRef = useRef<number | null>(null);
+  const introStartFiredRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -423,6 +488,9 @@ const HatchPlane = ({
       uLineWobble: { value: lineWobble },
       uPeakDensity: { value: peakDensity },
       uIntro: { value: introMs > 0 ? 0 : 1 },
+      uDensityMode: { value: densityMode === "luminance" ? 1 : 0 },
+      uLuminanceBoost: { value: luminanceBoost },
+      uInvertProximity: { value: invertProximity },
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
@@ -458,6 +526,19 @@ const HatchPlane = ({
   useEffect(() => {
     if (matRef.current) matRef.current.uniforms.uPeakDensity.value = peakDensity;
   }, [peakDensity]);
+  useEffect(() => {
+    if (matRef.current)
+      matRef.current.uniforms.uDensityMode.value =
+        densityMode === "luminance" ? 1 : 0;
+  }, [densityMode]);
+  useEffect(() => {
+    if (matRef.current)
+      matRef.current.uniforms.uLuminanceBoost.value = luminanceBoost;
+  }, [luminanceBoost]);
+  useEffect(() => {
+    if (matRef.current)
+      matRef.current.uniforms.uInvertProximity.value = invertProximity;
+  }, [invertProximity]);
 
   useEffect(() => {
     if (!matRef.current) return;
@@ -473,17 +554,31 @@ const HatchPlane = ({
     matRef.current.uniforms.uMouseActive.value = mouseActiveRef.current;
 
     // Pencil draw-on intro. Wait for the mask texture so the reveal is
-    // synchronised with the outline appearing.
-    if (introMs > 0 && texture) {
-      if (introStartRef.current === null) {
-        introStartRef.current = state.clock.elapsedTime * 1000;
+    // synchronised with the outline appearing. While the texture is
+    // still loading we hold uIntro at 0 (lines hidden) so the canvas
+    // never flashes a "fully drawn" frame between mount and first paint.
+    if (introMs > 0) {
+      if (!texture) {
+        matRef.current.uniforms.uIntro.value = 0;
+      } else {
+        if (introStartRef.current === null) {
+          introStartRef.current = state.clock.elapsedTime * 1000;
+        }
+        const elapsed =
+          state.clock.elapsedTime * 1000 - introStartRef.current - introDelayMs;
+        const intro = Math.max(0, Math.min(1, elapsed / introMs));
+        matRef.current.uniforms.uIntro.value = intro;
+        if (intro > 0 && !introStartFiredRef.current) {
+          introStartFiredRef.current = true;
+          onIntroStart?.();
+        }
       }
-      const elapsed =
-        state.clock.elapsedTime * 1000 - introStartRef.current - introDelayMs;
-      const intro = Math.max(0, Math.min(1, elapsed / introMs));
-      matRef.current.uniforms.uIntro.value = intro;
     } else {
       matRef.current.uniforms.uIntro.value = 1;
+      if (!introStartFiredRef.current) {
+        introStartFiredRef.current = true;
+        onIntroStart?.();
+      }
     }
   });
 
@@ -518,6 +613,10 @@ const HatchScene = ({
   peakDensity = 1.0,
   introMs = 1300,
   introDelayMs = 0,
+  densityMode = "binary",
+  luminanceBoost = 1.0,
+  invertProximity = 0,
+  onIntroStart,
 }: HatchSceneProps) => {
   const fill = height === "100%";
   const wrapperStyle: CSSProperties = fill
@@ -546,6 +645,10 @@ const HatchScene = ({
           peakDensity={peakDensity}
           introMs={introMs}
           introDelayMs={introDelayMs}
+          densityMode={densityMode}
+          luminanceBoost={luminanceBoost}
+          invertProximity={invertProximity}
+          onIntroStart={onIntroStart}
         />
       </Canvas>
     </div>

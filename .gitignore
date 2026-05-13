@@ -27,3 +27,8 @@ yarn-error.log*
 
 .now
 .vercel
+
+# Local Claude Code state + worktrees + transient lockfiles
+/.claude/
+/.worktrees/
+/.package-lock.json

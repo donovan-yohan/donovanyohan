@@ -20,6 +20,23 @@ This is Donovan Yohan's portfolio site. It uses Next.js Pages Router, React, sty
 - Keep generated folders (`.next`, `out`, `coverage`, `node_modules`) out of edits.
 - Future design-system work should align content and layout to the dot-grid/sketchbook direction in `DESIGN.md`.
 
+## Theme awareness
+
+The site has light + dark modes driven by `data-theme` on `<html>`. State source of truth is the `Context` in `components/context.tsx`, hydrated from `localStorage` (or `prefers-color-scheme`) by the inline `themeBootstrap` script in each page's `<Head>`.
+
+When you add or touch UI on a page, follow these rules so dark mode does not silently break:
+
+- **Prefer CSS variables** (`var(--ink)`, `var(--paper)`, `var(--rule)`, etc.) over hardcoded hex/rgba. CSS vars flip automatically under `[data-theme="dark"]` blocks in each page's `<style jsx global>`.
+- **Canvas/WebGL/inline-painted graphics** (`DotGrid`, `HatchScene`, anything Canvas-2D or shader-driven) cannot read CSS vars. They take a `color` (or `inkColor`) prop. **Always pass a theme-conditional value** by reading `theme` from `Context`:
+  ```tsx
+  const { theme } = useContext(Context);
+  <DotGrid color={theme === "dark" ? "rgba(244, 240, 228, 0.12)" : "rgba(40, 38, 32, 0.18)"} />
+  ```
+  Default props on these components are tuned for light mode only — relying on defaults will produce invisible dots / wrong-tint shading in dark mode.
+- **New pages** must include the `themeBootstrap` `<script>` in `<Head>` before any other content, and wrap dynamic-color graphics with the `useContext(Context)` pattern above.
+- **SVG strokes** can use `stroke="var(--ink)"` (CSS vars work in inline SVG). External raster images can't — swap them via theme-aware `src` if both variants exist.
+- When in doubt, grep `pages/index.tsx` for `theme === "dark"` to find the canonical light/dark color pairs already in use, and reuse them.
+
 ## Vault adapter — load-bearing privacy code (forward-looking)
 
 > **Note:** This section describes the vault adapter design that lands across

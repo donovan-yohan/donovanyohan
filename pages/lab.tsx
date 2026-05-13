@@ -1,18 +1,12 @@
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import { useRef, useState } from "react";
-import { Geist_Mono, Crimson_Pro } from "next/font/google";
 import { Box, Card, Grid, MarginAnchor, Stack } from "../components/lab/system";
+import { gm500, gm800, cp400, cp400i } from "../global/fonts";
 
 const DotGrid = dynamic(() => import("../components/lab/DotGrid"), { ssr: false });
 const HatchScene = dynamic(() => import("../components/lab/HatchScene"), { ssr: false });
 const Notebook = dynamic(() => import("../components/lab/Notebook"), { ssr: false });
-
-const gm500 = Geist_Mono({ subsets: ["latin"], weight: "500", style: "normal" });
-const gm800 = Geist_Mono({ subsets: ["latin"], weight: "800", style: "normal" });
-
-const cp400 = Crimson_Pro({ subsets: ["latin"], weight: "400", style: "normal" });
-const cp400i = Crimson_Pro({ subsets: ["latin"], weight: "400", style: "italic" });
 
 interface SectionProps {
   num: string;

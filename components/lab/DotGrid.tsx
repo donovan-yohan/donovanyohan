@@ -12,6 +12,12 @@ interface DotGridProps {
    * top-left corner in document coordinates instead of viewport (0, 0).
    */
   anchorRef?: React.RefObject<HTMLElement | null>;
+  /**
+   * Optional scroll source. When provided, dots offset by this element's
+   * `scrollLeft` / `scrollTop` instead of the window. Use for pages that
+   * scroll inside an inner container (e.g. /about's horizontal scroller).
+   */
+  scrollContainerRef?: React.RefObject<HTMLElement | null>;
 }
 
 const DotGrid = ({
@@ -22,10 +28,11 @@ const DotGrid = ({
   color = "rgba(40, 38, 32, 0.32)",
   background = "transparent",
   anchorRef,
+  scrollContainerRef,
 }: DotGridProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: -9999, y: -9999, active: false });
-  const scrollRef = useRef(0);
+  const scrollRef = useRef({ x: 0, y: 0 });
   const originRef = useRef({ x: 0, y: 0 });
   const rafRef = useRef<number | null>(null);
 
@@ -71,7 +78,14 @@ const DotGrid = ({
       mouseRef.current.y = -9999;
     };
     const onScroll = () => {
-      scrollRef.current = window.scrollY || window.pageYOffset || 0;
+      const src = scrollContainerRef?.current;
+      if (src) {
+        scrollRef.current.x = src.scrollLeft;
+        scrollRef.current.y = src.scrollTop;
+      } else {
+        scrollRef.current.x = window.scrollX || window.pageXOffset || 0;
+        scrollRef.current.y = window.scrollY || window.pageYOffset || 0;
+      }
     };
 
     const tick = () => {
@@ -81,7 +95,8 @@ const DotGrid = ({
         ctx.fillRect(0, 0, width, height);
       }
 
-      const scrollY = scrollRef.current;
+      const scrollX = scrollRef.current.x;
+      const scrollY = scrollRef.current.y;
       const m = mouseRef.current;
       const r2 = influenceRadius * influenceRadius;
       const ox = originRef.current.x;
@@ -89,9 +104,10 @@ const DotGrid = ({
       ctx.fillStyle = color;
 
       // Anchor dot grid to content origin (anchor element's top-left in document
-      // coordinates). Dots fall on a 16px lattice starting from origin.
-      const startCol = Math.floor((0 - ox) / spacing);
-      const endCol = Math.ceil((width - ox) / spacing);
+      // coordinates). Dots fall on a 16px lattice starting from origin and
+      // translate with the scroll source on both axes.
+      const startCol = Math.floor((scrollX - ox) / spacing);
+      const endCol = Math.ceil((scrollX + width - ox) / spacing);
       const startRow = Math.floor((scrollY - oy) / spacing);
       const endRow = Math.ceil((scrollY + height - oy) / spacing);
 
@@ -100,7 +116,8 @@ const DotGrid = ({
         const viewY = docY - scrollY;
         if (viewY < -spacing || viewY > height + spacing) continue;
         for (let c = startCol; c <= endCol; c++) {
-          const viewX = ox + c * spacing;
+          const docX = ox + c * spacing;
+          const viewX = docX - scrollX;
           if (viewX < -spacing || viewX > width + spacing) continue;
 
           let radius = dotRadius;
@@ -126,23 +143,25 @@ const DotGrid = ({
     resize();
     onScroll();
     updateOrigin();
-    window.addEventListener("resize", () => {
+    const onResize = () => {
       resize();
       updateOrigin();
-    });
+    };
+    const scrollTarget: HTMLElement | Window = scrollContainerRef?.current ?? window;
+    window.addEventListener("resize", onResize);
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerleave", onLeave);
-    window.addEventListener("scroll", onScroll, { passive: true });
+    scrollTarget.addEventListener("scroll", onScroll, { passive: true });
     rafRef.current = requestAnimationFrame(tick);
 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("resize", onResize);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerleave", onLeave);
-      window.removeEventListener("scroll", onScroll);
+      scrollTarget.removeEventListener("scroll", onScroll);
     };
-  }, [spacing, dotRadius, influenceRadius, maxRadiusBoost, color, background, anchorRef]);
+  }, [spacing, dotRadius, influenceRadius, maxRadiusBoost, color, background, anchorRef, scrollContainerRef]);
 
   return (
     <canvas

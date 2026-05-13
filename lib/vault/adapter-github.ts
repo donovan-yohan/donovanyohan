@@ -29,7 +29,7 @@ import { VaultFrontmatterSchema } from "./schema";
 import type { VaultNote, VaultAdapter } from "./schema";
 import { deriveSlug } from "./slug";
 import { applyPreviewDefaults } from "./preview-defaults";
-import { remarkStripWikilinks } from "./wikilinks";
+import { remarkStripWikilinks, stripWikilinks } from "./wikilinks";
 import { VaultParseError } from "./errors";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
@@ -123,8 +123,10 @@ function extractFirstParagraph(markdown: string): string {
     paragraphLines.push(trimmed);
   }
 
-  return paragraphLines
-    .join(" ")
+  // P18: strip [[wikilinks]] from the fallback excerpt too, so raw Obsidian
+  // syntax never leaks into card previews.
+  const joined = paragraphLines.join(" ");
+  return stripWikilinks(joined)
     .replace(/\*\*([^*]+)\*\*/g, "$1")
     .replace(/\*([^*]+)\*/g, "$1")
     .replace(/`([^`]+)`/g, "$1")

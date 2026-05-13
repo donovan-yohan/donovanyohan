@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Box, Card, Grid, MarginAnchor, Stack } from "./system";
 
 // =============================================================================
@@ -99,6 +99,13 @@ export type Entry =
   | LinkEntry
   | VideoEntry
   | ListEntry;
+
+/**
+ * Caller-supplied resolver that turns an entry into a clickable URL.
+ * Returns null to leave the card non-interactive (lab page mocks, notes
+ * without detail routes, etc.). Threaded through Month/Row → EntryCard.
+ */
+export type CardHrefBuilder = (entry: Entry) => string | null;
 
 // Notebook layout primitives -------------------------------------------------
 
@@ -501,11 +508,25 @@ const HIGHLIGHT_PATHS: readonly string[] = [
   "M3,8 Q40,7 80,7 T180,8 Q205,8 218,9 L215,37 Q200,38 160,38 T70,37 Q35,38 2,37 L3,8 Z",
 ];
 
-const buildHighlightBg = (index: number, color: string): string => {
+/**
+ * Build the inline style for the title highlighter pseudo.
+ *
+ * The wobbly SVG marker shape is baked into a CSS `mask-image` data URL
+ * (alpha mask, fill=black), and the actual tint is applied via
+ * `background-color` referencing one of the four shared highlighter CSS
+ * variables (`--hl-1`..`--hl-4`). Splitting shape from colour means the
+ * marker is theme-reactive — light mode uses cyan/pink/lime/yellow,
+ * dark mode uses blue/red/purple/orange, all without re-baking the SVG.
+ * Cards rotate through the four slots by entry index for variety.
+ */
+const buildHighlightStyle = (index: number): React.CSSProperties => {
+  const slot = (index % 4) + 1;
   const path = HIGHLIGHT_PATHS[index % HIGHLIGHT_PATHS.length];
-  const fill = color.replace("#", "%23");
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 44' preserveAspectRatio='none'><path d='${path}' fill='${fill}'/></svg>`;
-  return `url("data:image/svg+xml;utf8,${svg}")`;
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 44' preserveAspectRatio='none'><path d='${path}' fill='black'/></svg>`;
+  return {
+    ["--hl-mask" as string]: `url("data:image/svg+xml;utf8,${svg}")`,
+    ["--hl-bg" as string]: `var(--hl-${slot})`,
+  } as React.CSSProperties;
 };
 
 const formatIndex = (n: number) => n.toString().padStart(3, "0");
@@ -562,11 +583,49 @@ interface NotebookProps {
   monoClass: string;
   serifClass: string;
   italicSerifClass: string;
+  /**
+   * Optional content tree. When omitted the component renders its internal
+   * mock data — useful for the lab page and for booting before the vault
+   * adapter is wired. Production callers (homepage) pass the vault-derived
+   * months from `notesToNotebookMonths()`.
+   */
+  months?: NotebookMonth[];
+  /**
+   * Optional href resolver. When provided, every card is wrapped with a
+   * stretched-link anchor so clicking anywhere on the card navigates.
+   * Omitted on the lab page so mock entries don't link to missing routes.
+   */
+  cardHrefBuilder?: CardHrefBuilder;
 }
 
-const Notebook = ({ monoClass, serifClass, italicSerifClass }: NotebookProps) => {
+const Notebook = ({
+  monoClass,
+  serifClass,
+  italicSerifClass,
+  months,
+  cardHrefBuilder,
+}: NotebookProps) => {
   const [filter, setFilter] = useState<EntryType | "all">("all");
-  const allEntries = useMemo(() => flattenEntries(NOTEBOOK), []);
+  const [chipsStuck, setChipsStuck] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const data = months ?? NOTEBOOK;
+  const allEntries = useMemo(() => flattenEntries(data), [data]);
+
+  // Toggle a `.is-stuck` class on the chip bar once it actually sticks to
+  // the top of the viewport. A 1px sentinel above the bar tells us when
+  // the bar has crossed the sticky offset — we shrink the row + tighten
+  // type so the active filter stays visible while the user scrolls the
+  // notebook itself.
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setChipsStuck(!entry.isIntersecting),
+      { rootMargin: "-49px 0px 0px 0px", threshold: 0 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: allEntries.length };
@@ -581,41 +640,39 @@ const Notebook = ({ monoClass, serifClass, italicSerifClass }: NotebookProps) =>
   }, [allEntries]);
 
   const filtered = filter === "all" ? null : allEntries.filter((e) => e.type === filter);
-  const totalShown = filtered ? filtered.length : allEntries.length;
 
   return (
-    <Stack gap={1}>
-      <Stack
-        as="div"
-        direction="row"
-        gap={1}
-        wrap
-        pb={1}
-        className={`chips ${monoClass}`}
-        style={{ borderBottom: "1px solid var(--rule)" }}
-      >
-        <button
-          type="button"
-          className={`chip ${filter === "all" ? "chipActive" : ""}`}
-          onClick={() => setFilter("all")}
-        >
-          <span className="chipGlyph">●</span>
-          <span className="chipLabel">all</span>
-          <span className="chipCount">{counts.all}</span>
-        </button>
-        {types.map((t) => (
-          <button
-            key={t}
-            type="button"
-            className={`chip ${filter === t ? "chipActive" : ""}`}
-            onClick={() => setFilter(t)}
-          >
-            <span className="chipGlyph">{TYPE_GLYPH[t]}</span>
-            <span className="chipLabel">{TYPE_LABEL[t]}</span>
-            <span className="chipCount">{counts[t] ?? 0}</span>
-          </button>
-        ))}
-      </Stack>
+    <>
+      {/* Sentinel lives OUTSIDE the Stack so the parent's flex gap can't
+          insert a dotted band between it and the chip bar — and so the
+          chip bar's sticky range still spans the rest of the section. */}
+      <div ref={sentinelRef} className="chipsSentinel" aria-hidden />
+      <Stack gap={1}>
+        <div className={`chipsBar ${chipsStuck ? "is-stuck" : ""} ${monoClass}`}>
+          <div className="chipsInner">
+            <button
+              type="button"
+              className={`chip ${filter === "all" ? "chipActive" : ""}`}
+              onClick={() => setFilter("all")}
+            >
+              <span className="chipGlyph">●</span>
+              <span className="chipLabel">all</span>
+              <span className="chipCount">{counts.all}</span>
+            </button>
+            {types.map((t) => (
+              <button
+                key={t}
+                type="button"
+                className={`chip ${filter === t ? "chipActive" : ""}`}
+                onClick={() => setFilter(t)}
+              >
+                <span className="chipGlyph">{TYPE_GLYPH[t]}</span>
+                <span className="chipLabel">{TYPE_LABEL[t]}</span>
+                <span className="chipCount">{counts[t] ?? 0}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
       {filtered ? (
         <Stack gap={1}>
@@ -626,31 +683,62 @@ const Notebook = ({ monoClass, serifClass, italicSerifClass }: NotebookProps) =>
               monoClass={monoClass}
               serifClass={serifClass}
               italicSerifClass={italicSerifClass}
+              cardHrefBuilder={cardHrefBuilder}
             />
           ))}
         </Stack>
       ) : (
-        NOTEBOOK.map((m) => (
+        data.map((m) => (
           <MonthBlock
             key={m.key}
             month={m}
             monoClass={monoClass}
             serifClass={serifClass}
             italicSerifClass={italicSerifClass}
+            cardHrefBuilder={cardHrefBuilder}
           />
         ))
       )}
 
-      <Box
-        as="footer"
-        pt={2}
-        className={`eof ${monoClass}`}
-        style={{ borderTop: "1px solid var(--rule)" }}
-      >
-        EOF · {totalShown} {totalShown === 1 ? "entry" : "entries"} indexed · /donovan-yohan
-      </Box>
-
       <style jsx global>{`
+        /* Sentinel + chip bar share a wrapper that's a single Stack child,
+           so the parent Stack's gap doesn't insert a dotted band between
+           them. Sentinel stays in normal flow at the top of the wrapper
+           so IntersectionObserver fires when the chip bar pins. */
+        .chipsWrap {
+          position: relative;
+        }
+        .chipsSentinel {
+          width: 100%;
+          height: 1px;
+          /* Collapse the 1px tracking row visually so no dotted strip
+             appears between the header bg and the chip bar. The element
+             still occupies layout space for IntersectionObserver. */
+          margin-bottom: -1px;
+          pointer-events: none;
+        }
+        /* Chip bar starts flush with the vertical accent rule (left edge
+           pulled back by --gutter-pad so the bar's left aligns with
+           --gutter-w) and bleeds right to the viewport edge. The bg +
+           bottom border end at the rule line — left gutter stays clear. */
+        .chipsBar {
+          position: sticky;
+          top: var(--nav-h, 48px);
+          z-index: 20;
+          background: var(--paper);
+          border-bottom: 1px solid var(--rule);
+          margin-left: calc(-1 * var(--gutter-pad));
+          margin-right: calc(-1 * var(--content-pad-left));
+        }
+        .chipsInner {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: var(--u);
+          padding: var(--u) var(--content-pad-left) var(--u)
+            var(--gutter-pad);
+        }
+
         .chip {
           appearance: none;
           background: transparent;
@@ -691,14 +779,9 @@ const Notebook = ({ monoClass, serifClass, italicSerifClass }: NotebookProps) =>
         .chipActive .chipCount {
           opacity: 0.85;
         }
-        .eof {
-          font-size: 11px;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-          color: var(--ink-mute);
-        }
       `}</style>
-    </Stack>
+      </Stack>
+    </>
   );
 };
 
@@ -707,9 +790,16 @@ interface MonthBlockProps {
   monoClass: string;
   serifClass: string;
   italicSerifClass: string;
+  cardHrefBuilder?: CardHrefBuilder;
 }
 
-const MonthBlock = ({ month, monoClass, serifClass, italicSerifClass }: MonthBlockProps) => {
+const MonthBlock = ({
+  month,
+  monoClass,
+  serifClass,
+  italicSerifClass,
+  cardHrefBuilder,
+}: MonthBlockProps) => {
   const lastIdx = month.rows.length - 1;
   const head = month.rows.slice(0, lastIdx);
   const tail = lastIdx >= 0 ? month.rows[lastIdx] : null;
@@ -718,7 +808,11 @@ const MonthBlock = ({ month, monoClass, serifClass, italicSerifClass }: MonthBlo
   return (
     <section className="monthSection">
       <div className="stickyZone">
-        <MarginAnchor top={4} className={monoClass}>
+        <MarginAnchor
+          top={3}
+          className={monoClass}
+          style={{ zIndex: 30 }}
+        >
           <span className="monthName">{month.monthLabel}</span>
           <span className="monthYear">{month.year}</span>
           <span className="monthCount">
@@ -733,6 +827,7 @@ const MonthBlock = ({ month, monoClass, serifClass, italicSerifClass }: MonthBlo
             monoClass={monoClass}
             serifClass={serifClass}
             italicSerifClass={italicSerifClass}
+            cardHrefBuilder={cardHrefBuilder}
           />
         ))}
       </div>
@@ -743,6 +838,7 @@ const MonthBlock = ({ month, monoClass, serifClass, italicSerifClass }: MonthBlo
           monoClass={monoClass}
           serifClass={serifClass}
           italicSerifClass={italicSerifClass}
+          cardHrefBuilder={cardHrefBuilder}
         />
       ) : null}
 
@@ -766,12 +862,15 @@ const MonthBlock = ({ month, monoClass, serifClass, italicSerifClass }: MonthBlo
           color: var(--ink);
         }
         .monthYear {
-          font-size: 11px;
-          font-weight: 500;
-          letter-spacing: 0.18em;
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
           text-transform: uppercase;
-          color: var(--ink-mute);
-          margin-top: 8px;
+          color: var(--ink);
+          /* MarginAnchor adds gap: var(--u) between children. Pull the year
+             back to sit flush under the month name; the entry count keeps
+             its 1u breathing room below. */
+          margin-top: calc(var(--u) * -1);
         }
         .monthCount {
           font-size: 11px;
@@ -802,9 +901,16 @@ interface RowBlockProps {
   monoClass: string;
   serifClass: string;
   italicSerifClass: string;
+  cardHrefBuilder?: CardHrefBuilder;
 }
 
-const RowBlock = ({ row, monoClass, serifClass, italicSerifClass }: RowBlockProps) => (
+const RowBlock = ({
+  row,
+  monoClass,
+  serifClass,
+  italicSerifClass,
+  cardHrefBuilder,
+}: RowBlockProps) => (
   <Grid cols={row.cols} rows={row.rows ?? 1} gap={1} dense data-cols={row.cols}>
     {row.cells.map((cell, i) => (
       <EntryCard
@@ -815,6 +921,7 @@ const RowBlock = ({ row, monoClass, serifClass, italicSerifClass }: RowBlockProp
         monoClass={monoClass}
         serifClass={serifClass}
         italicSerifClass={italicSerifClass}
+        cardHrefBuilder={cardHrefBuilder}
       />
     ))}
   </Grid>
@@ -827,6 +934,7 @@ interface EntryCardProps {
   monoClass: string;
   serifClass: string;
   italicSerifClass: string;
+  cardHrefBuilder?: CardHrefBuilder;
 }
 
 const EntryCard = ({
@@ -836,17 +944,24 @@ const EntryCard = ({
   monoClass,
   serifClass,
   italicSerifClass,
+  cardHrefBuilder,
 }: EntryCardProps) => {
   const accent = entry.accent;
   const tint = entry.tint;
   const aux = cardAuxMeta(entry);
   const action = ACTION_LABEL[entry.type] ?? null;
   const accentColor = accent ?? "var(--ink)";
+  // Card-wide link: caller decides (homepage maps to /writing/{slug}); link
+  // entries always use their own external URL even when no builder is set.
+  const href =
+    cardHrefBuilder?.(entry) ?? (entry.type === "link" ? entry.url : null);
+  const isExternal = href ? /^(https?:)?\/\//.test(href) : false;
   const cardStyle: React.CSSProperties = {
     background: tint,
     ["--card-accent" as string]: accentColor,
     gridColumn: colSpan && colSpan > 1 ? `span ${colSpan}` : undefined,
     gridRow: rowSpan && rowSpan > 1 ? `span ${rowSpan}` : undefined,
+    position: "relative",
   };
 
   return (
@@ -880,17 +995,35 @@ const EntryCard = ({
 
         <footer className={`cardBottomBar ${monoClass}`}>
           <span className="cardBottomLeft">
-            <span>{TYPE_LABEL[entry.type]}</span>
-            {aux ? (
-              <>
-                <span className="cardSep">·</span>
-                <span>{aux}</span>
-              </>
-            ) : null}
+            {/* Footer auxiliary line. Falls back to the type label when no
+                richer aux (read time, duration, fig, attribution) is set,
+                so non-essay cards still anchor a left-side caption. */}
+            <span>{aux ?? TYPE_LABEL[entry.type]}</span>
           </span>
           {action ? <span className="cardAction">{action}</span> : null}
         </footer>
       </Stack>
+
+      {href ? (
+        <a
+          className="cardStretchedLink"
+          href={href}
+          {...(isExternal
+            ? { target: "_blank", rel: "noreferrer" }
+            : {})}
+          aria-label={
+            "title" in entry
+              ? entry.title
+              : "label" in entry
+                ? entry.label
+                : "text" in entry
+                  ? entry.text
+                  : "caption" in entry
+                    ? entry.caption
+                    : "Read entry"
+          }
+        />
+      ) : null}
 
       <style jsx global>{`
         .cardTopBar {
@@ -906,6 +1039,7 @@ const EntryCard = ({
           text-transform: uppercase;
           line-height: 16px;
           height: 32px;
+          border-bottom: 1px solid var(--rule);
         }
         .cardTopLeft {
           display: inline-flex;
@@ -942,6 +1076,7 @@ const EntryCard = ({
           line-height: 16px;
           height: 32px;
           color: var(--ink-mute);
+          border-top: 1px solid var(--rule);
         }
         .cardBottomLeft {
           display: inline-flex;
@@ -950,6 +1085,24 @@ const EntryCard = ({
         }
         .cardAction {
           font-weight: 600;
+        }
+        /* Full-card click target. Sits above the static content so anywhere
+           on the card navigates, but doesn't paint anything visible. Text
+           selection still works because pointer events on the rest of the
+           card stay enabled via the link's transparent overlay. */
+        .cardStretchedLink {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          text-decoration: none;
+          color: inherit;
+        }
+        .cardStretchedLink:focus-visible {
+          outline: 2px solid var(--accent);
+          outline-offset: -2px;
+        }
+        .card:has(.cardStretchedLink) {
+          cursor: pointer;
         }
       `}</style>
     </Card>
@@ -975,7 +1128,7 @@ const EntryBody = ({ entry, monoClass, serifClass, italicSerifClass }: EntryBody
             {entry.accent ? (
               <span
                 className="titleHi"
-                style={{ ["--hl-bg" as string]: buildHighlightBg(entry.index, entry.accent) } as React.CSSProperties}
+                style={buildHighlightStyle(entry.index)}
               >
                 {entry.title}
               </span>
@@ -1081,19 +1234,34 @@ const Body = () => (
       letter-spacing: -0.01em;
       color: var(--ink);
     }
-    /* Highlighter stroke. Wrapping span is a real inline element (not the
-       blockified h3), so bg covers only the text width and clones per line
-       via box-decoration-break: clone. --hl-bg holds the linear-gradient. */
+    /* Highlighter stroke. The wobbly SVG marker shape is set as a
+       mask-image on a ::before pseudo so the colour can come from a CSS
+       var (theme-reactive); the text itself stays unmasked above the
+       pseudo. Inline-block so the pseudo's positioning context is stable;
+       the trade-off is the title can't wrap mid-phrase — fine for the
+       short headlines that get highlighted. */
     :global(.titleHi) {
-      display: inline;
-      background-image: var(--hl-bg);
-      background-size: 100% 0.85em;
-      background-position: 0 0.45em;
-      background-repeat: no-repeat;
+      position: relative;
+      display: inline-block;
+      isolation: isolate;
       padding: 0 4px;
       margin: 0 -4px;
-      -webkit-box-decoration-break: clone;
-      box-decoration-break: clone;
+    }
+    :global(.titleHi)::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0.5em;
+      bottom: 0;
+      background-color: var(--hl-bg);
+      -webkit-mask-image: var(--hl-mask);
+      mask-image: var(--hl-mask);
+      -webkit-mask-size: 100% 100%;
+      mask-size: 100% 100%;
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      z-index: -1;
     }
     :global(.blurb) {
       margin: 0;
