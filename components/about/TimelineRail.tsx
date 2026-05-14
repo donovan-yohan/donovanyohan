@@ -5,12 +5,15 @@
  *
  * Layout matches the lane exactly: each tick is positioned using the same
  * `cardStrideX` / `leftPadX` constants the lane uses, so a tick at year Y
- * sits centered above the cards belonging to that year.
+ * sits centered above the cards belonging to that year. Years render in
+ * heavy uppercase mono; emphasized years and stamps get a highlighter
+ * strip behind them (no rotation, no cursive).
  */
 
 import { CSSProperties, useMemo } from "react";
 
 import type { TimelineEvent } from "../../global/timeline";
+import { HiSpan } from "../Highlighter";
 
 interface TimelineRailProps {
   events: TimelineEvent[];
@@ -23,14 +26,14 @@ interface TimelineRailProps {
   /** Right padding after the last card, in px. Used to size the rail. */
   rightPadX: number;
   monoClass: string;
-  scriptClass: string;
+  monoBoldClass: string;
 }
 
 interface YearTick {
   year: number;
   /** Center x of all events tagged with this year, in px from rail origin. */
   centerX: number;
-  /** Whether to render the big handwritten label. */
+  /** Whether to render the big highlighted label. */
   emphasize: boolean;
   /** Stamp (NOW / START) if any of the events for this year has one. */
   stamp?: string;
@@ -43,7 +46,7 @@ export const TimelineRail = ({
   leftPadX,
   rightPadX,
   monoClass,
-  scriptClass,
+  monoBoldClass,
 }: TimelineRailProps) => {
   const ticks = useMemo<YearTick[]>(() => {
     const byYear = new Map<number, { indices: number[]; stamp?: string }>();
@@ -71,8 +74,6 @@ export const TimelineRail = ({
     return result;
   }, [events, cardStrideX, cardWidthX, leftPadX]);
 
-  // Lane width = leftPad + n cards + (n - 1) gaps + rightPad.
-  // = leftPad + n*cardWidth + (n-1)*(stride - cardWidth) + rightPad.
   const gapX = cardStrideX - cardWidthX;
   const trackWidth =
     leftPadX +
@@ -89,14 +90,26 @@ export const TimelineRail = ({
           <div key={t.year} className="railTick" style={{ left: t.centerX }}>
             <span className="railTickMark" />
             {t.stamp ? (
-              <span className={`railStamp ${scriptClass}`}>{t.stamp}</span>
+              <span className={`railStamp ${monoBoldClass}`}>{t.stamp}</span>
             ) : null}
             <span
-              className={`railYear ${t.emphasize ? scriptClass : monoClass} ${
-                t.emphasize ? "railYearBig" : "railYearSmall"
-              }`}
+              className={`railYear ${
+                t.emphasize ? monoBoldClass : monoClass
+              } ${t.emphasize ? "railYearBig" : "railYearSmall"}`}
             >
-              {t.year}
+              {t.emphasize ? (
+                <HiSpan
+                  slot={4}
+                  style={{
+                    backgroundSize: "100% 0.7em",
+                    backgroundPosition: "0 80%",
+                  }}
+                >
+                  {t.year}
+                </HiSpan>
+              ) : (
+                t.year
+              )}
             </span>
           </div>
         ))}
@@ -121,7 +134,7 @@ export const TimelineRail = ({
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 2px;
+          gap: 4px;
           padding-top: 6px;
         }
         .railTickMark {
@@ -131,10 +144,13 @@ export const TimelineRail = ({
           opacity: 0.6;
         }
         .railStamp {
-          font-size: 14px;
-          color: var(--accent);
-          letter-spacing: 0.04em;
-          margin-bottom: -2px;
+          font-size: 11px;
+          letter-spacing: 0.22em;
+          color: var(--paper);
+          background: var(--accent);
+          padding: 3px 8px;
+          margin-bottom: 2px;
+          text-transform: uppercase;
         }
         .railYear {
           color: var(--ink);
@@ -142,14 +158,12 @@ export const TimelineRail = ({
           white-space: nowrap;
         }
         .railYearBig {
-          font-size: 28px;
-          font-weight: 800;
-          letter-spacing: -0.02em;
-          transform: rotate(-2deg);
+          font-size: 22px;
+          letter-spacing: 0.04em;
         }
         .railYearSmall {
           font-size: 11px;
-          letter-spacing: 0.2em;
+          letter-spacing: 0.24em;
           text-transform: uppercase;
           color: var(--ink-mute);
         }
@@ -158,7 +172,7 @@ export const TimelineRail = ({
           left: 0;
           bottom: 0;
           height: 2px;
-          background: var(--accent);
+          background: var(--ink);
         }
       `}</style>
     </div>

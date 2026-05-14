@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { HiSpan, type HiSlot } from "../Highlighter";
 import { Box, Card, Grid, MarginAnchor, Stack } from "./system";
 
 // =============================================================================
@@ -494,40 +495,11 @@ const NOTEBOOK: NotebookMonth[] = [
 
 // Helpers --------------------------------------------------------------------
 
-// Highlighter stroke. SVG path defines a solid-fill blob with subtle top/
-// bottom edge variation (varying width along the stroke) and slightly
-// diagonal left/right ends (off-vertical, like a marker held at a tilt).
-// Five variants picked deterministically by entry index. No transparent
-// regions inside the path — fully opaque. box-decoration-break: clone on
-// the wrapping inline span paints the shape per wrapped line.
-const HIGHLIGHT_PATHS: readonly string[] = [
-  "M3,8 Q40,7 90,7 T175,7 T217,8 L215,37 Q170,38 130,37 T70,37 T5,37 L3,8 Z",
-  "M5,9 Q45,8 100,8 T200,9 L218,9 L216,38 Q165,38 120,37 T50,37 T3,37 L5,9 Z",
-  "M3,7 Q35,6 80,7 T160,7 T210,8 L213,38 Q210,38 180,37 T100,38 T20,37 L1,38 L3,7 Z",
-  "M2,9 Q50,8 110,8 T200,8 L215,8 L218,37 L200,38 Q140,38 90,37 T2,38 L2,9 Z",
-  "M3,8 Q40,7 80,7 T180,8 Q205,8 218,9 L215,37 Q200,38 160,38 T70,37 Q35,38 2,37 L3,8 Z",
-];
-
-/**
- * Build the inline style for the title highlighter pseudo.
- *
- * The wobbly SVG marker shape is baked into a CSS `mask-image` data URL
- * (alpha mask, fill=black), and the actual tint is applied via
- * `background-color` referencing one of the four shared highlighter CSS
- * variables (`--hl-1`..`--hl-4`). Splitting shape from colour means the
- * marker is theme-reactive — light mode uses cyan/pink/lime/yellow,
- * dark mode uses blue/red/purple/orange, all without re-baking the SVG.
- * Cards rotate through the four slots by entry index for variety.
- */
-const buildHighlightStyle = (index: number): React.CSSProperties => {
-  const slot = (index % 4) + 1;
-  const path = HIGHLIGHT_PATHS[index % HIGHLIGHT_PATHS.length];
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 44' preserveAspectRatio='none'><path d='${path}' fill='black'/></svg>`;
-  return {
-    ["--hl-mask" as string]: `url("data:image/svg+xml;utf8,${svg}")`,
-    ["--hl-bg" as string]: `var(--hl-${slot})`,
-  } as React.CSSProperties;
-};
+// Highlighter rotates through the four colour slots by entry index for
+// variety. Path variant is chosen deterministically by index too so a
+// given card always gets the same wobble.
+const highlightSlot = (index: number): HiSlot =>
+  ((index % 4) + 1) as HiSlot;
 
 const formatIndex = (n: number) => n.toString().padStart(3, "0");
 
@@ -1126,12 +1098,12 @@ const EntryBody = ({ entry, monoClass, serifClass, italicSerifClass }: EntryBody
         <>
           <h3 className={`title ${monoClass}`}>
             {entry.accent ? (
-              <span
-                className="titleHi"
-                style={buildHighlightStyle(entry.index)}
+              <HiSpan
+                slot={highlightSlot(entry.index)}
+                pathIndex={entry.index}
               >
                 {entry.title}
-              </span>
+              </HiSpan>
             ) : (
               entry.title
             )}
@@ -1233,35 +1205,6 @@ const Body = () => (
       font-weight: 700;
       letter-spacing: -0.01em;
       color: var(--ink);
-    }
-    /* Highlighter stroke. The wobbly SVG marker shape is set as a
-       mask-image on a ::before pseudo so the colour can come from a CSS
-       var (theme-reactive); the text itself stays unmasked above the
-       pseudo. Inline-block so the pseudo's positioning context is stable;
-       the trade-off is the title can't wrap mid-phrase — fine for the
-       short headlines that get highlighted. */
-    :global(.titleHi) {
-      position: relative;
-      display: inline-block;
-      isolation: isolate;
-      padding: 0 4px;
-      margin: 0 -4px;
-    }
-    :global(.titleHi)::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0.5em;
-      bottom: 0;
-      background-color: var(--hl-bg);
-      -webkit-mask-image: var(--hl-mask);
-      mask-image: var(--hl-mask);
-      -webkit-mask-size: 100% 100%;
-      mask-size: 100% 100%;
-      -webkit-mask-repeat: no-repeat;
-      mask-repeat: no-repeat;
-      z-index: -1;
     }
     :global(.blurb) {
       margin: 0;

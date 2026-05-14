@@ -55,6 +55,26 @@ interface HatchSceneProps {
    */
   invertProximity?: number;
   /**
+   * Mark pattern.
+   *  - `"cross"` (default): two diagonals — the original cross-hatch.
+   *  - `"hatch-left"`: only the -45° diagonal (lines sloping down-left).
+   *  - `"hatch-right"`: only the +45° diagonal (lines sloping down-right).
+   *  - `"dots"`: halftone dot grid. Same fractal-subdivision reveal —
+   *     denser regions of the source fill in more dots, sparser regions
+   *     leave dots out. Dot radius is driven by `halfWidthV` so the
+   *     marks read at roughly the same visual weight as the lines.
+   */
+  pattern?: "cross" | "hatch-left" | "hatch-right" | "dots";
+  /**
+   * Amplitude of the low-frequency UV-space wobble applied to mask
+   * lookups. Designed to give binary silhouette edges a hand-drawn
+   * waver, but on photographic luminance masks it bends straight
+   * interior features (window frames, walls). Defaults to `0.008` in
+   * binary mode and `0` in luminance mode — pass an explicit value to
+   * override.
+   */
+  maskWobble?: number;
+  /**
    * Fires once when the intro animation's first frame actually emits
    * uIntro > 0 — i.e. mask texture has loaded AND introDelayMs has
    * elapsed. Use this to gate UI that should only reveal once ink is
@@ -94,6 +114,8 @@ const fragmentShader = /* glsl */ `
   uniform float uDensityMode; // 0 = binary alpha mask, 1 = luminance density map
   uniform float uLuminanceBoost; // multiplier applied to (1 - luminance)
   uniform float uInvertProximity; // 0 = cursor adds density, 1 = cursor removes it
+  uniform float uPattern; // 0=cross, 1=hatch-left (-45), 2=hatch-right (+45), 3=dots
+  uniform float uMaskWobble; // UV-space amplitude of the mask-sample wobble
 
   // CanvasTexture defaults to flipY=true so screen and canvas share orientation.
   // In binary mode we read alpha (silhouette mask). In luminance mode we read
@@ -133,6 +155,13 @@ const fragmentShader = /* glsl */ `
   //   density 1/3  → 2 lines per period (every 4th)  — spacing 1
   //   density 2/3  → 4 lines per period (every 2nd)  — spacing 0.5
   //   density 1    → 8 lines per period (every line) — spacing 0.25
+  // The four spatial tiers can't be subdivided further at typical
+  // hatchScales without hitting sub-pixel aliasing and forming moire
+  // diamond patterns. To extend the shade range past the four-tier ceiling
+  // we instead thicken lines at peak density (a "press-harder pencil"
+  // step): when darkness exceeds ~0.85 every line widens, approaching
+  // solid fill at darkness = 1.0. This adds a fifth visual shade tier
+  // without inserting new geometry.
   float hatchLine(vec2 p, float angle, float halfWidthV, float density) {
     const float freq = 4.0;
     float c = cos(angle);
@@ -170,7 +199,11 @@ const fragmentShader = /* glsl */ `
                                              0.90;
     float keep = smoothstep(threshold, threshold + max(uFadeWidth, 0.0001), density);
 
-    float thresh = halfWidthV * freq * (1.0 + tJitter);
+    // Press-harder shade tier. Above ~0.85 darkness every active line
+    // widens, so deepest-shadow regions saturate to near-solid ink
+    // instead of capping at the four-line cross-hatch coverage.
+    float pressBoost = 1.0 + smoothstep(0.85, 1.0, density) * 0.6;
+    float thresh = halfWidthV * freq * (1.0 + tJitter) * pressBoost;
     float aa = thresh * 0.30;
     float wave = abs(fract(v * freq + wob) - 0.5) * 2.0;
     float line = 1.0 - smoothstep(thresh, thresh + aa, wave);
@@ -192,6 +225,69 @@ const fragmentShader = /* glsl */ `
     return line * keep * reveal;
   }
 
+  // Halftone dot field. Uses the same fractal-subdivision reveal ladder as
+  // hatchLine, so dots "fade in" between existing dots as density grows.
+  //
+  //   density 0    → 1 dot per 8×8 cells   (sparsest)
+  //   density 1/3  → 2 dots per 8×8        (every 4)
+  //   density 2/3  → 4 dots per 8×8        (every 2)
+  //   density 1    → every cell filled
+  //
+  // Cell size in p-space matches the hatch line spacing (1.0 / freq), so a
+  // dot field at radius ~halfWidthV reads at the same visual weight as the
+  // cross-hatch lines using the same uHalfWidthV setting. Above ~0.85
+  // darkness dot radius grows toward solid fill — same press-harder shade
+  // tier extension as hatchLine.
+  float dotField(vec2 p, float density) {
+    const float freq = 4.0;
+    vec2 cell = floor(p * freq);
+    vec2 cellCenter = (cell + 0.5) / freq;
+    float dist = length(p - cellCenter);
+
+    // Per-cell subdivision level. Take the coarser of the two axes — a cell
+    // is "level 0" only if both x and y are on the every-8th lattice; any
+    // axis at a finer level pushes the cell into a deeper subdivision.
+    float m8x = mod(cell.x, 8.0);
+    float m8y = mod(cell.y, 8.0);
+    float levelX =
+      m8x < 0.5                                    ? 0.0 :
+      (abs(m8x - 4.0) < 0.5)                       ? 1.0 :
+      (abs(m8x - 2.0) < 0.5 || abs(m8x - 6.0) < 0.5) ? 2.0 :
+                                                     3.0;
+    float levelY =
+      m8y < 0.5                                    ? 0.0 :
+      (abs(m8y - 4.0) < 0.5)                       ? 1.0 :
+      (abs(m8y - 2.0) < 0.5 || abs(m8y - 6.0) < 0.5) ? 2.0 :
+                                                     3.0;
+    float level = max(levelX, levelY);
+
+    float level0Threshold = uDensityMode > 0.5 ? 0.0 : -1.0;
+    float threshold =
+      level < 0.5 ? level0Threshold :
+      level < 1.5 ? 0.35 :
+      level < 2.5 ? 0.65 :
+                    0.90;
+    float keep = smoothstep(threshold, threshold + max(uFadeWidth, 0.0001), density);
+
+    // Per-cell thickness jitter so the field reads slightly hand-stamped
+    // rather than mechanical. Constant per cell; doesn't reshape neighbours.
+    float tJitter = (hash(cell + vec2(1.7, 9.3)) - 0.5) * 2.0 * uThicknessJitter;
+    float pressBoost = 1.0 + smoothstep(0.85, 1.0, density) * 0.6;
+    float r = uHalfWidthV * (1.0 + tJitter) * pressBoost * (1.0 / freq) * 1.6;
+    float aa = r * 0.35;
+    float dot = 1.0 - smoothstep(r, r + aa, dist);
+
+    // Per-cell pencil draw-on, staggered like the lines do along their
+    // length. Smaller cells get progressively later starts to mirror the
+    // line-direction reveal.
+    float introStagger = hash(cell + vec2(31.1, 5.7)) * 0.6;
+    float introDur = 0.4;
+    float cellIntro = clamp((uIntro - introStagger) / introDur, 0.0, 1.0);
+    float reveal = uIntro >= 1.0 ? 1.0 : cellIntro;
+
+    return dot * keep * reveal;
+  }
+
   void main() {
     vec2 uv = vUv;
     vec2 pixel = uv * uResolution;
@@ -203,7 +299,7 @@ const fragmentShader = /* glsl */ `
     // not "distorted glyph".
     float nx = vnoise(uv * 22.0) - 0.5;
     float ny = vnoise(uv * 22.0 + vec2(13.7, 7.2)) - 0.5;
-    vec2 wobbleUv = uv + vec2(nx, ny) * 0.008;
+    vec2 wobbleUv = uv + vec2(nx, ny) * uMaskWobble;
 
     float m = maskAt(wobbleUv);
 
@@ -252,16 +348,33 @@ const fragmentShader = /* glsl */ `
       darkness = clamp(uBaseDensity + proximity * (peak - uBaseDensity), 0.0, 1.0);
     }
 
-    // --- Cross-hatch: two diagonals, both drawn on a single freq-4 grid with
-    // fractal-subdivision reveal driven by darkness. See hatchLine for the
-    // exact level ordering. Lines never move; new lines insert at the
-    // halfway points of the previous subdivision step.
+    // --- Mark pattern. Default ("cross") draws both diagonals on a single
+    // freq-4 grid with fractal-subdivision reveal driven by darkness — see
+    // hatchLine for the level ordering. Lines never move; new lines insert
+    // at the halfway points of the previous subdivision step.
+    //
+    // Other pattern modes (single-diagonal hatching, dots) reuse the same
+    // density ladder so they read at consistent weight across patterns.
     vec2 hp = pixel / uHatchScale;
 
-    float h1 = hatchLine(hp, radians(-45.0), uHalfWidthV, darkness);
-    float h2 = hatchLine(hp, radians( 45.0), uHalfWidthV, darkness);
+    float marks;
+    if (uPattern < 0.5) {
+      // pattern 0: cross-hatch — original behaviour, both diagonals.
+      float h1 = hatchLine(hp, radians(-45.0), uHalfWidthV, darkness);
+      float h2 = hatchLine(hp, radians( 45.0), uHalfWidthV, darkness);
+      marks = max(h1, h2);
+    } else if (uPattern < 1.5) {
+      // pattern 1: hatch-left — only the -45° diagonal.
+      marks = hatchLine(hp, radians(-45.0), uHalfWidthV, darkness);
+    } else if (uPattern < 2.5) {
+      // pattern 2: hatch-right — only the +45° diagonal.
+      marks = hatchLine(hp, radians( 45.0), uHalfWidthV, darkness);
+    } else {
+      // pattern 3: dots — halftone field.
+      marks = dotField(hp, darkness);
+    }
 
-    float hatch = max(h1, h2) * inside;
+    float hatch = marks * inside;
 
     float ink = max(outline, hatch);
     gl_FragColor = vec4(uInk, ink);
@@ -371,6 +484,8 @@ interface PlaneProps {
   densityMode: "binary" | "luminance";
   luminanceBoost: number;
   invertProximity: number;
+  pattern: "cross" | "hatch-left" | "hatch-right" | "dots";
+  maskWobble: number;
   onIntroStart?: () => void;
 }
 
@@ -392,6 +507,8 @@ const HatchPlane = ({
   densityMode,
   luminanceBoost,
   invertProximity,
+  pattern,
+  maskWobble,
   onIntroStart,
 }: PlaneProps) => {
   const matRef = useRef<THREE.ShaderMaterial>(null);
@@ -491,6 +608,17 @@ const HatchPlane = ({
       uDensityMode: { value: densityMode === "luminance" ? 1 : 0 },
       uLuminanceBoost: { value: luminanceBoost },
       uInvertProximity: { value: invertProximity },
+      uPattern: {
+        value:
+          pattern === "hatch-left"
+            ? 1
+            : pattern === "hatch-right"
+              ? 2
+              : pattern === "dots"
+                ? 3
+                : 0,
+      },
+      uMaskWobble: { value: maskWobble },
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
@@ -539,6 +667,20 @@ const HatchPlane = ({
     if (matRef.current)
       matRef.current.uniforms.uInvertProximity.value = invertProximity;
   }, [invertProximity]);
+  useEffect(() => {
+    if (matRef.current)
+      matRef.current.uniforms.uPattern.value =
+        pattern === "hatch-left"
+          ? 1
+          : pattern === "hatch-right"
+            ? 2
+            : pattern === "dots"
+              ? 3
+              : 0;
+  }, [pattern]);
+  useEffect(() => {
+    if (matRef.current) matRef.current.uniforms.uMaskWobble.value = maskWobble;
+  }, [maskWobble]);
 
   useEffect(() => {
     if (!matRef.current) return;
@@ -616,8 +758,12 @@ const HatchScene = ({
   densityMode = "binary",
   luminanceBoost = 1.0,
   invertProximity = 0,
+  pattern = "cross",
+  maskWobble,
   onIntroStart,
 }: HatchSceneProps) => {
+  const resolvedMaskWobble =
+    maskWobble ?? (densityMode === "luminance" ? 0 : 0.008);
   const fill = height === "100%";
   const wrapperStyle: CSSProperties = fill
     ? { position: "absolute", inset: 0, background: paperColor }
@@ -648,6 +794,8 @@ const HatchScene = ({
           densityMode={densityMode}
           luminanceBoost={luminanceBoost}
           invertProximity={invertProximity}
+          pattern={pattern}
+          maskWobble={resolvedMaskWobble}
           onIntroStart={onIntroStart}
         />
       </Canvas>

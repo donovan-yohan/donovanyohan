@@ -28,6 +28,7 @@ const HatchScene = dynamic(() => import("../components/lab/HatchScene"), { ssr: 
 const Notebook = dynamic(() => import("../components/lab/Notebook"), { ssr: false });
 const RoughIcon = dynamic(() => import("../components/lab/RoughIcon"), { ssr: false });
 import DrawBox from "../components/DrawBox";
+import { HiSpan } from "../components/Highlighter";
 
 // Original DY centerlines (used only by the nav home mark, which renders
 // the glyph as a solid stroked silhouette at small size).
@@ -471,7 +472,7 @@ const ContactFrame = ({
                   the dark reveal overlay (dark). */}
               {inView ? (
                 <HatchScene
-                  mask={{ kind: "svg", src: "/img/manga/dy-studies-gray.png" }}
+                  mask={{ kind: "svg", src: "/img/manga/dy-studies-2.png" }}
                   height="100%"
                   padding={0}
                   outlineWidth={0}
@@ -802,7 +803,9 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
         <Box className="historyFrame" id="work">
           <header className="historyHead">
             <span className={`historyKicker ${gm500.className}`}>The bullet journal</span>
-            <h2 className={`historyTitle ${gm800.className}`}>MY JOURNAL</h2>
+            <h2 className={`historyTitle ${gm800.className}`}>
+              <HiSpan slot={2}>MY JOURNAL</HiSpan>
+            </h2>
             <p className={`historyLede ${cp400.className}`}>
               Long-form case studies, working essays, and the occasional
               field note. Filter by type below.
@@ -1135,8 +1138,6 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
           margin-bottom: 6px;
         }
         .historyTitle {
-          position: relative;
-          isolation: isolate;
           margin: 0 0 10px;
           font-size: clamp(36px, 4.5vw, 56px);
           line-height: 1.05;
@@ -1147,18 +1148,6 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
              the text, not the full column. */
           width: fit-content;
           max-width: 100%;
-        }
-        .historyTitle::before {
-          content: "";
-          position: absolute;
-          left: -8px;
-          right: -8px;
-          /* Anchor from baseline-ish: ride the lower half of the cap height
-             so the stripe overlaps text instead of dropping below it. */
-          bottom: 18%;
-          height: 0.45em;
-          background: var(--hl-2);
-          z-index: -1;
         }
         .historyLede {
           margin: 0;
@@ -1201,15 +1190,22 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
           /* Border is rendered by an inline RoughBox so it can ink-draw
              on entry. The legacy 1px solid var(--ink) border is dropped;
              the SVG strokes are the only visible edge. */
+          /* Entry offset routed through a CSS variable so each panel
+             can compose it into its own transform. Without this, a
+             top-level translateY here would outrank the centerpiece's
+             translate(-50%, -50%) once .is-in flips on, dragging the
+             hatch panel out of position. Panels that don't override
+             transform inherit the base rule below. */
+          --enter-y: 14px;
           opacity: 0;
-          transform: translateY(14px);
+          transform: translateY(var(--enter-y));
           transition:
             opacity 700ms ease,
             transform 700ms ease;
         }
         .contactFrame.is-in .contactPanel {
           opacity: 1;
-          transform: translateY(0);
+          --enter-y: 0px;
         }
         .contactPanel:nth-of-type(1) {
           transition-delay: 120ms;
@@ -1537,10 +1533,10 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
         .panelImage {
           left: 50%;
           top: 50%;
-          transform: translate(-50%, -50%) translateY(0);
+          transform: translate(-50%, -50%) translateY(var(--enter-y));
           width: 82%;
           max-width: 1300px;
-          aspect-ratio: 5 / 4;
+          aspect-ratio: 1619 / 972;
           padding: 0;
           overflow: hidden;
         }
