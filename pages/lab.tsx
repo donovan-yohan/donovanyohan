@@ -1,8 +1,12 @@
 import dynamic from "next/dynamic";
 import Head from "next/head";
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { Box, Card, Grid, MarginAnchor, Stack } from "../components/lab/system";
+import Context from "../components/context";
 import { gm500, gm800, cp400, cp400i } from "../global/fonts";
+import { themeBootstrap } from "../lib/theme-bootstrap";
+import { dotGridColor } from "../lib/dot-grid-color";
+import { hatchInkColor } from "../lib/hatch-ink";
 
 const DotGrid = dynamic(() => import("../components/lab/DotGrid"), { ssr: false });
 const HatchScene = dynamic(() => import("../components/lab/HatchScene"), { ssr: false });
@@ -81,6 +85,8 @@ interface HatchPlaygroundProps {
 }
 
 const HatchPlayground = ({ monoClass, serifClass }: HatchPlaygroundProps) => {
+  const { theme } = useContext(Context);
+  const inkColor = hatchInkColor(theme);
   const [hatchScale, setHatchScale] = useState(16);
   const [halfWidthV, setHalfWidthV] = useState(0.07);
   const [mouseRadius, setMouseRadius] = useState(600);
@@ -100,6 +106,7 @@ const HatchPlayground = ({ monoClass, serifClass }: HatchPlaygroundProps) => {
           <HatchScene
             mask={{ kind: "svg", src: "/img/dy.svg" }}
             height={416}
+            inkColor={inkColor}
             hatchScale={hatchScale}
             halfWidthV={halfWidthV}
             mouseRadius={mouseRadius}
@@ -238,11 +245,17 @@ const HatchPlayground = ({ monoClass, serifClass }: HatchPlaygroundProps) => {
 
 const Lab = () => {
   const dotAnchorRef = useRef<HTMLDivElement>(null);
+  const { theme } = useContext(Context);
   return (
     <>
       <Head>
         <title>Lab · Engineering notebook · iter 06</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Inline bootstrap sets data-theme on <html> before first paint
+            so DotGrid + HatchScene mount with the right colours. */}
+        <script
+          dangerouslySetInnerHTML={{ __html: themeBootstrap }}
+        />
       </Head>
 
       <Box className="topnav">
@@ -275,7 +288,12 @@ const Lab = () => {
       </Box>
 
       <Box className="paper">
-        <DotGrid spacing={16} maxRadiusBoost={1.1} anchorRef={dotAnchorRef} />
+        <DotGrid
+          spacing={16}
+          maxRadiusBoost={1.1}
+          anchorRef={dotAnchorRef}
+          color={dotGridColor(theme)}
+        />
 
         <Box as="main" className="page">
           <div ref={dotAnchorRef} className="dotAnchor" aria-hidden />
@@ -298,6 +316,7 @@ const Lab = () => {
                       fontFamily: "Geist Mono",
                       fontWeight: 800,
                     }}
+                    inkColor={hatchInkColor(theme)}
                   />
                 </Stack>
               </Card>
@@ -311,6 +330,7 @@ const Lab = () => {
                       fontFamily: "Geist Mono",
                       fontWeight: 500,
                     }}
+                    inkColor={hatchInkColor(theme)}
                   />
                 </Stack>
               </Card>
@@ -327,7 +347,12 @@ const Lab = () => {
               <Card>
                 <Stack gap={1}>
                   <span className={`shaderLabel ${gm500.className}`}>dy · piped through hatch</span>
-                  <HatchScene mask={{ kind: "svg", src: "/img/dy.svg" }} height={416} padding={48} />
+                  <HatchScene
+                    mask={{ kind: "svg", src: "/img/dy.svg" }}
+                    height={416}
+                    padding={48}
+                    inkColor={hatchInkColor(theme)}
+                  />
                 </Stack>
               </Card>
             </Grid>

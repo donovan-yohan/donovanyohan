@@ -13,6 +13,8 @@
 import Head from "next/head";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { themeBootstrap } from "../../lib/theme-bootstrap";
+
 type Params = {
   resize: number;
   contrastK: number;
@@ -130,6 +132,7 @@ export default function LineartLab() {
     <>
       <Head>
         <title>Lineart tuner</title>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </Head>
       <main className="page">
         <header className="head">

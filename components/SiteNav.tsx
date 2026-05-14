@@ -12,6 +12,7 @@
  */
 
 import { useContext } from "react";
+import Link from "next/link";
 
 import Context from "./context";
 import { gm500, gm800 } from "../global/fonts";
@@ -33,7 +34,7 @@ export const SiteNav = ({ current }: SiteNavProps) => {
   return (
     <nav className="topnav">
       <div className="topnavInner">
-        <a href="/" className={`navHome ${gm800.className}`} aria-label="Home">
+        <Link href="/" className={`navHome ${gm800.className}`} aria-label="Home">
           <span className="navMarkBox" aria-hidden>
             <svg viewBox="0 0 1500 1500" className="navHomeMark" aria-hidden>
               {DY_PATHS.map((d, i) => (
@@ -50,7 +51,7 @@ export const SiteNav = ({ current }: SiteNavProps) => {
             </svg>
           </span>
           <span className="navTitle">Donovan Yohan</span>
-        </a>
+        </Link>
         <span className="navSpacer" aria-hidden />
         <div className="navTabs">
           <a
@@ -61,27 +62,27 @@ export const SiteNav = ({ current }: SiteNavProps) => {
           >
             <span className="navTabLabel">Resume</span>
           </a>
-          <a
+          <Link
             className={`navTab tabWork ${gm500.className}`}
             href="/#work"
             data-current={current === "work" ? "true" : undefined}
           >
             <span className="navTabLabel">Work</span>
-          </a>
-          <a
+          </Link>
+          <Link
             className={`navTab tabAbout ${gm500.className}`}
             href="/about"
             data-current={current === "about" ? "true" : undefined}
           >
             <span className="navTabLabel">About</span>
-          </a>
-          <a
+          </Link>
+          <Link
             className={`navTab tabContact ${gm500.className}`}
-            href="#footer"
+            href="/#footer"
             data-current={current === "contact" ? "true" : undefined}
           >
             <span className="navTabLabel">Contact</span>
-          </a>
+          </Link>
         </div>
         <button
           type="button"

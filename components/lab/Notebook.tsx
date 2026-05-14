@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { HiSpan, type HiSlot } from "../Highlighter";
 import { Box, Card, Grid, MarginAnchor, Stack } from "./system";
 
@@ -925,9 +926,16 @@ const EntryCard = ({
   const accentColor = accent ?? "var(--ink)";
   // Card-wide link: caller decides (homepage maps to /writing/{slug}); link
   // entries always use their own external URL even when no builder is set.
-  const href =
+  // Scheme-less `link.url` values (e.g. "example.com/foo") get an https://
+  // prefix so the anchor doesn't navigate to a same-origin relative path.
+  const rawHref =
     cardHrefBuilder?.(entry) ?? (entry.type === "link" ? entry.url : null);
-  const isExternal = href ? /^(https?:)?\/\//.test(href) : false;
+  const href = rawHref
+    ? rawHref.startsWith("/") || /^(https?:|mailto:|tel:|#)/i.test(rawHref)
+      ? rawHref
+      : `https://${rawHref}`
+    : null;
+  const isExternal = href ? /^https?:\/\//i.test(href) : false;
   const cardStyle: React.CSSProperties = {
     background: tint,
     ["--card-accent" as string]: accentColor,
@@ -977,24 +985,41 @@ const EntryCard = ({
       </Stack>
 
       {href ? (
-        <a
-          className="cardStretchedLink"
-          href={href}
-          {...(isExternal
-            ? { target: "_blank", rel: "noreferrer" }
-            : {})}
-          aria-label={
-            "title" in entry
-              ? entry.title
-              : "label" in entry
-                ? entry.label
-                : "text" in entry
-                  ? entry.text
-                  : "caption" in entry
-                    ? entry.caption
-                    : "Read entry"
-          }
-        />
+        isExternal ? (
+          <a
+            className="cardStretchedLink"
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={
+              "title" in entry
+                ? entry.title
+                : "label" in entry
+                  ? entry.label
+                  : "text" in entry
+                    ? entry.text
+                    : "caption" in entry
+                      ? entry.caption
+                      : "Read entry"
+            }
+          />
+        ) : (
+          <Link
+            className="cardStretchedLink"
+            href={href}
+            aria-label={
+              "title" in entry
+                ? entry.title
+                : "label" in entry
+                  ? entry.label
+                  : "text" in entry
+                    ? entry.text
+                    : "caption" in entry
+                      ? entry.caption
+                      : "Read entry"
+            }
+          />
+        )
       ) : null}
 
       <style jsx global>{`

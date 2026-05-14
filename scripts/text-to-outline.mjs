@@ -65,34 +65,11 @@ for (const cmd of path.commands) {
 }
 if (current) contours.push(current);
 
-/**
- * Shoelace signed area for a polygonal approximation of the contour.
- * Curves contribute as straight segments between their endpoints — good
- * enough to determine winding direction. In opentype.js space (y-axis
- * inverted relative to font units; opentype emits SVG-style y-down), the
- * outer contours wind CLOCKWISE → positive signed area, and inner
- * counters wind COUNTER-CLOCKWISE → negative signed area. We keep the
- * positive (outer) contours and drop the rest.
- */
-const signedArea = (contour) => {
-  const pts = [];
-  for (const c of contour) {
-    if (c.type === "Z") continue;
-    pts.push([c.x, c.y]);
-  }
-  let a = 0;
-  for (let i = 0; i < pts.length; i++) {
-    const [x1, y1] = pts[i];
-    const [x2, y2] = pts[(i + 1) % pts.length];
-    a += x1 * y2 - x2 * y1;
-  }
-  return a / 2;
-};
-
 // Keep ALL contours — outer perimeters AND inner counter rings. Stroking
 // the result traces each glyph's true silhouette including the cutouts
 // (A's triangle, R's hole, ?'s ring, etc.). The earlier outer-only pass
-// was too aggressive — the cutouts are part of the glyph's read.
+// used a shoelace signed-area test, but it was too aggressive — the
+// cutouts are part of the glyph's read.
 const outers = contours;
 
 // Compute the bounding box of the kept contours to derive the viewBox.

@@ -53,7 +53,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   return { props: { note } };
 };
 
-export default function WritingSlug({ note }: Props) {
+export default function WorkSlug({ note }: Props) {
   const { theme, toggleTheme } = useContext(Context);
 
   // Format date as MAY 2026 etc. — same monospace badge convention used

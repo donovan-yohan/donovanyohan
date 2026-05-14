@@ -11,6 +11,8 @@
 import Head from "next/head";
 import { useMemo, useState } from "react";
 
+import { themeBootstrap } from "../../lib/theme-bootstrap";
+
 type Params = {
   brightness: number;
   contrast: number;
@@ -78,6 +80,7 @@ export default function GrayscaleLab() {
     <>
       <Head>
         <title>Grayscale tuner</title>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </Head>
       <main className="page">
         <header className="head">
@@ -145,13 +148,39 @@ export default function GrayscaleLab() {
         </p>
       </main>
 
+      <style jsx global>{`
+        :root,
+        [data-theme="light"] {
+          --grayscale-ink: #16140e;
+          --grayscale-ink-soft: rgba(22, 20, 14, 0.7);
+          --grayscale-ink-mute: rgba(22, 20, 14, 0.55);
+          --grayscale-ink-faint: rgba(22, 20, 14, 0.18);
+          --grayscale-paper: #fdfdf9;
+          --grayscale-paper-2: rgba(22, 20, 14, 0.06);
+          --grayscale-accent: #c33548;
+          --grayscale-accent-soft: rgba(195, 53, 72, 0.05);
+        }
+        [data-theme="dark"] {
+          --grayscale-ink: #faf7ec;
+          --grayscale-ink-soft: rgba(250, 247, 236, 0.78);
+          --grayscale-ink-mute: rgba(250, 247, 236, 0.58);
+          --grayscale-ink-faint: rgba(250, 247, 236, 0.22);
+          --grayscale-paper: #0e0d0a;
+          --grayscale-paper-2: rgba(250, 247, 236, 0.06);
+          --grayscale-accent: #ea5b6f;
+          --grayscale-accent-soft: rgba(234, 91, 111, 0.1);
+        }
+        body {
+          background: var(--grayscale-paper);
+        }
+      `}</style>
       <style jsx>{`
         .page {
           max-width: 1400px;
           margin: 0 auto;
           padding: 48px 32px 96px;
           font-family: ui-monospace, monospace;
-          color: #16140e;
+          color: var(--grayscale-ink);
         }
         h1 {
           margin: 0 0 8px;
@@ -160,7 +189,7 @@ export default function GrayscaleLab() {
         }
         p {
           margin: 0 0 32px;
-          color: rgba(22, 20, 14, 0.7);
+          color: var(--grayscale-ink-soft);
           font-family: ui-serif, Georgia, serif;
         }
         .stage {
@@ -171,18 +200,18 @@ export default function GrayscaleLab() {
         }
         figure {
           margin: 0;
-          border: 1px solid rgba(22, 20, 14, 0.18);
+          border: 1px solid var(--grayscale-ink-faint);
           border-radius: 4px;
           overflow: hidden;
-          background: #fdfdf9;
+          background: var(--grayscale-paper);
         }
         figcaption {
           padding: 8px 12px;
           font-size: 11px;
           letter-spacing: 0.18em;
           text-transform: uppercase;
-          color: rgba(22, 20, 14, 0.6);
-          border-bottom: 1px solid rgba(22, 20, 14, 0.18);
+          color: var(--grayscale-ink-mute);
+          border-bottom: 1px solid var(--grayscale-ink-faint);
         }
         figure img {
           width: 100%;
@@ -215,23 +244,23 @@ export default function GrayscaleLab() {
         }
         .val {
           font-variant-numeric: tabular-nums;
-          color: #c33548;
+          color: var(--grayscale-accent);
           font-weight: 700;
         }
         input[type="range"] {
           width: 100%;
-          accent-color: #c33548;
+          accent-color: var(--grayscale-accent);
         }
         .hint {
           font-size: 12px;
-          color: rgba(22, 20, 14, 0.55);
+          color: var(--grayscale-ink-mute);
           font-family: ui-serif, Georgia, serif;
         }
         button {
           grid-column: 1 / -1;
           padding: 10px 16px;
-          background: #16140e;
-          color: #fdfdf9;
+          background: var(--grayscale-ink);
+          color: var(--grayscale-paper);
           border: 0;
           border-radius: 2px;
           font-family: inherit;
@@ -242,7 +271,7 @@ export default function GrayscaleLab() {
           justify-self: start;
         }
         .snippet {
-          background: rgba(22, 20, 14, 0.06);
+          background: var(--grayscale-paper-2);
           padding: 16px 20px;
           border-radius: 2px;
           font-size: 12px;
@@ -253,8 +282,8 @@ export default function GrayscaleLab() {
         .note {
           margin-top: 24px;
           padding: 16px 20px;
-          border-left: 3px solid #c33548;
-          background: rgba(195, 53, 72, 0.05);
+          border-left: 3px solid var(--grayscale-accent);
+          background: var(--grayscale-accent-soft);
         }
         @media (max-width: 900px) {
           .stage,

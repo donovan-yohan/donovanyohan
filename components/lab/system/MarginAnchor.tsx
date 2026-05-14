@@ -28,7 +28,7 @@ export const MarginAnchor = ({
 }: MarginAnchorProps) => {
   const outerStyle: CSSProperties = {
     position: sticky ? "sticky" : "absolute",
-    top: sticky ? ux(top) : 0,
+    top: ux(top),
     zIndex: 10,
     height: 0,
     marginLeft: "calc(-1 * var(--content-pad-left))",

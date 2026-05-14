@@ -12,8 +12,18 @@ export const useSnap = <T extends HTMLElement = HTMLDivElement>(
 
   useLayoutEffect(() => {
     if (!enabled) return;
+    // Bail on non-positive unit values — Math.ceil(x / 0) would emit
+    // Infinity, which writes an invalid CSS min-{height,width} value.
+    if (unit <= 0) return;
     const el = ref.current;
     if (!el) return;
+
+    // Clear any stale snapped style on the inactive axis when axis or
+    // enabled changes (previous setting could have written e.g.
+    // minHeight while the current axis is "width"), otherwise the
+    // leftover constraint keeps shaping layout.
+    if (axis === "width") el.style.minHeight = "";
+    if (axis === "height") el.style.minWidth = "";
 
     let raf = 0;
     let lastH = -1;

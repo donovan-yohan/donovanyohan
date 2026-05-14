@@ -84,7 +84,9 @@ const RoughIcon = ({
       if (!pts) return;
       const flat = pts.split(/[\s,]+/).map(Number).filter((n) => !Number.isNaN(n));
       const pairs: [number, number][] = [];
-      for (let i = 0; i < flat.length; i += 2) pairs.push([flat[i], flat[i + 1]]);
+      // Iterate to flat.length - 1 so an odd-length coord list drops the
+      // trailing orphan instead of pushing [x, undefined] into roughjs.
+      for (let i = 0; i < flat.length - 1; i += 2) pairs.push([flat[i], flat[i + 1]]);
       if (pairs.length >= 2) dst.appendChild(rc.linearPath(pairs, opts));
     });
   }, [Icon, seed, roughness, bowing, strokeWidth, color, disableMultiStroke, preserveVertices]);

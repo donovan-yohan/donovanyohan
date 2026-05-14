@@ -127,8 +127,18 @@ const noteToEntry = (note: VaultNote, index: number): Entry => {
 export function notesToNotebookMonths(notes: VaultNote[]): NotebookMonth[] {
   const byKey = new Map<string, VaultNote[]>();
   for (const n of notes) {
-    const [year, month] = n.frontmatter.date.split("-");
-    if (!year || !month) continue;
+    const date = n.frontmatter.date;
+    // Strict YYYY-MM-DD shape — anything else gets dropped + logged so a
+    // bad note doesn't silently disappear from the notebook.
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(
+          `notesToNotebookMonths: skipping note "${n.slug}" with malformed date "${date}"`,
+        );
+      }
+      continue;
+    }
+    const [year, month] = date.split("-");
     const key = `${year}-${month}`;
     const existing = byKey.get(key);
     if (existing) existing.push(n);

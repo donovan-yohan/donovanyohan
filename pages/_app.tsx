@@ -11,7 +11,16 @@ type Theme = "light" | "dark";
  * persist their choice — system preference no longer overrides it.
  */
 export default function MyApp({ Component, pageProps }: AppProps) {
-  const [theme, setTheme] = useState<Theme>("light");
+  // Seed from `data-theme` (already set by the inline themeBootstrap
+  // script that runs before hydration). Reading the DOM-side value
+  // here avoids a "flash of incorrect theme" for JS-driven visuals —
+  // DotGrid, HatchScene, the nav toggle icon — whose initial render
+  // would otherwise read "light" while the document is actually dark.
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof document === "undefined") return "light";
+    const attr = document.documentElement.getAttribute("data-theme");
+    return attr === "dark" ? "dark" : "light";
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") return;

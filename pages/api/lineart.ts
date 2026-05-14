@@ -14,7 +14,7 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -143,5 +143,14 @@ export default function handler(
     res.status(500).json({
       error: err instanceof Error ? err.message : String(err),
     });
+  } finally {
+    // Always clean the per-request temp dir, even when magick/potrace
+    // throws — repeated tuner calls otherwise leak gigabytes into
+    // /tmp over a long dev session.
+    try {
+      rmSync(tmp, { recursive: true, force: true });
+    } catch {
+      // tmp dir already gone or unreadable — nothing to do.
+    }
   }
 }

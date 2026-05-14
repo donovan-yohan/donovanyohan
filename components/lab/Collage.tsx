@@ -27,8 +27,15 @@ interface ParsedDate {
 
 const parseDate = (date: string): ParsedDate => {
   const parts = date.split(/[·\-/.\s]+/).filter(Boolean);
-  const [y, m, d] = parts;
-  const monthIdx = Math.max(0, Math.min(11, parseInt(m, 10) - 1));
+  // Tolerate malformed inputs: a missing day/month/year should fall back
+  // to safe defaults rather than throw from .padStart on undefined.
+  const y = parts[0] ?? "0000";
+  const m = parts[1] ?? "01";
+  const d = parts[2] ?? "01";
+  const parsedMonth = parseInt(m, 10);
+  const monthIdx = Number.isFinite(parsedMonth)
+    ? Math.max(0, Math.min(11, parsedMonth - 1))
+    : 0;
   return {
     day: d.padStart(2, "0"),
     month: MONTHS[monthIdx],
