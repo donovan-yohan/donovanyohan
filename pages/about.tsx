@@ -22,10 +22,11 @@ import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { timeline } from "../global/timeline";
 import { TimelineCard } from "../components/about/TimelineCard";
 import { TimelineRail } from "../components/about/TimelineRail";
+import { HeroComposition } from "../components/about/HeroComposition";
 import SiteNav from "../components/SiteNav";
 import Context from "../components/context";
 import { themeBootstrap } from "../lib/theme-bootstrap";
-import { gm500, gm800, cp400, cp400i, cv700 } from "../global/fonts";
+import { gm500, gm800, cp400, cp400i } from "../global/fonts";
 import { dotGridColor } from "../lib/dot-grid-color";
 
 const DotGrid = dynamic(() => import("../components/lab/DotGrid"), { ssr: false });
@@ -38,11 +39,6 @@ const STRIDE_U = CARD_U + GAP_U;
 const LEFT_PAD_U = 2;
 const RIGHT_PAD_U = 8;
 const UPX = 16;
-
-// Width of the timeline peek that shows past the right edge of the hero on
-// first paint. Big enough to fit the leading rail tick + a sliver of the
-// first card.
-const PEEK_PX = 128;
 
 const About = () => {
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -108,23 +104,13 @@ const About = () => {
           color={dotGridColor(theme)}
         />
 
-        {/* Hero panel — full height, almost full width. */}
-        <section className="aboutHero">
-          <div className="aboutHeroInner">
-            <span className={`micro ${gm500.className}`}>ABOUT · LIFE TIMELINE</span>
-            <h1 className={`aboutHeroTitle ${gm800.className}`}>
-              The long version, scrolled sideways.
-            </h1>
-            <p className={`aboutHeroLead ${cp400.className}`}>
-              Hi — I&apos;m Donovan. <em className={cp400i.className}>NOW</em> sits at
-              the left edge of the timeline; scroll right (or wheel down) to
-              walk back. Hobbies, jobs, side quests.
-            </p>
-            <p className={`aboutHeroHint ${cp400.className}`}>
-              <span className={cv700.className}>scroll →</span>
-            </p>
-          </div>
-        </section>
+        {/* Hero panel — full-height graphic-design landing. */}
+        <HeroComposition
+          monoClass={gm500.className}
+          monoBoldClass={gm800.className}
+          serifClass={cp400.className}
+          italicSerifClass={cp400i.className}
+        />
 
         {/* Timeline block — rail on top, lane below, both fixed-width. */}
         <section className="aboutTimeline">
@@ -135,7 +121,7 @@ const About = () => {
             leftPadX={LEFT_PAD_U * UPX}
             rightPadX={RIGHT_PAD_U * UPX}
             monoClass={gm500.className}
-            scriptClass={cv700.className}
+            monoBoldClass={gm800.className}
           />
           <div className="aboutLane">
             <div className="aboutLanePad" aria-hidden />
@@ -148,6 +134,7 @@ const About = () => {
                 <TimelineCard
                   event={event}
                   monoClass={gm500.className}
+                  monoBoldClass={gm800.className}
                   serifClass={cp400.className}
                   italicSerifClass={cp400i.className}
                   drawn={drawnIds.has(event.id)}
@@ -233,47 +220,6 @@ const About = () => {
         }
         .aboutShell::-webkit-scrollbar { display: none; }
 
-        .aboutHero {
-          flex: 0 0 auto;
-          width: calc(100vw - ${PEEK_PX}px);
-          height: 100%;
-          display: flex;
-          align-items: center;
-          border-right: 1px solid var(--rule);
-          background: var(--paper);
-        }
-        .aboutHeroInner {
-          padding: 0 calc(4 * var(--u)) 0 var(--content-pad-left);
-          max-width: calc(720px + var(--content-pad-left));
-        }
-        .micro {
-          display: block;
-          font-size: 11px;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: var(--ink-mute);
-          margin-bottom: calc(1.5 * var(--u));
-        }
-        .aboutHeroTitle {
-          margin: 0 0 calc(1.5 * var(--u));
-          font-size: clamp(40px, 5.5vw, 72px);
-          line-height: 0.98;
-          letter-spacing: -0.04em;
-          color: var(--ink);
-        }
-        .aboutHeroLead {
-          margin: 0;
-          font-size: 20px;
-          line-height: 1.5;
-          color: var(--ink-soft);
-        }
-        .aboutHeroLead em { font-style: italic; }
-        .aboutHeroHint {
-          margin: calc(2 * var(--u)) 0 0;
-          font-size: 28px;
-          color: var(--accent);
-        }
-
         .aboutTimeline {
           flex: 0 0 auto;
           height: 100%;
@@ -300,14 +246,6 @@ const About = () => {
           align-items: center;
           gap: calc(0.5 * var(--u));
           height: 100%;
-        }
-        @media (max-width: 800px) {
-          .aboutHeroInner {
-            padding: 0 calc(2 * var(--u));
-          }
-          .aboutHeroTitle {
-            font-size: 40px;
-          }
         }
       `}</style>
     </>
