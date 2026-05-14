@@ -1,0 +1,79 @@
+components/lab/HatchScene.tsx
+  s_bc03de8df0d6e7::t_bc5270bf28c596 670-680
+  s_2edd52aca30927::t_9df6a894ff9bb0 118
+  s_098a73b6d758d6::t_ab71d64480ced0 158-164,202-206
+  s_bc03de8df0d6e7::t_ba97a8396e9ac3 761
+  s_2edd52aca30927::t_209574c7ee2735 302
+  s_bc03de8df0d6e7::t_49cbbd7ac034a1 510
+  s_bc03de8df0d6e7::t_5f1ac7e010eca7 487
+  s_bc03de8df0d6e7::t_d400190c6ef2fa 117
+  s_2edd52aca30927::t_55d5fdd0749afc 762,765-766
+  s_bc03de8df0d6e7::t_2f542e1397eb88 797
+  s_bc03de8df0d6e7::t_5ceb357bbecb53 228-230,235,237,241,243-247,249,252,257,262-266,270-274,277-290
+  s_bc03de8df0d6e7::t_a661021e15b135 611-620
+  s_2edd52aca30927::t_602cd6a384fc85 798
+  s_2edd52aca30927::t_b834dc57574b09 69-76
+  s_098a73b6d758d6::t_319f4b2e0c86bd 231-234,238-239,242,248,250-251,253-256,258-261,267-269,275-276
+  s_bc03de8df0d6e7::t_886fb9f40bf62e 236
+  s_098a73b6d758d6::t_9c99d89fb80125 240
+  s_2edd52aca30927::t_e74a5c51b0ac43 621
+  s_bc03de8df0d6e7::t_f332ffab591db2 351-357,360-375,377
+  s_bc03de8df0d6e7::t_57e111c4f70a10 58-68
+  s_2edd52aca30927::t_5a66b6feeba97f 681-683
+  s_2edd52aca30927::t_9479e6ee73581c 511
+  s_2edd52aca30927::t_8ad135a9df22d0 488
+components/lab/Notebook.tsx
+  s_098a73b6d758d6::t_ad90da408b7b00 1101-1103,1106
+  s_098a73b6d758d6::t_b7bf703b0eaa5b 2
+  s_098a73b6d758d6::t_f56edc35554fc1 498-502
+pages/index.tsx
+  s_2edd52aca30927::t_42854b9dfd2c14 475
+  s_098a73b6d758d6::t_6d21736523281b 806-808
+  s_bc03de8df0d6e7::t_6e04767188060d 1195-1198
+  s_098a73b6d758d6::t_e167e4de003ec5 31
+  s_bc03de8df0d6e7::t_a0be2bc58fcc00 1536
+  s_2edd52aca30927::t_b9ea33d4409f7b 1539
+  s_bc03de8df0d6e7::t_ea06472f9b926d 1193-1194,1199,1201,1208
+eslint.config.mjs
+  s_098a73b6d758d6::t_6bce509616aa36 9-12,14-18
+  s_098a73b6d758d6::t_e41f2a409c6b46 13
+components/Highlighter.tsx
+  s_098a73b6d758d6::t_5b5d19886a20b6 1-43,45,51-62,66-67,69-78,81-86,88-111
+  s_098a73b6d758d6::t_41d4a345b57eea 44,46-50,63-65,68,79-80,87
+components/about/TimelineRail.tsx
+  s_098a73b6d758d6::t_f91b090bfb1667 16
+  s_098a73b6d758d6::t_a24c2ca48c63f1 100-112
+  s_bc03de8df0d6e7::t_d07e57e6b8f0fc 8-10,29,36,49,93,96-98,137,147-153,161-162,166,175
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "a11f38be1519d8186bc00a82d8469ef761c329bd",
+  "prompts": {},
+  "sessions": {
+    "s_098a73b6d758d6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1c46813-566b-4a72-9965-172e4ba5a71b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    },
+    "s_2edd52aca30927": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bbda16d8-de7c-42d7-b141-a23dddb614ff",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    },
+    "s_bc03de8df0d6e7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65387993-508e-426f-b563-b0e7fb40188c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
