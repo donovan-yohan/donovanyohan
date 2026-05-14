@@ -1,0 +1,64 @@
+pages/lab/lineart.tsx
+  s_098a73b6d758d6::t_cc02fc2a3f5966 16-17
+  s_098a73b6d758d6::t_17295061f4e3a7 135
+pages/_app.tsx
+  s_098a73b6d758d6::t_0fdf3437a7aa17 14-23
+components/lab/system/useSnap.ts
+  s_098a73b6d758d6::t_63627b134f4d76 15-17,21-26
+pages/lab.tsx
+  s_098a73b6d758d6::t_beb76402b43e72 109
+  s_098a73b6d758d6::t_32d02901b0fa93 333
+  s_098a73b6d758d6::t_648f16a993d3a4 319
+  s_098a73b6d758d6::t_8c09b4128f291b 88-89
+  s_098a73b6d758d6::t_18569ba564c846 248,254-258
+  s_098a73b6d758d6::t_0246e18027e5f7 9
+  s_098a73b6d758d6::t_3c4646a4bf11c3 350-355
+  s_098a73b6d758d6::t_80ef2620ecb42b 291-296
+  s_098a73b6d758d6::t_06de6cda14b364 3,5,7-8
+components/SiteNav.tsx
+  s_098a73b6d758d6::t_65756f3c025306 15
+  s_098a73b6d758d6::t_7ecbfd9d9a3935 65,71-72,78-79,81,85
+  s_098a73b6d758d6::t_9ed5a969f7c77c 37,54
+components/lab/system/MarginAnchor.tsx
+  s_098a73b6d758d6::t_5e7c2ba50ae5c9 31
+pages/work/[slug].tsx
+  s_098a73b6d758d6::t_c35de49db65c50 56
+components/lab/RoughIcon.tsx
+  s_098a73b6d758d6::t_365ca1515c7dfe 87-88
+  s_098a73b6d758d6::t_b37106ae9bf6df 89
+components/lab/Notebook.tsx
+  s_098a73b6d758d6::t_0baa17a13fe771 988-1022
+  s_098a73b6d758d6::t_e8414553a3208d 2
+  s_098a73b6d758d6::t_be40f3092932c4 929-931,933-938
+lib/vault/to-notebook.ts
+  s_098a73b6d758d6::t_4584710d0fcc54 130-141
+scripts/text-to-outline.mjs
+  s_098a73b6d758d6::t_9bec947d61ce80 71-72
+components/lab/Collage.tsx
+  s_098a73b6d758d6::t_df4763ffb3ef42 30-38
+pages/api/lineart.ts
+  s_098a73b6d758d6::t_95466a71afeb15 17
+  s_098a73b6d758d6::t_2b81750464013e 146-154
+lib/hatch-ink.ts
+  s_098a73b6d758d6::t_0f00caa3d75cb2 1-9
+pages/lab/grayscale.tsx
+  s_098a73b6d758d6::t_68e578419e94f0 83
+  s_098a73b6d758d6::t_ee12cbdd41953b 14-15
+  s_098a73b6d758d6::t_768d9bdf95b2f0 151-176,183,192,203,206,213-214,247,252,256,262-263,274,285-286
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "99db46410cab1a055a7670a0948774903ea631ec",
+  "prompts": {},
+  "sessions": {
+    "s_098a73b6d758d6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1c46813-566b-4a72-9965-172e4ba5a71b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
