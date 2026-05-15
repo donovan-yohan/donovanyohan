@@ -15,7 +15,7 @@
  *   - Reject device entries (BlockDevice, CharacterDevice, etc.)
  *   - Reject symlinks (SymbolicLink)
  *   - Apply same ignore-list as walk.ts (.obsidian, .trash, .git, etc.)
- *   - Only process *.md files
+ *   - Only process *.md files under notes/
  *   - 1MB size cap per entry
  *   - Token never appears in thrown error messages
  *
@@ -49,6 +49,8 @@ const IGNORE_PREFIXES = [
   "node_modules/",
   "templates/",
 ];
+
+const CONTENT_PREFIX = "notes/";
 
 /** 1MB size cap on individual vault files. */
 const MAX_FILE_BYTES = 1024 * 1024;
@@ -284,8 +286,9 @@ export class GitHubVaultAdapter implements VaultAdapter {
 
           const relPath = stripTarballPrefix(rawPath);
 
-          // Must be a .md file
-          if (!relPath.endsWith(".md")) {
+          // Must be a .md file under notes/. Root docs such as AGENTS.md,
+          // README.md, and AUTHORING.md are operator guidance, not content.
+          if (!relPath.startsWith(CONTENT_PREFIX) || !relPath.endsWith(".md")) {
             entry.resume();
             return;
           }

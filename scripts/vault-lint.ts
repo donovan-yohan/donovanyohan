@@ -105,8 +105,10 @@ function parseFrontmatter(content: string): ParseResult {
 // ── Vault walker ──────────────────────────────────────────────────────────────
 
 /**
- * Recursively walks a directory and returns all `.md` file absolute paths.
- * Excludes hidden directories (`.obsidian`, `.trash`, `.git`, `.github`) plus
+ * Recursively walks the vault's `notes/` directory and returns all `.md` file absolute paths.
+ * Root markdown files (`README.md`, `AGENTS.md`, `AUTHORING.md`) are operator
+ * docs and are intentionally not linted as publishable notes. Excludes hidden
+ * directories (`.obsidian`, `.trash`, `.git`, `.github`) plus
  * `node_modules`, `templates` per VAULT.md walk-ignore-list.
  *
  * Uses `withFileTypes` to avoid an extra `lstatSync` per entry (perf).
@@ -131,6 +133,7 @@ interface WalkResult {
 
 function walkVault(dir: string): WalkResult {
   const out: string[] = [];
+  const notesDir = join(dir, "notes");
 
   function recurse(d: string): string | null {
     // `withFileTypes: true` returns Dirent[] which exposes
@@ -166,21 +169,21 @@ function walkVault(dir: string): WalkResult {
     return null;
   }
 
-  // Verify the root is actually a directory before recursing. Handles
+  // Verify the notes/ content root is actually a directory before recursing. Handles
   // missing dir, file-instead-of-dir, permission denied — all surface as
   // a clear error rather than the silent "0 files walked" we used to
   // return. (copilot #45)
   let rootStat: ReturnType<typeof lstatSync>;
   try {
-    rootStat = lstatSync(dir);
+    rootStat = lstatSync(notesDir);
   } catch (err) {
     return { files: [], error: err instanceof Error ? err.message : String(err) };
   }
   if (!rootStat.isDirectory()) {
-    return { files: [], error: `not a directory: ${dir}` };
+    return { files: [], error: `not a directory: ${notesDir}` };
   }
 
-  const recurseErr = recurse(dir);
+  const recurseErr = recurse(notesDir);
   return { files: out, error: recurseErr };
 }
 

@@ -153,6 +153,24 @@ describe("vault-lint CLI", () => {
       expect(code).toBe(0);
       expect(stderr).not.toMatch(/\[schema\]|\[yaml\]|\[duplicate-slug\]/);
     });
+
+    it("ignores root markdown and only lints notes/", () => {
+      const vault = makeVault({
+        "agents.md": VALID_PUBLIC("Agents"),
+      });
+      writeFileSync(join(vault, "AGENTS.md"), VALID_PUBLIC("Root Agents"), "utf-8");
+      writeFileSync(join(vault, "README.md"), VALID_PUBLIC("Root Readme"), "utf-8");
+
+      const { code, stderr } = withCapture(() =>
+        main(["node", "vault-lint.ts", "--report", vault]),
+      );
+
+      expect(code).toBe(0);
+      expect(stderr).toMatch(/notes\/agents\.md/);
+      expect(stderr).not.toMatch(/AGENTS\.md/);
+      expect(stderr).not.toMatch(/README\.md/);
+      expect(stderr).not.toMatch(/duplicate-slug/);
+    });
   });
 
   describe("duplicate slug detection", () => {
@@ -530,7 +548,7 @@ No title field — schema should fail, resolves to private.
     it("rejects opening --- without closing fence as YAML error (copilot #45)", () => {
       const v = makeVault({});
       writeFileSync(
-        join(v, "broken.md"),
+        join(v, "notes", "broken.md"),
         "---\ntitle: Broken\nvisibility: public\n",
       );
       const { code, stderr } = withCapture(() =>
@@ -543,11 +561,11 @@ No title field — schema should fail, resolves to private.
     it("flags BOTH files in a duplicate-slug collision (copilot #45)", () => {
       const v = makeVault({});
       writeFileSync(
-        join(v, "hello.md"),
+        join(v, "notes", "hello.md"),
         "---\ntitle: A\ndate: 2026-05-10\nvisibility: public\nslug: shared\n---\n",
       );
       writeFileSync(
-        join(v, "world.md"),
+        join(v, "notes", "world.md"),
         "---\ntitle: B\ndate: 2026-05-11\nvisibility: public\nslug: shared\n---\n",
       );
       const { code, stdout } = withCapture(() =>
@@ -563,13 +581,13 @@ No title field — schema should fail, resolves to private.
           .filter((e) => e.kind === "duplicate-slug")
           .map((e) => e.path),
       );
-      expect(errPaths.has("hello.md")).toBe(true);
-      expect(errPaths.has("world.md")).toBe(true);
+      expect(errPaths.has("notes/hello.md")).toBe(true);
+      expect(errPaths.has("notes/world.md")).toBe(true);
       const fileStatuses = Object.fromEntries(
         out.files.map((f) => [f.path, f.status]),
       );
-      expect(fileStatuses["hello.md"]).toBe("error");
-      expect(fileStatuses["world.md"]).toBe("error");
+      expect(fileStatuses["notes/hello.md"]).toBe("error");
+      expect(fileStatuses["notes/world.md"]).toBe("error");
     });
 
     it("treats non-existent vault path as walk error, not silent OK (copilot #45)", () => {
@@ -593,20 +611,20 @@ No title field — schema should fail, resolves to private.
       const { symlinkSync, existsSync } = await import("fs");
       const v = makeVault({});
       writeFileSync(
-        join(v, "real.md"),
+        join(v, "notes", "real.md"),
         "---\ntitle: Real\ndate: 2026-05-10\nvisibility: public\n---\n",
       );
       // Create a symlink pointing to a target that exists
       try {
         symlinkSync(
-          join(v, "real.md"),
-          join(v, "symlink-to-real.md"),
+          join(v, "notes", "real.md"),
+          join(v, "notes", "symlink-to-real.md"),
         );
       } catch {
         // Skip on platforms / FS that don't support symlinks
         return;
       }
-      if (!existsSync(join(v, "symlink-to-real.md"))) return;
+      if (!existsSync(join(v, "notes", "symlink-to-real.md"))) return;
       const { code, stdout } = withCapture(() =>
         main(["node", "vault-lint.ts", "--json", v]),
       );
@@ -614,8 +632,8 @@ No title field — schema should fail, resolves to private.
       const out = JSON.parse(stdout) as {
         files: { path: string }[];
       };
-      // Only 'real.md' should appear; the symlink must be skipped
-      expect(out.files.map((f) => f.path)).toEqual(["real.md"]);
+      // Only 'notes/real.md' should appear; the symlink must be skipped
+      expect(out.files.map((f) => f.path)).toEqual(["notes/real.md"]);
     });
   });
 });

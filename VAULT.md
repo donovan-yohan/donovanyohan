@@ -89,7 +89,7 @@ guarantees the privacy boundary makes, and how to debug when notes don't appear.
 
 ## Vault layout
 
-The adapter walks the vault root recursively. Conventions:
+The adapter walks only the `notes/` subtree. Root markdown files are operator docs, not publishable content. Conventions:
 
 ```
 dy-journal/                # vault root
