@@ -11,17 +11,94 @@
  * paper.
  */
 
-import Image from "next/image";
-import { useEffect, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
+import { HeroFlipbook } from "./HeroFlipbook";
 import { RoughSketch } from "./RoughSketch";
+
+const WALK_FRAMES: readonly string[] = [
+  "/img/photos/about/hero_animation/walk_1.png",
+  "/img/photos/about/hero_animation/walk_2.png",
+  "/img/photos/about/hero_animation/walk_3.png",
+  "/img/photos/about/hero_animation/walk_4.png",
+  "/img/photos/about/hero_animation/walk_5.png",
+  "/img/photos/about/hero_animation/walk_6.png",
+];
+
+/**
+ * Per-frame horizontal offset, as a fraction of the hero panel's width.
+ * First few frames sit at 0 (character is turning around in place); the
+ * later frames step right as they walk off panel. Position interpolates
+ * only inside the crossfade transition band, so the figure reads as
+ * "anchored, anchored, anchored, jump, anchored, jump, anchored" —
+ * matching how a real flipbook reveals discrete positions instead of
+ * a smooth continuous slide.
+ *
+ * Keep length in sync with WALK_FRAMES.
+ */
+const FRAME_POSITIONS: readonly number[] = [
+  0,    // walk_1 — turning, in place
+  0,    // walk_2 — turning, in place
+  0,    // walk_3 — turning, now facing right
+  0.2,  // walk_4 — first step
+  0.45, // walk_5 — mid stride
+  0.75, // walk_6 — walked out of the frame
+];
+
+/**
+ * How wide the crossfade band is across one segment (0..1). Smaller
+ * = more abrupt frame swap. Both the opacity crossfade and the
+ * position interpolation share this band so the two effects stay
+ * synchronised.
+ */
+const TRANSITION_BAND = 0.5;
+
+/**
+ * Smoothstep across the transition band; mirrors HeroFlipbook's
+ * bandBlend so the position interpolation matches the opacity fade.
+ */
+const bandBlend = (segLocal: number, band: number) => {
+  const half = band / 2;
+  const start = 0.5 - half;
+  if (segLocal <= start) return 0;
+  if (segLocal >= 0.5 + half) return 1;
+  const t = (segLocal - start) / band;
+  return t * t * (3 - 2 * t);
+};
+
+/**
+ * Map raw scroll progress 0..1 to the figure's current x offset
+ * (as a fraction of hero panel width). Outside the transition band
+ * the offset is locked to the current frame's slot; inside the band
+ * it interpolates between the current and next frame's slot.
+ */
+const walkOffsetForProgress = (p: number): number => {
+  const N = FRAME_POSITIONS.length;
+  if (N === 0) return 0;
+  const framePos = p * (N - 1);
+  const lo = Math.min(Math.floor(framePos), N - 1);
+  const hi = Math.min(lo + 1, N - 1);
+  const segLocal = framePos - lo;
+  const blend = lo === hi ? 0 : bandBlend(segLocal, TRANSITION_BAND);
+  return (
+    FRAME_POSITIONS[lo] +
+    (FRAME_POSITIONS[hi] - FRAME_POSITIONS[lo]) * blend
+  );
+};
+
 
 interface HeroCompositionProps {
   monoClass: string;
   monoBoldClass: string;
   serifClass: string;
   italicSerifClass: string;
+  /**
+   * Horizontal scroller that contains this hero. Used to read
+   * `scrollLeft` and map it to flipbook progress so the figure walks
+   * forward as the user scrolls right.
+   */
+  scrollerRef?: RefObject<HTMLElement | null>;
 }
 
 const ease = [0.22, 0.61, 0.36, 1] as const;
@@ -31,14 +108,51 @@ export const HeroComposition = ({
   monoBoldClass,
   serifClass,
   italicSerifClass,
+  scrollerRef,
 }: HeroCompositionProps) => {
   const reduce = useReducedMotion();
   const [drawn, setDrawn] = useState(false);
+  const [flipProgress, setFlipProgress] = useState(0);
+  const heroRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const t = window.setTimeout(() => setDrawn(true), reduce ? 0 : 900);
     return () => window.clearTimeout(t);
   }, [reduce]);
+
+  // Track horizontal scroll progress over the hero panel. Maps
+  // scrollLeft / heroWidth into 0..1 and pushes it to the flipbook.
+  // rAF-throttled so high-frequency wheel events don't cause render
+  // storms on the figure stack.
+  useEffect(() => {
+    if (reduce) return;
+    const scroller = scrollerRef?.current;
+    const hero = heroRef.current;
+    if (!scroller || !hero) return;
+
+    let raf = 0;
+    const compute = () => {
+      raf = 0;
+      const w = hero.offsetWidth || 1;
+      // hero is the first child of the scroller, so its left edge in
+      // the scroll content is at offsetLeft (typically 0). Subtract
+      // it anyway to be safe if the layout grows a leading pad later.
+      const heroLeft = hero.offsetLeft;
+      const local = scroller.scrollLeft - heroLeft;
+      const p = Math.max(0, Math.min(1, local / w));
+      setFlipProgress(p);
+    };
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(compute);
+    };
+    compute();
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      scroller.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [scrollerRef, reduce]);
 
   const fade = (delay: number, y = 24) => ({
     initial: reduce ? { opacity: 1, y: 0 } : { opacity: 0, y },
@@ -58,7 +172,11 @@ export const HeroComposition = ({
   });
 
   return (
-    <section className="heroComp" aria-labelledby="aboutHeroTitle">
+    <section
+      ref={heroRef}
+      className="heroComp"
+      aria-labelledby="aboutHeroTitle"
+    >
       <div className="heroCompInner">
         {/* LEFT — editorial type stack. */}
         <div className="heroType">
@@ -145,7 +263,11 @@ export const HeroComposition = ({
             transition={{ duration: 0.8, delay: 0.1, ease }}
           />
 
-          {/* Paper rectangle frame holding the figure. */}
+          {/* Paper rectangle frame holding the figure. Frame + shapes +
+              chips stay put as scroll progresses; only the figure stack
+              inside translates (see .figureImgWrap inline style). Frame
+              uses overflow: visible so the walking figure isn't clipped
+              when it walks past the right edge of the frame. */}
           <motion.div className="figureFrame" {...pop(0.12)}>
             {/* Multiply shapes that overlap the figure. */}
             <span className="shapeRedCircle" aria-hidden />
@@ -153,22 +275,26 @@ export const HeroComposition = ({
             <span className="shapeStripeBlock" aria-hidden />
             <span className="shapeRedBar" aria-hidden />
 
-            {/* Figure. `fill` + a sized parent skips the intrinsic
-                941x1672 layout step that caused a brief paint of the
-                figure at natural size before CSS could constrain it. */}
-            <div className="figureImgWrap">
-              <Image
-                src="/img/photos/about_hero.png"
-                alt="Donovan Yohan, illustrated full-body portrait"
-                fill
-                priority
-                className="figureImg"
-                sizes="(max-width: 900px) 70vw, 480px"
-                style={{
-                  objectFit: "contain",
-                  objectPosition: "center center",
-                  pointerEvents: "none",
-                }}
+            {/* Figure stack. translate3d on the wrap (not the frame)
+                walks the character horizontally past the frame edge
+                while shapes + chips stay anchored to the frame. The
+                distance is driven by a CSS custom property so we don't
+                have to mirror the panel width in component state — the
+                browser does the unit math on every paint. */}
+            <div
+              className="figureImgWrap"
+              style={
+                {
+                  ["--walk-offset" as string]:
+                    walkOffsetForProgress(flipProgress),
+                } as React.CSSProperties
+              }
+            >
+              <HeroFlipbook
+                progress={flipProgress}
+                frames={WALK_FRAMES}
+                transitionBand={TRANSITION_BAND}
+                alt="Donovan Yohan, illustrated full-body portrait walking"
               />
             </div>
 
@@ -489,7 +615,9 @@ export const HeroComposition = ({
           display: flex;
           align-items: center;
           justify-content: center;
-          overflow: hidden;
+          /* overflow visible so the figure inside can walk past the
+             frame's right edge as scroll progresses. */
+          overflow: visible;
         }
         /* Registration tick marks at the corners — drafting-table feel.
            Sit just inside the outer border. */
@@ -568,6 +696,17 @@ export const HeroComposition = ({
           inset: 10px;
           z-index: 2;
           pointer-events: none;
+          /* GPU-composite the walking figure so the per-frame swap
+             doesn't repaint the rest of the frame. The translate
+             distance is set in JS via --walk-offset (an absolute
+             0..1 fraction of the hero panel's width, computed from
+             a per-frame position table — see FRAME_POSITIONS). */
+          will-change: transform;
+          transform: translate3d(
+            calc((100vw - 128px) * var(--walk-offset, 0)),
+            0,
+            0
+          );
         }
         :global(.figureImg) {
           z-index: 2;

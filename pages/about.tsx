@@ -110,6 +110,7 @@ const About = () => {
           monoBoldClass={gm800.className}
           serifClass={cp400.className}
           italicSerifClass={cp400i.className}
+          scrollerRef={scrollerRef}
         />
 
         {/* Timeline block — rail on top, lane below, both fixed-width. */}
