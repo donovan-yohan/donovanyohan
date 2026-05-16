@@ -17,37 +17,21 @@ import { HiSpan } from "../Highlighter";
 
 interface TimelineRailProps {
   events: TimelineEvent[];
-  /** Stride from one card's left edge to the next, in px (card + gap). */
-  cardStrideX: number;
-  /** Width of a single card, in px. Used to center ticks over their card. */
-  cardWidthX: number;
-  /** Left padding before the first card, in px. */
-  leftPadX: number;
-  /** Right padding after the last card, in px. Used to size the rail. */
-  rightPadX: number;
   monoClass: string;
   monoBoldClass: string;
 }
 
 interface YearTick {
   year: number;
-  /** Center x of all events tagged with this year, in px from rail origin. */
-  centerX: number;
+  /** Center x of all events tagged with this year, as a CSS length. */
+  centerX: string;
   /** Whether to render the big highlighted label. */
   emphasize: boolean;
   /** Stamp (NOW / START) if any of the events for this year has one. */
   stamp?: string;
 }
 
-export const TimelineRail = ({
-  events,
-  cardStrideX,
-  cardWidthX,
-  leftPadX,
-  rightPadX,
-  monoClass,
-  monoBoldClass,
-}: TimelineRailProps) => {
+export const TimelineRail = ({ events, monoClass, monoBoldClass }: TimelineRailProps) => {
   const ticks = useMemo<YearTick[]>(() => {
     const byYear = new Map<number, { indices: number[]; stamp?: string }>();
     events.forEach((e, i) => {
@@ -61,9 +45,8 @@ export const TimelineRail = ({
     sortedYears.forEach((year, idx) => {
       const bucket = byYear.get(year);
       if (!bucket) return;
-      const avgIndex =
-        bucket.indices.reduce((s, n) => s + n, 0) / bucket.indices.length;
-      const centerX = leftPadX + avgIndex * cardStrideX + cardWidthX / 2;
+      const avgIndex = bucket.indices.reduce((s, n) => s + n, 0) / bucket.indices.length;
+      const centerX = `calc(var(--timeline-left-pad) + ${avgIndex} * (var(--timeline-card-w) + var(--timeline-gap)) + var(--timeline-card-w) / 2)`;
       result.push({
         year,
         centerX,
@@ -72,15 +55,9 @@ export const TimelineRail = ({
       });
     });
     return result;
-  }, [events, cardStrideX, cardWidthX, leftPadX]);
+  }, [events]);
 
-  const gapX = cardStrideX - cardWidthX;
-  const trackWidth =
-    leftPadX +
-    events.length * cardWidthX +
-    Math.max(0, events.length - 1) * gapX +
-    rightPadX;
-
+  const trackWidth = `calc(var(--timeline-left-pad) + ${events.length} * var(--timeline-card-w) + ${Math.max(0, events.length - 1)} * var(--timeline-gap) + var(--timeline-right-pad))`;
   const trackStyle: CSSProperties = { width: trackWidth };
 
   return (
@@ -89,9 +66,7 @@ export const TimelineRail = ({
         {ticks.map((t) => (
           <div key={t.year} className="railTick" style={{ left: t.centerX }}>
             <span className="railTickMark" />
-            {t.stamp ? (
-              <span className={`railStamp ${monoBoldClass}`}>{t.stamp}</span>
-            ) : null}
+            {t.stamp ? <span className={`railStamp ${monoBoldClass}`}>{t.stamp}</span> : null}
             <span
               className={`railYear ${
                 t.emphasize ? monoBoldClass : monoClass
@@ -114,12 +89,12 @@ export const TimelineRail = ({
           </div>
         ))}
       </div>
-      <div className="railRule" aria-hidden style={{ width: trackWidth }} />
+      <div className="railRule" aria-hidden style={trackStyle} />
 
       <style jsx>{`
         .rail {
           position: relative;
-          height: calc(5 * var(--u));
+          height: var(--rail-lane-h);
           flex: 0 0 auto;
         }
         .railTrack {

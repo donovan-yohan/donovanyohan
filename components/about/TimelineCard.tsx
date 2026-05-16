@@ -171,14 +171,9 @@ export const TimelineCard = ({
     ? accent.markColor[theme === "dark" ? "dark" : "light"]
     : undefined;
 
-  const { lead, mark, tail } = useMemo(
-    () => splitTitleForMark(event.title),
-    [event.title],
-  );
+  const { lead, mark, tail } = useMemo(() => splitTitleForMark(event.title), [event.title]);
 
-  const dateline = event.stamp
-    ? `${event.stamp} · ${event.year}`
-    : `${event.year}`;
+  const dateline = event.stamp ? `${event.stamp} · ${event.year}` : `${event.year}`;
 
   const frameStyle: CSSProperties = {
     borderColor: accent.band,
@@ -202,9 +197,7 @@ export const TimelineCard = ({
         {/* Top accent band — date stamp reversed out of it. */}
         <motion.div className="tCardBand" style={bandStyle} variants={slideVariants}>
           <span className={`tCardBandText ${monoBoldClass}`}>{dateline}</span>
-          <span className={`tCardBandIndex ${monoClass}`}>
-            {String(seed).padStart(2, "0")}
-          </span>
+          <span className={`tCardBandIndex ${monoClass}`}>{String(seed).padStart(2, "0")}</span>
         </motion.div>
 
         {/* Media — clean frame, offset geometric shape behind. */}
@@ -285,32 +278,29 @@ export const TimelineCard = ({
         ) : null}
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
         .tCard {
-          flex: 0 0 auto;
-          width: calc(28 * var(--u));
+          flex: 0 0 var(--timeline-card-w);
+          width: var(--timeline-card-w);
           height: 100%;
           display: flex;
           align-items: center;
+          min-width: 0;
         }
         .tCardFrame {
           position: relative;
           width: 100%;
-          max-height: 100%;
+          height: min(640px, calc(100% - 24px));
           border: 1.5px solid;
           background: var(--paper-2);
-          box-shadow:
-            6px 6px 0 0 var(--ink),
-            0 0 0 1px var(--ink) inset;
+          box-shadow: 3px 3px 0 0 var(--ink);
           display: flex;
           flex-direction: column;
           min-height: 0;
           overflow: hidden;
         }
-        :global([data-theme="dark"]) .tCardFrame {
-          box-shadow:
-            6px 6px 0 0 rgba(250, 247, 236, 0.12),
-            0 0 0 1px rgba(250, 247, 236, 0.18) inset;
+        [data-theme="dark"] .tCardFrame {
+          box-shadow: 3px 3px 0 0 rgba(250, 247, 236, 0.14);
         }
         .tCardBand {
           flex: 0 0 auto;
@@ -335,7 +325,7 @@ export const TimelineCard = ({
           position: relative;
           width: 100%;
           aspect-ratio: 4 / 3;
-          max-height: 55%;
+          max-height: 48%;
           flex: 0 0 auto;
           padding: calc(0.75 * var(--u));
           display: flex;
@@ -360,7 +350,7 @@ export const TimelineCard = ({
           align-items: center;
           justify-content: center;
         }
-        :global(.tCardImg) {
+        .tCardImg {
           width: 100%;
           height: 100%;
           object-fit: cover;
@@ -384,8 +374,8 @@ export const TimelineCard = ({
         }
         .tCardTitle {
           margin: 0;
-          font-size: 22px;
-          line-height: 1.12;
+          font-size: 24px;
+          line-height: 1.16;
           font-weight: 400;
           color: var(--ink);
           flex: 0 0 auto;
@@ -393,12 +383,12 @@ export const TimelineCard = ({
         .tCardCopy {
           margin: 0;
           font-size: 14px;
-          line-height: 1.45;
+          line-height: 1.5;
           color: var(--ink-soft);
           flex: 1 1 auto;
           overflow: hidden;
           display: -webkit-box;
-          -webkit-line-clamp: 6;
+          -webkit-line-clamp: 5;
           -webkit-box-orient: vertical;
         }
         .tCardDeco {
@@ -409,6 +399,45 @@ export const TimelineCard = ({
           height: 56px;
           pointer-events: none;
           z-index: 2;
+        }
+
+        @media (max-width: 600px) {
+          .tCardFrame {
+            height: min(580px, calc(100% - 32px));
+            box-shadow: 2px 2px 0 0 var(--ink);
+          }
+          [data-theme="dark"] .tCardFrame {
+            box-shadow: 2px 2px 0 0 rgba(250, 247, 236, 0.14);
+          }
+          .tCardBand {
+            padding: 5px 10px;
+          }
+          .tCardBandText {
+            font-size: 10px;
+            letter-spacing: 0.18em;
+          }
+          .tCardMediaWrap {
+            padding: 10px;
+            max-height: 44%;
+          }
+          .tCardBody {
+            padding: 8px 12px 12px;
+          }
+          .tCardTitle {
+            font-size: 21px;
+            line-height: 1.16;
+          }
+          .tCardCopy {
+            font-size: 14px;
+            line-height: 1.46;
+            -webkit-line-clamp: 5;
+          }
+          .tCardDeco {
+            width: 42px;
+            height: 42px;
+            right: -8px;
+            bottom: -8px;
+          }
         }
       `}</style>
     </motion.article>

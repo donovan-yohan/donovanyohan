@@ -18,6 +18,7 @@
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
 
 import { timeline } from "../global/timeline";
 import { TimelineCard } from "../components/about/TimelineCard";
@@ -31,14 +32,10 @@ import { dotGridColor } from "../lib/dot-grid-color";
 
 const DotGrid = dynamic(() => import("../components/lab/DotGrid"), { ssr: false });
 
-// Lane geometry, in 16px units. Stride = card + gap, kept in sync with
-// `.aboutLane { gap }` and `.tCard { width }`.
-const CARD_U = 28;
-const GAP_U = 3;
-const STRIDE_U = CARD_U + GAP_U;
+// Desktop lane geometry lives in CSS variables so narrow viewports can keep
+// the same horizontal timeline while shrinking cards to the viewport.
 const LEFT_PAD_U = 2;
 const RIGHT_PAD_U = 8;
-const UPX = 16;
 
 const About = () => {
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -80,11 +77,36 @@ const About = () => {
           return next;
         });
       },
-      { root: el, rootMargin: "0px -10% 0px -10%", threshold: 0.2 },
+      { root: el, rootMargin: "0px -10% 0px -10%", threshold: 0.2 }
     );
     targets.forEach((t) => io.observe(t));
     return () => io.disconnect();
   }, []);
+
+  const handleShellKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    const lane = el.querySelector<HTMLElement>(".aboutLane");
+    const slot = el.querySelector<HTMLElement>(".aboutSlot");
+    const gap = lane ? Number.parseFloat(window.getComputedStyle(lane).columnGap) || 48 : 48;
+    const stride = (slot?.getBoundingClientRect().width || 448) + gap;
+
+    let left: number | null = null;
+    if (event.key === "ArrowRight" || event.key === "ArrowDown" || event.key === "PageDown") {
+      left = el.scrollLeft + stride;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp" || event.key === "PageUp") {
+      left = el.scrollLeft - stride;
+    } else if (event.key === "Home") {
+      left = 0;
+    } else if (event.key === "End") {
+      left = el.scrollWidth;
+    }
+
+    if (left === null) return;
+    event.preventDefault();
+    el.scrollTo({ left, behavior: "smooth" });
+  };
 
   return (
     <>
@@ -96,7 +118,14 @@ const About = () => {
 
       <SiteNav current="about" />
 
-      <div className="aboutShell" ref={scrollerRef}>
+      <div
+        className="aboutShell"
+        ref={scrollerRef}
+        tabIndex={0}
+        role="region"
+        aria-label="Horizontal about timeline. Use arrow keys, wheel, drag, or swipe to move sideways."
+        onKeyDown={handleShellKeyDown}
+      >
         <DotGrid
           spacing={16}
           maxRadiusBoost={1.1}
@@ -117,21 +146,13 @@ const About = () => {
         <section className="aboutTimeline">
           <TimelineRail
             events={timeline}
-            cardStrideX={STRIDE_U * UPX}
-            cardWidthX={CARD_U * UPX}
-            leftPadX={LEFT_PAD_U * UPX}
-            rightPadX={RIGHT_PAD_U * UPX}
             monoClass={gm500.className}
             monoBoldClass={gm800.className}
           />
           <div className="aboutLane">
             <div className="aboutLanePad" aria-hidden />
             {timeline.map((event, i) => (
-              <div
-                key={event.id}
-                className="aboutSlot"
-                data-tcard-id={event.id}
-              >
+              <div key={event.id} className="aboutSlot" data-tcard-id={event.id}>
                 <TimelineCard
                   event={event}
                   monoClass={gm500.className}
@@ -163,6 +184,12 @@ const About = () => {
           --gutter-w: calc(12 * var(--u));
           --gutter-pad: var(--u);
           --content-pad-left: calc(var(--gutter-w) + var(--gutter-pad));
+          --hero-panel-w: calc(100vw - 128px);
+          --timeline-card-w: calc(28 * var(--u));
+          --timeline-gap: calc(3 * var(--u));
+          --timeline-left-pad: calc(${LEFT_PAD_U} * var(--u));
+          --timeline-right-pad: calc(${RIGHT_PAD_U} * var(--u));
+          --rail-lane-h: calc(5 * var(--u));
           /* Highlighter tab colours — mirrored from the home page so the nav
              reads identically across routes. */
           --hl-1: rgba(120, 220, 255, 0.55);
@@ -191,7 +218,8 @@ const About = () => {
           --hl-4: rgba(230, 130, 50, 0.55);
           --logo-bg: #c8632b;
         }
-        html, body {
+        html,
+        body {
           margin: 0;
           padding: 0;
           height: 100%;
@@ -201,7 +229,22 @@ const About = () => {
           overflow: hidden;
           overscroll-behavior: none;
         }
-        * { box-sizing: border-box; }
+        * {
+          box-sizing: border-box;
+        }
+
+        @media (max-width: 600px) {
+          :root {
+            --gutter-w: calc(2 * var(--u));
+            --content-pad-left: calc(2 * var(--u));
+            --hero-panel-w: calc(100vw - 32px);
+            --timeline-card-w: calc(100vw - 32px);
+            --timeline-gap: var(--u);
+            --timeline-left-pad: var(--u);
+            --timeline-right-pad: calc(2 * var(--u));
+            --rail-lane-h: calc(4 * var(--u));
+          }
+        }
       `}</style>
 
       <style jsx global>{`
@@ -218,8 +261,17 @@ const About = () => {
           overflow-y: hidden;
           scrollbar-width: none;
           overscroll-behavior: none;
+          outline: none;
+          scroll-snap-type: x proximity;
+          -webkit-overflow-scrolling: touch;
         }
-        .aboutShell::-webkit-scrollbar { display: none; }
+        .aboutShell:focus-visible {
+          outline: 2px solid var(--ink);
+          outline-offset: -4px;
+        }
+        .aboutShell::-webkit-scrollbar {
+          display: none;
+        }
 
         .aboutTimeline {
           flex: 0 0 auto;
@@ -233,20 +285,29 @@ const About = () => {
           min-height: 0;
           display: flex;
           align-items: center;
-          gap: calc(3 * var(--u));
+          gap: var(--timeline-gap);
         }
         .aboutLanePad {
-          flex: 0 0 calc(${LEFT_PAD_U} * var(--u));
+          flex: 0 0 var(--timeline-left-pad);
+          margin-right: calc(-1 * var(--timeline-gap));
         }
         .aboutLanePadEnd {
-          flex: 0 0 calc(${RIGHT_PAD_U} * var(--u));
+          flex: 0 0 var(--timeline-right-pad);
+          margin-left: calc(-1 * var(--timeline-gap));
         }
         .aboutSlot {
-          flex: 0 0 auto;
+          flex: 0 0 var(--timeline-card-w);
           display: flex;
           align-items: center;
           gap: calc(0.5 * var(--u));
           height: 100%;
+          scroll-snap-align: center;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .aboutShell {
+            scroll-behavior: auto;
+          }
         }
       `}</style>
     </>
