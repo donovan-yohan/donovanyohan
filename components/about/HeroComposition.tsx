@@ -38,10 +38,10 @@ const WALK_FRAMES: readonly string[] = [
  * Keep length in sync with WALK_FRAMES.
  */
 const FRAME_POSITIONS: readonly number[] = [
-  0,    // walk_1 — turning, in place
-  0,    // walk_2 — turning, in place
-  0,    // walk_3 — turning, now facing right
-  0.2,  // walk_4 — first step
+  0, // walk_1 — turning, in place
+  0, // walk_2 — turning, in place
+  0, // walk_3 — turning, now facing right
+  0.2, // walk_4 — first step
   0.45, // walk_5 — mid stride
   0.75, // walk_6 — walked out of the frame
 ];
@@ -81,12 +81,8 @@ const walkOffsetForProgress = (p: number): number => {
   const hi = Math.min(lo + 1, N - 1);
   const segLocal = framePos - lo;
   const blend = lo === hi ? 0 : bandBlend(segLocal, TRANSITION_BAND);
-  return (
-    FRAME_POSITIONS[lo] +
-    (FRAME_POSITIONS[hi] - FRAME_POSITIONS[lo]) * blend
-  );
+  return FRAME_POSITIONS[lo] + (FRAME_POSITIONS[hi] - FRAME_POSITIONS[lo]) * blend;
 };
-
 
 interface HeroCompositionProps {
   monoClass: string;
@@ -172,11 +168,7 @@ export const HeroComposition = ({
   });
 
   return (
-    <section
-      ref={heroRef}
-      className="heroComp"
-      aria-labelledby="aboutHeroTitle"
-    >
+    <section ref={heroRef} className="heroComp" aria-labelledby="aboutHeroTitle">
       <div className="heroCompInner">
         {/* LEFT — editorial type stack. */}
         <div className="heroType">
@@ -186,11 +178,7 @@ export const HeroComposition = ({
             ABOUT · INDEX · DONOVAN YOHAN
           </motion.span>
 
-          <motion.h1
-            id="aboutHeroTitle"
-            className={`heroTitle ${monoBoldClass}`}
-            {...fade(0.18)}
-          >
+          <motion.h1 id="aboutHeroTitle" className={`heroTitle ${monoBoldClass}`} {...fade(0.18)}>
             <span className="heroTitleRow heroTitleKicker">
               ISSUE 021 &nbsp;/&nbsp; SIDE-QUEST GAZETTE
             </span>
@@ -199,7 +187,9 @@ export const HeroComposition = ({
             </span>
             <span className="heroTitleRow heroTitleMega">
               <span className="heroTitleMark heroTitleMarkBlue">YOHAN</span>
-              <span className="heroTitleSlash" aria-hidden>/</span>
+              <span className="heroTitleSlash" aria-hidden>
+                /
+              </span>
             </span>
             <span className="heroTitleRow heroTitleDeck">
               THE LONG VERSION, SCROLLED SIDEWAYS &mdash; <br />
@@ -207,14 +197,10 @@ export const HeroComposition = ({
             </span>
           </motion.h1>
 
-          <motion.p
-            className={`heroLead ${serifClass}`}
-            {...fade(0.35)}
-          >
-            Senior front-end engineer. Hobby-collector.
-            What follows is{" "}
-            <em className={italicSerifClass}>the long version</em> &mdash; one
-            card per beat, newest first.
+          <motion.p className={`heroLead ${serifClass}`} {...fade(0.35)}>
+            Senior front-end engineer. Hobby-collector. What follows is{" "}
+            <em className={italicSerifClass}>the long version</em> &mdash; one card per beat, newest
+            first.
           </motion.p>
 
           <motion.div className="heroCta" {...fade(0.5, 18)}>
@@ -236,7 +222,8 @@ export const HeroComposition = ({
               </span>
             </span>
             <span className={`heroCtaHint ${monoClass}`}>
-              wheel down · or drag
+              <span className="heroCtaHintDesktop">wheel down · or drag</span>
+              <span className="heroCtaHintTouch">swipe / drag sideways</span>
             </span>
           </motion.div>
 
@@ -285,8 +272,7 @@ export const HeroComposition = ({
               className="figureImgWrap"
               style={
                 {
-                  ["--walk-offset" as string]:
-                    walkOffsetForProgress(flipProgress),
+                  ["--walk-offset" as string]: walkOffsetForProgress(flipProgress),
                 } as React.CSSProperties
               }
             >
@@ -300,17 +286,14 @@ export const HeroComposition = ({
 
             {/* Web-UI sticker chips on the frame. */}
             <span className={`frameChipTopLeft ${monoBoldClass}`}>
-              <span className="chipArrow" aria-hidden>&lsaquo;</span> 021
+              <span className="chipArrow" aria-hidden>
+                &lsaquo;
+              </span>{" "}
+              021
             </span>
             <span className={`frameChipTopRight ${monoBoldClass}`}>
               <span className="chipDot" aria-hidden />
               ABOUT
-            </span>
-            <span className={`frameChipBottomLeft ${monoClass}`}>
-              FUTURE-FACING · NOW &rarr; 2006
-            </span>
-            <span className={`frameChipBottomRight ${monoBoldClass}`}>
-              S-{new Date().getFullYear()}x
             </span>
           </motion.div>
 
@@ -368,7 +351,7 @@ export const HeroComposition = ({
       <style jsx>{`
         .heroComp {
           flex: 0 0 auto;
-          width: calc(100vw - 128px);
+          width: var(--hero-panel-w);
           height: 100%;
           background: var(--paper);
           border-right: 1px solid var(--rule);
@@ -391,8 +374,7 @@ export const HeroComposition = ({
           position: relative;
           width: 100%;
           height: 100%;
-          padding: calc(2 * var(--u)) calc(3 * var(--u)) calc(2 * var(--u))
-            var(--content-pad-left);
+          padding: calc(2 * var(--u)) calc(3 * var(--u)) calc(2 * var(--u)) var(--content-pad-left);
         }
 
         /* ---- LEFT type stack -------------------------------------------- */
@@ -480,11 +462,7 @@ export const HeroComposition = ({
           padding: 0 0.04em;
           margin: 0 -0.04em;
           color: var(--ink);
-          background-image: linear-gradient(
-            to right,
-            var(--hl),
-            var(--hl)
-          );
+          background-image: linear-gradient(to right, var(--hl), var(--hl));
           background-position: 0 88%;
           background-size: 100% 0.18em;
           background-repeat: no-repeat;
@@ -521,7 +499,8 @@ export const HeroComposition = ({
           color: var(--paper);
           font-size: 13px;
           letter-spacing: 0.24em;
-          border-radius: 999px;
+          border: 1px solid var(--ink);
+          border-radius: 0;
         }
         [data-theme="dark"] .heroCtaPill {
           background: var(--paper);
@@ -537,6 +516,9 @@ export const HeroComposition = ({
           text-transform: uppercase;
           color: var(--ink-mute);
         }
+        .heroCtaHintTouch {
+          display: none;
+        }
 
         /* Dot matrix anchor, lower-left chrome echoing the reference UI. */
         .heroDots {
@@ -545,10 +527,7 @@ export const HeroComposition = ({
           bottom: -8px;
           width: 96px;
           height: 64px;
-          background-image: radial-gradient(
-            var(--ink-mute) 1.6px,
-            transparent 1.8px
-          );
+          background-image: radial-gradient(var(--ink-mute) 1.6px, transparent 1.8px);
           background-size: 12px 12px;
           background-position: 0 0;
           opacity: 0.65;
@@ -702,11 +681,7 @@ export const HeroComposition = ({
              0..1 fraction of the hero panel's width, computed from
              a per-frame position table — see FRAME_POSITIONS). */
           will-change: transform;
-          transform: translate3d(
-            calc((100vw - 128px) * var(--walk-offset, 0)),
-            0,
-            0
-          );
+          transform: translate3d(calc(var(--hero-panel-w) * var(--walk-offset, 0)), 0, 0);
         }
         :global(.figureImg) {
           z-index: 2;
@@ -801,17 +776,109 @@ export const HeroComposition = ({
           font-size: 11px;
           letter-spacing: 0.3em;
           color: var(--ink-mute);
+          opacity: 0.55;
           z-index: 4;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 600px) {
           .heroCompInner {
-            grid-template-columns: 1fr;
-            padding: calc(2 * var(--u));
-            gap: calc(2 * var(--u));
+            padding: calc(2 * var(--u)) var(--u) var(--u);
+          }
+          .heroType {
+            justify-content: flex-start;
+            gap: calc(0.9 * var(--u));
+            max-width: 100%;
+            padding-top: calc(1.25 * var(--u));
+          }
+          .heroIndex {
+            gap: 8px;
+            font-size: 9px;
+            letter-spacing: 0.16em;
+          }
+          .heroIndexDivider {
+            width: 18px;
+          }
+          .heroTitleKicker {
+            font-size: 9px;
+            letter-spacing: 0.18em;
+            line-height: 1.35;
+            margin-bottom: 4px;
+          }
+          .heroTitleMega {
+            font-size: clamp(50px, 15.5vw, 62px);
+            line-height: 0.88;
+            letter-spacing: -0.055em;
+          }
+          .heroTitleDeck {
+            font-size: 10px;
+            letter-spacing: 0.14em;
+            line-height: 1.45;
+            max-width: 29ch;
+          }
+          .heroLead {
+            font-size: 16px;
+            line-height: 1.45;
+            max-width: 30ch;
+          }
+          .heroCta {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 2px;
+          }
+          .heroCtaPill {
+            padding: 7px 10px 7px 14px;
+            font-size: 11px;
+            letter-spacing: 0.18em;
+          }
+          .heroCtaPillArrow {
+            width: 30px;
+            height: 16px;
+          }
+          .heroCtaHintDesktop {
+            display: none;
+          }
+          .heroCtaHintTouch {
+            display: inline;
+          }
+          .heroDots,
+          .bgStripesRed,
+          .bgLinesBlue,
+          .accentAsterisk,
+          .accentSparkle,
+          .heroEdge {
+            display: none;
           }
           .heroStage {
-            min-height: 420px;
+            inset: auto -18px 34px auto;
+            width: 170px;
+            height: 315px;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.42;
+          }
+          .figureFrame {
+            height: 300px;
+            border-width: 2px;
+            padding: 7px;
+          }
+          .figureFrame::before,
+          .figureFrame::after {
+            width: 10px;
+            height: 10px;
+          }
+          .frameChipTopLeft,
+          .frameChipTopRight {
+            font-size: 9px;
+            letter-spacing: 0.14em;
+          }
+          .accentStar {
+            right: 10px;
+            top: auto;
+            bottom: 260px;
+            width: 34px;
+            height: 34px;
+            opacity: 0.7;
           }
         }
       `}</style>
