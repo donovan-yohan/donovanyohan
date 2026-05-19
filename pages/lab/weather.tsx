@@ -11,6 +11,7 @@
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
+import { themeBootstrap } from "../../lib/theme-bootstrap";
 import {
   Sun,
   CloudSun,
@@ -89,6 +90,7 @@ export default function WeatherLab() {
     <>
       <Head>
         <title>Weather icon tuner</title>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </Head>
       <main className="page">
         <header className="head">

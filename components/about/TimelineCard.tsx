@@ -278,7 +278,7 @@ export const TimelineCard = ({
         ) : null}
       </div>
 
-      <style jsx global>{`
+      <style jsx>{`
         .tCard {
           flex: 0 0 var(--timeline-card-w);
           width: var(--timeline-card-w);
@@ -299,7 +299,7 @@ export const TimelineCard = ({
           min-height: 0;
           overflow: hidden;
         }
-        [data-theme="dark"] .tCardFrame {
+        :global([data-theme="dark"]) .tCardFrame {
           box-shadow: 3px 3px 0 0 rgba(250, 247, 236, 0.14);
         }
         .tCardBand {
@@ -406,7 +406,7 @@ export const TimelineCard = ({
             height: min(580px, calc(100% - 32px));
             box-shadow: 2px 2px 0 0 var(--ink);
           }
-          [data-theme="dark"] .tCardFrame {
+          :global([data-theme="dark"]) .tCardFrame {
             box-shadow: 2px 2px 0 0 rgba(250, 247, 236, 0.14);
           }
           .tCardBand {

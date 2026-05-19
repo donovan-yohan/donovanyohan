@@ -16,6 +16,7 @@ import Link from "next/link";
 
 import Context from "./context";
 import { gm500, gm800 } from "../global/fonts";
+import { ABOUT_PAGE_ENABLED } from "../lib/flags";
 
 const DY_PATHS: readonly string[] = [
   "M 1371.48 700.4 L 1371.67 1013.54 L 1371.67 1063.38 C 1371.67 1238.53 1229.69 1380.51 1054.54 1380.51 L 990.63 1380.51",
@@ -69,13 +70,15 @@ export const SiteNav = ({ current }: SiteNavProps) => {
           >
             <span className="navTabLabel">Work</span>
           </Link>
-          <Link
-            className={`navTab tabAbout ${gm500.className}`}
-            href="/about"
-            data-current={current === "about" ? "true" : undefined}
-          >
-            <span className="navTabLabel">About</span>
-          </Link>
+          {ABOUT_PAGE_ENABLED ? (
+            <Link
+              className={`navTab tabAbout ${gm500.className}`}
+              href="/about"
+              data-current={current === "about" ? "true" : undefined}
+            >
+              <span className="navTabLabel">About</span>
+            </Link>
+          ) : null}
           <Link
             className={`navTab tabContact ${gm500.className}`}
             href="/#footer"

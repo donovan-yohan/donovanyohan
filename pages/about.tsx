@@ -17,6 +17,7 @@
 
 import Head from "next/head";
 import dynamic from "next/dynamic";
+import type { GetStaticProps } from "next";
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 
@@ -29,6 +30,7 @@ import Context from "../components/context";
 import { themeBootstrap } from "../lib/theme-bootstrap";
 import { gm500, gm800, cp400, cp400i } from "../global/fonts";
 import { dotGridColor } from "../lib/dot-grid-color";
+import { ABOUT_PAGE_ENABLED } from "../lib/flags";
 
 const DotGrid = dynamic(() => import("../components/lab/DotGrid"), { ssr: false });
 
@@ -87,16 +89,21 @@ const About = () => {
     const el = scrollerRef.current;
     if (!el) return;
 
-    const lane = el.querySelector<HTMLElement>(".aboutLane");
-    const slot = el.querySelector<HTMLElement>(".aboutSlot");
-    const gap = lane ? Number.parseFloat(window.getComputedStyle(lane).columnGap) || 48 : 48;
-    const stride = (slot?.getBoundingClientRect().width || 448) + gap;
-
+    // ArrowUp/Down and PageUp/Down intentionally NOT mapped — interactive
+    // children (focused link/button inside a card) need vertical-keys to
+    // bubble for native focus/scroll behaviour, and remapping them sideways
+    // would surprise screen-reader and keyboard users.
     let left: number | null = null;
-    if (event.key === "ArrowRight" || event.key === "ArrowDown" || event.key === "PageDown") {
-      left = el.scrollLeft + stride;
-    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp" || event.key === "PageUp") {
-      left = el.scrollLeft - stride;
+    if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+      const lane = el.querySelector<HTMLElement>(".aboutLane");
+      const slot = el.querySelector<HTMLElement>(".aboutSlot");
+      const parsedGap = lane
+        ? Number.parseFloat(window.getComputedStyle(lane).columnGap)
+        : Number.NaN;
+      const gap = Number.isFinite(parsedGap) ? parsedGap : 48;
+      const slotWidth = slot?.getBoundingClientRect().width;
+      const stride = (Number.isFinite(slotWidth) && slotWidth ? slotWidth : 448) + gap;
+      left = event.key === "ArrowRight" ? el.scrollLeft + stride : el.scrollLeft - stride;
     } else if (event.key === "Home") {
       left = 0;
     } else if (event.key === "End") {
@@ -105,7 +112,13 @@ const About = () => {
 
     if (left === null) return;
     event.preventDefault();
-    el.scrollTo({ left, behavior: "smooth" });
+    // Respect OS-level reduced-motion preference for JS-driven scrolls. The
+    // CSS rule below only catches `scroll-behavior: smooth`, not the explicit
+    // `behavior: "smooth"` option passed here.
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    el.scrollTo({ left, behavior: prefersReducedMotion ? "auto" : "smooth" });
   };
 
   return (
@@ -315,3 +328,14 @@ const About = () => {
 };
 
 export default About;
+
+// `/about` is gated behind ABOUT_PAGE_ENABLED while the timeline content is
+// finalized. When the flag is off, Next.js serves the standard 404 page
+// instead of building/rendering the route — keeps the URL completely
+// off-grid until we're ready to ship.
+export const getStaticProps: GetStaticProps = async () => {
+  if (!ABOUT_PAGE_ENABLED) {
+    return { notFound: true };
+  }
+  return { props: {} };
+};

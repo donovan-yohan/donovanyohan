@@ -22,6 +22,7 @@ import type { ComponentType, SVGProps } from "react";
 import { themeBootstrap } from "../lib/theme-bootstrap";
 import { gm500, gm800, cp400, cp400i } from "../global/fonts";
 import { dotGridColor } from "../lib/dot-grid-color";
+import { ABOUT_PAGE_ENABLED } from "../lib/flags";
 
 const DotGrid = dynamic(() => import("../components/lab/DotGrid"), { ssr: false });
 const HatchScene = dynamic(() => import("../components/lab/HatchScene"), { ssr: false });
@@ -697,9 +698,11 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
             <a className={`navTab tabWork ${gm500.className}`} href="/#work">
               <span className="navTabLabel">Work</span>
             </a>
-            <a className={`navTab tabAbout ${gm500.className}`} href="/about">
-              <span className="navTabLabel">About</span>
-            </a>
+            {ABOUT_PAGE_ENABLED ? (
+              <a className={`navTab tabAbout ${gm500.className}`} href="/about">
+                <span className="navTabLabel">About</span>
+              </a>
+            ) : null}
             <a className={`navTab tabContact ${gm500.className}`} href="#footer">
               <span className="navTabLabel">Contact</span>
             </a>

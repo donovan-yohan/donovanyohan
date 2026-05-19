@@ -687,12 +687,10 @@ export const HeroComposition = ({
           z-index: 2;
         }
 
-        /* Web-UI chips on the frame corners. Sit above the multiply
+        /* Web-UI chips on the top frame corners. Sit above the multiply
            shapes so labels stay readable. */
         .frameChipTopLeft,
-        .frameChipTopRight,
-        .frameChipBottomLeft,
-        .frameChipBottomRight {
+        .frameChipTopRight {
           position: absolute;
           z-index: 5;
           font-size: 11px;
@@ -711,27 +709,6 @@ export const HeroComposition = ({
           top: 12px;
           right: 14px;
           color: var(--hero-red);
-        }
-        .frameChipBottomLeft {
-          bottom: 12px;
-          left: 14px;
-          color: var(--ink-mute);
-          font-size: 10px;
-          letter-spacing: 0.24em;
-        }
-        .frameChipBottomRight {
-          bottom: 12px;
-          right: 14px;
-          background: var(--ink);
-          color: var(--paper);
-          padding: 4px 9px;
-          border-radius: 999px;
-          font-size: 11px;
-          letter-spacing: 0.18em;
-        }
-        [data-theme="dark"] .frameChipBottomRight {
-          background: var(--paper);
-          color: var(--ink);
         }
         .chipArrow {
           font-size: 14px;

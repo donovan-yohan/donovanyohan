@@ -125,7 +125,7 @@ const noteToEntry = (note: VaultNote, index: number): Entry => {
  * journal "most recent month on top" reading order.
  */
 export function notesToNotebookMonths(notes: VaultNote[]): NotebookMonth[] {
-  const byKey = new Map<string, VaultNote[]>();
+  const valid: VaultNote[] = [];
   for (const n of notes) {
     const date = n.frontmatter.date;
     // Strict YYYY-MM-DD shape — anything else gets dropped + logged so a
@@ -138,7 +138,24 @@ export function notesToNotebookMonths(notes: VaultNote[]): NotebookMonth[] {
       }
       continue;
     }
-    const [year, month] = date.split("-");
+    valid.push(n);
+  }
+
+  // Chronological index — oldest note gets #001, newest gets the highest
+  // number. Stable as new notes land: a fresh entry takes the next number up
+  // without renumbering existing cards. Tie-break on slug so notes that share
+  // a date stay deterministic across builds.
+  const indexBySlug = new Map<string, number>();
+  [...valid]
+    .sort((a, b) => {
+      const cmp = a.frontmatter.date.localeCompare(b.frontmatter.date);
+      return cmp !== 0 ? cmp : a.slug.localeCompare(b.slug);
+    })
+    .forEach((n, i) => indexBySlug.set(n.slug, i + 1));
+
+  const byKey = new Map<string, VaultNote[]>();
+  for (const n of valid) {
+    const [year, month] = n.frontmatter.date.split("-");
     const key = `${year}-${month}`;
     const existing = byKey.get(key);
     if (existing) existing.push(n);
@@ -146,7 +163,6 @@ export function notesToNotebookMonths(notes: VaultNote[]): NotebookMonth[] {
   }
 
   const orderedKeys = Array.from(byKey.keys()).sort().reverse();
-  let runningIndex = 1;
 
   return orderedKeys.map((key) => {
     const [year, monthNum] = key.split("-");
@@ -156,7 +172,7 @@ export function notesToNotebookMonths(notes: VaultNote[]): NotebookMonth[] {
       .sort((a, b) => b.frontmatter.date.localeCompare(a.frontmatter.date));
 
     const cells: NotebookCell[] = items.map((n) => ({
-      entry: noteToEntry(n, runningIndex++),
+      entry: noteToEntry(n, indexBySlug.get(n.slug) ?? 0),
     }));
 
     const rows: NotebookRow[] = [];
