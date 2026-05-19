@@ -27,7 +27,6 @@ import { ABOUT_PAGE_ENABLED } from "../lib/flags";
 const DotGrid = dynamic(() => import("../components/lab/DotGrid"), { ssr: false });
 const HatchScene = dynamic(() => import("../components/lab/HatchScene"), { ssr: false });
 const Notebook = dynamic(() => import("../components/lab/Notebook"), { ssr: false });
-const RoughIcon = dynamic(() => import("../components/lab/RoughIcon"), { ssr: false });
 import DrawBox from "../components/DrawBox";
 import { HiSpan } from "../components/Highlighter";
 
@@ -201,8 +200,6 @@ interface DrawnTitleProps {
   /** ms after the section enters view before this line starts drawing. */
   delay: number;
 }
-
-const TITLE_OUTLINE_MS = 1300;
 
 const DrawnTitle = ({
   outline,
