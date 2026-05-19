@@ -1,0 +1,41 @@
+components/about/HeroComposition.tsx
+  s_92b514da451f4c::t_476f9563074215 690,693
+pages/lab/weather.tsx
+  s_92b514da451f4c::t_e0b68a063f83f1 14
+  s_92b514da451f4c::t_82da4829279bf9 93
+lib/flags.ts
+  s_92b514da451f4c::t_5ed5546911ba56 1-24
+pages/index.tsx
+  s_92b514da451f4c::t_0b6dd760dfa0e7 25
+  s_92b514da451f4c::t_3d4b735ae42fc1 701-705
+components/about/TimelineCard.tsx
+  s_92b514da451f4c::t_8dcad29cbc2b83 302,409
+  s_92b514da451f4c::t_bdddda5d9e622a 281
+pages/about.tsx
+  s_92b514da451f4c::t_a6db9508856698 20
+  s_92b514da451f4c::t_06529ce68b9e20 331-341
+  s_92b514da451f4c::t_3b73948d839d07 92-95,97-106,115-121
+  s_92b514da451f4c::t_63223830f7a461 33
+pages/work/[slug].tsx
+  s_92b514da451f4c::t_ee36d1de7e8109 127-131
+  s_92b514da451f4c::t_b45688f27b0368 22
+components/SiteNav.tsx
+  s_92b514da451f4c::t_1f76026ace28d4 73-81
+  s_92b514da451f4c::t_5868851e8c0f48 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.10",
+  "base_commit_sha": "12043925ed22117b2ff7d2e07ac3b2ba8938602c",
+  "prompts": {},
+  "sessions": {
+    "s_92b514da451f4c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1696e600-aa37-4a05-8789-37ffc4542cab",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
