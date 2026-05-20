@@ -1,20 +1,29 @@
 /**
  * adapter-local.ts — local filesystem vault adapter.
  *
- * Implements the walk-then-stop-if-private order per P22:
- *   1. Walk candidate .md files (P17 allowlist via walkVault)
- *   2. Read file with 1MB size cap
- *   3. Parse frontmatter via gray-matter (per-file try/catch)
- *   4. resolveVisibility() from raw frontmatter
- *   5. STOP if private — return { status: 'private', path }
- *   6. For public: full schema validate, derive slug, build VaultNote
- *   7. Public-but-malformed-schema → throw VaultParseError
- *   8. Private-but-malformed → silently skip (returns error result)
+ * Two-pass walk per P22 + P31:
  *
- * Per-file errors are isolated; one bad file does NOT reject the whole adapter.
+ *   Pass 1 — `resolveFile()`: for every candidate .md path, parse frontmatter,
+ *     run `resolveVisibility()`, and derive the slug. Returns either a
+ *     `public` resolution (with the parsed frontmatter + raw markdown body
+ *     ready to render) or a `private` resolution (slug only — body is never
+ *     inspected beyond frontmatter). The walk-then-stop-if-private order is
+ *     preserved: private notes never get their body parsed or rendered, the
+ *     resolver only reads the YAML header.
  *
- * NOTE: Body HTML rendering (remark → rehype-sanitize → rehype-stringify)
- * lives here for Slice 0. Slice 1 can factor it out to render.ts.
+ *   Pass 2 — `renderPublicNote()`: for each public resolution, render the
+ *     body via `renderMarkdown()` with the full slug map built from pass 1
+ *     so wikilinks resolve to anchors / private targets fail loudly / unknown
+ *     targets fall back to plain text. Preview defaults applied here.
+ *
+ * Why two passes: wikilink resolution needs the complete public/private slug
+ * set up front. Building the slug set during a single pass would force a
+ * source-order dependency on which notes can link to which.
+ *
+ * Per-file errors are isolated. One bad file does not reject the whole walk.
+ * Public-but-schema-invalid still throws `VaultParseError` from pass 1, and
+ * a wikilink-leak in pass 2 throws `WikilinkLeakError` — both are intentional
+ * build-fail gates.
  *
  * Per P25: No I/O, no env access at module init.
  */
@@ -22,55 +31,73 @@
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
-import { unified } from "unified";
-import remarkParse from "remark-parse";
-import remarkGfm from "remark-gfm";
-import remarkRehype from "remark-rehype";
-import rehypeSanitize from "rehype-sanitize";
-import rehypeStringify from "rehype-stringify";
 import { walkVault } from "./walk";
 import { resolveVisibility } from "./fail-closed";
 import { VaultFrontmatterSchema } from "./schema";
-import type { VaultNote, VaultAdapter, AdapterFileResult } from "./schema";
+import type {
+  VaultNote,
+  VaultAdapter,
+  VaultFrontmatter,
+} from "./schema";
 import { deriveSlug } from "./slug";
 import { applyPreviewDefaults } from "./preview-defaults";
-import { remarkStripWikilinks, stripWikilinks } from "./wikilinks";
+import { stripWikilinks } from "./wikilinks";
+import { renderMarkdown } from "./render";
 import { VaultParseError } from "./errors";
 
 /** 1MB size cap on individual vault files. */
 const MAX_FILE_BYTES = 1024 * 1024;
 
 /**
- * Processes a single markdown file through the vault pipeline.
- * Returns an AdapterFileResult — never throws for private/malformed cases.
+ * Pass-1 output. Public resolutions carry everything the renderer needs in
+ * pass 2; private resolutions carry only the slug (or `null` if it could not
+ * be derived without trusting metadata we never parsed).
  */
-async function processFile(
+type ResolvedFile =
+  | {
+      visibility: "public";
+      relPath: string;
+      slug: string;
+      frontmatter: VaultFrontmatter;
+      bodyMarkdown: string;
+    }
+  | { visibility: "private"; relPath: string; slug: string | null };
+
+/**
+ * Pass 1: read + frontmatter-parse + visibility-resolve + slug-derive.
+ *
+ * Returns `null` only when the file could not be read (size cap, IO error,
+ * etc.). Private and malformed-YAML cases return a `private` resolution so
+ * the caller can still collect a slug into the leak-gate set.
+ *
+ * Throws `VaultParseError` for public-but-schema-invalid (P22).
+ */
+async function resolveFile(
   vaultRoot: string,
   relPath: string,
-): Promise<AdapterFileResult> {
+): Promise<ResolvedFile | null> {
   const absPath = path.join(vaultRoot, relPath);
+  const filename = path.basename(relPath);
 
-  // ── Step 2: Read with size cap ─────────────────────────────────────────────
+  // Read with size cap
   let content: string;
   try {
     const s = await stat(absPath);
     if (s.size > MAX_FILE_BYTES) {
-      return {
-        status: "error",
-        path: relPath,
-        reason: `File too large: ${s.size} bytes (max ${MAX_FILE_BYTES})`,
-      };
+      console.warn(
+        `[vault] Skipping ${relPath}: ${s.size} bytes exceeds ${MAX_FILE_BYTES}`,
+      );
+      return null;
     }
     content = await readFile(absPath, "utf8");
   } catch (err) {
-    return {
-      status: "error",
-      path: relPath,
-      reason: `Read error: ${err instanceof Error ? err.message : String(err)}`,
-    };
+    console.error(
+      `[vault] Read error for ${relPath}: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return null;
   }
 
-  // ── Step 3: Parse frontmatter (per-file try/catch) ─────────────────────────
+  // Parse frontmatter
   let rawFrontmatter: unknown;
   let bodyMarkdown: string;
   try {
@@ -78,22 +105,36 @@ async function processFile(
     rawFrontmatter = parsed.data;
     bodyMarkdown = parsed.content;
   } catch {
-    // Malformed YAML → resolve to private (fail-closed)
-    return { status: "private", path: relPath };
+    // Malformed YAML → private; slug derived from filename only since we
+    // cannot trust any frontmatter slug override from a broken parse.
+    return {
+      visibility: "private",
+      relPath,
+      slug: deriveSlug(filename) || null,
+    };
   }
 
-  // ── Step 4: Resolve visibility ─────────────────────────────────────────────
   const visibility = resolveVisibility(rawFrontmatter);
 
-  // ── Step 5: Stop if private ────────────────────────────────────────────────
   if (visibility !== "public") {
-    return { status: "private", path: relPath };
+    // Private: slug derivation uses the filename and (if the YAML parsed)
+    // any explicit `slug:` override so the leak gate catches both shapes.
+    const fmSlug =
+      typeof rawFrontmatter === "object" &&
+      rawFrontmatter !== null &&
+      typeof (rawFrontmatter as Record<string, unknown>)["slug"] === "string"
+        ? ((rawFrontmatter as Record<string, unknown>)["slug"] as string)
+        : undefined;
+    return {
+      visibility: "private",
+      relPath,
+      slug: deriveSlug(filename, fmSlug) || null,
+    };
   }
 
-  // ── Step 6: Full schema validation for public notes ────────────────────────
+  // Public: full schema parse so we know `title`/`date` exist before render.
   const parseResult = VaultFrontmatterSchema.safeParse(rawFrontmatter);
   if (!parseResult.success) {
-    // Step 7: Public-but-malformed → throw VaultParseError
     throw new VaultParseError(
       relPath,
       "schema",
@@ -101,47 +142,22 @@ async function processFile(
     );
   }
 
-  const frontmatter = parseResult.data as import("./schema").VaultFrontmatter;
-
-  // ── Derive slug ────────────────────────────────────────────────────────────
-  const filename = path.basename(relPath);
+  const frontmatter = parseResult.data as VaultFrontmatter;
   const slug = deriveSlug(filename, frontmatter.slug);
 
-  // ── Render body HTML ───────────────────────────────────────────────────────
-  const processor = unified()
-    .use(remarkParse)
-    .use(remarkGfm)
-    .use(remarkStripWikilinks)
-    .use(remarkRehype)
-    .use(rehypeSanitize)
-    .use(rehypeStringify);
-
-  const bodyHtml = String(await processor.process(bodyMarkdown));
-
-  // ── Extract first paragraph for preview defaults ───────────────────────────
-  const firstParagraph = extractFirstParagraph(bodyMarkdown);
-
-  // ── Apply preview defaults ─────────────────────────────────────────────────
-  const preview = applyPreviewDefaults(frontmatter.preview, {
-    title: frontmatter.title,
-    firstParagraph,
-  });
-
-  const note: VaultNote = {
+  return {
+    visibility: "public",
+    relPath,
     slug,
-    path: relPath,
     frontmatter,
-    body: bodyHtml,
     bodyMarkdown,
-    preview,
   };
-
-  return { status: "public", note };
 }
 
 /**
  * Extracts the first non-empty paragraph of plain text from markdown.
- * Strips markdown syntax naively for use as an excerpt fallback.
+ * Strips inline markdown + wikilink syntax so the fallback excerpt is
+ * readable. Per P18 the raw `[[...]]` form never reaches a card preview.
  */
 function extractFirstParagraph(markdown: string): string {
   const lines = markdown.split("\n");
@@ -154,7 +170,6 @@ function extractFirstParagraph(markdown: string): string {
       if (inParagraph) break;
       continue;
     }
-    // Skip headings, code fences, block quotes, list items for the excerpt
     if (
       trimmed.startsWith("#") ||
       trimmed.startsWith("```") ||
@@ -168,9 +183,6 @@ function extractFirstParagraph(markdown: string): string {
     paragraphLines.push(trimmed);
   }
 
-  // Strip basic inline markdown + Obsidian wikilinks so the fallback excerpt
-  // is plain readable text (P18 — never leak raw [[wikilink]] syntax into a
-  // card preview).
   const joined = paragraphLines.join(" ");
   return stripWikilinks(joined)
     .replace(/\*\*([^*]+)\*\*/g, "$1")
@@ -181,6 +193,39 @@ function extractFirstParagraph(markdown: string): string {
 }
 
 /**
+ * Pass 2: render a public resolution into a final `VaultNote`.
+ *
+ * `renderMarkdown` receives the full slug-map context built from pass 1, so
+ * wikilinks resolve into anchors (public) / throw (private) / strip (unknown).
+ */
+async function renderPublicNote(
+  resolved: Extract<ResolvedFile, { visibility: "public" }>,
+  publicSlugs: ReadonlySet<string>,
+  privateSlugs: ReadonlySet<string>,
+): Promise<VaultNote> {
+  const body = await renderMarkdown(resolved.bodyMarkdown, {
+    publicSlugs,
+    privateSlugs,
+    sourcePath: resolved.relPath,
+  });
+
+  const firstParagraph = extractFirstParagraph(resolved.bodyMarkdown);
+  const preview = applyPreviewDefaults(resolved.frontmatter.preview, {
+    title: resolved.frontmatter.title,
+    firstParagraph,
+  });
+
+  return {
+    slug: resolved.slug,
+    path: resolved.relPath,
+    frontmatter: resolved.frontmatter,
+    body,
+    bodyMarkdown: resolved.bodyMarkdown,
+    preview,
+  };
+}
+
+/**
  * LocalVaultAdapter — reads notes from a local filesystem vault.
  */
 export class LocalVaultAdapter implements VaultAdapter {
@@ -188,26 +233,42 @@ export class LocalVaultAdapter implements VaultAdapter {
 
   async getPublicNotes(): Promise<VaultNote[]> {
     const paths = await walkVault(this.vaultRoot);
-    const publicNotes: VaultNote[] = [];
 
+    // Pass 1: resolve every file
+    const resolved: ResolvedFile[] = [];
     for (const relPath of paths) {
-      let result: AdapterFileResult;
+      let result: ResolvedFile | null;
       try {
-        result = await processFile(this.vaultRoot, relPath);
+        result = await resolveFile(this.vaultRoot, relPath);
       } catch (err) {
-        // VaultParseError (public-but-malformed) — re-throw
-        if (err instanceof VaultParseError) {
-          throw err;
-        }
-        // Other unexpected errors — log and skip
-        console.error(`[vault] Unexpected error processing ${relPath}:`, err);
+        if (err instanceof VaultParseError) throw err;
+        console.error(
+          `[vault] Unexpected error resolving ${relPath}:`,
+          err,
+        );
         continue;
       }
+      if (result !== null) resolved.push(result);
+    }
 
-      if (result.status === "public") {
-        publicNotes.push(result.note);
+    // Build slug sets for the leak gate
+    const publicSlugs = new Set<string>();
+    const privateSlugs = new Set<string>();
+    for (const r of resolved) {
+      if (r.slug === null) continue;
+      if (r.visibility === "public") {
+        publicSlugs.add(r.slug);
+      } else {
+        privateSlugs.add(r.slug);
       }
-      // private and error results are intentionally ignored here
+    }
+
+    // Pass 2: render public bodies with slug-map context
+    const publicNotes: VaultNote[] = [];
+    for (const r of resolved) {
+      if (r.visibility !== "public") continue;
+      const note = await renderPublicNote(r, publicSlugs, privateSlugs);
+      publicNotes.push(note);
     }
 
     return publicNotes;

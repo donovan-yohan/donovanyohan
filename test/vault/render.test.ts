@@ -175,6 +175,74 @@ describe("renderMarkdown", () => {
     expect(html).not.toContain("evil()");
   });
 
+  // ── Resolve mode (P31) ────────────────────────────────────────────────────
+
+  it("resolve mode: emits anchor /writing/{slug} for public wikilink targets", async () => {
+    const html = await renderMarkdown("See [[hello-world]] for details.", {
+      publicSlugs: new Set(["hello-world"]),
+      privateSlugs: new Set(),
+      sourcePath: "notes/source.md",
+    });
+    expect(html).toContain('<a href="/writing/hello-world">hello-world</a>');
+  });
+
+  it("resolve mode: uses alias text for [[target|alias]]", async () => {
+    const html = await renderMarkdown(
+      "See [[hello-world|the first post]].",
+      {
+        publicSlugs: new Set(["hello-world"]),
+        privateSlugs: new Set(),
+        sourcePath: "notes/source.md",
+      },
+    );
+    expect(html).toContain(
+      '<a href="/writing/hello-world">the first post</a>',
+    );
+  });
+
+  it("resolve mode: throws WikilinkLeakError on private target", async () => {
+    const { WikilinkLeakError } = await import("../../lib/vault/errors");
+    await expect(
+      renderMarkdown("Linking [[secret-note]].", {
+        publicSlugs: new Set(),
+        privateSlugs: new Set(["secret-note"]),
+        sourcePath: "notes/source.md",
+      }),
+    ).rejects.toBeInstanceOf(WikilinkLeakError);
+  });
+
+  it("resolve mode: unresolved target falls back to plain text (no anchor)", async () => {
+    const html = await renderMarkdown("See [[unknown-slug]] here.", {
+      publicSlugs: new Set(["hello-world"]),
+      privateSlugs: new Set(),
+      sourcePath: "notes/source.md",
+    });
+    expect(html).toContain("unknown-slug");
+    expect(html).not.toContain("<a");
+  });
+
+  it("resolve mode: embeds are still stripped (no anchor, no asset name)", async () => {
+    const html = await renderMarkdown("Before ![[hello-world]] after.", {
+      publicSlugs: new Set(["hello-world"]),
+      privateSlugs: new Set(),
+      sourcePath: "notes/source.md",
+    });
+    expect(html).not.toContain("<a");
+    expect(html).not.toContain("hello-world");
+  });
+
+  it("resolve mode: literal wikilinks inside fenced code blocks are not resolved (no throw on private)", async () => {
+    // Inside a code fence the private target must not trip the leak gate —
+    // it's literal source text, not a link. (Mirrors the strip-mode contract.)
+    const md = "```\n[[secret-note]]\n```";
+    const html = await renderMarkdown(md, {
+      publicSlugs: new Set(),
+      privateSlugs: new Set(["secret-note"]),
+      sourcePath: "notes/source.md",
+    });
+    expect(html).toContain("[[secret-note]]");
+  });
+
   it("renders concurrently without cross-call regex state corruption", async () => {
     // Per-call RegExp instance prevents shared lastIndex mutation under
     // concurrent renderMarkdown calls. (gemini + copilot #43)
