@@ -1,0 +1,35 @@
+test/mobile-work-section-css.test.ts
+  s_a383e3cd69db7c::t_b6e1fbab9d2cf7 1-32
+pages/index.tsx
+  s_a383e3cd69db7c::t_2a5f180f0dd782 1855-1883,1897-1924
+  s_a383e3cd69db7c::t_bc5268c611ef0b 1060-1062
+test/nav-theme-toggle-css.test.ts
+  s_a383e3cd69db7c::t_fddfec0bff8b3f 1-10,13-28
+  s_a383e3cd69db7c::t_0196992604305a 11-12
+components/SiteNav.tsx
+  s_a383e3cd69db7c::t_bc5268c611ef0b 227-229
+  s_a383e3cd69db7c::t_d846335fc2d9cb 258-289
+components/lab/Notebook.tsx
+  s_a383e3cd69db7c::t_8d396906f042ce 756-783,884-917,919-927,929-932,937
+pages/work/[slug].tsx
+  s_a383e3cd69db7c::t_437071b55006af 622-649
+  s_a383e3cd69db7c::t_bc5268c611ef0b 388-390
+components/lab/system/MarginAnchor.tsx
+  s_a383e3cd69db7c::t_87a7706244e369 29-30,55-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "6b7f024dde73a6c1a91523ed361cb5a897ab77f2",
+  "prompts": {},
+  "sessions": {
+    "s_a383e3cd69db7c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e4b50-2dc4-76e3-a2c7-834e6e1587e3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
