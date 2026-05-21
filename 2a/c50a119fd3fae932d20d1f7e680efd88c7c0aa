@@ -1,0 +1,22 @@
+lib/vault/adapter-local.ts
+  s_a383e3cd69db7c::t_e7920f76096d48 238-239,241,248,250-254,269-276
+  s_a383e3cd69db7c::t_184db9336bb3cb 240,242-247,249
+lib/vault/adapter-github.ts
+  s_a383e3cd69db7c::t_ee0673ab882c52 395-402
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "2ac50a119fd3fae932d20d1f7e680efd88c7c0aa",
+  "prompts": {},
+  "sessions": {
+    "s_a383e3cd69db7c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e4b50-2dc4-76e3-a2c7-834e6e1587e3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
