@@ -752,6 +752,35 @@ const Notebook = ({
         .chipActive .chipCount {
           opacity: 0.85;
         }
+        @media (max-width: 900px) {
+          .chipsBar {
+            margin-left: calc(-1 * var(--content-pad-left));
+            margin-right: calc(-1 * var(--content-pad-left));
+          }
+          .chipsInner {
+            flex-wrap: nowrap;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 10px var(--content-pad-left);
+            scrollbar-width: none;
+          }
+          .chipsInner::-webkit-scrollbar {
+            display: none;
+          }
+          .chip {
+            flex: 0 0 auto;
+            min-height: 36px;
+            padding: 8px 10px;
+          }
+        }
+        @media (max-width: 520px) {
+          .chip {
+            letter-spacing: 0.08em;
+          }
+          .chipGlyph {
+            display: none;
+          }
+        }
       `}</style>
       </Stack>
     </>
@@ -852,16 +881,60 @@ const MonthBlock = ({
           color: var(--ink-mute);
         }
         @media (max-width: 900px) {
-          .monthName {
-            font-size: 64px;
+          .monthSection {
+            gap: calc(var(--u) * 1.5);
           }
-          .monthHeader {
-            top: 48px;
+          .stickyZone {
+            gap: var(--u);
+          }
+          .monthSection .marginAnchor {
+            position: sticky !important;
+            top: var(--nav-h, 48px) !important;
+            height: auto !important;
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+            z-index: 18 !important;
+            pointer-events: auto !important;
+          }
+          .monthSection .marginAnchorInner {
+            position: static !important;
+            width: auto !important;
+            padding: 10px 0 8px !important;
+            display: grid !important;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: baseline !important;
+            gap: 8px !important;
+            background: var(--paper);
+            border-bottom: 1px solid var(--rule);
+          }
+          .monthSection [data-cols] {
+            grid-template-columns: minmax(0, 1fr) !important;
+            grid-template-rows: none !important;
+          }
+          .monthSection .card {
+            grid-column: auto !important;
+            grid-row: auto !important;
+          }
+          .monthName {
+            font-size: 22px;
+            letter-spacing: 0.08em;
+            line-height: 1;
+          }
+          .monthYear {
+            margin-top: 0;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            color: var(--ink-mute);
+          }
+          .monthCount {
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-align: right;
           }
         }
         @media (max-width: 560px) {
           .monthName {
-            font-size: 48px;
+            font-size: 20px;
           }
         }
       `}</style>

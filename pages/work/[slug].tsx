@@ -385,6 +385,9 @@ export default function WorkSlug({ note }: Props) {
           justify-content: center;
           width: 32px;
           height: 32px;
+          flex: 0 0 32px;
+          min-width: 32px;
+          min-height: 32px;
           margin-left: 8px;
           padding: 0;
           border: 1px solid var(--rule);
@@ -616,7 +619,34 @@ export default function WorkSlug({ note }: Props) {
             padding: 32px 24px 96px;
           }
           .topnavInner {
-            padding: 0 24px;
+            padding: 0 clamp(10px, 3vw, 16px);
+            gap: 8px;
+          }
+          .navTitle {
+            display: none;
+          }
+          .navTabs {
+            flex: 0 1 auto;
+            min-width: 0;
+          }
+          .navTab {
+            padding: 0 clamp(8px, 2.4vw, 12px);
+            font-size: 11px;
+            letter-spacing: 0.08em;
+          }
+          .navSpacer {
+            flex: 1 1 auto;
+            min-width: 0;
+          }
+        }
+        @media (max-width: 420px) {
+          .navTab {
+            padding: 0 7px;
+            font-size: 10px;
+            letter-spacing: 0.05em;
+          }
+          .themeToggle {
+            margin-left: 4px;
           }
         }
       `}</style>

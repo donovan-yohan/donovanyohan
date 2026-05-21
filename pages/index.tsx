@@ -1057,6 +1057,9 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
           justify-content: center;
           width: 32px;
           height: 32px;
+          flex: 0 0 32px;
+          min-width: 32px;
+          min-height: 32px;
           margin-left: 8px;
           padding: 0;
           border: 1px solid var(--rule);
@@ -1849,6 +1852,35 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
         }
 
         @media (max-width: 900px) {
+          :root,
+          [data-theme="light"],
+          [data-theme="dark"] {
+            --gutter-w: 0px;
+            --gutter-pad: 0px;
+            --content-pad-left: clamp(20px, 6vw, 32px);
+            --content-w: calc(100vw - (2 * var(--content-pad-left)));
+            --page-max: 100vw;
+          }
+          .topnavInner {
+            padding: 0 clamp(10px, 3vw, 16px);
+            gap: 8px;
+          }
+          .navTitle {
+            display: none;
+          }
+          .navTabs {
+            flex: 0 1 auto;
+            min-width: 0;
+          }
+          .navTab {
+            padding: 0 clamp(8px, 2.4vw, 12px);
+            font-size: 11px;
+            letter-spacing: 0.08em;
+          }
+          .navSpacer {
+            flex: 1 1 auto;
+            min-width: 0;
+          }
           .page {
             padding: 32px clamp(24px, 6vw, 64px);
           }
@@ -1861,6 +1893,35 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
           }
           .heroCopy {
             font-size: clamp(22px, 5vw, 32px);
+          }
+          .historyFrame {
+            padding: 32px var(--content-pad-left) 72px;
+          }
+          .historyFrame::before,
+          .historyFrame::after {
+            display: none;
+          }
+          .historyHead {
+            margin-top: -32px;
+            margin-left: calc(-1 * var(--content-pad-left));
+            margin-right: calc(-1 * var(--content-pad-left));
+            padding: 32px var(--content-pad-left) 20px;
+          }
+          .historyTitle {
+            font-size: clamp(34px, 10vw, 44px);
+          }
+          .historyLede {
+            font-size: clamp(16px, 4.8vw, 19px);
+          }
+        }
+        @media (max-width: 420px) {
+          .navTab {
+            padding: 0 7px;
+            font-size: 10px;
+            letter-spacing: 0.05em;
+          }
+          .themeToggle {
+            margin-left: 4px;
           }
         }
       `}</style>

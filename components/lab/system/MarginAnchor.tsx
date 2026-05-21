@@ -26,6 +26,8 @@ export const MarginAnchor = ({
   style,
   children,
 }: MarginAnchorProps) => {
+  const outerClassName = ["marginAnchor", className].filter(Boolean).join(" ");
+
   const outerStyle: CSSProperties = {
     position: sticky ? "sticky" : "absolute",
     top: ux(top),
@@ -50,8 +52,8 @@ export const MarginAnchor = ({
   };
 
   return (
-    <div className={className} style={outerStyle}>
-      <div style={innerStyle}>{children}</div>
+    <div className={outerClassName} style={outerStyle}>
+      <div className="marginAnchorInner" style={innerStyle}>{children}</div>
     </div>
   );
 };
