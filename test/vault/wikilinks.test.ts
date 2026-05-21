@@ -114,3 +114,186 @@ describe("stripWikilinks — edge cases", () => {
     );
   });
 });
+
+// ── Resolve-mode plugin (P31) ─────────────────────────────────────────────────
+
+/**
+ * Helper: runs a markdown string through a unified pipeline using the
+ * supplied wikilink plugin. Returns serialized HTML so tests can assert on
+ * anchor presence / absence directly.
+ */
+async function renderWithPlugin(
+  markdown: string,
+  plugin: ReturnType<
+    typeof import("../../lib/vault/wikilinks").createWikilinkPlugin
+  >,
+): Promise<string> {
+  const { unified } = await import("unified");
+  const remarkParse = (await import("remark-parse")).default;
+  const remarkRehype = (await import("remark-rehype")).default;
+  const rehypeStringify = (await import("rehype-stringify")).default;
+
+  const result = await unified()
+    .use(remarkParse)
+    .use(plugin)
+    .use(remarkRehype)
+    .use(rehypeStringify)
+    .process(markdown);
+  return String(result);
+}
+
+describe("createWikilinkPlugin — resolve mode", () => {
+  it("emits an anchor when the target slug is in publicSlugs", async () => {
+    const { createWikilinkPlugin } = await import("../../lib/vault/wikilinks");
+    const plugin = createWikilinkPlugin({
+      publicSlugs: new Set(["hello-world"]),
+      privateSlugs: new Set(),
+      sourcePath: "notes/source.md",
+    });
+    const html = await renderWithPlugin("See [[hello-world]] here.", plugin);
+    expect(html).toContain('<a href="/writing/hello-world">hello-world</a>');
+  });
+
+  it("uses the alias as anchor text when [[target|alias]] is given", async () => {
+    const { createWikilinkPlugin } = await import("../../lib/vault/wikilinks");
+    const plugin = createWikilinkPlugin({
+      publicSlugs: new Set(["hello-world"]),
+      privateSlugs: new Set(),
+      sourcePath: "notes/source.md",
+    });
+    const html = await renderWithPlugin(
+      "See [[hello-world|the first post]].",
+      plugin,
+    );
+    expect(html).toContain(
+      '<a href="/writing/hello-world">the first post</a>',
+    );
+  });
+
+  it("ignores #heading and ^block-id in the URL (display target only)", async () => {
+    const { createWikilinkPlugin } = await import("../../lib/vault/wikilinks");
+    const plugin = createWikilinkPlugin({
+      publicSlugs: new Set(["hello-world"]),
+      privateSlugs: new Set(),
+      sourcePath: "notes/source.md",
+    });
+    const html = await renderWithPlugin(
+      "See [[hello-world#intro|alias]] and [[hello-world^ref]].",
+      plugin,
+    );
+    expect(html).toContain('<a href="/writing/hello-world">alias</a>');
+    expect(html).toContain('<a href="/writing/hello-world">hello-world</a>');
+  });
+
+  it("falls back to plain text when the target slug is unresolved", async () => {
+    const { createWikilinkPlugin } = await import("../../lib/vault/wikilinks");
+    const plugin = createWikilinkPlugin({
+      publicSlugs: new Set(["hello-world"]),
+      privateSlugs: new Set(),
+      sourcePath: "notes/source.md",
+    });
+    const html = await renderWithPlugin("See [[orphan-target]].", plugin);
+    expect(html).toContain("orphan-target");
+    expect(html).not.toContain("<a");
+  });
+
+  it("strips embeds entirely (![[asset]]) — never resolves them", async () => {
+    const { createWikilinkPlugin } = await import("../../lib/vault/wikilinks");
+    const plugin = createWikilinkPlugin({
+      publicSlugs: new Set(["hello-world"]),
+      privateSlugs: new Set(),
+      sourcePath: "notes/source.md",
+    });
+    // Even if hello-world were public, embeds are dropped — no asset name leak.
+    const html = await renderWithPlugin("Before ![[hello-world]] after.", plugin);
+    expect(html).not.toContain("hello-world");
+    expect(html).not.toContain("<a");
+    expect(html).toContain("Before");
+    expect(html).toContain("after");
+  });
+
+  it("throws WikilinkLeakError when the target resolves to a private slug", async () => {
+    const { createWikilinkPlugin } = await import("../../lib/vault/wikilinks");
+    const { WikilinkLeakError } = await import("../../lib/vault/errors");
+    const plugin = createWikilinkPlugin({
+      publicSlugs: new Set(),
+      privateSlugs: new Set(["secret-note"]),
+      sourcePath: "notes/source.md",
+    });
+    await expect(
+      renderWithPlugin("See [[secret-note]].", plugin),
+    ).rejects.toBeInstanceOf(WikilinkLeakError);
+  });
+
+  it("WikilinkLeakError carries sourcePath, target, and privateSlug", async () => {
+    const { createWikilinkPlugin } = await import("../../lib/vault/wikilinks");
+    const { WikilinkLeakError } = await import("../../lib/vault/errors");
+    const plugin = createWikilinkPlugin({
+      publicSlugs: new Set(),
+      privateSlugs: new Set(["secret-note"]),
+      sourcePath: "notes/source.md",
+    });
+
+    let caught: unknown;
+    try {
+      await renderWithPlugin("See [[Secret Note]].", plugin);
+    } catch (err) {
+      caught = err;
+    }
+    expect(caught).toBeInstanceOf(WikilinkLeakError);
+    const leak = caught as InstanceType<typeof WikilinkLeakError>;
+    expect(leak.sourcePath).toBe("notes/source.md");
+    expect(leak.target).toBe("Secret Note");
+    expect(leak.privateSlug).toBe("secret-note");
+  });
+
+  it("private-target check fires even when the same slug is also in publicSlugs (private wins)", async () => {
+    const { createWikilinkPlugin } = await import("../../lib/vault/wikilinks");
+    const { WikilinkLeakError } = await import("../../lib/vault/errors");
+    const plugin = createWikilinkPlugin({
+      publicSlugs: new Set(["secret-note"]),
+      privateSlugs: new Set(["secret-note"]),
+      sourcePath: "notes/source.md",
+    });
+    await expect(
+      renderWithPlugin("See [[secret-note]].", plugin),
+    ).rejects.toBeInstanceOf(WikilinkLeakError);
+  });
+
+  it("normalizes target via filename slug rules ([[Hello World]] → hello-world)", async () => {
+    const { createWikilinkPlugin } = await import("../../lib/vault/wikilinks");
+    const plugin = createWikilinkPlugin({
+      publicSlugs: new Set(["hello-world"]),
+      privateSlugs: new Set(),
+      sourcePath: "notes/source.md",
+    });
+    const html = await renderWithPlugin("See [[Hello World]].", plugin);
+    expect(html).toContain('<a href="/writing/hello-world">Hello World</a>');
+  });
+
+  it("does not resolve wikilinks inside code fences", async () => {
+    const { createWikilinkPlugin } = await import("../../lib/vault/wikilinks");
+    const plugin = createWikilinkPlugin({
+      publicSlugs: new Set(["hello-world"]),
+      privateSlugs: new Set(["secret-note"]),
+      sourcePath: "notes/source.md",
+    });
+    const md = "```\n[[hello-world]] and [[secret-note]]\n```";
+    // No throw despite secret-note being private — code fence is exempt.
+    const html = await renderWithPlugin(md, plugin);
+    expect(html).toContain("[[hello-world]]");
+    expect(html).toContain("[[secret-note]]");
+  });
+
+  it("respects hrefPrefix override", async () => {
+    const { createWikilinkPlugin } = await import("../../lib/vault/wikilinks");
+    const plugin = createWikilinkPlugin({
+      publicSlugs: new Set(["hello-world"]),
+      privateSlugs: new Set(),
+      sourcePath: "notes/source.md",
+      hrefPrefix: "/notes",
+    });
+    const html = await renderWithPlugin("See [[hello-world]].", plugin);
+    expect(html).toContain('<a href="/notes/hello-world">hello-world</a>');
+  });
+});

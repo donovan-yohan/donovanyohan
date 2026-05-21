@@ -63,6 +63,39 @@ export class VaultConfigError extends Error {
 }
 
 /**
+ * Thrown when a public note's wikilink target resolves to a private slug.
+ *
+ * The build must fail: leaking the existence of a private slug (even just the
+ * fact that it resolves to something) violates the privacy contract. Authors
+ * resolve this by (a) removing the wikilink, (b) marking the source note
+ * private, or (c) marking the target note public.
+ *
+ * `target` is the raw wikilink text as written (before slug derivation), so
+ * the error message points back to what the author typed. `privateSlug` is
+ * the slug it collided with after `deriveSlug()` normalization.
+ */
+export class WikilinkLeakError extends Error {
+  /** Vault-relative path of the public note containing the wikilink. */
+  sourcePath: string;
+  /** Raw wikilink target as it appears in the markdown (pre-slugification). */
+  target: string;
+  /** Slug the target collides with in the private-slug set. */
+  privateSlug: string;
+
+  constructor(sourcePath: string, target: string, privateSlug: string) {
+    super(
+      `Wikilink leak: public note "${sourcePath}" links to "[[${target}]]" ` +
+        `which resolves to private slug "${privateSlug}". ` +
+        `Either remove the link, mark the source note private, or mark the target note public.`,
+    );
+    this.name = "WikilinkLeakError";
+    this.sourcePath = sourcePath;
+    this.target = target;
+    this.privateSlug = privateSlug;
+  }
+}
+
+/**
  * Thrown for public notes that fail schema validation.
  * Per P22: public-but-malformed fails loudly. Private-but-malformed is
  * silently skipped (returned as an AdapterError, not thrown).
