@@ -235,21 +235,23 @@ export class LocalVaultAdapter implements VaultAdapter {
     const paths = await walkVault(this.vaultRoot);
 
     // Pass 1: resolve every file
-    const resolved: ResolvedFile[] = [];
-    for (const relPath of paths) {
-      let result: ResolvedFile | null;
-      try {
-        result = await resolveFile(this.vaultRoot, relPath);
-      } catch (err) {
-        if (err instanceof VaultParseError) throw err;
-        console.error(
-          `[vault] Unexpected error resolving ${relPath}:`,
-          err,
-        );
-        continue;
-      }
-      if (result !== null) resolved.push(result);
-    }
+    const resolvedResults = await Promise.all(
+      paths.map(async (relPath) => {
+        try {
+          return await resolveFile(this.vaultRoot, relPath);
+        } catch (err) {
+          if (err instanceof VaultParseError) throw err;
+          console.error(
+            `[vault] Unexpected error resolving ${relPath}:`,
+            err,
+          );
+          return null;
+        }
+      }),
+    );
+    const resolved = resolvedResults.filter(
+      (r): r is ResolvedFile => r !== null,
+    );
 
     // Build slug sets for the leak gate
     const publicSlugs = new Set<string>();
@@ -264,12 +266,14 @@ export class LocalVaultAdapter implements VaultAdapter {
     }
 
     // Pass 2: render public bodies with slug-map context
-    const publicNotes: VaultNote[] = [];
-    for (const r of resolved) {
-      if (r.visibility !== "public") continue;
-      const note = await renderPublicNote(r, publicSlugs, privateSlugs);
-      publicNotes.push(note);
-    }
+    const publicNotes = await Promise.all(
+      resolved
+        .filter(
+          (r): r is Extract<ResolvedFile, { visibility: "public" }> =>
+            r.visibility === "public",
+        )
+        .map((r) => renderPublicNote(r, publicSlugs, privateSlugs)),
+    );
 
     return publicNotes;
   }

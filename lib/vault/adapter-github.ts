@@ -392,12 +392,14 @@ export class GitHubVaultAdapter implements VaultAdapter {
     }
 
     // Pass 2: render public bodies with slug-map context
-    const publicNotes: VaultNote[] = [];
-    for (const r of resolved) {
-      if (r.visibility !== "public") continue;
-      const note = await renderPublicNote(r, publicSlugs, privateSlugs);
-      publicNotes.push(note);
-    }
+    const publicNotes = await Promise.all(
+      resolved
+        .filter(
+          (r): r is Extract<ResolvedFile, { visibility: "public" }> =>
+            r.visibility === "public",
+        )
+        .map((r) => renderPublicNote(r, publicSlugs, privateSlugs)),
+    );
 
     return publicNotes;
   }
