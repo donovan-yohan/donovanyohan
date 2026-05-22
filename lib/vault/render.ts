@@ -36,11 +36,67 @@ import remarkRehype from "remark-rehype";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify";
+import type { Element, Root } from "hast";
+import type { Plugin } from "unified";
 import { createWikilinkPlugin } from "./wikilinks";
 import type { WikilinkResolveOpts } from "./wikilinks";
 
 // Re-export so adapters can import the opts type from a single module.
 export type { WikilinkResolveOpts } from "./wikilinks";
+
+const HEADING_TAGS = new Set(["h1", "h2", "h3", "h4", "h5", "h6"]);
+
+/**
+ * Wrap heading contents in an inline span after sanitization. Article pages
+ * use this child span for multiline highlighter backgrounds with
+ * `box-decoration-break: clone`; applying the class here keeps markdown
+ * authors writing ordinary `## Heading` syntax.
+ */
+const rehypeArticleHeadingSpans: Plugin<[], Root> = function () {
+  return (tree) => {
+    visitElements(tree, (node) => {
+      if (!HEADING_TAGS.has(node.tagName) || node.children.length === 0) {
+        return;
+      }
+
+      const [first] = node.children;
+      if (
+        first?.type === "element" &&
+        first.tagName === "span" &&
+        Array.isArray(first.properties?.className) &&
+        first.properties.className.includes("articleHeadingText")
+      ) {
+        return;
+      }
+
+      node.children = [
+        {
+          type: "element",
+          tagName: "span",
+          properties: { className: ["articleHeadingText"] },
+          children: node.children,
+        },
+      ];
+    });
+  };
+};
+
+function visitElements(
+  node: Root | Element,
+  visitor: (node: Element) => void,
+): void {
+  if (node.type === "element") {
+    visitor(node);
+  }
+
+  if ("children" in node) {
+    for (const child of node.children) {
+      if (child.type === "element") {
+        visitElements(child, visitor);
+      }
+    }
+  }
+}
 
 /**
  * Cached strip-only processor for no-opts renders. Reusable per unified docs:
@@ -54,6 +110,7 @@ const stripProcessor = unified()
   .use(remarkRehype, { allowDangerousHtml: true })
   .use(rehypeRaw)
   .use(rehypeSanitize)
+  .use(rehypeArticleHeadingSpans)
   .use(rehypeStringify)
   .freeze();
 
@@ -87,6 +144,7 @@ export async function renderMarkdown(
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeRaw)
     .use(rehypeSanitize)
+    .use(rehypeArticleHeadingSpans)
     .use(rehypeStringify);
 
   const result = await processor.process(body);

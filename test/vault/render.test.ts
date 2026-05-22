@@ -39,6 +39,14 @@ describe("renderMarkdown", () => {
     expect(html).toContain("<h6>");
   });
 
+  it("wraps heading content in an inline span for per-line article highlights", async () => {
+    const html = await renderMarkdown("## What the loop is doing that the prompt can't");
+
+    expect(html).toContain('<h2><span class="articleHeadingText">');
+    expect(html).toContain("What the loop is doing that the prompt can't");
+    expect(html).toContain("</span></h2>");
+  });
+
   it("renders unordered and ordered lists", async () => {
     const md = `- item one\n- item two\n\n1. first\n2. second`;
     const html = await renderMarkdown(md);
