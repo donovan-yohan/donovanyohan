@@ -997,7 +997,7 @@ const EntryCard = ({
   const aux = cardAuxMeta(entry);
   const action = ACTION_LABEL[entry.type] ?? null;
   const accentColor = accent ?? "var(--ink)";
-  // Card-wide link: caller decides (homepage maps to /writing/{slug}); link
+  // Card-wide link: caller decides (homepage maps to /work/{slug}); link
   // entries always use their own external URL even when no builder is set.
   // Scheme-less `link.url` values (e.g. "example.com/foo") get an https://
   // prefix so the anchor doesn't navigate to a same-origin relative path.

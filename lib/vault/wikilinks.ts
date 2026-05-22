@@ -10,7 +10,7 @@
  *
  *   2. **Resolve mode** (`createWikilinkPlugin({ publicSlugs, privateSlugs, sourcePath })`):
  *      Looks up each wikilink's derived slug in the supplied slug sets.
- *        - public slug  → emit an mdast `link` node `/writing/{slug}`.
+ *        - public slug  → emit an mdast `link` node `/work/{slug}`.
  *        - private slug → throw `WikilinkLeakError` (build-fail gate per P31).
  *        - unresolved   → fall back to plain text (matches strip mode).
  *
@@ -98,8 +98,8 @@ export function stripWikilinks(markdown: string): string {
  * `sourcePath` is the vault-relative path of the note being rendered. It is
  * embedded in `WikilinkLeakError` so the build error points back to the file.
  *
- * `hrefPrefix` defaults to `/writing` (the only public note route at the
- * time of writing). Override only if the route moves.
+ * `hrefPrefix` defaults to `/work`, matching the portfolio's public note route.
+ * Override only for route-specific previews or tests.
  */
 export interface WikilinkResolveOpts {
   publicSlugs: ReadonlySet<string>;
@@ -212,7 +212,7 @@ function expandWikilinksInText(
         );
       }
       if (opts.publicSlugs.has(candidateSlug)) {
-        const prefix = opts.hrefPrefix ?? "/writing";
+        const prefix = opts.hrefPrefix ?? "/work";
         results.push({
           type: "link",
           url: `${prefix}/${candidateSlug}`,

@@ -1,5 +1,5 @@
 /**
- * pages/writing/index.tsx — public notes index (Slice 0, P14).
+ * pages/work/index.tsx — public notes index (Slice 0, P14).
  *
  * Minimum-viable implementation: a plain list of public notes sorted by date
  * descending, with title and ISO date. No notebook grid, no preview cards.
@@ -65,7 +65,7 @@ export default function WritingIndex({ notes, vaultSha, vaultConfigured }: Props
           <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
             {notes.map((note) => (
               <li key={note.slug} style={{ marginBottom: 32 }}>
-                <a href={`/writing/${note.slug}`}>
+                <a href={`/work/${note.slug}`}>
                   <h2 style={{ margin: "0 0 4px" }}>{note.frontmatter.title}</h2>
                 </a>
                 <time dateTime={note.frontmatter.date}>{note.frontmatter.date}</time>

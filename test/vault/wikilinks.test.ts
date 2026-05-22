@@ -151,7 +151,7 @@ describe("createWikilinkPlugin — resolve mode", () => {
       sourcePath: "notes/source.md",
     });
     const html = await renderWithPlugin("See [[hello-world]] here.", plugin);
-    expect(html).toContain('<a href="/writing/hello-world">hello-world</a>');
+    expect(html).toContain('<a href="/work/hello-world">hello-world</a>');
   });
 
   it("uses the alias as anchor text when [[target|alias]] is given", async () => {
@@ -166,7 +166,7 @@ describe("createWikilinkPlugin — resolve mode", () => {
       plugin,
     );
     expect(html).toContain(
-      '<a href="/writing/hello-world">the first post</a>',
+      '<a href="/work/hello-world">the first post</a>',
     );
   });
 
@@ -181,8 +181,8 @@ describe("createWikilinkPlugin — resolve mode", () => {
       "See [[hello-world#intro|alias]] and [[hello-world^ref]].",
       plugin,
     );
-    expect(html).toContain('<a href="/writing/hello-world">alias</a>');
-    expect(html).toContain('<a href="/writing/hello-world">hello-world</a>');
+    expect(html).toContain('<a href="/work/hello-world">alias</a>');
+    expect(html).toContain('<a href="/work/hello-world">hello-world</a>');
   });
 
   it("falls back to plain text when the target slug is unresolved", async () => {
@@ -268,7 +268,7 @@ describe("createWikilinkPlugin — resolve mode", () => {
       sourcePath: "notes/source.md",
     });
     const html = await renderWithPlugin("See [[Hello World]].", plugin);
-    expect(html).toContain('<a href="/writing/hello-world">Hello World</a>');
+    expect(html).toContain('<a href="/work/hello-world">Hello World</a>');
   });
 
   it("does not resolve wikilinks inside code fences", async () => {

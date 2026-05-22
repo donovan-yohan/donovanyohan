@@ -1,8 +1,8 @@
 // @vitest-environment node
 /**
- * test/vault/routes.test.ts — route-contract tests for /writing routes (#35).
+ * test/vault/routes.test.ts — route-contract tests for /work routes (#35).
  *
- * Tests the getStaticProps/getStaticPaths logic that pages/writing/* use,
+ * Tests the getStaticProps/getStaticPaths logic that pages/work/* use,
  * by directly exercising lib/vault API functions against fixture vaults.
  *
  * Does NOT use next/test or a running server — calls the vault API directly
@@ -43,9 +43,9 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 
-// ── /writing index — getStaticProps equivalent ────────────────────────────────
+// ── /work index — getStaticProps equivalent ───────────────────────────────────
 
-describe("/writing index — getPublicNotes()", () => {
+describe("/work index — getPublicNotes()", () => {
   it("returns exactly 3 public notes from fixture vault", async () => {
     const { getPublicNotes } = await import("../../lib/vault/index");
     const notes = await getPublicNotes();
@@ -74,9 +74,9 @@ describe("/writing index — getPublicNotes()", () => {
   });
 });
 
-// ── /writing/[slug] — getStaticPaths equivalent ───────────────────────────────
+// ── /work/[slug] — getStaticPaths equivalent ──────────────────────────────────
 
-describe("/writing/[slug] — getStaticPaths", () => {
+describe("/work/[slug] — getStaticPaths", () => {
   it("produces a path for each public note", async () => {
     const { getPublicNotes } = await import("../../lib/vault/index");
     const notes = await getPublicNotes();
@@ -103,9 +103,9 @@ describe("/writing/[slug] — getStaticPaths", () => {
   });
 });
 
-// ── /writing/[slug] — getStaticProps equivalent ───────────────────────────────
+// ── /work/[slug] — getStaticProps equivalent ──────────────────────────────────
 
-describe("/writing/[slug] — getNoteBySlug()", () => {
+describe("/work/[slug] — getNoteBySlug()", () => {
   it("returns the note for a known fixture slug", async () => {
     const { getNoteBySlug } = await import("../../lib/vault/index");
     const note = await getNoteBySlug("note-public-1");
@@ -214,7 +214,7 @@ describe("ESLint import/no-restricted-paths rule", () => {
       ].join("\n");
 
       const results = await eslint.lintText(code, {
-        filePath: "pages/writing/index.tsx",
+        filePath: "pages/work/index.tsx",
       });
 
       const importErrors = results[0].messages.filter(
@@ -242,7 +242,7 @@ describe("ESLint import/no-restricted-paths rule", () => {
       ].join("\n");
 
       const results = await eslint.lintText(code, {
-        filePath: "pages/writing/bad-import.tsx",
+        filePath: "pages/work/bad-import.tsx",
       });
 
       const importErrors = results[0].messages.filter(
@@ -268,7 +268,7 @@ describe("ESLint import/no-restricted-paths rule", () => {
       ].join("\n");
 
       const results = await eslint.lintText(code, {
-        filePath: "pages/writing/bad-import-github.tsx",
+        filePath: "pages/work/bad-import-github.tsx",
       });
 
       const importErrors = results[0].messages.filter(
