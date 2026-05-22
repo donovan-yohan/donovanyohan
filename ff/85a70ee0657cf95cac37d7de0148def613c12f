@@ -1,0 +1,24 @@
+lib/vault/render.ts
+  s_a383e3cd69db7c::t_5cf96e21005d75 94
+  s_a383e3cd69db7c::t_16c9f2a0133aed 39-40,47-93,95-100,113,147
+pages/work/[slug].tsx
+  s_a383e3cd69db7c::t_f7fa66cf4f9a75 481,498-527
+test/vault/render.test.ts
+  s_a383e3cd69db7c::t_1f0129427eee6d 42-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "ff85a70ee0657cf95cac37d7de0148def613c12f",
+  "prompts": {},
+  "sessions": {
+    "s_a383e3cd69db7c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e4b50-2dc4-76e3-a2c7-834e6e1587e3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
