@@ -1,0 +1,28 @@
+test/lab-layout-primitives.test.tsx
+  s_a383e3cd69db7c::t_4184d69b41a8f9 17
+  s_a383e3cd69db7c::t_0529596fe3f144 1-16,18-44
+components/lab/Notebook.tsx
+  s_a383e3cd69db7c::t_12aa0346d363b4 891-897,900-906,911-912,915-916
+components/lab/system/Grid.tsx
+  s_a383e3cd69db7c::t_12aa0346d363b4 3,17-20,36-37
+test/mobile-work-section-css.test.ts
+  s_a383e3cd69db7c::t_0529596fe3f144 19-22
+components/lab/system/MarginAnchor.tsx
+  s_a383e3cd69db7c::t_12aa0346d363b4 32-38,42,44-48,50-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "80e96fac2086d0dafdd0c9b7610a952fb88a4769",
+  "prompts": {},
+  "sessions": {
+    "s_a383e3cd69db7c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e4b50-2dc4-76e3-a2c7-834e6e1587e3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
