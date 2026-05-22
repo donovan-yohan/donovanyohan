@@ -1,5 +1,6 @@
 import { Box, BoxProps } from "./Box";
 import { Units, ux } from "./tokens";
+import type { CSSProperties } from "react";
 
 export interface GridProps extends Omit<BoxProps, "gap"> {
   cols: number;
@@ -13,8 +14,10 @@ export const Grid = ({ cols, rows, gap = 1, dense, style, ...rest }: GridProps) 
     gap={gap}
     style={{
       display: "grid",
-      gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
-      gridTemplateRows: rows ? `repeat(${rows}, minmax(min-content, auto))` : undefined,
+      gridTemplateColumns: `var(--grid-template-columns, repeat(${cols}, minmax(0, 1fr)))`,
+      gridTemplateRows: `var(--grid-template-rows, ${
+        rows ? `repeat(${rows}, minmax(min-content, auto))` : "none"
+      })`,
       gridAutoFlow: dense ? "dense" : undefined,
       ...style,
     }}
@@ -30,8 +33,8 @@ export interface GridItemProps extends BoxProps {
 export const GridItem = ({ colSpan, rowSpan, style, ...rest }: GridItemProps) => (
   <Box
     style={{
-      gridColumn: colSpan ? `span ${colSpan}` : undefined,
-      gridRow: rowSpan ? `span ${rowSpan}` : undefined,
+      gridColumn: `var(--grid-column, ${colSpan ? `span ${colSpan}` : "auto"})` as CSSProperties["gridColumn"],
+      gridRow: `var(--grid-row, ${rowSpan ? `span ${rowSpan}` : "auto"})` as CSSProperties["gridRow"],
       ...style,
     }}
     {...rest}

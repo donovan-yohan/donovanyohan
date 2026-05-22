@@ -888,32 +888,32 @@ const MonthBlock = ({
             gap: var(--u);
           }
           .monthSection .marginAnchor {
-            position: sticky !important;
-            top: var(--nav-h, 48px) !important;
-            height: auto !important;
-            margin-left: 0 !important;
-            padding-left: 0 !important;
-            z-index: 18 !important;
-            pointer-events: auto !important;
+            --margin-anchor-position: sticky;
+            --margin-anchor-top: var(--nav-h, 48px);
+            --margin-anchor-height: auto;
+            --margin-anchor-margin-left: 0;
+            --margin-anchor-padding-left: 0;
+            --margin-anchor-z-index: 18;
+            --margin-anchor-pointer-events: auto;
           }
           .monthSection .marginAnchorInner {
-            position: static !important;
-            width: auto !important;
-            padding: 10px 0 8px !important;
-            display: grid !important;
-            grid-template-columns: auto minmax(0, 1fr) auto;
-            align-items: baseline !important;
-            gap: 8px !important;
+            --margin-anchor-inner-position: static;
+            --margin-anchor-inner-width: auto;
+            --margin-anchor-inner-padding: 10px 0 8px;
+            --margin-anchor-inner-display: grid;
+            --margin-anchor-inner-grid-template-columns: auto minmax(0, 1fr) auto;
+            --margin-anchor-inner-align-items: baseline;
+            --margin-anchor-inner-gap: 8px;
             background: var(--paper);
             border-bottom: 1px solid var(--rule);
           }
           .monthSection [data-cols] {
-            grid-template-columns: minmax(0, 1fr) !important;
-            grid-template-rows: none !important;
+            --grid-template-columns: minmax(0, 1fr);
+            --grid-template-rows: none;
           }
           .monthSection .card {
-            grid-column: auto !important;
-            grid-row: auto !important;
+            --grid-column: auto;
+            --grid-row: auto;
           }
           .monthName {
             font-size: 22px;

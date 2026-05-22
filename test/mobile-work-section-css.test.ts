@@ -16,9 +16,10 @@ describe("mobile work section layout", () => {
 
     expect(source).toContain(".monthSection .marginAnchor");
     expect(source).toContain(".monthSection .marginAnchorInner");
-    expect(source).toContain("grid-template-columns: minmax(0, 1fr) !important;");
-    expect(source).toContain("grid-column: auto !important;");
-    expect(source).toContain("grid-row: auto !important;");
+    expect(source).toContain("--grid-template-columns: minmax(0, 1fr);");
+    expect(source).toContain("--grid-column: auto;");
+    expect(source).toContain("--grid-row: auto;");
+    expect(source).not.toContain("!important");
   });
 
   test("homepage removes the desktop side gutter from the work section on mobile", () => {
