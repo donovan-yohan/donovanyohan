@@ -1,0 +1,39 @@
+API_CONTRACT.md
+  s_a383e3cd69db7c::t_0b9b30b4bb92d5 11,53,99,116,141,151,154,167,170
+pages/work/index.tsx
+  s_a383e3cd69db7c::t_3bc66ae18cc101 2,68
+test/leak.test.ts
+  s_a383e3cd69db7c::t_0b9b30b4bb92d5 791,794,804,808,819,823
+VAULT.md
+  s_a383e3cd69db7c::t_0b9b30b4bb92d5 49,198,214,327,331
+lib/vault/wikilinks.ts
+  s_a383e3cd69db7c::t_3bc66ae18cc101 13,101-102,215
+test/vault/render.test.ts
+  s_a383e3cd69db7c::t_0abaa50e84b15e 188,194,207
+test/vault/wikilinks.test.ts
+  s_a383e3cd69db7c::t_0abaa50e84b15e 154,169,184-185,271
+test/vault/adapter-local.test.ts
+  s_a383e3cd69db7c::t_0abaa50e84b15e 151,157
+lib/vault/index.ts
+  s_a383e3cd69db7c::t_3bc66ae18cc101 47,52
+components/lab/Notebook.tsx
+  s_a383e3cd69db7c::t_3bc66ae18cc101 1000
+test/vault/routes.test.ts
+  s_a383e3cd69db7c::t_0b9b30b4bb92d5 3,5,46,48,77,79,106,108,217,245,271
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "60bfe95f29d807c3ac4cb4da6d3256928984056c",
+  "prompts": {},
+  "sessions": {
+    "s_a383e3cd69db7c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e4b50-2dc4-76e3-a2c7-834e6e1587e3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Donovan Yohan <donovanyohan@gmail.com>"
+    }
+  }
+}
