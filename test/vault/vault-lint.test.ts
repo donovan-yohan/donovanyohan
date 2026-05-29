@@ -112,10 +112,7 @@ function makeVault(notes: Record<string, string>): string {
 // ── Test setup ────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
-  tmpDir = join(
-    tmpdir(),
-    `vault-lint-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-  );
+  tmpDir = join(tmpdir(), `vault-lint-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
   mkdirSync(tmpDir, { recursive: true });
 });
 
@@ -134,9 +131,7 @@ describe("vault-lint CLI", () => {
         "no-vis.md": NO_VISIBILITY,
       });
 
-      const { code } = withCapture(() =>
-        main(["node", "vault-lint.ts", vault]),
-      );
+      const { code } = withCapture(() => main(["node", "vault-lint.ts", vault]));
 
       expect(code).toBe(0);
     });
@@ -146,9 +141,7 @@ describe("vault-lint CLI", () => {
         "hello-world.md": VALID_PUBLIC(),
       });
 
-      const { code, stderr } = withCapture(() =>
-        main(["node", "vault-lint.ts", vault]),
-      );
+      const { code, stderr } = withCapture(() => main(["node", "vault-lint.ts", vault]));
 
       expect(code).toBe(0);
       expect(stderr).not.toMatch(/\[schema\]|\[yaml\]|\[duplicate-slug\]/);
@@ -162,7 +155,7 @@ describe("vault-lint CLI", () => {
       writeFileSync(join(vault, "README.md"), VALID_PUBLIC("Root Readme"), "utf-8");
 
       const { code, stderr } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--report", vault]),
+        main(["node", "vault-lint.ts", "--report", vault])
       );
 
       expect(code).toBe(0);
@@ -170,6 +163,30 @@ describe("vault-lint CLI", () => {
       expect(stderr).not.toMatch(/AGENTS\.md/);
       expect(stderr).not.toMatch(/README\.md/);
       expect(stderr).not.toMatch(/duplicate-slug/);
+    });
+
+    it("validates markdown image urls with parentheses without scanning code blocks", () => {
+      const vault = makeVault({
+        "article.md": `---
+title: Article
+date: 2026-05-10
+visibility: public
+---
+
+![Hero](imgs/hero(1).svg)
+
+\`\`\`md
+![Missing](imgs/missing.svg)
+\`\`\`
+`,
+      });
+      mkdirSync(join(vault, "notes", "imgs"), { recursive: true });
+      writeFileSync(join(vault, "notes", "imgs", "hero(1).svg"), "<svg />", "utf-8");
+
+      const { code, stderr } = withCapture(() => main(["node", "vault-lint.ts", vault]));
+
+      expect(code).toBe(0);
+      expect(stderr).not.toMatch(/missing image asset/);
     });
   });
 
@@ -181,9 +198,7 @@ describe("vault-lint CLI", () => {
         "Hello World.md": VALID_PUBLIC("Hello World Dupe"),
       });
 
-      const { code } = withCapture(() =>
-        main(["node", "vault-lint.ts", vault]),
-      );
+      const { code } = withCapture(() => main(["node", "vault-lint.ts", vault]));
 
       expect(code).toBe(1);
     });
@@ -194,9 +209,7 @@ describe("vault-lint CLI", () => {
         "Hello World.md": VALID_PUBLIC("Hello World Dupe"),
       });
 
-      const { stderr } = withCapture(() =>
-        main(["node", "vault-lint.ts", vault]),
-      );
+      const { stderr } = withCapture(() => main(["node", "vault-lint.ts", vault]));
 
       expect(stderr).toMatch(/duplicate-slug|duplicate slug/i);
       expect(stderr).toMatch(/hello-world/);
@@ -217,9 +230,7 @@ Body.
         "other-note.md": withSlugOverride,
       });
 
-      const { code } = withCapture(() =>
-        main(["node", "vault-lint.ts", vault]),
-      );
+      const { code } = withCapture(() => main(["node", "vault-lint.ts", vault]));
 
       expect(code).toBe(1);
     });
@@ -232,9 +243,7 @@ Body.
         "malformed.md": MALFORMED_YAML,
       });
 
-      const { code } = withCapture(() =>
-        main(["node", "vault-lint.ts", vault]),
-      );
+      const { code } = withCapture(() => main(["node", "vault-lint.ts", vault]));
 
       expect(code).toBe(1);
     });
@@ -244,9 +253,7 @@ Body.
         "malformed.md": MALFORMED_YAML,
       });
 
-      const { stderr } = withCapture(() =>
-        main(["node", "vault-lint.ts", vault]),
-      );
+      const { stderr } = withCapture(() => main(["node", "vault-lint.ts", vault]));
 
       expect(stderr).toMatch(/\[yaml\]/);
     });
@@ -263,9 +270,7 @@ No title field — schema should fail, resolves to private.
         "no-title.md": missingTitle,
       });
 
-      const { code } = withCapture(() =>
-        main(["node", "vault-lint.ts", vault]),
-      );
+      const { code } = withCapture(() => main(["node", "vault-lint.ts", vault]));
 
       // Missing title on public note → schema error → exit 1
       // (resolveVisibility returns 'private' since schema fails → no error from lint)
@@ -283,9 +288,7 @@ No title field — schema should fail, resolves to private.
         "no-vis.md": NO_VISIBILITY,
       });
 
-      const { stderr } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--report", vault]),
-      );
+      const { stderr } = withCapture(() => main(["node", "vault-lint.ts", "--report", vault]));
 
       expect(stderr).toMatch(/public-note\.md/);
       expect(stderr).toMatch(/private-note\.md/);
@@ -297,9 +300,7 @@ No title field — schema should fail, resolves to private.
         "my-post.md": VALID_PUBLIC(),
       });
 
-      const { stderr } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--report", vault]),
-      );
+      const { stderr } = withCapture(() => main(["node", "vault-lint.ts", "--report", vault]));
 
       expect(stderr).toMatch(/\[public\]/i);
       expect(stderr).toMatch(/my-post\.md/);
@@ -310,9 +311,7 @@ No title field — schema should fail, resolves to private.
         "private.md": VALID_PRIVATE,
       });
 
-      const { stderr } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--report", vault]),
-      );
+      const { stderr } = withCapture(() => main(["node", "vault-lint.ts", "--report", vault]));
 
       expect(stderr).toMatch(/\[private\]/i);
       expect(stderr).toMatch(/private\.md/);
@@ -323,9 +322,7 @@ No title field — schema should fail, resolves to private.
         "post.md": VALID_PUBLIC(),
       });
 
-      const { code } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--report", vault]),
-      );
+      const { code } = withCapture(() => main(["node", "vault-lint.ts", "--report", vault]));
 
       expect(code).toBe(0);
     });
@@ -338,7 +335,7 @@ No title field — schema should fail, resolves to private.
       });
 
       const { code, stderr } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--report", vault]),
+        main(["node", "vault-lint.ts", "--report", vault])
       );
 
       expect(code).toBe(1);
@@ -353,9 +350,7 @@ No title field — schema should fail, resolves to private.
         "private.md": VALID_PRIVATE,
       });
 
-      const { stdout } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--json", vault]),
-      );
+      const { stdout } = withCapture(() => main(["node", "vault-lint.ts", "--json", vault]));
 
       const parsed = JSON.parse(stdout) as unknown;
       expect(parsed).toBeTruthy();
@@ -367,9 +362,7 @@ No title field — schema should fail, resolves to private.
         "private.md": VALID_PRIVATE,
       });
 
-      const { stdout } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--json", vault]),
-      );
+      const { stdout } = withCapture(() => main(["node", "vault-lint.ts", "--json", vault]));
 
       const result = JSON.parse(stdout) as {
         summary: { walked: number; public: number; private: number; errors: number };
@@ -399,9 +392,7 @@ No title field — schema should fail, resolves to private.
         "hello.md": VALID_PUBLIC(),
       });
 
-      const { stdout } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--json", vault]),
-      );
+      const { stdout } = withCapture(() => main(["node", "vault-lint.ts", "--json", vault]));
 
       // The only stdout content should be parseable JSON
       expect(() => JSON.parse(stdout)).not.toThrow();
@@ -416,9 +407,7 @@ No title field — schema should fail, resolves to private.
         "priv.md": VALID_PRIVATE,
       });
 
-      const { stdout } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--json", vault]),
-      );
+      const { stdout } = withCapture(() => main(["node", "vault-lint.ts", "--json", vault]));
 
       const result = JSON.parse(stdout) as {
         summary: { walked: number; public: number; private: number; errors: number };
@@ -439,9 +428,7 @@ No title field — schema should fail, resolves to private.
         "Hello World.md": VALID_PUBLIC("Note A Dup"),
       });
 
-      const { code, stdout } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--json", vault]),
-      );
+      const { code, stdout } = withCapture(() => main(["node", "vault-lint.ts", "--json", vault]));
 
       const result = JSON.parse(stdout) as {
         errors: Array<{ kind: string; path: string; message: string }>;
@@ -456,9 +443,7 @@ No title field — schema should fail, resolves to private.
         "hello.md": VALID_PUBLIC(),
       });
 
-      const { stderr } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--json", vault]),
-      );
+      const { stderr } = withCapture(() => main(["node", "vault-lint.ts", "--json", vault]));
 
       // No human-readable summary lines in stderr for json mode
       expect(stderr).not.toMatch(/vault-lint:/);
@@ -483,7 +468,7 @@ No title field — schema should fail, resolves to private.
       writeFileSync(join(trashDir, "deleted.md"), MALFORMED_YAML, "utf-8");
 
       const { code, stdout } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--json", vaultDir]),
+        main(["node", "vault-lint.ts", "--json", vaultDir])
       );
 
       // Only the one note in notes/ should be walked; no errors from hidden dirs
@@ -502,9 +487,7 @@ No title field — schema should fail, resolves to private.
         "note.md": VALID_PUBLIC(),
       });
 
-      const { code: cleanCode } = withCapture(() =>
-        main(["node", "vault-lint.ts", cleanVault]),
-      );
+      const { code: cleanCode } = withCapture(() => main(["node", "vault-lint.ts", cleanVault]));
       expect(cleanCode).toBe(0);
 
       const dupVault = makeVault({
@@ -513,9 +496,7 @@ No title field — schema should fail, resolves to private.
         "Hello World.md": VALID_PUBLIC("Note Dup"),
       });
 
-      const { code: errCode } = withCapture(() =>
-        main(["node", "vault-lint.ts", dupVault]),
-      );
+      const { code: errCode } = withCapture(() => main(["node", "vault-lint.ts", dupVault]));
       expect(errCode).toBe(1);
     });
   });
@@ -526,15 +507,9 @@ No title field — schema should fail, resolves to private.
       // (a fail-closed regression fixture). vault-lint correctly returns
       // exit 1 because that note has a YAML parse error — that's the
       // intended behavior, not a regression.
-      const fixtureVault = join(
-        process.cwd(),
-        "__fixtures__",
-        "vault",
-      );
+      const fixtureVault = join(process.cwd(), "__fixtures__", "vault");
 
-      const { code, stderr } = withCapture(() =>
-        main(["node", "vault-lint.ts", fixtureVault]),
-      );
+      const { code, stderr } = withCapture(() => main(["node", "vault-lint.ts", fixtureVault]));
 
       expect(code).toBe(1);
       expect(stderr).toMatch(/malformed-frontmatter/);
@@ -547,13 +522,8 @@ No title field — schema should fail, resolves to private.
   describe("regressions (PR #45 review)", () => {
     it("rejects opening --- without closing fence as YAML error (copilot #45)", () => {
       const v = makeVault({});
-      writeFileSync(
-        join(v, "notes", "broken.md"),
-        "---\ntitle: Broken\nvisibility: public\n",
-      );
-      const { code, stderr } = withCapture(() =>
-        main(["node", "vault-lint.ts", v]),
-      );
+      writeFileSync(join(v, "notes", "broken.md"), "---\ntitle: Broken\nvisibility: public\n");
+      const { code, stderr } = withCapture(() => main(["node", "vault-lint.ts", v]));
       expect(code).toBe(1);
       expect(stderr).toMatch(/yaml/i);
     });
@@ -562,47 +532,37 @@ No title field — schema should fail, resolves to private.
       const v = makeVault({});
       writeFileSync(
         join(v, "notes", "hello.md"),
-        "---\ntitle: A\ndate: 2026-05-10\nvisibility: public\nslug: shared\n---\n",
+        "---\ntitle: A\ndate: 2026-05-10\nvisibility: public\nslug: shared\n---\n"
       );
       writeFileSync(
         join(v, "notes", "world.md"),
-        "---\ntitle: B\ndate: 2026-05-11\nvisibility: public\nslug: shared\n---\n",
+        "---\ntitle: B\ndate: 2026-05-11\nvisibility: public\nslug: shared\n---\n"
       );
-      const { code, stdout } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--json", v]),
-      );
+      const { code, stdout } = withCapture(() => main(["node", "vault-lint.ts", "--json", v]));
       expect(code).toBe(1);
       const out = JSON.parse(stdout) as {
         files: { path: string; status: string }[];
         errors: { path: string; kind: string }[];
       };
       const errPaths = new Set(
-        out.errors
-          .filter((e) => e.kind === "duplicate-slug")
-          .map((e) => e.path),
+        out.errors.filter((e) => e.kind === "duplicate-slug").map((e) => e.path)
       );
       expect(errPaths.has("notes/hello.md")).toBe(true);
       expect(errPaths.has("notes/world.md")).toBe(true);
-      const fileStatuses = Object.fromEntries(
-        out.files.map((f) => [f.path, f.status]),
-      );
+      const fileStatuses = Object.fromEntries(out.files.map((f) => [f.path, f.status]));
       expect(fileStatuses["notes/hello.md"]).toBe("error");
       expect(fileStatuses["notes/world.md"]).toBe("error");
     });
 
     it("treats non-existent vault path as walk error, not silent OK (copilot #45)", () => {
       const ghostPath = join(tmpdir(), "vault-lint-ghost-" + Date.now());
-      const { code, stderr } = withCapture(() =>
-        main(["node", "vault-lint.ts", ghostPath]),
-      );
+      const { code, stderr } = withCapture(() => main(["node", "vault-lint.ts", ghostPath]));
       expect(code).toBe(1);
       expect(stderr.toLowerCase()).toMatch(/io|walk|directory|enoent/);
     });
 
     it("returns exit 1 (not process.exit) on bad args (gemini #45)", () => {
-      const { code, stderr } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--unknown-flag"]),
-      );
+      const { code, stderr } = withCapture(() => main(["node", "vault-lint.ts", "--unknown-flag"]));
       expect(code).toBe(1);
       expect(stderr).toMatch(/Unknown flag|Usage/);
     });
@@ -612,22 +572,17 @@ No title field — schema should fail, resolves to private.
       const v = makeVault({});
       writeFileSync(
         join(v, "notes", "real.md"),
-        "---\ntitle: Real\ndate: 2026-05-10\nvisibility: public\n---\n",
+        "---\ntitle: Real\ndate: 2026-05-10\nvisibility: public\n---\n"
       );
       // Create a symlink pointing to a target that exists
       try {
-        symlinkSync(
-          join(v, "notes", "real.md"),
-          join(v, "notes", "symlink-to-real.md"),
-        );
+        symlinkSync(join(v, "notes", "real.md"), join(v, "notes", "symlink-to-real.md"));
       } catch {
         // Skip on platforms / FS that don't support symlinks
         return;
       }
       if (!existsSync(join(v, "notes", "symlink-to-real.md"))) return;
-      const { code, stdout } = withCapture(() =>
-        main(["node", "vault-lint.ts", "--json", v]),
-      );
+      const { code, stdout } = withCapture(() => main(["node", "vault-lint.ts", "--json", v]));
       expect(code).toBe(0);
       const out = JSON.parse(stdout) as {
         files: { path: string }[];

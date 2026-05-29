@@ -26,16 +26,10 @@ export class DuplicateSlugError extends Error {
   /** How each path in `paths` got its slug. */
   resolutions: ("derived" | "frontmatter")[];
 
-  constructor(
-    slug: string,
-    paths: string[],
-    resolutions: ("derived" | "frontmatter")[],
-  ) {
+  constructor(slug: string, paths: string[], resolutions: ("derived" | "frontmatter")[]) {
     super(
       `Duplicate slug "${slug}" across ${paths.length} notes:\n` +
-        paths
-          .map((p, i) => `  ${p} (${resolutions[i] ?? "derived"})`)
-          .join("\n"),
+        paths.map((p, i) => `  ${p} (${resolutions[i] ?? "derived"})`).join("\n")
     );
     this.name = "DuplicateSlugError";
     this.slug = slug;
@@ -55,7 +49,7 @@ export class VaultConfigError extends Error {
   constructor(missing: string[]) {
     super(
       `Vault configuration error — missing required env vars in production:\n` +
-        missing.map((v) => `  ${v}`).join("\n"),
+        missing.map((v) => `  ${v}`).join("\n")
     );
     this.name = "VaultConfigError";
     this.missing = missing;
@@ -86,7 +80,7 @@ export class WikilinkLeakError extends Error {
     super(
       `Wikilink leak: public note "${sourcePath}" links to "[[${target}]]" ` +
         `which resolves to private slug "${privateSlug}". ` +
-        `Either remove the link, mark the source note private, or mark the target note public.`,
+        `Either remove the link, mark the source note private, or mark the target note public.`
     );
     this.name = "WikilinkLeakError";
     this.sourcePath = sourcePath;
@@ -104,16 +98,10 @@ export class VaultParseError extends Error {
   /** Vault-relative file path. */
   path: string;
   /** Classification of the parse failure. */
-  reason: "yaml" | "schema" | "visibility";
+  reason: "yaml" | "schema" | "visibility" | "asset";
 
-  constructor(
-    path: string,
-    reason: "yaml" | "schema" | "visibility",
-    detail?: string,
-  ) {
-    super(
-      `Vault parse error in "${path}" (${reason})${detail ? ": " + detail : ""}`,
-    );
+  constructor(path: string, reason: "yaml" | "schema" | "visibility" | "asset", detail?: string) {
+    super(`Vault parse error in "${path}" (${reason})${detail ? ": " + detail : ""}`);
     this.name = "VaultParseError";
     this.path = path;
     this.reason = reason;
