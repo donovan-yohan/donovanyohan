@@ -34,6 +34,7 @@ export const MarginAnchor = ({
     zIndex: "var(--margin-anchor-z-index, 10)" as unknown as CSSProperties["zIndex"],
     height: "var(--margin-anchor-height, 0)",
     marginLeft: "var(--margin-anchor-margin-left, calc(-1 * var(--content-pad-left)))",
+    marginRight: "var(--margin-anchor-margin-right, 0)",
     paddingLeft: "var(--margin-anchor-padding-left, var(--content-pad-left))",
     pointerEvents: "var(--margin-anchor-pointer-events, none)" as CSSProperties["pointerEvents"],
     ...style,

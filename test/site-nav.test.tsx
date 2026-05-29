@@ -26,4 +26,14 @@ describe("SiteNav", () => {
     await button.click();
     expect(toggleTheme).toHaveBeenCalledTimes(1);
   });
+
+  test("can render sticky when embedded in the homepage flow", () => {
+    render(
+      <Context.Provider value={{ theme: "dark", toggleTheme: vi.fn() }}>
+        <SiteNav position="sticky" />
+      </Context.Provider>,
+    );
+
+    expect(screen.getByRole("navigation")).toHaveClass("topnav-sticky");
+  });
 });

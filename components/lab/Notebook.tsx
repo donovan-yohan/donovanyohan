@@ -754,14 +754,20 @@ const Notebook = ({
         }
         @media (max-width: 900px) {
           .chipsBar {
-            margin-left: calc(-1 * var(--content-pad-left));
-            margin-right: calc(-1 * var(--content-pad-left));
+            --notebook-mobile-bleed: var(
+              --notebook-bleed-x,
+              var(--content-pad-left)
+            );
+            --mobile-chips-h: 57px;
+            margin-left: calc(-1 * var(--notebook-mobile-bleed));
+            margin-right: calc(-1 * var(--notebook-mobile-bleed));
           }
           .chipsInner {
             flex-wrap: nowrap;
             gap: 8px;
             overflow-x: auto;
-            padding: 10px var(--content-pad-left);
+            overscroll-behavior-x: contain;
+            padding: 10px var(--notebook-mobile-bleed);
             scrollbar-width: none;
           }
           .chipsInner::-webkit-scrollbar {
@@ -888,10 +894,17 @@ const MonthBlock = ({
             gap: var(--u);
           }
           .monthSection .marginAnchor {
+            --notebook-mobile-bleed: var(
+              --notebook-bleed-x,
+              var(--content-pad-left)
+            );
             --margin-anchor-position: sticky;
-            --margin-anchor-top: var(--nav-h, 48px);
+            --margin-anchor-top: calc(
+              var(--nav-h, 48px) + var(--mobile-chips-h, 57px)
+            );
             --margin-anchor-height: auto;
-            --margin-anchor-margin-left: 0;
+            --margin-anchor-margin-left: calc(-1 * var(--notebook-mobile-bleed));
+            --margin-anchor-margin-right: calc(-1 * var(--notebook-mobile-bleed));
             --margin-anchor-padding-left: 0;
             --margin-anchor-z-index: 18;
             --margin-anchor-pointer-events: auto;
@@ -899,7 +912,7 @@ const MonthBlock = ({
           .monthSection .marginAnchorInner {
             --margin-anchor-inner-position: static;
             --margin-anchor-inner-width: auto;
-            --margin-anchor-inner-padding: 10px 0 8px;
+            --margin-anchor-inner-padding: 10px var(--notebook-mobile-bleed) 8px;
             --margin-anchor-inner-display: grid;
             --margin-anchor-inner-grid-template-columns: auto minmax(0, 1fr) auto;
             --margin-anchor-inner-align-items: baseline;

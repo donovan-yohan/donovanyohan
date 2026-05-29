@@ -27,13 +27,15 @@ const DY_PATHS: readonly string[] = [
 interface SiteNavProps {
   /** Highlights the current tab via a `data-current` attr on the link. */
   current?: "home" | "work" | "about" | "contact";
+  /** Home uses sticky nav inside the page flow; article/detail pages keep it fixed. */
+  position?: "fixed" | "sticky";
 }
 
-export const SiteNav = ({ current }: SiteNavProps) => {
+export const SiteNav = ({ current, position = "fixed" }: SiteNavProps) => {
   const { theme, toggleTheme } = useContext(Context);
 
   return (
-    <nav className="topnav">
+    <nav className={`topnav topnav-${position}`}>
       <div className="topnavInner">
         <Link href="/" className={`navHome ${gm800.className}`} aria-label="Home">
           <span className="navMarkBox" aria-hidden>
@@ -131,6 +133,12 @@ export const SiteNav = ({ current }: SiteNavProps) => {
           z-index: 50;
           background: var(--paper);
           border-bottom: 1px solid var(--rule);
+        }
+        .topnav-sticky {
+          position: sticky;
+        }
+        .topnav-fixed {
+          position: fixed;
         }
         .topnavInner {
           display: flex;
