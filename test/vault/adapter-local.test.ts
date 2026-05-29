@@ -148,13 +148,13 @@ describe("LocalVaultAdapter — body structure", () => {
 describe("LocalVaultAdapter — wikilink resolution (P31)", () => {
   it("public-to-public wikilink resolves to an anchor", async () => {
     // note-public-2.md has [[note-public-1|link to first post]]
-    // note-public-1 is a public slug → anchor /writing/note-public-1 with alias text.
+    // note-public-1 is a public slug → anchor /work/note-public-1 with alias text.
     const adapter = new LocalVaultAdapter(FIXTURE_VAULT);
     const notes = await adapter.getPublicNotes();
     const note2 = notes.find((n) => n.slug === "note-public-2");
     expect(note2).toBeDefined();
     expect(note2!.body).toContain(
-      '<a href="/writing/note-public-1">link to first post</a>',
+      '<a href="/work/note-public-1">link to first post</a>',
     );
   });
 

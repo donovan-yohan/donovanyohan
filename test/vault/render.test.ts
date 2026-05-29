@@ -39,6 +39,14 @@ describe("renderMarkdown", () => {
     expect(html).toContain("<h6>");
   });
 
+  it("wraps heading content in an inline span for per-line article highlights", async () => {
+    const html = await renderMarkdown("## What the loop is doing that the prompt can't");
+
+    expect(html).toContain('<h2><span class="articleHeadingText">');
+    expect(html).toContain("What the loop is doing that the prompt can't");
+    expect(html).toContain("</span></h2>");
+  });
+
   it("renders unordered and ordered lists", async () => {
     const md = `- item one\n- item two\n\n1. first\n2. second`;
     const html = await renderMarkdown(md);
@@ -177,13 +185,13 @@ describe("renderMarkdown", () => {
 
   // ── Resolve mode (P31) ────────────────────────────────────────────────────
 
-  it("resolve mode: emits anchor /writing/{slug} for public wikilink targets", async () => {
+  it("resolve mode: emits anchor /work/{slug} for public wikilink targets", async () => {
     const html = await renderMarkdown("See [[hello-world]] for details.", {
       publicSlugs: new Set(["hello-world"]),
       privateSlugs: new Set(),
       sourcePath: "notes/source.md",
     });
-    expect(html).toContain('<a href="/writing/hello-world">hello-world</a>');
+    expect(html).toContain('<a href="/work/hello-world">hello-world</a>');
   });
 
   it("resolve mode: uses alias text for [[target|alias]]", async () => {
@@ -196,7 +204,7 @@ describe("renderMarkdown", () => {
       },
     );
     expect(html).toContain(
-      '<a href="/writing/hello-world">the first post</a>',
+      '<a href="/work/hello-world">the first post</a>',
     );
   });
 

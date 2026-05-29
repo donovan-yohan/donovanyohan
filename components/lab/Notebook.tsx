@@ -620,7 +620,11 @@ const Notebook = ({
           insert a dotted band between it and the chip bar — and so the
           chip bar's sticky range still spans the rest of the section. */}
       <div ref={sentinelRef} className="chipsSentinel" aria-hidden />
-      <Stack gap={1}>
+      <Stack
+        gap={0}
+        className="notebookStack"
+        style={{ gap: "var(--notebook-stack-gap, var(--u))" }}
+      >
         <div className={`chipsBar ${chipsStuck ? "is-stuck" : ""} ${monoClass}`}>
           <div className="chipsInner">
             <button
@@ -678,6 +682,9 @@ const Notebook = ({
            so the parent Stack's gap doesn't insert a dotted band between
            them. Sentinel stays in normal flow at the top of the wrapper
            so IntersectionObserver fires when the chip bar pins. */
+        .notebookStack {
+          --notebook-stack-gap: var(--u);
+        }
         .chipsWrap {
           position: relative;
         }
@@ -751,6 +758,47 @@ const Notebook = ({
         }
         .chipActive .chipCount {
           opacity: 0.85;
+        }
+        @media (max-width: 900px) {
+          .notebookStack {
+            --notebook-stack-gap: 0px;
+          }
+          .notebookStack > .monthSection + .monthSection {
+            margin-top: calc(var(--u) * 1.5);
+          }
+          .chipsBar {
+            --notebook-mobile-bleed: var(
+              --notebook-bleed-x,
+              var(--content-pad-left)
+            );
+            --mobile-chips-h: 57px;
+            margin-left: calc(-1 * var(--notebook-mobile-bleed));
+            margin-right: calc(-1 * var(--notebook-mobile-bleed));
+          }
+          .chipsInner {
+            flex-wrap: nowrap;
+            gap: 8px;
+            overflow-x: auto;
+            overscroll-behavior-x: contain;
+            padding: 10px var(--notebook-mobile-bleed);
+            scrollbar-width: none;
+          }
+          .chipsInner::-webkit-scrollbar {
+            display: none;
+          }
+          .chip {
+            flex: 0 0 auto;
+            min-height: 36px;
+            padding: 8px 10px;
+          }
+        }
+        @media (max-width: 520px) {
+          .chip {
+            letter-spacing: 0.08em;
+          }
+          .chipGlyph {
+            display: none;
+          }
         }
       `}</style>
       </Stack>
@@ -852,16 +900,67 @@ const MonthBlock = ({
           color: var(--ink-mute);
         }
         @media (max-width: 900px) {
-          .monthName {
-            font-size: 64px;
+          .monthSection {
+            gap: calc(var(--u) * 1.5);
           }
-          .monthHeader {
-            top: 48px;
+          .stickyZone {
+            gap: var(--u);
+          }
+          .monthSection .marginAnchor {
+            --notebook-mobile-bleed: var(
+              --notebook-bleed-x,
+              var(--content-pad-left)
+            );
+            --margin-anchor-position: sticky;
+            --margin-anchor-top: calc(
+              var(--nav-h, 48px) + var(--mobile-chips-h, 57px)
+            );
+            --margin-anchor-height: auto;
+            --margin-anchor-margin-left: calc(-1 * var(--notebook-mobile-bleed));
+            --margin-anchor-margin-right: calc(-1 * var(--notebook-mobile-bleed));
+            --margin-anchor-padding-left: 0;
+            --margin-anchor-z-index: 18;
+            --margin-anchor-pointer-events: auto;
+          }
+          .monthSection .marginAnchorInner {
+            --margin-anchor-inner-position: static;
+            --margin-anchor-inner-width: auto;
+            --margin-anchor-inner-padding: 10px var(--notebook-mobile-bleed) 8px;
+            --margin-anchor-inner-display: grid;
+            --margin-anchor-inner-grid-template-columns: auto minmax(0, 1fr) auto;
+            --margin-anchor-inner-align-items: baseline;
+            --margin-anchor-inner-gap: 8px;
+            background: var(--paper);
+            border-bottom: 1px solid var(--rule);
+          }
+          .monthSection [data-cols] {
+            --grid-template-columns: minmax(0, 1fr);
+            --grid-template-rows: none;
+          }
+          .monthSection .card {
+            --grid-column: auto;
+            --grid-row: auto;
+          }
+          .monthName {
+            font-size: 22px;
+            letter-spacing: 0.08em;
+            line-height: 1;
+          }
+          .monthYear {
+            margin-top: 0;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            color: var(--ink-mute);
+          }
+          .monthCount {
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-align: right;
           }
         }
         @media (max-width: 560px) {
           .monthName {
-            font-size: 48px;
+            font-size: 20px;
           }
         }
       `}</style>
@@ -924,7 +1023,7 @@ const EntryCard = ({
   const aux = cardAuxMeta(entry);
   const action = ACTION_LABEL[entry.type] ?? null;
   const accentColor = accent ?? "var(--ink)";
-  // Card-wide link: caller decides (homepage maps to /writing/{slug}); link
+  // Card-wide link: caller decides (homepage maps to /work/{slug}); link
   // entries always use their own external URL even when no builder is set.
   // Scheme-less `link.url` values (e.g. "example.com/foo") get an https://
   // prefix so the anchor doesn't navigate to a same-origin relative path.

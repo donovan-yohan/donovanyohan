@@ -385,6 +385,9 @@ export default function WorkSlug({ note }: Props) {
           justify-content: center;
           width: 32px;
           height: 32px;
+          flex: 0 0 32px;
+          min-width: 32px;
+          min-height: 32px;
           margin-left: 8px;
           padding: 0;
           border: 1px solid var(--rule);
@@ -475,12 +478,12 @@ export default function WorkSlug({ note }: Props) {
           color: var(--ink);
           font-size: 20px;
           line-height: 2;
+          --article-heading-highlight: var(--hl-4);
         }
         .articleBody p {
           margin: 0 0 20px;
         }
         .articleBody h2 {
-          position: relative;
           margin: 56px 0 16px;
           font-family:
             "Geist Mono",
@@ -492,39 +495,36 @@ export default function WorkSlug({ note }: Props) {
           font-weight: 800;
           color: var(--ink);
         }
-        /* Highlighter swatch sitting beneath h2 — picks the article's
-           accent slot via data-accent on the wrapper. Subtle stripe across
-           the lower half of the line, matching the hero copy treatment. */
-        .articleBody h2::before {
-          content: "";
-          position: absolute;
-          left: -6px;
-          top: 60%;
-          width: calc(100% + 12px);
-          height: 0.5em;
-          z-index: -1;
-          background: var(--hl-4);
-          opacity: 0.75;
+        /* Markdown headings render with an inline child span from
+           lib/vault/render.ts. Put the marker on that inline span instead
+           of h2::before so wrapped headings get one highlighter stroke per
+           visual line rather than a single full-block stripe. */
+        .articleBody h2 .articleHeadingText {
+          display: inline;
+          padding: 0 0.12em;
+          margin: 0 -0.12em;
+          background-image: linear-gradient(
+            to right,
+            var(--article-heading-highlight),
+            var(--article-heading-highlight)
+          );
+          background-position: 0 0.62em;
+          background-size: 100% 0.52em;
+          background-repeat: no-repeat;
+          -webkit-box-decoration-break: clone;
+          box-decoration-break: clone;
         }
-        .articleBody h2 {
-          isolation: isolate;
-          /* Shrink h2 to text width so the highlight ::before doesn't run
-             past the actual heading. Block still forces a line break before
-             and after. */
-          width: fit-content;
-          max-width: 100%;
+        .articleBody[data-accent="hl-1"] {
+          --article-heading-highlight: var(--hl-1);
         }
-        .articleBody[data-accent="hl-1"] h2::before {
-          background: var(--hl-1);
+        .articleBody[data-accent="hl-2"] {
+          --article-heading-highlight: var(--hl-2);
         }
-        .articleBody[data-accent="hl-2"] h2::before {
-          background: var(--hl-2);
+        .articleBody[data-accent="hl-3"] {
+          --article-heading-highlight: var(--hl-3);
         }
-        .articleBody[data-accent="hl-3"] h2::before {
-          background: var(--hl-3);
-        }
-        .articleBody[data-accent="hl-4"] h2::before {
-          background: var(--hl-4);
+        .articleBody[data-accent="hl-4"] {
+          --article-heading-highlight: var(--hl-4);
         }
         .articleBody h3 {
           margin: 32px 0 12px;
@@ -616,7 +616,34 @@ export default function WorkSlug({ note }: Props) {
             padding: 32px 24px 96px;
           }
           .topnavInner {
-            padding: 0 24px;
+            padding: 0 clamp(10px, 3vw, 16px);
+            gap: 8px;
+          }
+          .navTitle {
+            display: none;
+          }
+          .navTabs {
+            flex: 0 1 auto;
+            min-width: 0;
+          }
+          .navTab {
+            padding: 0 clamp(8px, 2.4vw, 12px);
+            font-size: 11px;
+            letter-spacing: 0.08em;
+          }
+          .navSpacer {
+            flex: 1 1 auto;
+            min-width: 0;
+          }
+        }
+        @media (max-width: 420px) {
+          .navTab {
+            padding: 0 7px;
+            font-size: 10px;
+            letter-spacing: 0.05em;
+          }
+          .themeToggle {
+            margin-left: 4px;
           }
         }
       `}</style>

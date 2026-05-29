@@ -44,12 +44,12 @@ export function getVaultConfig(): VaultConfig | null {
   // VAULT_PATH is set in production, return null so the caller can render an
   // empty vault rather than crash. Common scenario: someone forks the
   // template, deploys to Vercel, hasn't wired up their vault yet — the site
-  // should still build with /writing rendering the empty state.
+  // should still build with /work rendering the empty state.
   if (isProduction && !sourceEnv && !process.env.VAULT_PATH) {
     if (typeof process !== "undefined" && typeof console !== "undefined") {
       console.warn(
         "[vault] No vault configured (VAULT_SOURCE / VAULT_PATH unset in production). " +
-          "/writing will render empty. Set VAULT_SOURCE=local|github + the matching " +
+          "/work will render empty. Set VAULT_SOURCE=local|github + the matching " +
           "vars to publish content. See VAULT.md.",
       );
     }

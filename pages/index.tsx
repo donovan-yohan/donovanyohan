@@ -2,8 +2,9 @@ import Head from "next/head";
 import dynamic from "next/dynamic";
 import { useContext, useEffect, useRef, useState } from "react";
 import type { GetStaticProps } from "next";
-import { Box, Stack } from "../components/lab/system";
+import { Box } from "../components/lab/system";
 import Context from "../components/context";
+import SiteNav from "../components/SiteNav";
 import { getPublicNotes } from "../lib/vault";
 import { notesToNotebookMonths } from "../lib/vault/to-notebook";
 import type { NotebookMonth } from "../components/lab/Notebook";
@@ -22,21 +23,12 @@ import type { ComponentType, SVGProps } from "react";
 import { themeBootstrap } from "../lib/theme-bootstrap";
 import { gm500, gm800, cp400, cp400i } from "../global/fonts";
 import { dotGridColor } from "../lib/dot-grid-color";
-import { ABOUT_PAGE_ENABLED } from "../lib/flags";
 
 const DotGrid = dynamic(() => import("../components/lab/DotGrid"), { ssr: false });
 const HatchScene = dynamic(() => import("../components/lab/HatchScene"), { ssr: false });
 const Notebook = dynamic(() => import("../components/lab/Notebook"), { ssr: false });
 import DrawBox from "../components/DrawBox";
 import { HiSpan } from "../components/Highlighter";
-
-// Original DY centerlines (used only by the nav home mark, which renders
-// the glyph as a solid stroked silhouette at small size).
-const DY_PATHS: readonly string[] = [
-  "M 1371.48 700.4 L 1371.67 1013.54 L 1371.67 1063.38 C 1371.67 1238.53 1229.69 1380.51 1054.54 1380.51 L 990.63 1380.51",
-  "M 736.58 50.74 L 736.58 380.47 L 736.58 702.5",
-  "M 486.58 1021.04 L 420.25 1021.04 C 245.1 1021.04 103.11 879.05 103.11 703.89 C 103.11 528.74 245.1 386.76 420.25 386.76 C 595.4 386.76 737.39 528.74 737.39 703.89 C 737.39 879.05 879.38 1021.04 1054.53 1021.04 C 1229.68 1021.04 1371.67 879.05 1371.67 703.89 L 1371.67 411.42",
-];
 
 // True silhouette outline of the DY mark, traced from the rasterised glyph
 // via potrace. Single closed contour — animating its dash gives a continuous
@@ -645,7 +637,7 @@ interface IndexProps {
 }
 
 const Index = ({ notebookMonths, weather }: IndexProps) => {
-  const { theme, toggleTheme } = useContext(Context);
+  const { theme } = useContext(Context);
   const hatchInk = theme === "dark" ? "#ffffff" : "#1a1814";
 
   return (
@@ -656,88 +648,7 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </Head>
 
-      <Box as="nav" className="topnav">
-        <Stack
-          as="div"
-          direction="row"
-          align="center"
-          gap={2}
-          className="topnavInner"
-        >
-          <a href="/" className={`navHome ${gm800.className}`} aria-label="Home">
-            <span className="navMarkBox" aria-hidden>
-              <svg viewBox="0 0 1500 1500" className="navHomeMark" aria-hidden>
-                {DY_PATHS.map((d, i) => (
-                  <path
-                    key={i}
-                    d={d}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={130}
-                    strokeLinecap="butt"
-                    strokeLinejoin="miter"
-                  />
-                ))}
-              </svg>
-            </span>
-            <span className="navTitle">Donovan Yohan</span>
-          </a>
-          <span className="navSpacer" aria-hidden />
-          <div className="navTabs">
-            <a
-              className={`navTab tabResume ${gm500.className}`}
-              href="/DonovanYohanResume.pdf"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <span className="navTabLabel">Resume</span>
-            </a>
-            <a className={`navTab tabWork ${gm500.className}`} href="/#work">
-              <span className="navTabLabel">Work</span>
-            </a>
-            {ABOUT_PAGE_ENABLED ? (
-              <a className={`navTab tabAbout ${gm500.className}`} href="/about">
-                <span className="navTabLabel">About</span>
-              </a>
-            ) : null}
-            <a className={`navTab tabContact ${gm500.className}`} href="#footer">
-              <span className="navTabLabel">Contact</span>
-            </a>
-          </div>
-          <button
-            type="button"
-            className="themeToggle"
-            onClick={toggleTheme}
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-          >
-            <svg
-              className="themeIcon sun"
-              viewBox="0 0 24 24"
-              aria-hidden
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.8}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="4" />
-              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-            </svg>
-            <svg
-              className="themeIcon moon"
-              viewBox="0 0 24 24"
-              aria-hidden
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.8}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-            </svg>
-          </button>
-        </Stack>
-      </Box>
+      <SiteNav position="sticky" />
 
       <DotGrid
         spacing={16}
@@ -921,172 +832,6 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
       `}</style>
 
       <style jsx global>{`
-        .topnav {
-          --nav-h: 48px;
-          position: sticky;
-          top: 0;
-          z-index: 50;
-          background: var(--paper);
-          border-bottom: 1px solid var(--rule);
-        }
-        .topnavInner {
-          /* Full-width row with space-between so the logo chip pins to the
-             left padding gutter (matching the history rule) and the tabs +
-             theme toggle pin to the right padding gutter. */
-          max-width: none;
-          margin: 0;
-          width: 100%;
-          padding: 0 var(--gutter-w);
-          height: var(--nav-h);
-          justify-content: space-between;
-        }
-        /* Hobonichi-techo home block: square orange chip bleeds top-to-bottom
-           of the nav bar. Brand name sits beside it on the cream paper. */
-        .navHome {
-          display: inline-flex;
-          align-items: center;
-          gap: 14px;
-          color: var(--ink);
-          text-decoration: none;
-          height: 100%;
-        }
-        .navMarkBox {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: var(--nav-h);
-          height: var(--nav-h);
-          flex: 0 0 var(--nav-h);
-          background: var(--logo-bg);
-          color: var(--tab-ink);
-        }
-        .navHomeMark {
-          width: 60%;
-          height: 60%;
-          display: block;
-        }
-        .navTitle {
-          font-size: 14px;
-          letter-spacing: 0.12em;
-          font-weight: 800;
-          text-transform: uppercase;
-        }
-        .navSpacer {
-          flex: 1 1 auto;
-        }
-        .navLink {
-          font-size: 13px;
-          letter-spacing: 0.08em;
-          color: var(--ink-soft);
-          text-decoration: none;
-          text-transform: uppercase;
-          transition: color 140ms ease;
-        }
-        .navLink:hover {
-          color: var(--ink);
-        }
-        /* Manilla-folder file tabs: trapezoidal blocks that hang from the
-           nav bar top, slant inward as they descend, and meet at their
-           bottom bases. --tab-slant controls both the side inset and the
-           negative margin between adjacent tabs so the seams line up. */
-        .navTabs {
-          display: inline-flex;
-          align-items: stretch;
-          gap: 0;
-          height: 100%;
-        }
-        /* Tab cells: label sits centred over a coloured underline that
-           anchors to the nav-bar bottom. Underlines from adjacent tabs are
-           flush (no gap), so the nav reads as a continuous striped rail of
-           Hobonichi colour blocks. Hover lifts the whole cell + thickens
-           its underline so the active route reads as "pulled forward".  */
-        .navTab {
-          position: relative;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          height: var(--nav-h);
-          padding: 0 16px;
-          font-size: 12px;
-          letter-spacing: 0.12em;
-          font-weight: 700;
-          text-transform: uppercase;
-          text-decoration: none;
-          color: var(--ink);
-        }
-        .navTabLabel {
-          display: inline-block;
-          transition: transform 140ms ease;
-        }
-        .navTab::after {
-          content: "";
-          position: absolute;
-          left: 0;
-          right: 0;
-          /* Drop 1px past the tab's bottom edge so the underline covers
-             the topnav's bottom border underneath — no visible gap. */
-          bottom: -1px;
-          height: 8px;
-          background: var(--tab-c);
-          transition: height 140ms ease;
-        }
-        /* Lift = growth amount, so the label and the top of the coloured
-           underline travel together. Underline base stays anchored to the
-           nav-bar bottom; only its top edge rises into the lifted space. */
-        .navTab:hover .navTabLabel {
-          transform: translateY(-4px);
-        }
-        .navTab:hover::after {
-          height: 12px;
-        }
-        .tabResume {
-          --tab-c: var(--tab-resume);
-        }
-        .tabWork {
-          --tab-c: var(--tab-work);
-        }
-        .tabAbout {
-          --tab-c: var(--tab-about);
-        }
-        .tabContact {
-          --tab-c: var(--tab-contact);
-        }
-        .themeToggle {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 32px;
-          height: 32px;
-          margin-left: 8px;
-          padding: 0;
-          border: 1px solid var(--rule);
-          border-radius: 50%;
-          background: transparent;
-          color: var(--ink-soft);
-          cursor: pointer;
-          transition:
-            color 140ms ease,
-            border-color 140ms ease,
-            background-color 140ms ease;
-        }
-        .themeToggle:hover {
-          color: var(--ink);
-          border-color: var(--ink-faint);
-        }
-        .themeIcon {
-          width: 16px;
-          height: 16px;
-          display: block;
-        }
-        /* Show only the icon that represents the theme you'd switch TO. */
-        [data-theme="light"] .themeIcon.sun,
-        :root:not([data-theme="dark"]) .themeIcon.sun {
-          display: none;
-        }
-        [data-theme="dark"] .themeIcon.moon {
-          display: none;
-        }
-
         .page {
           position: relative;
           z-index: 1;
@@ -1849,8 +1594,21 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
         }
 
         @media (max-width: 900px) {
+          :root,
+          [data-theme="light"],
+          [data-theme="dark"] {
+            --gutter-w: 0px;
+            --gutter-pad: 0px;
+            --content-pad-left: clamp(20px, 6vw, 32px);
+            --page-pad-x: clamp(24px, 6vw, 64px);
+            --notebook-bleed-x: calc(
+              var(--content-pad-left) + var(--page-pad-x)
+            );
+            --content-w: calc(100vw - (2 * var(--content-pad-left)));
+            --page-max: 100vw;
+          }
           .page {
-            padding: 32px clamp(24px, 6vw, 64px);
+            padding: 32px var(--page-pad-x);
           }
           .hero {
             grid-template-columns: 1fr;
@@ -1861,6 +1619,27 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
           }
           .heroCopy {
             font-size: clamp(22px, 5vw, 32px);
+          }
+          .historyFrame {
+            margin-left: calc(-1 * var(--page-pad-x));
+            margin-right: calc(-1 * var(--page-pad-x));
+            padding: 32px var(--notebook-bleed-x) 72px;
+          }
+          .historyFrame::before,
+          .historyFrame::after {
+            display: none;
+          }
+          .historyHead {
+            margin-top: -32px;
+            margin-left: calc(-1 * var(--notebook-bleed-x));
+            margin-right: calc(-1 * var(--notebook-bleed-x));
+            padding: 32px var(--notebook-bleed-x) 20px;
+          }
+          .historyTitle {
+            font-size: clamp(34px, 10vw, 44px);
+          }
+          .historyLede {
+            font-size: clamp(16px, 4.8vw, 19px);
           }
         }
       `}</style>

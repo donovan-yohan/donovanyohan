@@ -46,7 +46,7 @@ guarantees the privacy boundary makes, and how to debug when notes don't appear.
 │  │                            │                                │ │
 │  └────────────────────────────┼────────────────────────────────┘ │
 │                               ▼                                  │
-│                       /writing  /writing/[slug]                  │
+│                         /work  /work/[slug]                      │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -195,7 +195,7 @@ env vars to be set explicitly — no fixture fallback.
 
 ```bash
 npm run dev
-# → http://localhost:3000/writing renders public notes from VAULT_PATH
+# → http://localhost:3000/work renders public notes from VAULT_PATH
 ```
 
 ## Daily workflow — Donovan
@@ -211,7 +211,7 @@ git add . && git commit -m "post: hello world" && git push
 #    Visit Vercel dashboard → donovanyohan → Deployments → "Redeploy"
 #    OR set up Vercel CLI: `vercel --prod`
 
-# 5. Verify live at https://donovanyohan.com/writing
+# 5. Verify live at https://donovanyohan.com/work
 ```
 
 Slice 1 adds the webhook: vault push → automatic rebuild.
@@ -324,11 +324,11 @@ If a leak somehow makes it past the test (it shouldn't, but):
 | Symlink rejection | `lib/vault/walk.ts` (`followSymbolicLinks: false`) |
 | Tarball traversal | `lib/vault/adapter-github.ts` extraction guards |
 | HTML sanitization | `lib/vault/render.ts` (`rehype-sanitize`) |
-| Wikilink strip | `lib/vault/wikilinks.ts` (remark plugin) |
+| Wikilink resolution | `lib/vault/wikilinks.ts` (remark plugin) |
 | Wikilink-target leak | leak test in CI |
 | No public history | adapter reads working tree only, never `git log` |
 | Module purity | (no enforcement; reviewed via AGENTS.md rules) |
-| Static path mode | `pages/writing/[slug].tsx` `fallback: false` |
+| Static path mode | `pages/work/[slug].tsx` `fallback: false` |
 | PAT scope | (manual; documented above) |
 | Build artifact leak | leak test in CI (`test/leak.test.ts`) |
 | HTTP-level leak | leak test in CI (spawns `next start`, curls endpoints) |

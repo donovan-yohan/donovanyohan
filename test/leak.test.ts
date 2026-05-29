@@ -788,10 +788,10 @@ describe("Phase 2 — HTTP-level checks (P26)", () => {
   );
 
   it(
-    "/_next/data/{buildId}/writing.json does not contain private content",
+    "/_next/data/{buildId}/work.json does not contain private content",
     async () => {
       if (!serverReady) return;
-      const url = `${serverBaseUrl}/_next/data/${buildId}/writing.json`;
+      const url = `${serverBaseUrl}/_next/data/${buildId}/work.json`;
       const { status, body } = await safeFetch(url);
       if (status !== 404 && status !== 0) {
         await assertNoPrivateContent(body, url);
@@ -801,11 +801,11 @@ describe("Phase 2 — HTTP-level checks (P26)", () => {
   );
 
   it(
-    "/_next/data/{buildId}/writing/{publicSlug}.json does not contain private content",
+    "/_next/data/{buildId}/work/{publicSlug}.json does not contain private content",
     async () => {
       if (!serverReady) return;
       for (const slug of publicSlugs) {
-        const url = `${serverBaseUrl}/_next/data/${buildId}/writing/${slug}.json`;
+        const url = `${serverBaseUrl}/_next/data/${buildId}/work/${slug}.json`;
         const { status, body } = await safeFetch(url);
         if (status !== 404 && status !== 0) {
           await assertNoPrivateContent(body, url);
@@ -816,11 +816,11 @@ describe("Phase 2 — HTTP-level checks (P26)", () => {
   );
 
   it(
-    "/_next/data/{buildId}/writing/{privateSlug}.json returns 404 (no private route rendered)",
+    "/_next/data/{buildId}/work/{privateSlug}.json returns 404 (no private route rendered)",
     async () => {
       if (!serverReady) return;
       for (const slug of privateSlugs) {
-        const url = `${serverBaseUrl}/_next/data/${buildId}/writing/${slug}.json`;
+        const url = `${serverBaseUrl}/_next/data/${buildId}/work/${slug}.json`;
         const { status, body } = await safeFetch(url);
         // Private slugs must not be served — they should 404
         if (status !== 0) {
