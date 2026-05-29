@@ -74,6 +74,9 @@ describe("mobile work section layout", () => {
     expect(screen.getByRole("button", { name: /essay/i })).toHaveClass("chip");
     expect(screen.getByText("MAY")).toHaveClass("monthName");
     expect(container.querySelector(".chipsBar")).not.toBeNull();
+    expect(container.querySelector(".notebookStack")).toHaveStyle({
+      gap: "var(--notebook-stack-gap, var(--u))",
+    });
     expect(container.querySelector(".monthSection .marginAnchorInner")).not.toBeNull();
     expect(screen.getByRole("link", { name: /shipping with agents/i })).toHaveAttribute(
       "href",

@@ -1621,7 +1621,9 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
             font-size: clamp(22px, 5vw, 32px);
           }
           .historyFrame {
-            padding: 32px var(--content-pad-left) 72px;
+            margin-left: calc(-1 * var(--page-pad-x));
+            margin-right: calc(-1 * var(--page-pad-x));
+            padding: 32px var(--notebook-bleed-x) 72px;
           }
           .historyFrame::before,
           .historyFrame::after {

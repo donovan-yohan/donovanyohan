@@ -620,7 +620,11 @@ const Notebook = ({
           insert a dotted band between it and the chip bar — and so the
           chip bar's sticky range still spans the rest of the section. */}
       <div ref={sentinelRef} className="chipsSentinel" aria-hidden />
-      <Stack gap={1}>
+      <Stack
+        gap={0}
+        className="notebookStack"
+        style={{ gap: "var(--notebook-stack-gap, var(--u))" }}
+      >
         <div className={`chipsBar ${chipsStuck ? "is-stuck" : ""} ${monoClass}`}>
           <div className="chipsInner">
             <button
@@ -678,6 +682,9 @@ const Notebook = ({
            so the parent Stack's gap doesn't insert a dotted band between
            them. Sentinel stays in normal flow at the top of the wrapper
            so IntersectionObserver fires when the chip bar pins. */
+        .notebookStack {
+          --notebook-stack-gap: var(--u);
+        }
         .chipsWrap {
           position: relative;
         }
@@ -753,6 +760,12 @@ const Notebook = ({
           opacity: 0.85;
         }
         @media (max-width: 900px) {
+          .notebookStack {
+            --notebook-stack-gap: 0px;
+          }
+          .notebookStack > .monthSection + .monthSection {
+            margin-top: calc(var(--u) * 1.5);
+          }
           .chipsBar {
             --notebook-mobile-bleed: var(
               --notebook-bleed-x,
