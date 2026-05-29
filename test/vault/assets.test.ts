@@ -10,6 +10,7 @@ import * as path from "node:path";
 import * as tar from "tar";
 import { LocalVaultAdapter } from "../../lib/vault/adapter-local";
 import { GitHubVaultAdapter } from "../../lib/vault/adapter-github";
+import { resolveVaultAssetRef, rewriteMarkdownVaultImageRefs } from "../../lib/vault/assets";
 import { VaultParseError } from "../../lib/vault/errors";
 
 const NOTE_WITH_IMAGE = `---
@@ -83,6 +84,36 @@ describe("vault asset pipeline — local adapter", () => {
         reason: "asset",
       } satisfies Partial<VaultParseError>);
     });
+  });
+
+  it("rejects backslash traversal references before local path joins see them", () => {
+    expect(
+      resolveVaultAssetRef("notes/writing/post.md", "post", "..\\..\\private\\imgs\\x.svg")
+    ).toBeNull();
+  });
+
+  it("rewrites image urls with parentheses and ignores image-looking code blocks", async () => {
+    const seen: string[] = [];
+    const markdown = [
+      '![Hero](imgs/hero(1).svg "Hero title")',
+      "",
+      "```md",
+      "![Code](imgs/code.svg)",
+      "```",
+    ].join("\n");
+
+    const rewritten = await rewriteMarkdownVaultImageRefs(
+      markdown,
+      "notes/writing/asset-note.md",
+      "asset-note",
+      async (asset) => {
+        seen.push(asset.sourceRelPath);
+      }
+    );
+
+    expect(rewritten).toContain('![Hero](/vault-assets/asset-note/hero(1).svg "Hero title")');
+    expect(rewritten).toContain("![Code](imgs/code.svg)");
+    expect(seen).toEqual(["notes/writing/imgs/hero(1).svg"]);
   });
 });
 

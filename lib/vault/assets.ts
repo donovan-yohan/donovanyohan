@@ -12,6 +12,8 @@
 
 import { copyFile, lstat, mkdir, realpath, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
 import { VaultParseError } from "./errors";
 import type { PreviewConfigPartial } from "./schema";
 
@@ -31,29 +33,48 @@ export interface ResolvedVaultAsset {
 
 type EnsureAsset = (asset: ResolvedVaultAsset) => Promise<void>;
 
+interface MarkdownNode {
+  type: string;
+  url?: unknown;
+  children?: MarkdownNode[];
+  position?: {
+    start?: { offset?: number };
+    end?: { offset?: number };
+  };
+}
+
+const markdownParser = unified().use(remarkParse).freeze();
+
 function isExternalOrAbsoluteRef(src: string): boolean {
   return src.startsWith("/") || src.startsWith("#") || /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(src);
 }
 
-function splitMarkdownDestination(raw: string): { src: string; suffix: string } {
-  const trimmed = raw.trim();
-  const wrapped = trimmed.match(/^<([^>]+)>(.*)$/);
-  if (wrapped) {
-    return { src: wrapped[1] ?? "", suffix: wrapped[2] ?? "" };
-  }
-
-  const titleStart = trimmed.search(/\s+["'(]/);
-  if (titleStart === -1) {
-    return { src: trimmed, suffix: "" };
-  }
-  return {
-    src: trimmed.slice(0, titleStart),
-    suffix: trimmed.slice(titleStart),
-  };
-}
-
 function hasAllowedImageExtension(relPath: string): boolean {
   return ALLOWED_IMAGE_EXTENSIONS.has(path.posix.extname(relPath).toLowerCase());
+}
+
+function visitMarkdownImages(node: MarkdownNode, visitor: (node: MarkdownNode) => void): void {
+  if (node.type === "image") {
+    visitor(node);
+  }
+
+  for (const child of node.children ?? []) {
+    visitMarkdownImages(child, visitor);
+  }
+}
+
+function replaceImageUrl(markdownSlice: string, oldUrl: string, newUrl: string): string {
+  for (const candidate of [`<${oldUrl}>`, oldUrl]) {
+    const index = markdownSlice.lastIndexOf(candidate);
+    if (index !== -1) {
+      const replacement = candidate.startsWith("<") ? `<${newUrl}>` : newUrl;
+      return `${markdownSlice.slice(0, index)}${replacement}${markdownSlice.slice(
+        index + candidate.length
+      )}`;
+    }
+  }
+
+  return markdownSlice;
 }
 
 export function isVaultAssetFile(relPath: string): boolean {
@@ -67,7 +88,7 @@ export function resolveVaultAssetRef(
   src: string
 ): ResolvedVaultAsset | null {
   const cleanSrc = src.trim();
-  if (!cleanSrc || isExternalOrAbsoluteRef(cleanSrc)) {
+  if (!cleanSrc || cleanSrc.includes("\\") || isExternalOrAbsoluteRef(cleanSrc)) {
     return null;
   }
 
@@ -116,28 +137,44 @@ export async function rewriteMarkdownVaultImageRefs(
   slug: string,
   ensureAsset: EnsureAsset
 ): Promise<string> {
-  const imagePattern = /!\[([^\]]*)\]\(([^)]+)\)/g;
-  let rewritten = "";
-  let lastIndex = 0;
+  const tree = markdownParser.parse(markdown) as MarkdownNode;
+  const replacements: Array<{
+    start: number;
+    end: number;
+    text: string;
+    asset: ResolvedVaultAsset;
+  }> = [];
 
-  for (const match of markdown.matchAll(imagePattern)) {
-    const [full, alt, rawDest] = match;
-    const index = match.index ?? 0;
-    rewritten += markdown.slice(lastIndex, index);
-
-    const { src, suffix } = splitMarkdownDestination(rawDest ?? "");
-    const asset = resolveVaultAssetRef(noteRelPath, slug, src);
-    if (asset) {
-      await ensureAsset(asset);
-      rewritten += `![${alt ?? ""}](${asset.publicPath}${suffix})`;
-    } else {
-      rewritten += full;
+  visitMarkdownImages(tree, (node) => {
+    const start = node.position?.start?.offset;
+    const end = node.position?.end?.offset;
+    if (typeof node.url !== "string" || start === undefined || end === undefined) {
+      return;
     }
 
-    lastIndex = index + full.length;
+    const asset = resolveVaultAssetRef(noteRelPath, slug, node.url);
+    if (!asset) {
+      return;
+    }
+
+    replacements.push({
+      start,
+      end,
+      asset,
+      text: replaceImageUrl(markdown.slice(start, end), node.url, asset.publicPath),
+    });
+  });
+
+  for (const replacement of replacements) {
+    await ensureAsset(replacement.asset);
   }
 
-  rewritten += markdown.slice(lastIndex);
+  let rewritten = markdown;
+  for (const replacement of replacements.sort((a, b) => b.start - a.start)) {
+    rewritten = `${rewritten.slice(0, replacement.start)}${replacement.text}${rewritten.slice(
+      replacement.end
+    )}`;
+  }
   return rewritten;
 }
 

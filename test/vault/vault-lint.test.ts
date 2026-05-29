@@ -164,6 +164,30 @@ describe("vault-lint CLI", () => {
       expect(stderr).not.toMatch(/README\.md/);
       expect(stderr).not.toMatch(/duplicate-slug/);
     });
+
+    it("validates markdown image urls with parentheses without scanning code blocks", () => {
+      const vault = makeVault({
+        "article.md": `---
+title: Article
+date: 2026-05-10
+visibility: public
+---
+
+![Hero](imgs/hero(1).svg)
+
+\`\`\`md
+![Missing](imgs/missing.svg)
+\`\`\`
+`,
+      });
+      mkdirSync(join(vault, "notes", "imgs"), { recursive: true });
+      writeFileSync(join(vault, "notes", "imgs", "hero(1).svg"), "<svg />", "utf-8");
+
+      const { code, stderr } = withCapture(() => main(["node", "vault-lint.ts", vault]));
+
+      expect(code).toBe(0);
+      expect(stderr).not.toMatch(/missing image asset/);
+    });
   });
 
   describe("duplicate slug detection", () => {

@@ -23,9 +23,12 @@ import { readFileSync, readdirSync, lstatSync } from "fs";
 import type { Dirent } from "fs";
 import { join, relative, basename } from "path";
 import { load as yamlLoad } from "js-yaml";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
 import { resolveVisibility } from "../lib/vault/fail-closed.js";
 import { deriveSlug } from "../lib/vault/slug.js";
 import { VaultFrontmatterSchema } from "../lib/vault/schema.js";
+import type { VaultFrontmatter } from "../lib/vault/schema.js";
 import { resolveVaultAssetRef } from "../lib/vault/assets.js";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -62,6 +65,24 @@ interface LintOutput {
 interface ParseResult {
   frontmatter: unknown;
   parseError: string | null;
+}
+
+interface MarkdownNode {
+  type: string;
+  url?: unknown;
+  children?: MarkdownNode[];
+}
+
+const markdownParser = unified().use(remarkParse).freeze();
+
+function visitMarkdownImages(node: MarkdownNode, visitor: (node: MarkdownNode) => void): void {
+  if (node.type === "image") {
+    visitor(node);
+  }
+
+  for (const child of node.children ?? []) {
+    visitMarkdownImages(child, visitor);
+  }
 }
 
 /**
@@ -105,47 +126,27 @@ function parseFrontmatter(content: string): ParseResult {
 
 function collectMarkdownImageDests(markdown: string): string[] {
   const out: string[] = [];
-  const imagePattern = /!\[[^\]]*\]\(([^)]+)\)/g;
-  for (const match of markdown.matchAll(imagePattern)) {
-    const rawDest = (match[1] ?? "").trim();
-    const wrapped = rawDest.match(/^<([^>]+)>/);
-    if (wrapped?.[1]) {
-      out.push(wrapped[1]);
-      continue;
+  const tree = markdownParser.parse(markdown) as MarkdownNode;
+  visitMarkdownImages(tree, (node) => {
+    if (typeof node.url === "string") {
+      out.push(node.url);
     }
-    const titleStart = rawDest.search(/\s+["'(]/);
-    out.push(titleStart === -1 ? rawDest : rawDest.slice(0, titleStart));
-  }
+  });
   return out;
 }
 
-function previewImage(frontmatter: unknown): string | null {
-  if (frontmatter === null || typeof frontmatter !== "object" || Array.isArray(frontmatter)) {
-    return null;
-  }
-  const preview = (frontmatter as Record<string, unknown>)["preview"];
-  if (preview === null || typeof preview !== "object" || Array.isArray(preview)) {
-    return null;
-  }
-  const image = (preview as Record<string, unknown>)["image"];
-  return typeof image === "string" ? image : null;
+function previewImage(frontmatter: VaultFrontmatter): string | null {
+  return frontmatter.preview?.image ?? null;
 }
 
 function validatePublicImageAssets(
   filePath: string,
   vaultRoot: string,
   relPath: string,
-  frontmatter: unknown,
+  frontmatter: VaultFrontmatter,
   content: string
 ): LintError[] {
-  const frontmatterSlug =
-    frontmatter !== null &&
-    typeof frontmatter === "object" &&
-    !Array.isArray(frontmatter) &&
-    typeof (frontmatter as Record<string, unknown>)["slug"] === "string"
-      ? ((frontmatter as Record<string, unknown>)["slug"] as string)
-      : undefined;
-  const slug = deriveSlug(basename(filePath), frontmatterSlug);
+  const slug = deriveSlug(basename(filePath), frontmatter.slug);
   const refs = [...collectMarkdownImageDests(content)];
   const preview = previewImage(frontmatter);
   if (preview) refs.push(preview);
@@ -367,7 +368,9 @@ function lintFile(
     };
   }
 
-  errors.push(...validatePublicImageAssets(filePath, vaultRoot, relPath, frontmatter, content));
+  errors.push(
+    ...validatePublicImageAssets(filePath, vaultRoot, relPath, schemaResult.data, content)
+  );
 
   if (errors.length > 0) {
     return {
