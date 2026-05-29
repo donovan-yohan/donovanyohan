@@ -38,6 +38,13 @@ import { applyPreviewDefaults } from "./preview-defaults";
 import { stripWikilinks } from "./wikilinks";
 import { renderMarkdown } from "./render";
 import { VaultParseError } from "./errors";
+import {
+  isVaultAssetFile,
+  rewriteMarkdownVaultImageRefs,
+  rewritePreviewVaultImage,
+  writeBufferedVaultAsset,
+  MAX_VAULT_ASSET_BYTES,
+} from "./assets";
 import matter from "gray-matter";
 import path from "node:path";
 
@@ -189,11 +196,7 @@ function resolveTarEntry(relPath: string, content: string): ResolvedFile {
 
   const parseResult = VaultFrontmatterSchema.safeParse(rawFrontmatter);
   if (!parseResult.success) {
-    throw new VaultParseError(
-      relPath,
-      "schema",
-      parseResult.error.issues[0]?.message,
-    );
+    throw new VaultParseError(relPath, "schema", parseResult.error.issues[0]?.message);
   }
 
   const frontmatter = parseResult.data as VaultFrontmatter;
@@ -215,15 +218,29 @@ async function renderPublicNote(
   resolved: Extract<ResolvedFile, { visibility: "public" }>,
   publicSlugs: ReadonlySet<string>,
   privateSlugs: ReadonlySet<string>,
+  assets: ReadonlyMap<string, Buffer>
 ): Promise<VaultNote> {
-  const body = await renderMarkdown(resolved.bodyMarkdown, {
+  const bodyMarkdownForRender = await rewriteMarkdownVaultImageRefs(
+    resolved.bodyMarkdown,
+    resolved.relPath,
+    resolved.slug,
+    (asset) => writeBufferedVaultAsset(resolved.relPath, asset, assets.get(asset.sourceRelPath))
+  );
+
+  const body = await renderMarkdown(bodyMarkdownForRender, {
     publicSlugs,
     privateSlugs,
     sourcePath: resolved.relPath,
   });
 
   const firstParagraph = extractFirstParagraph(resolved.bodyMarkdown);
-  const preview = applyPreviewDefaults(resolved.frontmatter.preview, {
+  const previewInput = await rewritePreviewVaultImage(
+    resolved.frontmatter.preview,
+    resolved.relPath,
+    resolved.slug,
+    (asset) => writeBufferedVaultAsset(resolved.relPath, asset, assets.get(asset.sourceRelPath))
+  );
+  const preview = applyPreviewDefaults(previewInput, {
     title: resolved.frontmatter.title,
     firstParagraph,
   });
@@ -250,12 +267,7 @@ export class GitHubVaultAdapter implements VaultAdapter {
   private readonly ref: string;
   private readonly token: string;
 
-  constructor(params: {
-    owner: string;
-    repo: string;
-    ref?: string;
-    token: string;
-  }) {
+  constructor(params: { owner: string; repo: string; ref?: string; token: string }) {
     this.owner = params.owner;
     this.repo = params.repo;
     this.ref = params.ref ?? "HEAD";
@@ -280,14 +292,12 @@ export class GitHubVaultAdapter implements VaultAdapter {
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      throw new Error(
-        `GitHub tarball fetch failed: ${msg.replaceAll(token, "[REDACTED]")}`,
-      );
+      throw new Error(`GitHub tarball fetch failed: ${msg.replaceAll(token, "[REDACTED]")}`);
     }
 
     if (!response.ok) {
       throw new Error(
-        `GitHub tarball fetch returned HTTP ${response.status} for ${this.owner}/${this.repo}@${this.ref}`,
+        `GitHub tarball fetch returned HTTP ${response.status} for ${this.owner}/${this.repo}@${this.ref}`
       );
     }
 
@@ -296,10 +306,10 @@ export class GitHubVaultAdapter implements VaultAdapter {
 
     // Parse entries in-memory — collect file contents before async processing
     const entries: Array<{ relPath: string; content: string }> = [];
+    const assets = new Map<string, Buffer>();
 
     // Detect gzip from magic bytes (0x1f 0x8b)
-    const isGzip =
-      buffer.length >= 2 && buffer[0] === 0x1f && buffer[1] === 0x8b;
+    const isGzip = buffer.length >= 2 && buffer[0] === 0x1f && buffer[1] === 0x8b;
 
     await new Promise<void>((resolve, reject) => {
       const readable = Readable.from(buffer);
@@ -318,7 +328,10 @@ export class GitHubVaultAdapter implements VaultAdapter {
 
           const relPath = stripTarballPrefix(rawPath);
 
-          if (!relPath.startsWith(CONTENT_PREFIX) || !relPath.endsWith(".md")) {
+          const isMarkdown = relPath.startsWith(CONTENT_PREFIX) && relPath.endsWith(".md");
+          const isAsset = isVaultAssetFile(relPath);
+
+          if (!isMarkdown && !isAsset) {
             entry.resume();
             return;
           }
@@ -333,11 +346,11 @@ export class GitHubVaultAdapter implements VaultAdapter {
 
           entry.on("data", (chunk: Buffer) => {
             totalSize += chunk.length;
-            if (totalSize > MAX_FILE_BYTES) {
+            if (totalSize > (isAsset ? MAX_VAULT_ASSET_BYTES : MAX_FILE_BYTES)) {
               entry.destroy(
                 new Error(
-                  `File too large: ${relPath} (>${MAX_FILE_BYTES} bytes)`,
-                ),
+                  `File too large: ${relPath} (>${isAsset ? MAX_VAULT_ASSET_BYTES : MAX_FILE_BYTES} bytes)`
+                )
               );
               return;
             }
@@ -345,8 +358,13 @@ export class GitHubVaultAdapter implements VaultAdapter {
           });
 
           entry.on("end", () => {
-            const content = Buffer.concat(chunks).toString("utf8");
-            entries.push({ relPath, content });
+            const buffer = Buffer.concat(chunks);
+            if (isAsset) {
+              assets.set(relPath, buffer);
+            } else {
+              const content = buffer.toString("utf8");
+              entries.push({ relPath, content });
+            }
           });
 
           entry.on("error", () => {
@@ -395,10 +413,9 @@ export class GitHubVaultAdapter implements VaultAdapter {
     const publicNotes = await Promise.all(
       resolved
         .filter(
-          (r): r is Extract<ResolvedFile, { visibility: "public" }> =>
-            r.visibility === "public",
+          (r): r is Extract<ResolvedFile, { visibility: "public" }> => r.visibility === "public"
         )
-        .map((r) => renderPublicNote(r, publicSlugs, privateSlugs)),
+        .map((r) => renderPublicNote(r, publicSlugs, privateSlugs, assets))
     );
 
     return publicNotes;

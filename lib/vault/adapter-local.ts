@@ -34,16 +34,17 @@ import matter from "gray-matter";
 import { walkVault } from "./walk";
 import { resolveVisibility } from "./fail-closed";
 import { VaultFrontmatterSchema } from "./schema";
-import type {
-  VaultNote,
-  VaultAdapter,
-  VaultFrontmatter,
-} from "./schema";
+import type { VaultNote, VaultAdapter, VaultFrontmatter } from "./schema";
 import { deriveSlug } from "./slug";
 import { applyPreviewDefaults } from "./preview-defaults";
 import { stripWikilinks } from "./wikilinks";
 import { renderMarkdown } from "./render";
 import { VaultParseError } from "./errors";
+import {
+  copyLocalVaultAsset,
+  rewriteMarkdownVaultImageRefs,
+  rewritePreviewVaultImage,
+} from "./assets";
 
 /** 1MB size cap on individual vault files. */
 const MAX_FILE_BYTES = 1024 * 1024;
@@ -72,10 +73,7 @@ type ResolvedFile =
  *
  * Throws `VaultParseError` for public-but-schema-invalid (P22).
  */
-async function resolveFile(
-  vaultRoot: string,
-  relPath: string,
-): Promise<ResolvedFile | null> {
+async function resolveFile(vaultRoot: string, relPath: string): Promise<ResolvedFile | null> {
   const absPath = path.join(vaultRoot, relPath);
   const filename = path.basename(relPath);
 
@@ -84,15 +82,13 @@ async function resolveFile(
   try {
     const s = await stat(absPath);
     if (s.size > MAX_FILE_BYTES) {
-      console.warn(
-        `[vault] Skipping ${relPath}: ${s.size} bytes exceeds ${MAX_FILE_BYTES}`,
-      );
+      console.warn(`[vault] Skipping ${relPath}: ${s.size} bytes exceeds ${MAX_FILE_BYTES}`);
       return null;
     }
     content = await readFile(absPath, "utf8");
   } catch (err) {
     console.error(
-      `[vault] Read error for ${relPath}: ${err instanceof Error ? err.message : String(err)}`,
+      `[vault] Read error for ${relPath}: ${err instanceof Error ? err.message : String(err)}`
     );
     return null;
   }
@@ -135,11 +131,7 @@ async function resolveFile(
   // Public: full schema parse so we know `title`/`date` exist before render.
   const parseResult = VaultFrontmatterSchema.safeParse(rawFrontmatter);
   if (!parseResult.success) {
-    throw new VaultParseError(
-      relPath,
-      "schema",
-      parseResult.error.issues[0]?.message,
-    );
+    throw new VaultParseError(relPath, "schema", parseResult.error.issues[0]?.message);
   }
 
   const frontmatter = parseResult.data as VaultFrontmatter;
@@ -199,18 +191,32 @@ function extractFirstParagraph(markdown: string): string {
  * wikilinks resolve into anchors (public) / throw (private) / strip (unknown).
  */
 async function renderPublicNote(
+  vaultRoot: string,
   resolved: Extract<ResolvedFile, { visibility: "public" }>,
   publicSlugs: ReadonlySet<string>,
-  privateSlugs: ReadonlySet<string>,
+  privateSlugs: ReadonlySet<string>
 ): Promise<VaultNote> {
-  const body = await renderMarkdown(resolved.bodyMarkdown, {
+  const bodyMarkdownForRender = await rewriteMarkdownVaultImageRefs(
+    resolved.bodyMarkdown,
+    resolved.relPath,
+    resolved.slug,
+    (asset) => copyLocalVaultAsset(vaultRoot, resolved.relPath, asset)
+  );
+
+  const body = await renderMarkdown(bodyMarkdownForRender, {
     publicSlugs,
     privateSlugs,
     sourcePath: resolved.relPath,
   });
 
   const firstParagraph = extractFirstParagraph(resolved.bodyMarkdown);
-  const preview = applyPreviewDefaults(resolved.frontmatter.preview, {
+  const previewInput = await rewritePreviewVaultImage(
+    resolved.frontmatter.preview,
+    resolved.relPath,
+    resolved.slug,
+    (asset) => copyLocalVaultAsset(vaultRoot, resolved.relPath, asset)
+  );
+  const preview = applyPreviewDefaults(previewInput, {
     title: resolved.frontmatter.title,
     firstParagraph,
   });
@@ -241,17 +247,12 @@ export class LocalVaultAdapter implements VaultAdapter {
           return await resolveFile(this.vaultRoot, relPath);
         } catch (err) {
           if (err instanceof VaultParseError) throw err;
-          console.error(
-            `[vault] Unexpected error resolving ${relPath}:`,
-            err,
-          );
+          console.error(`[vault] Unexpected error resolving ${relPath}:`, err);
           return null;
         }
-      }),
+      })
     );
-    const resolved = resolvedResults.filter(
-      (r): r is ResolvedFile => r !== null,
-    );
+    const resolved = resolvedResults.filter((r): r is ResolvedFile => r !== null);
 
     // Build slug sets for the leak gate
     const publicSlugs = new Set<string>();
@@ -269,10 +270,9 @@ export class LocalVaultAdapter implements VaultAdapter {
     const publicNotes = await Promise.all(
       resolved
         .filter(
-          (r): r is Extract<ResolvedFile, { visibility: "public" }> =>
-            r.visibility === "public",
+          (r): r is Extract<ResolvedFile, { visibility: "public" }> => r.visibility === "public"
         )
-        .map((r) => renderPublicNote(r, publicSlugs, privateSlugs)),
+        .map((r) => renderPublicNote(this.vaultRoot, r, publicSlugs, privateSlugs))
     );
 
     return publicNotes;

@@ -17,6 +17,7 @@ import { z } from "zod";
 
 export type Visibility = "public" | "private";
 export type PreviewKind = "text" | "image" | "quote" | "embed";
+export type NoteType = "note" | "work" | "writing" | "reshare";
 
 // ── Sub-schemas ───────────────────────────────────────────────────────────────
 
@@ -65,20 +66,15 @@ export const VaultFrontmatterSchema = z
     title: z.string().min(1),
 
     date: z.preprocess(
-      (v) =>
-        v instanceof Date
-          ? v.toISOString().slice(0, 10)
-          : typeof v === "string"
-            ? v
-            : v,
-      z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
+      (v) => (v instanceof Date ? v.toISOString().slice(0, 10) : typeof v === "string" ? v : v),
+      z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD")
     ),
 
     slug: z
       .string()
       .regex(
         /^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/,
-        "slug must be kebab-case ASCII, starting and ending with alphanumeric",
+        "slug must be kebab-case ASCII, starting and ending with alphanumeric"
       )
       .optional(),
 
@@ -90,6 +86,12 @@ export const VaultFrontmatterSchema = z
     visibility: z.enum(["public", "private"]).default("private"),
 
     preview: PreviewConfigSchema.optional(),
+
+    /**
+     * `type` — content category. Defaults to `"note"` for legacy notes.
+     * `writing` and `reshare` are used by dy-journal article frontmatter.
+     */
+    type: z.enum(["note", "work", "writing", "reshare"]).default("note"),
   })
   .passthrough();
 
