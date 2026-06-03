@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeAll, describe, expect, test, vi } from "vitest";
 
 import Notebook, { type NotebookMonth } from "../components/lab/Notebook";
@@ -35,6 +35,17 @@ const months: NotebookMonth[] = [
               tags: ["memory"],
             },
           },
+          {
+            entry: {
+              id: "design-log",
+              date: "2026-05-10",
+              index: 2,
+              type: "project",
+              title: "A design log card.",
+              blurb: "A project note.",
+              meta: "project · draft",
+            },
+          },
         ],
       },
     ],
@@ -58,6 +69,7 @@ describe("mobile work section layout", () => {
     );
     expect(anchor?.style.marginRight).toBe("var(--margin-anchor-margin-right, 0)");
     expect(inner?.style.padding).toBe("var(--margin-anchor-inner-padding)");
+    expect(inner?.style.boxSizing).toBe("border-box");
   });
 
   test("notebook renders mobile filter and month-header landmarks without source-code assertions", () => {
@@ -77,6 +89,7 @@ describe("mobile work section layout", () => {
 
     expect(screen.getByRole("button", { name: /all/i })).toHaveClass("chipActive");
     expect(screen.getByRole("button", { name: /article/i })).toHaveClass("chip");
+    expect(screen.getByRole("button", { name: /project/i })).toHaveClass("chip");
     expect(screen.getByRole("button", { name: /memory/i })).toHaveClass("chipTag");
     expect(screen.queryByRole("button", { name: /private only/i })).toBeNull();
     expect(screen.getByText("MAY")).toHaveClass("monthName");
@@ -89,5 +102,17 @@ describe("mobile work section layout", () => {
       "href",
       "/work/agents-loop",
     );
+
+    fireEvent.click(screen.getByRole("button", { name: /article/i }));
+
+    expect(screen.getByRole("button", { name: /article/i })).toHaveClass("chipActive");
+    expect(screen.getByText("MAY")).toHaveClass("monthName");
+    expect(screen.getByText("1 entry")).toHaveClass("monthCount");
+    expect(screen.getByRole("link", { name: /shipping with agents/i })).toHaveAttribute(
+      "href",
+      "/work/agents-loop",
+    );
+    expect(screen.queryByRole("link", { name: /design log card/i })).toBeNull();
+    expect(container.querySelector('.monthSection [data-cols="2"]')).not.toBeNull();
   });
 });

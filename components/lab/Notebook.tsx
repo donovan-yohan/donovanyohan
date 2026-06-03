@@ -761,14 +761,34 @@ const Notebook = ({
     [counts, tagFilters],
   );
 
-  const filtered =
-    filter === "all"
-      ? null
-      : filter.startsWith("type:")
-        ? allEntries.filter((e) => e.type === filter.slice("type:".length))
-        : filter.startsWith("tag:")
-          ? allEntries.filter((e) => (e.tags ?? []).includes(filter.slice("tag:".length)))
-          : null;
+  const activeEntryFilter = useMemo(() => {
+    if (filter === "all") return null;
+    if (filter.startsWith("type:")) {
+      const type = filter.slice("type:".length);
+      return (entry: Entry) => entry.type === type;
+    }
+    if (filter.startsWith("tag:")) {
+      const tag = filter.slice("tag:".length);
+      return (entry: Entry) => (entry.tags ?? []).includes(tag);
+    }
+    return null;
+  }, [filter]);
+
+  const visibleMonths = useMemo(() => {
+    if (activeEntryFilter === null) return data;
+
+    return data
+      .map((month) => ({
+        ...month,
+        rows: month.rows
+          .map((row) => ({
+            ...row,
+            cells: row.cells.filter((cell) => activeEntryFilter(cell.entry)),
+          }))
+          .filter((row) => row.cells.length > 0),
+      }))
+      .filter((month) => month.rows.length > 0);
+  }, [activeEntryFilter, data]);
 
   return (
     <>
@@ -819,31 +839,16 @@ const Notebook = ({
           </div>
         </div>
 
-      {filtered ? (
-        <Stack gap={1}>
-          {filtered.map((e) => (
-            <EntryCard
-              key={e.id}
-              entry={e}
-              monoClass={monoClass}
-              serifClass={serifClass}
-              italicSerifClass={italicSerifClass}
-              cardHrefBuilder={cardHrefBuilder}
-            />
-          ))}
-        </Stack>
-      ) : (
-        data.map((m) => (
-          <MonthBlock
-            key={m.key}
-            month={m}
-            monoClass={monoClass}
-            serifClass={serifClass}
-            italicSerifClass={italicSerifClass}
-            cardHrefBuilder={cardHrefBuilder}
-          />
-        ))
-      )}
+      {visibleMonths.map((m) => (
+        <MonthBlock
+          key={m.key}
+          month={m}
+          monoClass={monoClass}
+          serifClass={serifClass}
+          italicSerifClass={italicSerifClass}
+          cardHrefBuilder={cardHrefBuilder}
+        />
+      ))}
 
       <style jsx global>{`
         /* Sentinel + chip bar share a wrapper that's a single Stack child,

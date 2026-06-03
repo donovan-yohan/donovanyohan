@@ -44,6 +44,7 @@ export const MarginAnchor = ({
     left: 0,
     top: `var(--margin-anchor-inner-top, ${ux(1)})`,
     width: "var(--margin-anchor-inner-width, var(--gutter-w))",
+    boxSizing: "border-box",
     paddingRight: "var(--margin-anchor-inner-padding-right, var(--gutter-pad))",
     padding: "var(--margin-anchor-inner-padding)",
     display: "var(--margin-anchor-inner-display, flex)",
