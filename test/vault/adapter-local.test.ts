@@ -161,6 +161,76 @@ describe("LocalVaultAdapter — body structure", () => {
   });
 });
 
+describe("LocalVaultAdapter — wikilink resolution (P31)", () => {
+  it("public-to-public wikilink resolves to an anchor", async () => {
+    // note-public-2.md has [[note-public-1|link to first post]]
+    // note-public-1 is a public slug → anchor /work/note-public-1 with alias text.
+    const adapter = new LocalVaultAdapter(FIXTURE_VAULT);
+    const notes = await adapter.getPublicNotes();
+    const note2 = notes.find((n) => n.slug === "note-public-2");
+    expect(note2).toBeDefined();
+    expect(note2!.body).toContain(
+      '<a href="/work/note-public-1">link to first post</a>',
+    );
+  });
+
+  it("unresolved wikilink target falls back to plain text (no anchor)", async () => {
+    // note-public-1.md has [[private-note]] — neither slug exists.
+    // Resolves to neither public nor private, so falls back to text.
+    const adapter = new LocalVaultAdapter(FIXTURE_VAULT);
+    const notes = await adapter.getPublicNotes();
+    const note1 = notes.find((n) => n.slug === "note-public-1");
+    expect(note1).toBeDefined();
+    expect(note1!.body).toContain("private-note");
+    expect(note1!.body).not.toMatch(/<a[^>]*>private-note<\/a>/);
+    expect(note1!.body).not.toContain("[[");
+  });
+
+  it("leak gate throws when a public note wikilinks to a private slug", async () => {
+    // Build a tiny fixture vault on disk with one public + one private note,
+    // where the public note links to the private slug.
+    const { mkdtemp, writeFile, mkdir, rm } = await import("node:fs/promises");
+    const { tmpdir } = await import("node:os");
+    const tmpVault = await mkdtemp(path.join(tmpdir(), "vault-leak-"));
+    const notesDir = path.join(tmpVault, "notes");
+    await mkdir(notesDir, { recursive: true });
+
+    await writeFile(
+      path.join(notesDir, "public-leaker.md"),
+      `---
+title: Public Leaker
+date: 2026-05-10
+visibility: public
+---
+
+This links to [[private-target]] which should fail the build.
+`,
+    );
+    await writeFile(
+      path.join(notesDir, "private-target.md"),
+      `---
+title: Private Target
+date: 2026-05-10
+visibility: private
+---
+
+Body should never be read.
+`,
+    );
+
+    const { WikilinkLeakError } = await import("../../lib/vault/errors");
+    const adapter = new LocalVaultAdapter(tmpVault);
+
+    try {
+      await expect(adapter.getPublicNotes()).rejects.toBeInstanceOf(
+        WikilinkLeakError,
+      );
+    } finally {
+      await rm(tmpVault, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("LocalVaultAdapter — empty vault", () => {
   it("returns empty array for empty vault directory", async () => {
     const { mkdtemp, rmdir } = await import("node:fs/promises");

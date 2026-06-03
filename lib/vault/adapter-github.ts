@@ -15,9 +15,15 @@
  *   - Reject device entries (BlockDevice, CharacterDevice, etc.)
  *   - Reject symlinks (SymbolicLink)
  *   - Apply same ignore-list as walk.ts (.obsidian, .trash, .git, etc.)
- *   - Only process *.md files
+ *   - Only process *.md files under notes/
  *   - 1MB size cap per entry
  *   - Token never appears in thrown error messages
+ *
+ * Render flow mirrors the local adapter (P22 + P31): a two-pass walk where
+ * pass 1 resolves visibility + slug for every tarball entry, and pass 2
+ * renders public bodies via `renderMarkdown()` with the full slug map so
+ * wikilinks resolve to anchors / private targets throw / unknown targets
+ * fall back to plain text.
  *
  * Per P25: No I/O, no env access at module init.
  */
@@ -26,17 +32,19 @@ import * as tar from "tar";
 import { Readable } from "node:stream";
 import { resolveVisibility } from "./fail-closed";
 import { VaultFrontmatterSchema } from "./schema";
-import type { VaultNote, VaultAdapter } from "./schema";
+import type { VaultNote, VaultAdapter, VaultFrontmatter } from "./schema";
 import { deriveSlug } from "./slug";
 import { applyPreviewDefaults } from "./preview-defaults";
-import { remarkStripWikilinks } from "./wikilinks";
+import { stripWikilinks } from "./wikilinks";
+import { renderMarkdown } from "./render";
 import { VaultParseError } from "./errors";
-import { unified } from "unified";
-import remarkParse from "remark-parse";
-import remarkGfm from "remark-gfm";
-import remarkRehype from "remark-rehype";
-import rehypeSanitize from "rehype-sanitize";
-import rehypeStringify from "rehype-stringify";
+import {
+  isVaultAssetFile,
+  rewriteMarkdownVaultImageRefs,
+  rewritePreviewVaultImage,
+  writeBufferedVaultAsset,
+  MAX_VAULT_ASSET_BYTES,
+} from "./assets";
 import matter from "gray-matter";
 import path from "node:path";
 
@@ -50,6 +58,8 @@ const IGNORE_PREFIXES = [
   "templates/",
 ];
 
+const CONTENT_PREFIX = "notes/";
+
 /** 1MB size cap on individual vault files. */
 const MAX_FILE_BYTES = 1024 * 1024;
 
@@ -61,6 +71,21 @@ const UNSAFE_ENTRY_TYPES = new Set([
   "CharacterDevice",
   "FIFO",
 ]);
+
+/**
+ * Pass-1 output. Same shape as the local adapter's `ResolvedFile` — public
+ * resolutions carry the parsed frontmatter + raw body for pass 2, private
+ * resolutions carry only the slug so they feed the leak gate.
+ */
+type ResolvedFile =
+  | {
+      visibility: "public" | "preview";
+      relPath: string;
+      slug: string;
+      frontmatter: VaultFrontmatter;
+      bodyMarkdown: string;
+    }
+  | { visibility: "private"; relPath: string; slug: string | null };
 
 /**
  * Strips the leading tarball prefix (e.g. "owner-repo-sha123/") from an
@@ -87,17 +112,15 @@ function isIgnoredPath(relPath: string): boolean {
  * Rejects: absolute paths, traversal, unsafe types.
  */
 function isEntryPathSafe(rawPath: string, entryType: string): boolean {
-  // Reject unsafe entry types
   if (UNSAFE_ENTRY_TYPES.has(entryType)) return false;
-  // Reject absolute paths
   if (rawPath.startsWith("/")) return false;
-  // Reject traversal
   if (rawPath.includes("..")) return false;
   return true;
 }
 
 /**
  * Extracts the first non-empty paragraph of plain text from markdown.
+ * Wikilinks are stripped so the fallback excerpt never leaks raw `[[...]]`.
  */
 function extractFirstParagraph(markdown: string): string {
   const lines = markdown.split("\n");
@@ -123,8 +146,8 @@ function extractFirstParagraph(markdown: string): string {
     paragraphLines.push(trimmed);
   }
 
-  return paragraphLines
-    .join(" ")
+  const joined = paragraphLines.join(" ");
+  return stripWikilinks(joined)
     .replace(/\*\*([^*]+)\*\*/g, "$1")
     .replace(/\*([^*]+)\*/g, "$1")
     .replace(/`([^`]+)`/g, "$1")
@@ -133,67 +156,105 @@ function extractFirstParagraph(markdown: string): string {
 }
 
 /**
- * Process a single tarball entry's content through the vault pipeline.
- * Returns a VaultNote if public, null otherwise.
- * Throws VaultParseError if the note is public-but-schema-invalid.
+ * Pass 1 (tarball-entry variant): parse frontmatter, resolve visibility, and
+ * derive the slug. Returns a private resolution for malformed YAML so the
+ * slug still feeds the leak gate. Public-but-schema-invalid throws
+ * `VaultParseError`.
  */
-async function processTarEntry(
+function resolveTarEntry(
   relPath: string,
   content: string,
   includePreview: boolean,
-): Promise<VaultNote | null> {
+): ResolvedFile {
+  const filename = path.basename(relPath);
+
   let rawFrontmatter: unknown;
   let bodyMarkdown: string;
-
   try {
     const parsed = matter(content);
     rawFrontmatter = parsed.data;
     bodyMarkdown = parsed.content;
   } catch {
-    // Malformed YAML → private
-    return null;
+    return {
+      visibility: "private",
+      relPath,
+      slug: deriveSlug(filename) || null,
+    };
   }
 
   const visibility = resolveVisibility(rawFrontmatter, { includePreview });
+
   if (visibility === "private") {
-    return null;
+    const fmSlug =
+      typeof rawFrontmatter === "object" &&
+      rawFrontmatter !== null &&
+      typeof (rawFrontmatter as Record<string, unknown>)["slug"] === "string"
+        ? ((rawFrontmatter as Record<string, unknown>)["slug"] as string)
+        : undefined;
+    return {
+      visibility: "private",
+      relPath,
+      slug: deriveSlug(filename, fmSlug) || null,
+    };
   }
 
   const parseResult = VaultFrontmatterSchema.safeParse(rawFrontmatter);
   if (!parseResult.success) {
-    throw new VaultParseError(
-      relPath,
-      "schema",
-      parseResult.error.issues[0]?.message,
-    );
+    throw new VaultParseError(relPath, "schema", parseResult.error.issues[0]?.message);
   }
 
-  const frontmatter = parseResult.data as import("./schema").VaultFrontmatter;
-  const filename = path.basename(relPath);
+  const frontmatter = parseResult.data as VaultFrontmatter;
   const slug = deriveSlug(filename, frontmatter.slug);
 
-  const processor = unified()
-    .use(remarkParse)
-    .use(remarkGfm)
-    .use(remarkStripWikilinks)
-    .use(remarkRehype)
-    .use(rehypeSanitize)
-    .use(rehypeStringify);
+  return {
+    visibility,
+    relPath,
+    slug,
+    frontmatter,
+    bodyMarkdown,
+  };
+}
 
-  const bodyHtml = String(await processor.process(bodyMarkdown));
-  const firstParagraph = extractFirstParagraph(bodyMarkdown);
+/**
+ * Pass 2 (tarball variant): render the public body with slug-map context.
+ */
+async function renderPublicNote(
+  resolved: Extract<ResolvedFile, { visibility: "public" | "preview" }>,
+  publicSlugs: ReadonlySet<string>,
+  privateSlugs: ReadonlySet<string>,
+  assets: ReadonlyMap<string, Buffer>
+): Promise<VaultNote> {
+  const bodyMarkdownForRender = await rewriteMarkdownVaultImageRefs(
+    resolved.bodyMarkdown,
+    resolved.relPath,
+    resolved.slug,
+    (asset) => writeBufferedVaultAsset(resolved.relPath, asset, assets.get(asset.sourceRelPath))
+  );
 
-  const preview = applyPreviewDefaults(frontmatter.preview, {
-    title: frontmatter.title,
+  const body = await renderMarkdown(bodyMarkdownForRender, {
+    publicSlugs,
+    privateSlugs,
+    sourcePath: resolved.relPath,
+  });
+
+  const firstParagraph = extractFirstParagraph(resolved.bodyMarkdown);
+  const previewInput = await rewritePreviewVaultImage(
+    resolved.frontmatter.preview,
+    resolved.relPath,
+    resolved.slug,
+    (asset) => writeBufferedVaultAsset(resolved.relPath, asset, assets.get(asset.sourceRelPath))
+  );
+  const preview = applyPreviewDefaults(previewInput, {
+    title: resolved.frontmatter.title,
     firstParagraph,
   });
 
   return {
-    slug,
-    path: relPath,
-    frontmatter,
-    body: bodyHtml,
-    bodyMarkdown,
+    slug: resolved.slug,
+    path: resolved.relPath,
+    frontmatter: resolved.frontmatter,
+    body,
+    bodyMarkdown: resolved.bodyMarkdown,
     preview,
   };
 }
@@ -242,16 +303,13 @@ export class GitHubVaultAdapter implements VaultAdapter {
         redirect: "follow",
       });
     } catch (err) {
-      // Redact token from error message
       const msg = err instanceof Error ? err.message : String(err);
-      throw new Error(
-        `GitHub tarball fetch failed: ${msg.replaceAll(token, "[REDACTED]")}`,
-      );
+      throw new Error(`GitHub tarball fetch failed: ${msg.replaceAll(token, "[REDACTED]")}`);
     }
 
     if (!response.ok) {
       throw new Error(
-        `GitHub tarball fetch returned HTTP ${response.status} for ${this.owner}/${this.repo}@${this.ref}`,
+        `GitHub tarball fetch returned HTTP ${response.status} for ${this.owner}/${this.repo}@${this.ref}`
       );
     }
 
@@ -260,16 +318,13 @@ export class GitHubVaultAdapter implements VaultAdapter {
 
     // Parse entries in-memory — collect file contents before async processing
     const entries: Array<{ relPath: string; content: string }> = [];
+    const assets = new Map<string, Buffer>();
 
     // Detect gzip from magic bytes (0x1f 0x8b)
-    const isGzip =
-      buffer.length >= 2 && buffer[0] === 0x1f && buffer[1] === 0x8b;
+    const isGzip = buffer.length >= 2 && buffer[0] === 0x1f && buffer[1] === 0x8b;
 
     await new Promise<void>((resolve, reject) => {
       const readable = Readable.from(buffer);
-      // Pass explicit compression flags to avoid brotli/zstd sniff ambiguity
-      // that can block the parser if buffers are small.
-      // Note: tar v7 uses `onReadEntry`, not `onentry`.
       const parser = new tar.Parser({
         strict: true,
         gzip: isGzip,
@@ -278,37 +333,36 @@ export class GitHubVaultAdapter implements VaultAdapter {
           const rawPath = entry.path;
           const entryType = entry.type ?? "File";
 
-          // Security checks on raw path
           if (!isEntryPathSafe(rawPath, entryType)) {
-            entry.resume(); // drain the entry stream
+            entry.resume();
             return;
           }
 
           const relPath = stripTarballPrefix(rawPath);
 
-          // Must be a .md file
-          if (!relPath.endsWith(".md")) {
+          const isMarkdown = relPath.startsWith(CONTENT_PREFIX) && relPath.endsWith(".md");
+          const isAsset = isVaultAssetFile(relPath);
+
+          if (!isMarkdown && !isAsset) {
             entry.resume();
             return;
           }
 
-          // Apply ignore-list
           if (isIgnoredPath(relPath)) {
             entry.resume();
             return;
           }
 
-          // Collect file content with size cap
           const chunks: Buffer[] = [];
           let totalSize = 0;
 
           entry.on("data", (chunk: Buffer) => {
             totalSize += chunk.length;
-            if (totalSize > MAX_FILE_BYTES) {
+            if (totalSize > (isAsset ? MAX_VAULT_ASSET_BYTES : MAX_FILE_BYTES)) {
               entry.destroy(
                 new Error(
-                  `File too large: ${relPath} (>${MAX_FILE_BYTES} bytes)`,
-                ),
+                  `File too large: ${relPath} (>${isAsset ? MAX_VAULT_ASSET_BYTES : MAX_FILE_BYTES} bytes)`
+                )
               );
               return;
             }
@@ -316,8 +370,13 @@ export class GitHubVaultAdapter implements VaultAdapter {
           });
 
           entry.on("end", () => {
-            const content = Buffer.concat(chunks).toString("utf8");
-            entries.push({ relPath, content });
+            const buffer = Buffer.concat(chunks);
+            if (isAsset) {
+              assets.set(relPath, buffer);
+            } else {
+              const content = buffer.toString("utf8");
+              entries.push({ relPath, content });
+            }
           });
 
           entry.on("error", () => {
@@ -330,8 +389,6 @@ export class GitHubVaultAdapter implements VaultAdapter {
       parser.on("end", resolve);
       parser.on("error", reject);
 
-      // tar.Parser extends EventEmitter (not stream.Writable), so use pipe
-      // via the EventEmitter-compatible write() interface
       readable.on("data", (chunk: Buffer) => {
         parser.write(chunk);
       });
@@ -341,25 +398,38 @@ export class GitHubVaultAdapter implements VaultAdapter {
       readable.on("error", reject);
     });
 
-    // Process entries asynchronously (after tar parsing is complete)
-    const publicNotes: VaultNote[] = [];
-
+    // Pass 1: resolve every entry (visibility + slug; body not yet rendered)
+    const resolved: ResolvedFile[] = [];
     for (const { relPath, content } of entries) {
-      let note: VaultNote | null;
       try {
-        note = await processTarEntry(relPath, content, this.includePreview);
+        resolved.push(resolveTarEntry(relPath, content, this.includePreview));
       } catch (err) {
-        if (err instanceof VaultParseError) {
-          throw err;
-        }
-        console.error(`[vault/github] Error processing ${relPath}:`, err);
-        continue;
-      }
-
-      if (note !== null) {
-        publicNotes.push(note);
+        if (err instanceof VaultParseError) throw err;
+        console.error(`[vault/github] Error resolving ${relPath}:`, err);
       }
     }
+
+    // Build slug sets for the leak gate
+    const publicSlugs = new Set<string>();
+    const privateSlugs = new Set<string>();
+    for (const r of resolved) {
+      if (r.slug === null) continue;
+      if (r.visibility !== "private") {
+        publicSlugs.add(r.slug);
+      } else {
+        privateSlugs.add(r.slug);
+      }
+    }
+
+    // Pass 2: render public bodies with slug-map context
+    const publicNotes = await Promise.all(
+      resolved
+        .filter(
+          (r): r is Extract<ResolvedFile, { visibility: "public" | "preview" }> =>
+            r.visibility !== "private",
+        )
+        .map((r) => renderPublicNote(r, publicSlugs, privateSlugs, assets))
+    );
 
     return publicNotes;
   }

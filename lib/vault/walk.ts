@@ -1,7 +1,7 @@
 /**
  * walk.ts — vault file discovery.
  *
- * Walks the vault root for *.md files using fast-glob, then applies
+ * Walks the vault's notes/ subtree for *.md files using fast-glob, then applies
  * symlink and path-boundary checks (P17).
  *
  * Security properties:
@@ -29,8 +29,9 @@ const IGNORE_PATTERNS = [
 ];
 
 /**
- * Walks the vault root directory and returns vault-relative paths for
- * all eligible `.md` files.
+ * Walks the vault notes/ directory and returns vault-relative paths for
+ * all eligible `.md` files. Root documentation such as README.md, AGENTS.md,
+ * and AUTHORING.md is operator guidance, not publishable content.
  *
  * @param vaultRoot - Absolute path to the vault root directory.
  * @returns Array of vault-relative file paths (e.g. `"notes/hello.md"`).
@@ -42,7 +43,7 @@ export async function walkVault(vaultRoot: string): Promise<string[]> {
   // Discover candidates with fast-glob. followSymbolicLinks: false prevents
   // following symlinked directories, but fast-glob may still yield symlinked
   // file entries, so we lstat below as a second layer.
-  const raw = await fg("**/*.md", {
+  const raw = await fg("notes/**/*.md", {
     cwd: rootReal,
     followSymbolicLinks: false,
     ignore: IGNORE_PATTERNS,

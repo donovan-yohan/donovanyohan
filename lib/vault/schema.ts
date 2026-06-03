@@ -17,7 +17,7 @@ import { z } from "zod";
 
 export type Visibility = "public" | "preview" | "private";
 export type PreviewKind = "text" | "image" | "quote" | "embed";
-export type NoteType = "note" | "work";
+export type NoteType = "note" | "work" | "writing" | "reshare";
 
 // ── Sub-schemas ───────────────────────────────────────────────────────────────
 
@@ -155,13 +155,14 @@ export const VaultFrontmatterSchema = z
 
     /**
      * `type` — content category. Defaults to `"note"` for all existing notes.
-     * `"work"` enables work-page-specific rendering in Phase B (NoteRenderer).
+     * `"work"` enables work-page-specific rendering; `"writing"` and
+     * `"reshare"` are used by dy-journal article/frontmatter classification.
      */
     // `.default()` already makes the field optional at the input layer; do NOT
     // add `.optional()` after, which would cause Zod to infer `T | undefined`
     // and effectively bypass the default when the key is missing. The
-    // discriminator must always resolve to "note" or "work" at runtime.
-    type: z.enum(["note", "work"]).default("note"),
+    // discriminator must always resolve to a known note type at runtime.
+    type: z.enum(["note", "work", "writing", "reshare"]).default("note"),
 
     /**
      * `subtitle` — extended description shown in the work-page hero below the

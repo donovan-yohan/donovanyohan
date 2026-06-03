@@ -23,9 +23,13 @@ import { readFileSync, readdirSync, lstatSync } from "fs";
 import type { Dirent } from "fs";
 import { join, relative, basename } from "path";
 import { load as yamlLoad } from "js-yaml";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
 import { resolveVisibility } from "../lib/vault/fail-closed.js";
 import { deriveSlug } from "../lib/vault/slug.js";
 import { VaultFrontmatterSchema } from "../lib/vault/schema.js";
+import type { VaultFrontmatter } from "../lib/vault/schema.js";
+import { resolveVaultAssetRef } from "../lib/vault/assets.js";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -39,7 +43,7 @@ interface FileResult {
 
 interface LintError {
   path: string;
-  kind: "duplicate-slug" | "schema" | "yaml" | "io" | "args";
+  kind: "duplicate-slug" | "schema" | "yaml" | "io" | "args" | "asset";
   message: string;
 }
 
@@ -61,6 +65,24 @@ interface LintOutput {
 interface ParseResult {
   frontmatter: unknown;
   parseError: string | null;
+}
+
+interface MarkdownNode {
+  type: string;
+  url?: unknown;
+  children?: MarkdownNode[];
+}
+
+const markdownParser = unified().use(remarkParse).freeze();
+
+function visitMarkdownImages(node: MarkdownNode, visitor: (node: MarkdownNode) => void): void {
+  if (node.type === "image") {
+    visitor(node);
+  }
+
+  for (const child of node.children ?? []) {
+    visitMarkdownImages(child, visitor);
+  }
 }
 
 /**
@@ -102,11 +124,70 @@ function parseFrontmatter(content: string): ParseResult {
   }
 }
 
+function collectMarkdownImageDests(markdown: string): string[] {
+  const out: string[] = [];
+  const tree = markdownParser.parse(markdown) as MarkdownNode;
+  visitMarkdownImages(tree, (node) => {
+    if (typeof node.url === "string") {
+      out.push(node.url);
+    }
+  });
+  return out;
+}
+
+function previewImage(frontmatter: VaultFrontmatter): string | null {
+  return frontmatter.preview?.image ?? null;
+}
+
+function validatePublicImageAssets(
+  filePath: string,
+  vaultRoot: string,
+  relPath: string,
+  frontmatter: VaultFrontmatter,
+  content: string
+): LintError[] {
+  const slug = deriveSlug(basename(filePath), frontmatter.slug);
+  const refs = [...collectMarkdownImageDests(content)];
+  const preview = previewImage(frontmatter);
+  if (preview) refs.push(preview);
+
+  const errors: LintError[] = [];
+  for (const ref of refs) {
+    const asset = resolveVaultAssetRef(relPath, slug, ref);
+    if (!asset) continue;
+
+    const assetPath = join(vaultRoot, asset.sourceRelPath);
+    let assetStat: ReturnType<typeof lstatSync>;
+    try {
+      assetStat = lstatSync(assetPath);
+    } catch {
+      errors.push({
+        path: relPath,
+        kind: "asset",
+        message: `missing image asset: ${asset.sourceRelPath}`,
+      });
+      continue;
+    }
+
+    if (!assetStat.isFile() || assetStat.isSymbolicLink()) {
+      errors.push({
+        path: relPath,
+        kind: "asset",
+        message: `image asset must be a regular file: ${asset.sourceRelPath}`,
+      });
+    }
+  }
+
+  return errors;
+}
+
 // ── Vault walker ──────────────────────────────────────────────────────────────
 
 /**
- * Recursively walks a directory and returns all `.md` file absolute paths.
- * Excludes hidden directories (`.obsidian`, `.trash`, `.git`, `.github`) plus
+ * Recursively walks the vault's `notes/` directory and returns all `.md` file absolute paths.
+ * Root markdown files (`README.md`, `AGENTS.md`, `AUTHORING.md`) are operator
+ * docs and are intentionally not linted as publishable notes. Excludes hidden
+ * directories (`.obsidian`, `.trash`, `.git`, `.github`) plus
  * `node_modules`, `templates` per VAULT.md walk-ignore-list.
  *
  * Uses `withFileTypes` to avoid an extra `lstatSync` per entry (perf).
@@ -131,6 +212,7 @@ interface WalkResult {
 
 function walkVault(dir: string): WalkResult {
   const out: string[] = [];
+  const notesDir = join(dir, "notes");
 
   function recurse(d: string): string | null {
     // `withFileTypes: true` returns Dirent[] which exposes
@@ -166,21 +248,21 @@ function walkVault(dir: string): WalkResult {
     return null;
   }
 
-  // Verify the root is actually a directory before recursing. Handles
+  // Verify the notes/ content root is actually a directory before recursing. Handles
   // missing dir, file-instead-of-dir, permission denied — all surface as
   // a clear error rather than the silent "0 files walked" we used to
   // return. (copilot #45)
   let rootStat: ReturnType<typeof lstatSync>;
   try {
-    rootStat = lstatSync(dir);
+    rootStat = lstatSync(notesDir);
   } catch (err) {
     return { files: [], error: err instanceof Error ? err.message : String(err) };
   }
   if (!rootStat.isDirectory()) {
-    return { files: [], error: `not a directory: ${dir}` };
+    return { files: [], error: `not a directory: ${notesDir}` };
   }
 
-  const recurseErr = recurse(dir);
+  const recurseErr = recurse(notesDir);
   return { files: out, error: recurseErr };
 }
 
@@ -195,7 +277,7 @@ function walkVault(dir: string): WalkResult {
  */
 function lintFile(
   filePath: string,
-  vaultRoot: string,
+  vaultRoot: string
 ): { result: FileResult; errors: LintError[]; frontmatter: unknown } {
   const relPath = relative(vaultRoot, filePath);
   const errors: LintError[] = [];
@@ -286,6 +368,22 @@ function lintFile(
     };
   }
 
+  errors.push(
+    ...validatePublicImageAssets(filePath, vaultRoot, relPath, schemaResult.data, content)
+  );
+
+  if (errors.length > 0) {
+    return {
+      result: {
+        path: relPath,
+        status: "error",
+        reason: errors.map((err) => err.message).join("; "),
+      },
+      errors,
+      frontmatter,
+    };
+  }
+
   return { result: { path: relPath, status: "public" }, errors, frontmatter };
 }
 
@@ -328,11 +426,7 @@ function lintVault(vaultPath: string): LintOutput {
     // instead of re-reading the file. (gemini + copilot #45)
     if (result.status !== "error") {
       let frontmatterSlug: string | undefined;
-      if (
-        frontmatter !== null &&
-        typeof frontmatter === "object" &&
-        !Array.isArray(frontmatter)
-      ) {
+      if (frontmatter !== null && typeof frontmatter === "object" && !Array.isArray(frontmatter)) {
         const fm = frontmatter as Record<string, unknown>;
         if (typeof fm["slug"] === "string") {
           frontmatterSlug = fm["slug"];
@@ -430,9 +524,7 @@ export function main(argv: string[]): number {
   if (parsed.kind === "error") {
     process.stderr.write(parsed.message + "\n");
     if (!parsed.message.startsWith("Usage:")) {
-      process.stderr.write(
-        "Usage: vault-lint [--report] [--json] <vault-path>\n",
-      );
+      process.stderr.write("Usage: vault-lint [--report] [--json] <vault-path>\n");
     }
     return 1;
   }
@@ -451,15 +543,18 @@ export function main(argv: string[]): number {
 
   if (report) {
     // --report: list every file with status and reason
+    process.stderr.write(`vault-lint report — walked ${summary.walked} files\n`);
     process.stderr.write(
-      `vault-lint report — walked ${summary.walked} files\n`,
-    );
-    process.stderr.write(
-      `  public: ${summary.public}  private: ${summary.private}  errors: ${summary.errors}\n\n`,
+      `  public: ${summary.public}  private: ${summary.private}  errors: ${summary.errors}\n\n`
     );
 
     for (const file of files) {
-      const tag = file.status === "public" ? "[public] " : file.status === "private" ? "[private]" : "[error]  ";
+      const tag =
+        file.status === "public"
+          ? "[public] "
+          : file.status === "private"
+            ? "[private]"
+            : "[error]  ";
       const reason = file.reason !== undefined ? `  — ${file.reason}` : "";
       process.stderr.write(`  ${tag}  ${file.path}${reason}\n`);
     }
@@ -482,7 +577,7 @@ export function main(argv: string[]): number {
   const ok = errors.length === 0;
   if (!report && !json && ok) {
     process.stderr.write(
-      `vault-lint: ${summary.walked} files walked, ${summary.public} public, ${summary.private} private — OK\n`,
+      `vault-lint: ${summary.walked} files walked, ${summary.public} public, ${summary.private} private — OK\n`
     );
   }
 

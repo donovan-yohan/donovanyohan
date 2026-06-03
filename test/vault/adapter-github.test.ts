@@ -136,8 +136,8 @@ This is a private note. It should not be returned.
 describe("GitHubVaultAdapter — basic filtering", () => {
   it("returns public notes and filters private notes", async () => {
     const tarball = await createTarball([
-      { relativePath: "public-note.md", content: PUBLIC_NOTE },
-      { relativePath: "private-note.md", content: PRIVATE_NOTE },
+      { relativePath: "notes/public-note.md", content: PUBLIC_NOTE },
+      { relativePath: "notes/private-note.md", content: PRIVATE_NOTE },
     ]);
     mockFetch(tarball);
 
@@ -150,6 +150,25 @@ describe("GitHubVaultAdapter — basic filtering", () => {
     const notes = await adapter.getPublicNotes();
     expect(notes).toHaveLength(1);
     expect(notes[0].slug).toBe("public-note");
+  });
+
+  it("ignores root markdown outside notes/", async () => {
+    const tarball = await createTarball([
+      { relativePath: "AGENTS.md", content: PUBLIC_NOTE },
+      { relativePath: "README.md", content: PUBLIC_NOTE },
+      { relativePath: "notes/public-note.md", content: PUBLIC_NOTE },
+    ]);
+    mockFetch(tarball);
+
+    const adapter = new GitHubVaultAdapter({
+      owner: "test-owner",
+      repo: "test-repo",
+      token: "test-token-123",
+    });
+
+    const notes = await adapter.getPublicNotes();
+    expect(notes).toHaveLength(1);
+    expect(notes[0].path).toBe("notes/public-note.md");
   });
 
   it("strips prefix from tarball paths", async () => {
@@ -175,7 +194,7 @@ describe("GitHubVaultAdapter — basic filtering", () => {
 describe("GitHubVaultAdapter — security: symlink rejection", () => {
   it("rejects symlinks in tarball entries", async () => {
     const tarball = await createTarballWithSymlink("prefix", {
-      relativePath: "safe.md",
+      relativePath: "notes/safe.md",
       content: PUBLIC_NOTE,
     });
     mockFetch(tarball);
@@ -241,7 +260,7 @@ describe("GitHubVaultAdapter — ignore list", () => {
   it("ignores .obsidian/ entries in tarball", async () => {
     const tarball = await createTarball([
       { relativePath: ".obsidian/workspace.json", content: '{"main":{}}' },
-      { relativePath: "public.md", content: PUBLIC_NOTE },
+      { relativePath: "notes/public.md", content: PUBLIC_NOTE },
     ]);
     mockFetch(tarball);
 
@@ -258,7 +277,7 @@ describe("GitHubVaultAdapter — ignore list", () => {
   it("ignores .trash/ entries in tarball", async () => {
     const tarball = await createTarball([
       { relativePath: ".trash/old.md", content: PUBLIC_NOTE },
-      { relativePath: "public.md", content: PUBLIC_NOTE },
+      { relativePath: "notes/public.md", content: PUBLIC_NOTE },
     ]);
     mockFetch(tarball);
 
