@@ -46,7 +46,8 @@ export const MarginAnchor = ({
     width: "var(--margin-anchor-inner-width, var(--gutter-w))",
     boxSizing: "border-box",
     paddingRight: "var(--margin-anchor-inner-padding-right, var(--gutter-pad))",
-    padding: "var(--margin-anchor-inner-padding)",
+    padding:
+      "var(--margin-anchor-inner-padding, 0 var(--margin-anchor-inner-padding-right, var(--gutter-pad)) 0 0)",
     display: "var(--margin-anchor-inner-display, flex)",
     flexDirection: "column",
     gridTemplateColumns: "var(--margin-anchor-inner-grid-template-columns)",

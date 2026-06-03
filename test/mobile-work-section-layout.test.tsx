@@ -68,7 +68,9 @@ describe("mobile work section layout", () => {
       "var(--margin-anchor-margin-left, calc(-1 * var(--content-pad-left)))",
     );
     expect(anchor?.style.marginRight).toBe("var(--margin-anchor-margin-right, 0)");
-    expect(inner?.style.padding).toBe("var(--margin-anchor-inner-padding)");
+    expect(inner?.style.padding).toBe(
+      "var(--margin-anchor-inner-padding, 0 var(--margin-anchor-inner-padding-right, var(--gutter-pad)) 0 0)",
+    );
     expect(inner?.style.boxSizing).toBe("border-box");
   });
 
