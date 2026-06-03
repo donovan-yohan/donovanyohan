@@ -32,6 +32,7 @@ const months: NotebookMonth[] = [
               title: "Shipping with agents in the loop.",
               blurb: "A working note.",
               read: "7 min",
+              tags: ["memory"],
             },
           },
         ],
@@ -66,12 +67,18 @@ describe("mobile work section layout", () => {
         serifClass="serif"
         italicSerifClass="italic"
         months={months}
+        tagFilters={[
+          { slug: "memory", label: "Memory" },
+          { slug: "private-only", label: "Private Only" },
+        ]}
         cardHrefBuilder={(entry) => `/work/${entry.id}`}
       />,
     );
 
     expect(screen.getByRole("button", { name: /all/i })).toHaveClass("chipActive");
     expect(screen.getByRole("button", { name: /article/i })).toHaveClass("chip");
+    expect(screen.getByRole("button", { name: /memory/i })).toHaveClass("chipTag");
+    expect(screen.queryByRole("button", { name: /private only/i })).toBeNull();
     expect(screen.getByText("MAY")).toHaveClass("monthName");
     expect(container.querySelector(".chipsBar")).not.toBeNull();
     expect(container.querySelector(".notebookStack")).toHaveStyle({

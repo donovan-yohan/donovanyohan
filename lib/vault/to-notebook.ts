@@ -129,6 +129,7 @@ const noteToEntry = (note: VaultNote, index: number): Entry => {
     index,
     ...(preview.accent !== undefined ? { accent: preview.accent } : {}),
     ...(preview.tint !== undefined ? { tint: preview.tint } : {}),
+    ...(fm.tags.length > 0 ? { tags: fm.tags } : {}),
   } as const;
 
   if (type === "photo") {

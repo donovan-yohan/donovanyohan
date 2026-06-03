@@ -29,6 +29,7 @@ function makeNote(overrides?: Partial<VaultNote> & { frontmatterExtra?: Record<s
       date: "2026-05-10",
       visibility: "public",
       type: "note",
+      tags: [],
       ...frontmatterExtra,
     },
     body: "<p>Hello world</p>",

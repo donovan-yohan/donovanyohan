@@ -189,6 +189,31 @@ describe("GitHubVaultAdapter — basic filtering", () => {
     // path should be vault-relative, without the prefix
     expect(notes[0].path).toBe("notes/my-public-note.md");
   });
+
+  it("loads taxonomy metadata from notes/.meta without exposing it as a note", async () => {
+    const tarball = await createTarball([
+      { relativePath: "notes/public-note.md", content: PUBLIC_NOTE },
+      {
+        relativePath: "notes/.meta/taxonomy.yml",
+        content: "tags:\n  memory:\n    label: Memory\n    showInFilters: true\n    order: 10\n",
+      },
+    ]);
+    mockFetch(tarball);
+
+    const adapter = new GitHubVaultAdapter({
+      owner: "test-owner",
+      repo: "test-repo",
+      token: "test-token-123",
+    });
+
+    const notes = await adapter.getPublicNotes();
+    const taxonomy = await adapter.getTaxonomy();
+    expect(notes).toHaveLength(1);
+    expect(notes[0].path).toBe("notes/public-note.md");
+    expect(taxonomy.tags.memory.label).toBe("Memory");
+    expect(taxonomy.tags.memory.showInFilters).toBe(true);
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("GitHubVaultAdapter — security: symlink rejection", () => {

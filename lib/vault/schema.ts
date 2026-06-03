@@ -19,6 +19,33 @@ export type Visibility = "public" | "preview" | "private";
 export type PreviewKind = "text" | "image" | "quote" | "embed";
 export type NoteType = "note" | "work" | "writing" | "reshare";
 
+export const TAG_SLUG_REGEX = /^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/;
+export const TagSlugSchema = z
+  .string()
+  .regex(TAG_SLUG_REGEX, "tag slug must be kebab-case ASCII, starting and ending with alphanumeric");
+
+export const SeriesConfigSchema = z.object({
+  slug: TagSlugSchema,
+  title: z.string().min(1, "series.title cannot be empty"),
+  order: z.number().int().min(1).optional(),
+});
+
+export type SeriesConfig = z.infer<typeof SeriesConfigSchema>;
+
+export const TaxonomyTagSchema = z.object({
+  label: z.string().min(1, "tag label cannot be empty"),
+  description: z.string().optional(),
+  showInFilters: z.boolean().default(false),
+  order: z.number().int().default(1000),
+});
+
+export const VaultTaxonomySchema = z.object({
+  tags: z.record(TagSlugSchema, TaxonomyTagSchema).default({}),
+});
+
+export type TaxonomyTag = z.infer<typeof TaxonomyTagSchema>;
+export type VaultTaxonomy = z.infer<typeof VaultTaxonomySchema>;
+
 // ── Sub-schemas ───────────────────────────────────────────────────────────────
 
 /**
@@ -147,6 +174,8 @@ export const VaultFrontmatterSchema = z
     visibility: z.enum(["public", "preview", "private"]).default("private"),
 
     preview: PreviewConfigSchema.optional(),
+    tags: z.array(TagSlugSchema).default([]),
+    series: SeriesConfigSchema.optional(),
 
     // ── Work-type fields (Layer B, Phase A) ────────────────────────────────
     // All optional. Backwards-compatible: existing notes that omit them are
@@ -228,6 +257,7 @@ export interface VaultNote {
  */
 export interface VaultAdapter {
   getPublicNotes(): Promise<VaultNote[]>;
+  getTaxonomy(): Promise<VaultTaxonomy>;
 }
 
 /**
