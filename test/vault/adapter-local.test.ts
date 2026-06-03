@@ -40,6 +40,22 @@ describe("LocalVaultAdapter — public note count", () => {
       ["note-public-1", "note-public-2", "note-public-3"].sort(),
     );
   });
+
+  it("does not return preview notes by default", async () => {
+    const adapter = new LocalVaultAdapter(FIXTURE_VAULT);
+    const notes = await adapter.getPublicNotes();
+    const slugs = notes.map((n) => n.slug);
+    expect(slugs).not.toContain("note-preview-1");
+  });
+
+  it("returns preview notes when includePreview is enabled", async () => {
+    const adapter = new LocalVaultAdapter(FIXTURE_VAULT, { includePreview: true });
+    const notes = await adapter.getPublicNotes();
+    const preview = notes.find((n) => n.slug === "note-preview-1");
+    expect(notes).toHaveLength(4);
+    expect(preview).toBeDefined();
+    expect(preview!.frontmatter.visibility).toBe("preview");
+  });
 });
 
 describe("LocalVaultAdapter — private notes never body-rendered", () => {

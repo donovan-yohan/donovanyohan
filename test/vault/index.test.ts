@@ -66,6 +66,31 @@ describe("getPublicNotes — memoization", () => {
   });
 });
 
+describe("getPublicNotes — publication mode", () => {
+  beforeEach(async () => {
+    const { __resetVaultCache__ } = await import("../../lib/vault/index");
+    __resetVaultCache__();
+    delete process.env.VAULT_PUBLICATION_MODE;
+    delete process.env.VAULT_VISIBILITY_MODE;
+    delete process.env.VERCEL_GIT_COMMIT_REF;
+    delete process.env.VAULT_PREVIEW_BRANCHES;
+  });
+
+  it("includes preview notes on the configured development preview branch", async () => {
+    process.env.VERCEL_GIT_COMMIT_REF = "develop";
+    const { getPublicNotes } = await import("../../lib/vault/index");
+    const notes = await getPublicNotes();
+    expect(notes.map((n) => n.slug)).toContain("note-preview-1");
+  });
+
+  it("keeps preview notes out of master/main production builds", async () => {
+    process.env.VERCEL_GIT_COMMIT_REF = "master";
+    const { getPublicNotes } = await import("../../lib/vault/index");
+    const notes = await getPublicNotes();
+    expect(notes.map((n) => n.slug)).not.toContain("note-preview-1");
+  });
+});
+
 describe("getNoteBySlug — lookup", () => {
   beforeEach(async () => {
     const { __resetVaultCache__ } = await import("../../lib/vault/index");

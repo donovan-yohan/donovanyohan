@@ -111,7 +111,7 @@ dy-journal/                # vault root
 ---
 title: My note               # REQUIRED, non-empty string
 date: 2026-05-10             # REQUIRED, YYYY-MM-DD
-visibility: public           # OPT-IN to publish (anything else = private)
+visibility: public           # prod opt-in; use preview for staging-only notes
 slug: my-note                # OPTIONAL, override derived slug
 preview:                     # OPTIONAL, all sub-fields optional
   kind: text                 # text | image | quote | embed
@@ -201,6 +201,7 @@ VAULT_PATH=/absolute/path/to/dy-journal
 # Slice 1+ (production — uncomment when shipping authed/webhook flows)
 # VAULT_SOURCE=github
 # VAULT_REPO_URL=https://github.com/donovan-yohan/dy-journal
+# VAULT_GITHUB_REF=HEAD
 # VAULT_GITHUB_TOKEN=github_pat_...
 # OWNER_GITHUB_LOGIN=donovan-yohan
 # VERCEL_DEPLOY_HOOK_URL=https://api.vercel.com/v1/integrations/deploy/...
@@ -210,6 +211,12 @@ VAULT_PATH=/absolute/path/to/dy-journal
 `VAULT_PATH` accepts absolute paths or paths relative to the portfolio repo
 root (e.g. `../dy-journal`). Production (`NODE_ENV=production`) requires the
 env vars to be set explicitly — no fixture fallback.
+
+Development preview branches (`develop` and `development` by default, or the
+comma-separated `VAULT_PREVIEW_BRANCHES` list) render both `visibility: public`
+and `visibility: preview`. Production/default branches (`master`/`main`) render
+only `visibility: public`. You can override explicitly with
+`VAULT_PUBLICATION_MODE=preview` or `VAULT_PUBLICATION_MODE=production`.
 
 ### 5. Run
 

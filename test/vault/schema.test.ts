@@ -86,6 +86,16 @@ describe("VaultFrontmatterSchema", () => {
       expect(result.data.visibility).toBe("private");
     });
 
+    it("accepts explicit 'preview' visibility", () => {
+      const result = VaultFrontmatterSchema.safeParse({
+        ...VALID_BASE,
+        visibility: "preview",
+      });
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.visibility).toBe("preview");
+    });
+
     it("rejects invalid visibility values", () => {
       expect(
         VaultFrontmatterSchema.safeParse({ ...VALID_BASE, visibility: "PUBLIC" }).success,

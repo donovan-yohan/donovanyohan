@@ -140,6 +140,7 @@ function extractFirstParagraph(markdown: string): string {
 async function processTarEntry(
   relPath: string,
   content: string,
+  includePreview: boolean,
 ): Promise<VaultNote | null> {
   let rawFrontmatter: unknown;
   let bodyMarkdown: string;
@@ -153,8 +154,8 @@ async function processTarEntry(
     return null;
   }
 
-  const visibility = resolveVisibility(rawFrontmatter);
-  if (visibility !== "public") {
+  const visibility = resolveVisibility(rawFrontmatter, { includePreview });
+  if (visibility === "private") {
     return null;
   }
 
@@ -208,17 +209,20 @@ export class GitHubVaultAdapter implements VaultAdapter {
   private readonly repo: string;
   private readonly ref: string;
   private readonly token: string;
+  private readonly includePreview: boolean;
 
   constructor(params: {
     owner: string;
     repo: string;
     ref?: string;
     token: string;
+    includePreview?: boolean;
   }) {
     this.owner = params.owner;
     this.repo = params.repo;
     this.ref = params.ref ?? "HEAD";
     this.token = params.token;
+    this.includePreview = params.includePreview === true;
   }
 
   async getPublicNotes(): Promise<VaultNote[]> {
@@ -343,7 +347,7 @@ export class GitHubVaultAdapter implements VaultAdapter {
     for (const { relPath, content } of entries) {
       let note: VaultNote | null;
       try {
-        note = await processTarEntry(relPath, content);
+        note = await processTarEntry(relPath, content, this.includePreview);
       } catch (err) {
         if (err instanceof VaultParseError) {
           throw err;

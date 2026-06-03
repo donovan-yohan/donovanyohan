@@ -52,6 +52,7 @@ describe("walkVault — ignore list", () => {
     expect(files).toContain("note-public-1.md");
     expect(files).toContain("note-public-2.md");
     expect(files).toContain("note-public-3.md");
+    expect(files).toContain("notes/note-preview-1.md");
     expect(files).toContain("note-private-1.md");
     expect(files).toContain("note-private-2.md");
     expect(files).toContain("leak-canary.md");
@@ -69,9 +70,10 @@ describe("walkVault — symlink rejection", () => {
 
   it("total file count does not include symlinks or ignored dirs", async () => {
     const files = await walkVault(FIXTURE_VAULT);
-    // 7 real .md files at top level (public-1, public-2, public-3, private-1, private-2,
-    // malformed-frontmatter, leak-canary). No symlinks, no hidden dirs.
-    expect(files.length).toBe(7);
+    // 8 real .md files at top level / notes subtree (public-1, public-2,
+    // public-3, preview-1, private-1, private-2, malformed-frontmatter,
+    // leak-canary). No symlinks, no hidden dirs.
+    expect(files.length).toBe(8);
   });
 });
 

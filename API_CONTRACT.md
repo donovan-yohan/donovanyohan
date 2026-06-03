@@ -21,7 +21,7 @@ notebook UI to build against. This is the load-bearing contract.
 ## Public types
 
 ```ts
-export type Visibility = 'public' | 'private';
+export type Visibility = 'public' | 'preview' | 'private';
 
 export type PreviewKind = 'text' | 'image' | 'quote' | 'embed';
 
@@ -171,8 +171,11 @@ The frontend can rely on these guarantees from `getPublicNotes()`:
 - HTML in markdown body is sanitized (`<script>`, `<iframe>`, `onclick=`, etc.
   removed by `rehype-sanitize`).
 
-**Default-deny.** `visibility: public` is the only opt-in. Anything else =
-private. The frontend never receives private content via this API.
+**Default-deny.** `visibility: public` is the only production opt-in. Anything
+else is private on `master`/production. `visibility: preview` is rendered only
+when the build runs in the configured development-preview publication mode
+(default branches: `develop`, `development`, or explicit
+`VAULT_PUBLICATION_MODE=preview`).
 
 ## Route shapes
 

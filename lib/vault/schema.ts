@@ -15,7 +15,7 @@ import { z } from "zod";
 
 // ── Exported primitive types ──────────────────────────────────────────────────
 
-export type Visibility = "public" | "private";
+export type Visibility = "public" | "preview" | "private";
 export type PreviewKind = "text" | "image" | "quote" | "embed";
 export type NoteType = "note" | "work";
 
@@ -140,11 +140,11 @@ export const VaultFrontmatterSchema = z
       .optional(),
 
     /**
-     * Privacy boundary (P10): default `'private'` — fail-closed.
-     * The only way a note becomes public is an explicit `visibility: public`
-     * in frontmatter that also passes full schema validation.
+     * Production privacy boundary (P10): default `private` — fail-closed.
+     * `visibility: preview` is also non-public unless the build explicitly opts
+     * into staging preview mode for a configured development branch.
      */
-    visibility: z.enum(["public", "private"]).default("private"),
+    visibility: z.enum(["public", "preview", "private"]).default("private"),
 
     preview: PreviewConfigSchema.optional(),
 
@@ -234,7 +234,7 @@ export interface VaultAdapter {
  */
 export type VaultConfig =
   | { source: "local"; path: string }
-  | { source: "github"; repoUrl: string; token: string };
+  | { source: "github"; repoUrl: string; token: string; ref?: string };
 
 /**
  * AdapterResult — the per-file result from the adapter pipeline.

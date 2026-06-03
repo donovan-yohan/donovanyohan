@@ -47,6 +47,7 @@ const MAX_FILE_BYTES = 1024 * 1024;
 async function processFile(
   vaultRoot: string,
   relPath: string,
+  includePreview: boolean,
 ): Promise<AdapterFileResult> {
   const absPath = path.join(vaultRoot, relPath);
 
@@ -83,10 +84,10 @@ async function processFile(
   }
 
   // ── Step 4: Resolve visibility ─────────────────────────────────────────────
-  const visibility = resolveVisibility(rawFrontmatter);
+  const visibility = resolveVisibility(rawFrontmatter, { includePreview });
 
   // ── Step 5: Stop if private ────────────────────────────────────────────────
-  if (visibility !== "public") {
+  if (visibility === "private") {
     return { status: "private", path: relPath };
   }
 
@@ -182,7 +183,10 @@ function extractFirstParagraph(markdown: string): string {
  * LocalVaultAdapter — reads notes from a local filesystem vault.
  */
 export class LocalVaultAdapter implements VaultAdapter {
-  constructor(private readonly vaultRoot: string) {}
+  constructor(
+    private readonly vaultRoot: string,
+    private readonly opts: { includePreview?: boolean } = {},
+  ) {}
 
   async getPublicNotes(): Promise<VaultNote[]> {
     const paths = await walkVault(this.vaultRoot);
@@ -191,7 +195,11 @@ export class LocalVaultAdapter implements VaultAdapter {
     for (const relPath of paths) {
       let result: AdapterFileResult;
       try {
-        result = await processFile(this.vaultRoot, relPath);
+        result = await processFile(
+          this.vaultRoot,
+          relPath,
+          this.opts.includePreview === true,
+        );
       } catch (err) {
         // VaultParseError (public-but-malformed) — re-throw
         if (err instanceof VaultParseError) {

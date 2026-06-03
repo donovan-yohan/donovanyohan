@@ -23,6 +23,7 @@ import { LocalVaultAdapter } from "./adapter-local";
 import { GitHubVaultAdapter } from "./adapter-github";
 import { assertNoDuplicateSlugs } from "./duplicate-check";
 import { VaultConfigError } from "./errors";
+import { shouldIncludePreviewNotes } from "./publication-mode";
 
 // Re-export new work-type types so consumers can import from lib/vault.
 export type {
@@ -79,7 +80,12 @@ export function getVaultConfig(): VaultConfig | null {
       throw new VaultConfigError(missing);
     }
 
-    return { source: "github", repoUrl: repoUrl!, token: token! };
+    return {
+      source: "github",
+      repoUrl: repoUrl!,
+      token: token!,
+      ref: process.env.VAULT_GITHUB_REF || undefined,
+    };
   }
 
   // source === 'local'
@@ -124,6 +130,7 @@ export async function getPublicNotes(): Promise<VaultNote[]> {
     if (config === null) {
       return [];
     }
+    const includePreview = shouldIncludePreviewNotes();
     let adapter;
 
     if (config.source === "github") {
@@ -139,9 +146,15 @@ export async function getPublicNotes(): Promise<VaultNote[]> {
           `Invalid VAULT_REPO_URL: "${config.repoUrl}" — expected https://github.com/{owner}/{repo}`,
         );
       }
-      adapter = new GitHubVaultAdapter({ owner, repo, token: config.token });
+      adapter = new GitHubVaultAdapter({
+        owner,
+        repo,
+        token: config.token,
+        ref: config.ref,
+        includePreview,
+      });
     } else {
-      adapter = new LocalVaultAdapter(config.path);
+      adapter = new LocalVaultAdapter(config.path, { includePreview });
     }
 
     const notes = await adapter.getPublicNotes();

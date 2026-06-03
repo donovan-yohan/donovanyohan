@@ -41,8 +41,10 @@ the operator-side contract.
 - **`lib/vault/fail-closed.ts`** — `resolveVisibility()` is the privacy boundary.
   The test table in `test/resolveVisibility.test.ts` is the authoritative spec.
   Any change here MUST extend the table, not relax it.
-- **`lib/vault/schema.ts`** — never relax `default('private')`, never remove
-  `passthrough()`, never change the `visibility` enum.
+- **`lib/vault/schema.ts` + `publication-mode.ts`** — never relax
+  `default('private')`, never remove `passthrough()`, and do not make
+  `visibility: preview` render outside the configured development-preview
+  publication mode. Production/default branches must stay public-only.
 - **`lib/vault/walk.ts`** — never weaken the path **ignore-list** — directories
   that MUST be excluded from the walk: `.obsidian/`, `.trash/`, `.git/`,
   `.github/`, `node_modules/`, `templates/`. (The allowed-glob is `**/*.md`;

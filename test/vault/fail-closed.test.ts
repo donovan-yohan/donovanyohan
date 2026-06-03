@@ -113,6 +113,12 @@ describe("resolveVisibility — fail-closed privacy boundary (P10)", () => {
     ).toBe("private");
   });
 
+  it("{ visibility: 'preview', title: 'X', date: '2026-05-10' } → private by default", () => {
+    expect(
+      resolveVisibility({ visibility: "preview", title: "X", date: "2026-05-10" }),
+    ).toBe("private");
+  });
+
   // ── The only public case ────────────────────────────────────────────────────
 
   it("{ title: 'X', date: '2026-05-10', visibility: 'public' } → public", () => {
@@ -140,5 +146,14 @@ describe("resolveVisibility — fail-closed privacy boundary (P10)", () => {
         visibility: "public",
       }),
     ).toBe("public");
+  });
+
+  it("{ title: 'X', date: '2026-05-10', visibility: 'preview' } → preview only when includePreview=true", () => {
+    expect(
+      resolveVisibility(
+        { title: "X", date: "2026-05-10", visibility: "preview" },
+        { includePreview: true },
+      ),
+    ).toBe("preview");
   });
 });
