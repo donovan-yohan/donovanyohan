@@ -34,7 +34,7 @@ import matter from "gray-matter";
 import { walkVault } from "./walk";
 import { resolveVisibility } from "./fail-closed";
 import { VaultFrontmatterSchema } from "./schema";
-import type { VaultNote, VaultAdapter, VaultFrontmatter } from "./schema";
+import type { VaultNote, VaultAdapter, VaultFrontmatter, VaultTaxonomy } from "./schema";
 import { deriveSlug } from "./slug";
 import { applyPreviewDefaults } from "./preview-defaults";
 import { stripWikilinks } from "./wikilinks";
@@ -45,6 +45,11 @@ import {
   rewriteMarkdownVaultImageRefs,
   rewritePreviewVaultImage,
 } from "./assets";
+import {
+  EMPTY_VAULT_TAXONOMY,
+  TAXONOMY_PATHS,
+  parseVaultTaxonomy,
+} from "./taxonomy";
 
 /** 1MB size cap on individual vault files. */
 const MAX_FILE_BYTES = 1024 * 1024;
@@ -261,7 +266,7 @@ export class LocalVaultAdapter implements VaultAdapter {
           console.error(`[vault] Unexpected error resolving ${relPath}:`, err);
           return null;
         }
-      })
+      }),
     );
     const resolved = resolvedResults.filter((r): r is ResolvedFile => r !== null);
 
@@ -284,9 +289,24 @@ export class LocalVaultAdapter implements VaultAdapter {
           (r): r is Extract<ResolvedFile, { visibility: "public" | "preview" }> =>
             r.visibility !== "private",
         )
-        .map((r) => renderPublicNote(this.vaultRoot, r, publicSlugs, privateSlugs))
+        .map((r) => renderPublicNote(this.vaultRoot, r, publicSlugs, privateSlugs)),
     );
 
     return publicNotes;
+  }
+
+  async getTaxonomy(): Promise<VaultTaxonomy> {
+    for (const relPath of TAXONOMY_PATHS) {
+      const absPath = path.join(this.vaultRoot, relPath);
+      try {
+        const content = await readFile(absPath, "utf8");
+        return parseVaultTaxonomy(content, relPath);
+      } catch (err) {
+        const code = typeof err === "object" && err !== null && "code" in err ? String(err.code) : "";
+        if (code === "ENOENT") continue;
+        throw err;
+      }
+    }
+    return EMPTY_VAULT_TAXONOMY;
   }
 }

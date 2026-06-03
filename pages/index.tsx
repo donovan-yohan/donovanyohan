@@ -5,9 +5,9 @@ import type { GetStaticProps } from "next";
 import { Box } from "../components/lab/system";
 import Context from "../components/context";
 import SiteNav from "../components/SiteNav";
-import { getPublicNotes } from "../lib/vault";
+import { getPublicNotes, getVaultTaxonomy } from "../lib/vault";
 import { notesToNotebookMonths } from "../lib/vault/to-notebook";
-import type { NotebookMonth } from "../components/lab/Notebook";
+import type { Entry, NotebookMonth } from "../components/lab/Notebook";
 import wannaOutline from "../lib/text-outlines/wanna.json";
 import chatOutline from "../lib/text-outlines/chat.json";
 import {
@@ -631,12 +631,18 @@ const ContactFrame = ({
   );
 };
 
+interface NotebookTagFilter {
+  slug: string;
+  label: string;
+}
+
 interface IndexProps {
   notebookMonths: NotebookMonth[];
+  notebookTagFilters: NotebookTagFilter[];
   weather: CurrentWeather | null;
 }
 
-const Index = ({ notebookMonths, weather }: IndexProps) => {
+const Index = ({ notebookMonths, notebookTagFilters, weather }: IndexProps) => {
   const { theme } = useContext(Context);
   const hatchInk = theme === "dark" ? "#ffffff" : "#1a1814";
 
@@ -728,9 +734,10 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
             serifClass={cp400.className}
             italicSerifClass={cp400i.className}
             months={notebookMonths.length > 0 ? notebookMonths : undefined}
+            tagFilters={notebookTagFilters}
             cardHrefBuilder={
               notebookMonths.length > 0
-                ? (e) => `/work/${e.id}`
+                ? (e: Entry) => `/work/${e.id}`
                 : undefined
             }
           />
@@ -1729,20 +1736,27 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
   );
 };
 
-const loadNotebookMonths = async (): Promise<NotebookMonth[]> => {
+const loadNotebookData = async (): Promise<{
+  months: NotebookMonth[];
+  tagFilters: NotebookTagFilter[];
+}> => {
   try {
-    const notes = await getPublicNotes();
+    const [notes, taxonomy] = await Promise.all([getPublicNotes(), getVaultTaxonomy()]);
     const surfaced = notes.filter(
       (n) =>
         n.frontmatter.type === "work" || n.frontmatter.type === "writing",
     );
-    return notesToNotebookMonths(surfaced);
+    const tagFilters = Object.entries(taxonomy.tags)
+      .filter(([, tag]) => tag.showInFilters)
+      .sort(([, a], [, b]) => a.order - b.order || a.label.localeCompare(b.label))
+      .map(([slug, tag]) => ({ slug, label: tag.label }));
+    return { months: notesToNotebookMonths(surfaced), tagFilters };
   } catch (err) {
     console.warn(
-      "[index] getPublicNotes() failed, falling back to Notebook mock data:",
+      "[index] vault load failed, falling back to Notebook mock data:",
       err instanceof Error ? err.message : err,
     );
-    return [];
+    return { months: [], tagFilters: [] };
   }
 };
 
@@ -1780,12 +1794,16 @@ export const getStaticProps: GetStaticProps<IndexProps> = async () => {
   // Vault walk + Open-Meteo are independent — run them concurrently so
   // build time is max(vault, meteo) rather than the sum. ISR refreshes
   // every 30min, and Open-Meteo can be slow; parallelizing here matters.
-  const [notebookMonths, weather] = await Promise.all([
-    loadNotebookMonths(),
+  const [notebookData, weather] = await Promise.all([
+    loadNotebookData(),
     loadCurrentWeather(),
   ]);
   return {
-    props: { notebookMonths, weather },
+    props: {
+      notebookMonths: notebookData.months,
+      notebookTagFilters: notebookData.tagFilters,
+      weather,
+    },
     revalidate: 1800,
   };
 };

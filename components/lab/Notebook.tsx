@@ -47,6 +47,7 @@ interface BaseEntry {
   accent?: string;
   tint?: string;
   meta?: string;
+  tags?: string[];
 }
 
 interface EssayLike extends BaseEntry {
@@ -568,6 +569,11 @@ const flattenEntries = (nb: NotebookMonth[]): Entry[] => {
 
 // Components -----------------------------------------------------------------
 
+interface TagFilter {
+  slug: string;
+  label: string;
+}
+
 interface NotebookProps {
   monoClass: string;
   serifClass: string;
@@ -585,6 +591,11 @@ interface NotebookProps {
    * Omitted on the lab page so mock entries don't link to missing routes.
    */
   cardHrefBuilder?: CardHrefBuilder;
+  /**
+   * Optional dy-journal taxonomy tags exposed as filter chips. Counts are
+   * derived from entry tags after vault visibility filtering.
+   */
+  tagFilters?: TagFilter[];
 }
 
 const Notebook = ({
@@ -593,8 +604,9 @@ const Notebook = ({
   italicSerifClass,
   months,
   cardHrefBuilder,
+  tagFilters = [],
 }: NotebookProps) => {
-  const [filter, setFilter] = useState<EntryType | "all">("all");
+  const [filter, setFilter] = useState("all");
   const [chipsStuck, setChipsStuck] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const data = months ?? NOTEBOOK;
@@ -729,7 +741,12 @@ const Notebook = ({
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: allEntries.length };
-    for (const e of allEntries) c[e.type] = (c[e.type] ?? 0) + 1;
+    for (const e of allEntries) {
+      c[`type:${e.type}`] = (c[`type:${e.type}`] ?? 0) + 1;
+      for (const tag of e.tags ?? []) {
+        c[`tag:${tag}`] = (c[`tag:${tag}`] ?? 0) + 1;
+      }
+    }
     return c;
   }, [allEntries]);
 
@@ -739,7 +756,19 @@ const Notebook = ({
     return Array.from(seen);
   }, [allEntries]);
 
-  const filtered = filter === "all" ? null : allEntries.filter((e) => e.type === filter);
+  const visibleTagFilters = useMemo(
+    () => tagFilters.filter((tag) => (counts[`tag:${tag.slug}`] ?? 0) > 0),
+    [counts, tagFilters],
+  );
+
+  const filtered =
+    filter === "all"
+      ? null
+      : filter.startsWith("type:")
+        ? allEntries.filter((e) => e.type === filter.slice("type:".length))
+        : filter.startsWith("tag:")
+          ? allEntries.filter((e) => (e.tags ?? []).includes(filter.slice("tag:".length)))
+          : null;
 
   return (
     <>
@@ -767,12 +796,24 @@ const Notebook = ({
               <button
                 key={t}
                 type="button"
-                className={`chip ${filter === t ? "chipActive" : ""}`}
-                onClick={() => setFilter(t)}
+                className={`chip ${filter === `type:${t}` ? "chipActive" : ""}`}
+                onClick={() => setFilter(`type:${t}`)}
               >
                 <span className="chipGlyph">{TYPE_GLYPH[t]}</span>
                 <span className="chipLabel">{TYPE_LABEL[t]}</span>
-                <span className="chipCount">{counts[t] ?? 0}</span>
+                <span className="chipCount">{counts[`type:${t}`] ?? 0}</span>
+              </button>
+            ))}
+            {visibleTagFilters.map((tag) => (
+              <button
+                key={tag.slug}
+                type="button"
+                className={`chip chipTag ${filter === `tag:${tag.slug}` ? "chipActive" : ""}`}
+                onClick={() => setFilter(`tag:${tag.slug}`)}
+              >
+                <span className="chipGlyph">#</span>
+                <span className="chipLabel">{tag.label}</span>
+                <span className="chipCount">{counts[`tag:${tag.slug}`] ?? 0}</span>
               </button>
             ))}
           </div>

@@ -18,12 +18,13 @@
  * occur inside explicitly-called functions.
  */
 
-import type { VaultNote, VaultConfig } from "./schema";
+import type { VaultNote, VaultConfig, VaultTaxonomy, VaultAdapter } from "./schema";
 import { LocalVaultAdapter } from "./adapter-local";
 import { GitHubVaultAdapter } from "./adapter-github";
 import { assertNoDuplicateSlugs } from "./duplicate-check";
 import { VaultConfigError } from "./errors";
 import { shouldIncludePreviewNotes } from "./publication-mode";
+import { EMPTY_VAULT_TAXONOMY } from "./taxonomy";
 
 // Re-export new work-type types so consumers can import from lib/vault.
 export type {
@@ -31,6 +32,9 @@ export type {
   BannerConfig,
   BgColorConfig,
   WorkInfoItem,
+  VaultTaxonomy,
+  TaxonomyTag,
+  SeriesConfig,
 } from "./schema";
 
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -103,8 +107,52 @@ export function getVaultConfig(): VaultConfig | null {
 
 // ── Memoization cache ─────────────────────────────────────────────────────────
 
+function adapterForConfig(config: Exclude<VaultConfig, null>, includePreview: boolean): VaultAdapter {
+  if (config.source === "github") {
+    const urlParts = config.repoUrl
+      .replace(/^https?:\/\/github\.com\//, "")
+      .replace(/\.git$/, "")
+      .split("/");
+    const owner = urlParts[0];
+    const repo = urlParts[1];
+    if (!owner || !repo) {
+      throw new Error(
+        `Invalid VAULT_REPO_URL: "${config.repoUrl}" — expected https://github.com/{owner}/{repo}`,
+      );
+    }
+    return new GitHubVaultAdapter({
+      owner,
+      repo,
+      token: config.token,
+      ref: config.ref,
+      includePreview,
+    });
+  }
+
+  return new LocalVaultAdapter(config.path, { includePreview });
+}
+
 let cachedNotes: VaultNote[] | null = null;
 let cacheInflight: Promise<VaultNote[]> | null = null;
+let cachedTaxonomy: VaultTaxonomy | null = null;
+let taxonomyInflight: Promise<VaultTaxonomy> | null = null;
+let cachedAdapterKey: string | null = null;
+let cachedAdapter: VaultAdapter | null = null;
+
+function adapterKeyForConfig(config: Exclude<VaultConfig, null>, includePreview: boolean): string {
+  return JSON.stringify({ config, includePreview });
+}
+
+function sharedAdapterForConfig(
+  config: Exclude<VaultConfig, null>,
+  includePreview: boolean,
+): VaultAdapter {
+  const key = adapterKeyForConfig(config, includePreview);
+  if (cachedAdapter && cachedAdapterKey === key) return cachedAdapter;
+  cachedAdapterKey = key;
+  cachedAdapter = adapterForConfig(config, includePreview);
+  return cachedAdapter;
+}
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
@@ -131,31 +179,7 @@ export async function getPublicNotes(): Promise<VaultNote[]> {
       return [];
     }
     const includePreview = shouldIncludePreviewNotes();
-    let adapter;
-
-    if (config.source === "github") {
-      // Parse owner/repo from repoUrl (e.g. "https://github.com/owner/repo")
-      const urlParts = config.repoUrl
-        .replace(/^https?:\/\/github\.com\//, "")
-        .replace(/\.git$/, "")
-        .split("/");
-      const owner = urlParts[0];
-      const repo = urlParts[1];
-      if (!owner || !repo) {
-        throw new Error(
-          `Invalid VAULT_REPO_URL: "${config.repoUrl}" — expected https://github.com/{owner}/{repo}`,
-        );
-      }
-      adapter = new GitHubVaultAdapter({
-        owner,
-        repo,
-        token: config.token,
-        ref: config.ref,
-        includePreview,
-      });
-    } else {
-      adapter = new LocalVaultAdapter(config.path, { includePreview });
-    }
+    const adapter = sharedAdapterForConfig(config, includePreview);
 
     const notes = await adapter.getPublicNotes();
 
@@ -177,6 +201,30 @@ export async function getPublicNotes(): Promise<VaultNote[]> {
   } catch (err) {
     // On error, clear inflight so the next call retries
     cacheInflight = null;
+    throw err;
+  }
+}
+
+export async function getVaultTaxonomy(): Promise<VaultTaxonomy> {
+  if (cachedTaxonomy !== null) return cachedTaxonomy;
+  if (taxonomyInflight !== null) return taxonomyInflight;
+
+  taxonomyInflight = (async () => {
+    const config = getVaultConfig();
+    if (config === null) return EMPTY_VAULT_TAXONOMY;
+
+    const includePreview = shouldIncludePreviewNotes();
+    const adapter = sharedAdapterForConfig(config, includePreview);
+    const taxonomy = await adapter.getTaxonomy();
+    cachedTaxonomy = taxonomy;
+    taxonomyInflight = null;
+    return taxonomy;
+  })();
+
+  try {
+    return await taxonomyInflight;
+  } catch (err) {
+    taxonomyInflight = null;
     throw err;
   }
 }
@@ -203,4 +251,8 @@ export function __resetVaultCache__(): void {
   }
   cachedNotes = null;
   cacheInflight = null;
+  cachedTaxonomy = null;
+  taxonomyInflight = null;
+  cachedAdapterKey = null;
+  cachedAdapter = null;
 }

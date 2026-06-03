@@ -30,6 +30,17 @@ describe("getPublicNotes — memoization", () => {
     expect(notes.length).toBeGreaterThanOrEqual(3);
   });
 
+  it("returns taxonomy from the fixture vault", async () => {
+    const { getVaultTaxonomy, __resetVaultCache__ } = await import(
+      "../../lib/vault/index"
+    );
+    __resetVaultCache__();
+
+    const taxonomy = await getVaultTaxonomy();
+    expect(taxonomy.tags.memory.label).toBe("Memory");
+    expect(taxonomy.tags.memory.showInFilters).toBe(true);
+  });
+
   it("second call returns same cached result (spy on LocalVaultAdapter)", async () => {
     const { getPublicNotes, __resetVaultCache__ } = await import(
       "../../lib/vault/index"

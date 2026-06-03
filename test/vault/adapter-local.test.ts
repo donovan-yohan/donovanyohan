@@ -41,6 +41,14 @@ describe("LocalVaultAdapter — public note count", () => {
     );
   });
 
+  it("loads the dy-journal taxonomy manifest when present", async () => {
+    const adapter = new LocalVaultAdapter(FIXTURE_VAULT);
+    const taxonomy = await adapter.getTaxonomy();
+    expect(taxonomy.tags.memory.label).toBe("Memory");
+    expect(taxonomy.tags.memory.showInFilters).toBe(true);
+    expect(taxonomy.tags["diy-agent"].showInFilters).toBe(false);
+  });
+
   it("does not return preview notes by default", async () => {
     const adapter = new LocalVaultAdapter(FIXTURE_VAULT);
     const notes = await adapter.getPublicNotes();

@@ -32,7 +32,7 @@ import * as tar from "tar";
 import { Readable } from "node:stream";
 import { resolveVisibility } from "./fail-closed";
 import { VaultFrontmatterSchema } from "./schema";
-import type { VaultNote, VaultAdapter, VaultFrontmatter } from "./schema";
+import type { VaultNote, VaultAdapter, VaultFrontmatter, VaultTaxonomy } from "./schema";
 import { deriveSlug } from "./slug";
 import { applyPreviewDefaults } from "./preview-defaults";
 import { stripWikilinks } from "./wikilinks";
@@ -47,6 +47,12 @@ import {
 } from "./assets";
 import matter from "gray-matter";
 import path from "node:path";
+import {
+  EMPTY_VAULT_TAXONOMY,
+  TAXONOMY_PATHS,
+  isTaxonomyPath,
+  parseVaultTaxonomy,
+} from "./taxonomy";
 
 /** Glob ignore prefixes for tarball entries (mirrors walk.ts IGNORE_PATTERNS). */
 const IGNORE_PREFIXES = [
@@ -259,6 +265,11 @@ async function renderPublicNote(
   };
 }
 
+type ParsedVaultData = {
+  notes: VaultNote[];
+  taxonomy: VaultTaxonomy;
+};
+
 /**
  * GitHubVaultAdapter — fetches and parses a vault from a GitHub tarball.
  *
@@ -271,6 +282,7 @@ export class GitHubVaultAdapter implements VaultAdapter {
   private readonly ref: string;
   private readonly token: string;
   private readonly includePreview: boolean;
+  private dataInflight: Promise<ParsedVaultData> | null = null;
 
   constructor(params: {
     owner: string;
@@ -286,7 +298,19 @@ export class GitHubVaultAdapter implements VaultAdapter {
     this.includePreview = params.includePreview === true;
   }
 
-  async getPublicNotes(): Promise<VaultNote[]> {
+  private async loadVaultData(): Promise<ParsedVaultData> {
+    if (this.dataInflight) return this.dataInflight;
+
+    this.dataInflight = this.fetchVaultData();
+    try {
+      return await this.dataInflight;
+    } catch (err) {
+      this.dataInflight = null;
+      throw err;
+    }
+  }
+
+  private async fetchVaultData(): Promise<ParsedVaultData> {
     const url = `https://api.github.com/repos/${this.owner}/${this.repo}/tarball/${this.ref}`;
     const token = this.token;
 
@@ -318,6 +342,7 @@ export class GitHubVaultAdapter implements VaultAdapter {
 
     // Parse entries in-memory — collect file contents before async processing
     const entries: Array<{ relPath: string; content: string }> = [];
+    const taxonomyEntries: Array<{ relPath: string; content: string }> = [];
     const assets = new Map<string, Buffer>();
 
     // Detect gzip from magic bytes (0x1f 0x8b)
@@ -342,8 +367,9 @@ export class GitHubVaultAdapter implements VaultAdapter {
 
           const isMarkdown = relPath.startsWith(CONTENT_PREFIX) && relPath.endsWith(".md");
           const isAsset = isVaultAssetFile(relPath);
+          const isTaxonomy = isTaxonomyPath(relPath);
 
-          if (!isMarkdown && !isAsset) {
+          if (!isMarkdown && !isAsset && !isTaxonomy) {
             entry.resume();
             return;
           }
@@ -375,7 +401,11 @@ export class GitHubVaultAdapter implements VaultAdapter {
               assets.set(relPath, buffer);
             } else {
               const content = buffer.toString("utf8");
-              entries.push({ relPath, content });
+              if (isTaxonomy) {
+                taxonomyEntries.push({ relPath, content });
+              } else {
+                entries.push({ relPath, content });
+              }
             }
           });
 
@@ -431,6 +461,21 @@ export class GitHubVaultAdapter implements VaultAdapter {
         .map((r) => renderPublicNote(r, publicSlugs, privateSlugs, assets))
     );
 
-    return publicNotes;
+    const taxonomyEntry = TAXONOMY_PATHS
+      .map((relPath) => taxonomyEntries.find((entry) => entry.relPath === relPath))
+      .find((entry): entry is { relPath: string; content: string } => entry !== undefined);
+    const taxonomy = taxonomyEntry
+      ? parseVaultTaxonomy(taxonomyEntry.content, taxonomyEntry.relPath)
+      : EMPTY_VAULT_TAXONOMY;
+
+    return { notes: publicNotes, taxonomy };
+  }
+
+  async getPublicNotes(): Promise<VaultNote[]> {
+    return (await this.loadVaultData()).notes;
+  }
+
+  async getTaxonomy(): Promise<VaultTaxonomy> {
+    return (await this.loadVaultData()).taxonomy;
   }
 }
