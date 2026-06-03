@@ -56,6 +56,7 @@ interface EssayLike extends BaseEntry {
   read?: string;
   image?: string;
   imageAlt?: string;
+  imageAspectRatio?: string;
 }
 
 interface NoteEntry extends BaseEntry {
@@ -70,6 +71,7 @@ interface PhotoEntry extends BaseEntry {
   fig: string;
   image?: string;
   imageAlt?: string;
+  imageAspectRatio?: string;
   swatches?: string[];
 }
 
@@ -601,51 +603,112 @@ const Notebook = ({
   // Next's client router can remount the homepage without the browser doing
   // native scroll restoration. When a card opens an article, store the card's
   // viewport offset and nudge it back to that same spot after the homepage
-  // remounts. Repeating for a few frames handles image-driven layout shifts.
+  // remounts. A short, throttled retry window handles hash-scroll and image
+  // layout shifts without fighting the user for multiple seconds.
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const raw = window.sessionStorage.getItem(NOTEBOOK_RETURN_SCROLL_KEY);
-    if (!raw) return;
-
-    let snapshot: NotebookReturnScrollSnapshot;
-    try {
-      snapshot = JSON.parse(raw) as NotebookReturnScrollSnapshot;
-    } catch {
-      return;
-    }
-
-    if (!Number.isFinite(snapshot.scrollY) || Date.now() - snapshot.ts > 5 * 60 * 1000) {
-      return;
-    }
-
-    let frame = 0;
-    let raf = 0;
-    const restore = () => {
-      const target = snapshot.entryId
-        ? Array.from(document.querySelectorAll<HTMLElement>("[data-entry-id]")).find(
-            (node) => node.dataset.entryId === snapshot.entryId,
-          )
-        : null;
-
-      const entryTop = snapshot.entryTop;
-      if (target && typeof entryTop === "number" && Number.isFinite(entryTop)) {
-        const delta = target.getBoundingClientRect().top - entryTop;
-        window.scrollTo({ top: Math.max(0, window.scrollY + delta), behavior: "auto" });
-      } else {
-        window.scrollTo({ top: snapshot.scrollY, behavior: "auto" });
-      }
-
-      frame += 1;
-      if (frame < 120) {
-        raf = window.requestAnimationFrame(restore);
-      } else {
+    const clearSnapshot = () => {
+      try {
         window.sessionStorage.removeItem(NOTEBOOK_RETURN_SCROLL_KEY);
+      } catch {
+        // Storage can throw in private browsing; restoration is best-effort.
       }
     };
 
-    raf = window.requestAnimationFrame(restore);
-    return () => window.cancelAnimationFrame(raf);
+    const beginRestore = (): (() => void) | undefined => {
+      let raw: string | null = null;
+      try {
+        raw = window.sessionStorage.getItem(NOTEBOOK_RETURN_SCROLL_KEY);
+      } catch {
+        return undefined;
+      }
+      if (!raw) return undefined;
+
+      let snapshot: NotebookReturnScrollSnapshot;
+      try {
+        snapshot = JSON.parse(raw) as NotebookReturnScrollSnapshot;
+      } catch {
+        clearSnapshot();
+        return undefined;
+      }
+
+      if (!Number.isFinite(snapshot.scrollY) || Date.now() - snapshot.ts > 5 * 60 * 1000) {
+        clearSnapshot();
+        return undefined;
+      }
+
+      const entryTop = snapshot.entryTop;
+      const entrySelector = snapshot.entryId?.match(/^[a-z0-9-]+$/)
+        ? `[data-entry-id="${snapshot.entryId}"]`
+        : null;
+      let target = entrySelector ? document.querySelector<HTMLElement>(entrySelector) : null;
+      let attempt = 0;
+      let stableCount = 0;
+      let timeout = 0;
+      let aborted = false;
+
+      const cleanup = () => {
+        window.clearTimeout(timeout);
+        window.removeEventListener("pointerdown", abort);
+        window.removeEventListener("touchstart", abort);
+        window.removeEventListener("wheel", abort);
+        window.removeEventListener("keydown", abort);
+      };
+
+      const abort = () => {
+        aborted = true;
+        clearSnapshot();
+        cleanup();
+      };
+
+      const restore = () => {
+        if (aborted) return;
+        if (!target && entrySelector) target = document.querySelector<HTMLElement>(entrySelector);
+
+        let shouldStop = false;
+        if (target && typeof entryTop === "number" && Number.isFinite(entryTop)) {
+          const delta = target.getBoundingClientRect().top - entryTop;
+          if (Math.abs(delta) < 1) {
+            stableCount += 1;
+            shouldStop = stableCount >= 4 && attempt >= 6;
+          } else {
+            stableCount = 0;
+            window.scrollTo({ top: Math.max(0, window.scrollY + delta), behavior: "auto" });
+          }
+        } else {
+          window.scrollTo({ top: snapshot.scrollY, behavior: "auto" });
+          shouldStop = true;
+        }
+
+        attempt += 1;
+        if (attempt < 30 && !shouldStop) {
+          timeout = window.setTimeout(restore, 50);
+        } else {
+          clearSnapshot();
+          cleanup();
+        }
+      };
+
+      window.addEventListener("pointerdown", abort, { once: true });
+      window.addEventListener("touchstart", abort, { once: true });
+      window.addEventListener("wheel", abort, { once: true });
+      window.addEventListener("keydown", abort, { once: true });
+      timeout = window.setTimeout(restore, 0);
+      return cleanup;
+    };
+
+    let cleanupRestore = beginRestore();
+    const handlePageShow = () => {
+      cleanupRestore?.();
+      cleanupRestore = beginRestore();
+    };
+    window.addEventListener("pageshow", handlePageShow);
+
+    return () => {
+      cleanupRestore?.();
+      window.removeEventListener("pageshow", handlePageShow);
+    };
   }, []);
 
   // Toggle a `.is-stuck` class on the chip bar once it actually sticks to
@@ -1132,7 +1195,11 @@ const EntryCard = ({
       scrollY: window.scrollY,
       ts: Date.now(),
     };
-    window.sessionStorage.setItem(NOTEBOOK_RETURN_SCROLL_KEY, JSON.stringify(snapshot));
+    try {
+      window.sessionStorage.setItem(NOTEBOOK_RETURN_SCROLL_KEY, JSON.stringify(snapshot));
+    } catch {
+      // Storage can throw in private browsing; navigation should still proceed.
+    }
   };
   const cardStyle: React.CSSProperties = {
     background: tint,
@@ -1349,6 +1416,11 @@ interface EntryBodyProps {
   italicSerifClass: string;
 }
 
+const imageAspectStyle = (imageAspectRatio?: string): React.CSSProperties | undefined =>
+  imageAspectRatio
+    ? ({ ["--card-image-aspect" as string]: imageAspectRatio } as React.CSSProperties)
+    : undefined;
+
 const EntryBody = ({ entry, monoClass, serifClass, italicSerifClass }: EntryBodyProps) => {
   switch (entry.type) {
     case "essay":
@@ -1358,7 +1430,12 @@ const EntryBody = ({ entry, monoClass, serifClass, italicSerifClass }: EntryBody
       return (
         <>
           {entry.image ? (
-            <img className="cardCoverImage" src={entry.image} alt={entry.imageAlt ?? ""} />
+            <img
+              className="cardCoverImage"
+              src={entry.image}
+              alt={entry.imageAlt ?? ""}
+              style={imageAspectStyle(entry.imageAspectRatio)}
+            />
           ) : null}
           <h3 className={`title ${monoClass}`}>
             {entry.accent ? (
@@ -1390,7 +1467,12 @@ const EntryBody = ({ entry, monoClass, serifClass, italicSerifClass }: EntryBody
       return (
         <>
           {entry.image ? (
-            <img className="photoPreview" src={entry.image} alt={entry.imageAlt ?? entry.caption} />
+            <img
+              className="photoPreview"
+              src={entry.image}
+              alt={entry.imageAlt ?? entry.caption}
+              style={imageAspectStyle(entry.imageAspectRatio)}
+            />
           ) : (
             <div className="photoStrip" aria-hidden>
               {(entry.swatches ?? ["#c8b89a", "#9ba78c", "#5a4a3a"]).map((s, i) => (
@@ -1612,7 +1694,7 @@ const Body = () => (
       :global(.cardCoverImage),
       :global(.photoPreview) {
         height: auto;
-        aspect-ratio: auto;
+        aspect-ratio: auto var(--card-image-aspect, 16 / 9);
         object-fit: contain;
       }
     }
