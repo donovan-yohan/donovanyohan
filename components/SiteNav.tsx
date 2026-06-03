@@ -124,7 +124,11 @@ export const SiteNav = ({ current, position = "fixed" }: SiteNavProps) => {
         </button>
       </div>
 
-      <div className={`mobileBottomNav ${gm500.className}`} aria-label="Mobile navigation">
+      <div
+        className={`mobileBottomNav ${gm500.className}`}
+        role="navigation"
+        aria-label="Mobile navigation"
+      >
         <Link href="/" className="mobileNavItem" aria-label="Home">
           <span className="mobileHomeLogo" aria-hidden>
             <svg viewBox="0 0 1500 1500" className="mobileHomeMark" aria-hidden>
@@ -337,7 +341,7 @@ export const SiteNav = ({ current, position = "fixed" }: SiteNavProps) => {
             --mobile-bottom-nav-h: 64px;
           }
           body {
-            padding-bottom: calc(var(--mobile-bottom-nav-h) + env(safe-area-inset-bottom));
+            padding-bottom: calc(var(--mobile-bottom-nav-h) + env(safe-area-inset-bottom, 0px));
           }
           .topnav {
             --nav-h: 0px;
@@ -360,8 +364,8 @@ export const SiteNav = ({ current, position = "fixed" }: SiteNavProps) => {
             z-index: 60;
             display: grid;
             grid-template-columns: repeat(5, minmax(0, 1fr));
-            min-height: calc(var(--mobile-bottom-nav-h) + env(safe-area-inset-bottom));
-            padding: 7px clamp(10px, 3vw, 16px) calc(7px + env(safe-area-inset-bottom));
+            min-height: calc(var(--mobile-bottom-nav-h) + env(safe-area-inset-bottom, 0px));
+            padding: 7px clamp(10px, 3vw, 16px) calc(7px + env(safe-area-inset-bottom, 0px));
             background: color-mix(in srgb, var(--paper) 94%, transparent);
             border-top: 1px solid var(--rule);
             backdrop-filter: blur(14px);

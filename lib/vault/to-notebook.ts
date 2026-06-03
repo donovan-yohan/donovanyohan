@@ -7,8 +7,9 @@
  * vault without any client-side fetching.
  *
  * Grouping: notes are bucketed by `YYYY-MM` from frontmatter.date. Each
- * month renders as one dense three-column grid so authored `preview.span`
- * can create wider/taller feature cards instead of the old equal-card wall.
+ * month renders as dense three-column grid rows so authored `preview.span`
+ * can create wider/taller feature cards while the month label keeps a sticky
+ * scroll range on desktop.
  *
  * Entry type derivation is content-type aware:
  *   writing → article card, with optional `preview.image` cover
@@ -65,6 +66,13 @@ const bannerImage = (fm: VaultNote["frontmatter"]): string | undefined => {
   return stringField(banner.light) ?? stringField(banner.dark);
 };
 
+const knownImageAspectRatio = (image: string | undefined): string | undefined => {
+  if (!image) return undefined;
+  if (/\/img\/photos\/[^/]*banner\.(png|jpe?g|webp)$/i.test(image)) return "1024 / 400";
+  if (image.startsWith("/vault-assets/")) return "1376 / 768";
+  return undefined;
+};
+
 const noteKindToEntryType = (kind: PreviewKind | undefined): EntryType => {
   switch (kind) {
     case "image":
@@ -113,6 +121,7 @@ const noteToEntry = (note: VaultNote, index: number): Entry => {
   const headline = preview.headline ?? fm.title;
   const excerpt = preview.excerpt ?? "";
   const image = preview.image ?? bannerImage(fm);
+  const imageAspectRatio = knownImageAspectRatio(image);
 
   const base = {
     id: note.slug,
@@ -129,7 +138,9 @@ const noteToEntry = (note: VaultNote, index: number): Entry => {
       title: headline,
       caption: excerpt || headline,
       fig: `FIG.${index.toString().padStart(2, "0")}`,
-      ...(image !== undefined ? { image, imageAlt: headline } : {}),
+      ...(image !== undefined
+        ? { image, imageAlt: headline, ...(imageAspectRatio ? { imageAspectRatio } : {}) }
+        : {}),
     };
   }
   if (type === "quote") {
@@ -151,7 +162,9 @@ const noteToEntry = (note: VaultNote, index: number): Entry => {
     title: headline,
     blurb: excerpt,
     read: computeReadTime(note.bodyMarkdown),
-    ...(image !== undefined ? { image, imageAlt: headline } : {}),
+    ...(image !== undefined
+      ? { image, imageAlt: headline, ...(imageAspectRatio ? { imageAspectRatio } : {}) }
+      : {}),
   };
 };
 
@@ -169,6 +182,16 @@ const rowSpanForNote = (note: VaultNote): number | undefined => {
     return 2;
   }
   return undefined;
+};
+
+const rowsForCells = (cells: NotebookCell[]): NotebookRow[] => {
+  if (cells.length > 1) {
+    return [
+      { cols: DEFAULT_COLS, cells: cells.slice(0, -1) },
+      { cols: DEFAULT_COLS, cells: cells.slice(-1) },
+    ];
+  }
+  return [{ cols: DEFAULT_COLS, cells }];
 };
 
 const cellForNote = (note: VaultNote, index: number): NotebookCell => {
@@ -228,7 +251,7 @@ export function notesToNotebookMonths(notes: VaultNote[]): NotebookMonth[] {
     const cells: NotebookCell[] = items.map((n) =>
       cellForNote(n, indexBySlug.get(n.slug) ?? 0),
     );
-    const rows: NotebookRow[] = [{ cols: DEFAULT_COLS, cells }];
+    const rows = rowsForCells(cells);
 
     return {
       key,
