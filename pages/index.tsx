@@ -718,7 +718,7 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
               <HiSpan slot={2}>MY JOURNAL</HiSpan>
             </h2>
             <p className={`historyLede ${cp400.className}`}>
-              Long-form case studies, working essays, and the occasional
+              Long-form case studies, working articles, and the occasional
               field note. Filter by type below.
             </p>
           </header>
@@ -1456,26 +1456,100 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
             min-height: auto;
           }
           .contactGrid {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
             min-height: 0;
           }
           /* Collapse the tabloid offsets so the scraps stack cleanly on
-             narrow screens. Tilts get reduced but kept for personality. */
+             narrow screens. The image keeps its native ratio instead of
+             getting height-forced into a clipping-prone card. */
           .contactPanel {
             position: relative;
             left: auto;
             right: auto;
             top: auto;
             bottom: auto;
-            width: 100% !important;
+            width: auto !important;
+            max-width: none;
+            min-width: 0;
             aspect-ratio: auto;
             min-height: auto;
+          }
+          .panelImage,
+          .panelHero {
+            grid-column: 1 / -1;
+            width: 100% !important;
+          }
+          .panelImage {
+            aspect-ratio: 1619 / 972;
+            transform: translateY(var(--enter-y));
+          }
+          .panelImageInner {
+            height: 100%;
           }
           .panelHero {
             --tilt: 0deg;
             min-height: auto;
+          }
+          .panelDateTime,
+          .panelWeather {
+            grid-column: span 1;
+            align-self: stretch;
+          }
+          .panelDateTime {
+            font-size: clamp(8px, 2.2vw, 10px);
+          }
+          .panelDateTime > .flipClock {
+            padding: 6px;
+            font-size: 2.25em;
+            gap: 0.08em;
+          }
+          .dateMonth {
+            padding: 6px;
+            font-size: 2.8em;
+          }
+          .dateMain {
+            padding: 6px;
+          }
+          .dateDay {
+            font-size: 8em;
+          }
+          .dateYear {
+            font-size: 1.1em;
+          }
+          .panelWeather {
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+          }
+          .weatherBar {
+            padding: 8px 10px;
+            font-size: 9px;
+            letter-spacing: 0.08em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          .weatherBody {
+            flex: 1 1 auto;
+            justify-content: center;
+            gap: 7px;
+            padding: 12px 10px 34px;
+          }
+          .weatherGlyph svg {
+            width: 34px;
+            height: 34px;
+          }
+          .weatherTemp {
+            flex: 0 1 auto;
+            font-size: clamp(32px, 9vw, 44px);
+            text-align: left;
+          }
+          .weatherUnitToggle {
+            right: 8px;
+            bottom: 8px;
+            font-size: 10px;
           }
           .contactHeroTop {
             flex-direction: column;
@@ -1599,26 +1673,34 @@ const Index = ({ notebookMonths, weather }: IndexProps) => {
           [data-theme="dark"] {
             --gutter-w: 0px;
             --gutter-pad: 0px;
-            --content-pad-left: clamp(20px, 6vw, 32px);
-            --page-pad-x: clamp(24px, 6vw, 64px);
-            --notebook-bleed-x: calc(
-              var(--content-pad-left) + var(--page-pad-x)
-            );
+            --page-pad-x: clamp(16px, 4vw, 20px);
+            --content-pad-left: var(--page-pad-x);
+            --notebook-bleed-x: var(--page-pad-x);
             --content-w: calc(100vw - (2 * var(--content-pad-left)));
             --page-max: 100vw;
           }
           .page {
-            padding: 32px var(--page-pad-x);
+            padding: 0 var(--page-pad-x) 32px;
+          }
+          .heroFrame {
+            min-height: calc(100dvh - var(--mobile-bottom-nav-h, 64px));
+            padding: 0;
           }
           .hero {
             grid-template-columns: 1fr;
-            gap: 32px;
+            justify-items: center;
+            width: 100%;
+            max-width: 460px;
+            gap: clamp(24px, 4.5vh, 34px);
           }
           .logoSlot {
-            width: min(40vh, 70vw);
+            width: min(50dvh, 88vw, 360px);
           }
           .heroCopy {
-            font-size: clamp(22px, 5vw, 32px);
+            width: 100%;
+            text-align: center;
+            font-size: clamp(25px, 7vw, 36px);
+            line-height: 1.16;
           }
           .historyFrame {
             margin-left: calc(-1 * var(--page-pad-x));

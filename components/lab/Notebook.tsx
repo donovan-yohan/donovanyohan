@@ -54,6 +54,8 @@ interface EssayLike extends BaseEntry {
   title: string;
   blurb?: string;
   read?: string;
+  image?: string;
+  imageAlt?: string;
 }
 
 interface NoteEntry extends BaseEntry {
@@ -63,8 +65,11 @@ interface NoteEntry extends BaseEntry {
 
 interface PhotoEntry extends BaseEntry {
   type: "photo" | "gallery";
+  title?: string;
   caption: string;
   fig: string;
+  image?: string;
+  imageAlt?: string;
   swatches?: string[];
 }
 
@@ -109,6 +114,15 @@ export type Entry =
  */
 export type CardHrefBuilder = (entry: Entry) => string | null;
 
+const NOTEBOOK_RETURN_SCROLL_KEY = "dy:notebook:return-scroll";
+
+interface NotebookReturnScrollSnapshot {
+  entryId?: string;
+  entryTop?: number;
+  scrollY: number;
+  ts: number;
+}
+
 // Notebook layout primitives -------------------------------------------------
 
 export type ColsMode = 2 | 3 | 4 | 5;
@@ -135,7 +149,7 @@ export interface NotebookMonth {
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
 const TYPE_LABEL: Record<EntryType, string> = {
-  essay: "essay",
+  essay: "article",
   project: "project",
   caseStudy: "case study",
   note: "note",
@@ -584,6 +598,56 @@ const Notebook = ({
   const data = months ?? NOTEBOOK;
   const allEntries = useMemo(() => flattenEntries(data), [data]);
 
+  // Next's client router can remount the homepage without the browser doing
+  // native scroll restoration. When a card opens an article, store the card's
+  // viewport offset and nudge it back to that same spot after the homepage
+  // remounts. Repeating for a few frames handles image-driven layout shifts.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const raw = window.sessionStorage.getItem(NOTEBOOK_RETURN_SCROLL_KEY);
+    if (!raw) return;
+
+    let snapshot: NotebookReturnScrollSnapshot;
+    try {
+      snapshot = JSON.parse(raw) as NotebookReturnScrollSnapshot;
+    } catch {
+      return;
+    }
+
+    if (!Number.isFinite(snapshot.scrollY) || Date.now() - snapshot.ts > 5 * 60 * 1000) {
+      return;
+    }
+
+    let frame = 0;
+    let raf = 0;
+    const restore = () => {
+      const target = snapshot.entryId
+        ? Array.from(document.querySelectorAll<HTMLElement>("[data-entry-id]")).find(
+            (node) => node.dataset.entryId === snapshot.entryId,
+          )
+        : null;
+
+      const entryTop = snapshot.entryTop;
+      if (target && typeof entryTop === "number" && Number.isFinite(entryTop)) {
+        const delta = target.getBoundingClientRect().top - entryTop;
+        window.scrollTo({ top: Math.max(0, window.scrollY + delta), behavior: "auto" });
+      } else {
+        window.scrollTo({ top: snapshot.scrollY, behavior: "auto" });
+      }
+
+      frame += 1;
+      if (frame < 120) {
+        raf = window.requestAnimationFrame(restore);
+      } else {
+        window.sessionStorage.removeItem(NOTEBOOK_RETURN_SCROLL_KEY);
+      }
+    };
+
+    raf = window.requestAnimationFrame(restore);
+    return () => window.cancelAnimationFrame(raf);
+  }, []);
+
   // Toggle a `.is-stuck` class on the chip bar once it actually sticks to
   // the top of the viewport. A 1px sentinel above the bar tells us when
   // the bar has crossed the sticky offset — we shrink the row + tighten
@@ -936,10 +1000,13 @@ const MonthBlock = ({
           .monthSection [data-cols] {
             --grid-template-columns: minmax(0, 1fr);
             --grid-template-rows: none;
+            --notebook-grid-auto-flow: row;
+            --notebook-grid-auto-rows: auto;
           }
           .monthSection .card {
-            --grid-column: auto;
-            --grid-row: auto;
+            --card-grid-column: auto;
+            --card-grid-row: auto;
+            --card-min-height: 0px;
           }
           .monthName {
             font-size: 22px;
@@ -983,7 +1050,17 @@ const RowBlock = ({
   italicSerifClass,
   cardHrefBuilder,
 }: RowBlockProps) => (
-  <Grid cols={row.cols} rows={row.rows ?? 1} gap={1} dense data-cols={row.cols}>
+  <Grid
+    cols={row.cols}
+    rows={row.rows}
+    gap={1}
+    dense
+    data-cols={row.cols}
+    style={{
+      gridAutoFlow: "var(--notebook-grid-auto-flow, dense)",
+      gridAutoRows: "var(--notebook-grid-auto-rows, minmax(220px, auto))",
+    }}
+  >
     {row.cells.map((cell, i) => (
       <EntryCard
         key={`${cell.entry.id}-${i}`}
@@ -1035,11 +1112,33 @@ const EntryCard = ({
       : `https://${rawHref}`
     : null;
   const isExternal = href ? /^https?:\/\//i.test(href) : false;
+  const handleInternalClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      event.button !== 0 ||
+      typeof window === "undefined"
+    ) {
+      return;
+    }
+
+    const card = event.currentTarget.closest<HTMLElement>("[data-entry-id]");
+    const rect = card?.getBoundingClientRect();
+    const snapshot: NotebookReturnScrollSnapshot = {
+      entryId: entry.id,
+      entryTop: rect?.top,
+      scrollY: window.scrollY,
+      ts: Date.now(),
+    };
+    window.sessionStorage.setItem(NOTEBOOK_RETURN_SCROLL_KEY, JSON.stringify(snapshot));
+  };
   const cardStyle: React.CSSProperties = {
     background: tint,
     ["--card-accent" as string]: accentColor,
-    gridColumn: colSpan && colSpan > 1 ? `span ${colSpan}` : undefined,
-    gridRow: rowSpan && rowSpan > 1 ? `span ${rowSpan}` : undefined,
+    ["--card-grid-column-desktop" as string]: colSpan && colSpan > 1 ? `span ${colSpan}` : undefined,
+    ["--card-grid-row-desktop" as string]: rowSpan && rowSpan > 1 ? `span ${rowSpan}` : undefined,
     position: "relative",
   };
 
@@ -1052,6 +1151,7 @@ const EntryCard = ({
       className="card"
       style={cardStyle}
       data-type={entry.type}
+      data-entry-id={entry.id}
     >
       <Stack gap={0} style={{ height: "100%" }}>
         <header className={`cardTopBar ${monoClass}`}>
@@ -1106,6 +1206,7 @@ const EntryCard = ({
           <Link
             className="cardStretchedLink"
             href={href}
+            onClick={href.startsWith("/work/") ? handleInternalClick : undefined}
             aria-label={
               "title" in entry
                 ? entry.title
@@ -1137,10 +1238,30 @@ const EntryCard = ({
           height: 32px;
           border-bottom: 1px solid var(--rule);
         }
+        .card {
+          --card-min-height: calc(14 * var(--u));
+          grid-column: var(
+            --card-grid-column,
+            var(--card-grid-column-desktop, auto)
+          );
+          grid-row: var(
+            --card-grid-row,
+            var(--card-grid-row-desktop, auto)
+          );
+          min-width: 0;
+          overflow: hidden;
+        }
         .cardTopLeft {
           display: inline-flex;
           align-items: center;
           gap: 8px;
+          min-width: 0;
+          overflow: hidden;
+        }
+        .cardIndex,
+        .cardType,
+        .cardDate {
+          white-space: nowrap;
         }
         .cardIndex {
           font-weight: 700;
@@ -1200,6 +1321,22 @@ const EntryCard = ({
         .card:has(.cardStretchedLink) {
           cursor: pointer;
         }
+        @media (max-width: 900px) {
+          .cardTopBar,
+          .cardBottomBar {
+            min-width: 0;
+          }
+          .cardType {
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          .cardBottomLeft {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+        }
       `}</style>
     </Card>
   );
@@ -1220,6 +1357,9 @@ const EntryBody = ({ entry, monoClass, serifClass, italicSerifClass }: EntryBody
     case "mixed":
       return (
         <>
+          {entry.image ? (
+            <img className="cardCoverImage" src={entry.image} alt={entry.imageAlt ?? ""} />
+          ) : null}
           <h3 className={`title ${monoClass}`}>
             {entry.accent ? (
               <HiSpan
@@ -1249,11 +1389,16 @@ const EntryBody = ({ entry, monoClass, serifClass, italicSerifClass }: EntryBody
     case "gallery":
       return (
         <>
-          <div className="photoStrip" aria-hidden>
-            {(entry.swatches ?? ["#c8b89a", "#9ba78c", "#5a4a3a"]).map((s, i) => (
-              <span key={i} className="photoSwatch" style={{ background: s }} />
-            ))}
-          </div>
+          {entry.image ? (
+            <img className="photoPreview" src={entry.image} alt={entry.imageAlt ?? entry.caption} />
+          ) : (
+            <div className="photoStrip" aria-hidden>
+              {(entry.swatches ?? ["#c8b89a", "#9ba78c", "#5a4a3a"]).map((s, i) => (
+                <span key={i} className="photoSwatch" style={{ background: s }} />
+              ))}
+            </div>
+          )}
+          {entry.title ? <h3 className={`title ${monoClass}`}>{entry.title}</h3> : null}
           <p className={`figLine ${monoClass}`}>
             <span className="figTag">{entry.fig}</span>
             <span className="figCaption">{entry.caption}</span>
@@ -1341,6 +1486,19 @@ const Body = () => (
       font-size: 20px;
       line-height: 28px;
       color: var(--ink);
+    }
+    :global(.cardCoverImage),
+    :global(.photoPreview) {
+      display: block;
+      width: 100%;
+      height: 176px;
+      object-fit: cover;
+      border: 1px solid var(--rule);
+      border-radius: 1px;
+      background: var(--paper-2);
+    }
+    :global(.cardCoverImage) {
+      margin-bottom: calc(var(--u) * 0.25);
     }
     :global(.photoStrip) {
       display: flex;
@@ -1439,6 +1597,24 @@ const Body = () => (
     :global(.listDone .listText) {
       text-decoration: line-through;
       color: var(--ink-mute);
+    }
+    @media (max-width: 900px) {
+      :global(.title) {
+        font-size: clamp(20px, 7vw, 30px);
+        line-height: 1.06;
+        letter-spacing: -0.04em;
+        overflow-wrap: anywhere;
+      }
+      :global(.blurb) {
+        font-size: 17px;
+        line-height: 1.45;
+      }
+      :global(.cardCoverImage),
+      :global(.photoPreview) {
+        height: auto;
+        aspect-ratio: auto;
+        object-fit: contain;
+      }
     }
   `}</style>
 );

@@ -44,7 +44,7 @@ export const Card = ({
     boxSizing: "border-box",
     borderRadius: 2,
     ...variants[variant],
-    minHeight: ux(minH),
+    minHeight: `var(--card-min-height, ${ux(minH)})`,
     ...(h !== undefined ? { height: ux(h) } : {}),
     ...(p !== undefined ? { padding: ux(p) } : {}),
     ...(px !== undefined ? { paddingLeft: ux(px), paddingRight: ux(px) } : {}),

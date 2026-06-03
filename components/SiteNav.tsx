@@ -13,6 +13,7 @@
 
 import { useContext } from "react";
 import Link from "next/link";
+import { BriefcaseBusiness, FileText, Mail, Moon, Sun } from "lucide-react";
 
 import Context from "./context";
 import { gm500, gm800 } from "../global/fonts";
@@ -120,6 +121,68 @@ export const SiteNav = ({ current, position = "fixed" }: SiteNavProps) => {
           >
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
           </svg>
+        </button>
+      </div>
+
+      <div className={`mobileBottomNav ${gm500.className}`} aria-label="Mobile navigation">
+        <Link href="/" className="mobileNavItem" aria-label="Home">
+          <span className="mobileHomeLogo" aria-hidden>
+            <svg viewBox="0 0 1500 1500" className="mobileHomeMark" aria-hidden>
+              {DY_PATHS.map((d, i) => (
+                <path
+                  key={i}
+                  d={d}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={130}
+                  strokeLinecap="butt"
+                  strokeLinejoin="miter"
+                />
+              ))}
+            </svg>
+          </span>
+          <span>Home</span>
+        </Link>
+        <a
+          className="mobileNavItem"
+          href="/DonovanYohanResume.pdf"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Resume"
+        >
+          <FileText className="mobileNavIcon" aria-hidden />
+          <span>Resume</span>
+        </a>
+        <Link
+          href="/#work"
+          className="mobileNavItem"
+          data-current={current === "work" ? "true" : undefined}
+          aria-label="Work"
+        >
+          <BriefcaseBusiness className="mobileNavIcon" aria-hidden />
+          <span>Work</span>
+        </Link>
+        <Link
+          href="/#footer"
+          className="mobileNavItem"
+          data-current={current === "contact" ? "true" : undefined}
+          aria-label="Contact"
+        >
+          <Mail className="mobileNavIcon" aria-hidden />
+          <span>Contact</span>
+        </Link>
+        <button
+          type="button"
+          className="mobileNavItem mobileThemeButton"
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+        >
+          {theme === "dark" ? (
+            <Sun className="mobileNavIcon" aria-hidden />
+          ) : (
+            <Moon className="mobileNavIcon" aria-hidden />
+          )}
+          <span>Theme</span>
         </button>
       </div>
 
@@ -263,36 +326,112 @@ export const SiteNav = ({ current, position = "fixed" }: SiteNavProps) => {
         [data-theme="dark"] .themeIcon.moon {
           display: none;
         }
+        .mobileBottomNav {
+          display: none;
+        }
         @media (max-width: 900px) {
+          :root,
+          [data-theme="light"],
+          [data-theme="dark"] {
+            --nav-h: 0px;
+            --mobile-bottom-nav-h: 64px;
+          }
+          body {
+            padding-bottom: calc(var(--mobile-bottom-nav-h) + env(safe-area-inset-bottom));
+          }
+          .topnav {
+            --nav-h: 0px;
+            background: transparent;
+            border-bottom: 0;
+            pointer-events: none;
+          }
           .topnavInner {
-            padding: 0 clamp(10px, 3vw, 16px);
-            gap: 8px;
-          }
-          .navTitle {
             display: none;
-          }
-          .navTabs {
-            flex: 0 1 auto;
-            min-width: 0;
-          }
-          .navTab {
-            padding: 0 clamp(8px, 2.4vw, 12px);
-            font-size: 11px;
-            letter-spacing: 0.08em;
           }
           .navSpacer {
             flex: 1 1 auto;
             min-width: 0;
           }
+          .mobileBottomNav {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 60;
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            min-height: calc(var(--mobile-bottom-nav-h) + env(safe-area-inset-bottom));
+            padding: 7px clamp(10px, 3vw, 16px) calc(7px + env(safe-area-inset-bottom));
+            background: color-mix(in srgb, var(--paper) 94%, transparent);
+            border-top: 1px solid var(--rule);
+            backdrop-filter: blur(14px);
+            pointer-events: auto;
+          }
+          .mobileNavItem {
+            appearance: none;
+            border: 0;
+            border-radius: 12px;
+            background: transparent;
+            color: var(--ink-mute);
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            min-width: 0;
+            min-height: 48px;
+            padding: 4px 2px;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 9px;
+            line-height: 1;
+            font-family: inherit;
+            font-weight: inherit;
+            cursor: pointer;
+            transition:
+              background-color 140ms ease,
+              color 140ms ease;
+          }
+          .mobileNavItem:hover,
+          .mobileNavItem:active,
+          .mobileNavItem[data-current="true"] {
+            background: var(--accent-soft);
+            color: var(--ink);
+          }
+          .mobileNavIcon {
+            width: 20px;
+            height: 20px;
+            stroke-width: 1.9;
+          }
+          .mobileHomeLogo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            background: var(--logo-bg);
+            color: var(--tab-ink);
+            border-radius: 2px;
+          }
+          .mobileHomeMark {
+            width: 62%;
+            height: 62%;
+            display: block;
+          }
+          .mobileThemeButton span {
+            font-family: inherit;
+            font-weight: inherit;
+          }
         }
         @media (max-width: 420px) {
-          .navTab {
-            padding: 0 7px;
-            font-size: 10px;
-            letter-spacing: 0.05em;
+          .mobileBottomNav {
+            padding-left: 8px;
+            padding-right: 8px;
           }
-          .themeToggle {
-            margin-left: 4px;
+          .mobileNavItem {
+            letter-spacing: 0.04em;
+            font-size: 8px;
           }
         }
       `}</style>

@@ -71,7 +71,7 @@ describe("mobile work section layout", () => {
     );
 
     expect(screen.getByRole("button", { name: /all/i })).toHaveClass("chipActive");
-    expect(screen.getByRole("button", { name: /essay/i })).toHaveClass("chip");
+    expect(screen.getByRole("button", { name: /article/i })).toHaveClass("chip");
     expect(screen.getByText("MAY")).toHaveClass("monthName");
     expect(container.querySelector(".chipsBar")).not.toBeNull();
     expect(container.querySelector(".notebookStack")).toHaveStyle({

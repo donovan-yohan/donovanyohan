@@ -6,18 +6,15 @@
  * `getPublicNotes()` resolves, so the Notebook renders straight from the
  * vault without any client-side fetching.
  *
- * Grouping: notes are bucketed by `YYYY-MM` from frontmatter.date, then
- * each bucket becomes one NotebookMonth. Within a month, notes sort by
- * date desc and pack into rows of `DEFAULT_COLS` cells. The Notebook can
- * still receive bespoke layouts (custom rows/spans) via a future authored
- * override, but the auto layout keeps "drop a note in dy-journal → see it
- * in the bullet journal" working with zero per-note layout boilerplate.
+ * Grouping: notes are bucketed by `YYYY-MM` from frontmatter.date. Each
+ * month renders as one dense three-column grid so authored `preview.span`
+ * can create wider/taller feature cards instead of the old equal-card wall.
  *
- * Entry type derivation maps `preview.kind` → Notebook EntryType:
- *   text  → essay     (uses headline + excerpt)
- *   image → photo     (uses image + caption from excerpt)
- *   quote → quote     (uses excerpt as quote text)
- *   embed → video     (uses headline + excerpt as blurb)
+ * Entry type derivation is content-type aware:
+ *   writing → article card, with optional `preview.image` cover
+ *   work    → case-study card, with optional preview image or banner cover
+ *   note    → note/photo/quote/video based on preview kind
+ *   reshare → quote/video/article based on preview kind
  */
 
 import type {
@@ -45,14 +42,9 @@ const MONTH_LABELS = [
   "DEC",
 ] as const;
 
-// Default packing width when the vault doesn't dictate a layout. 2-up reads
-// well at the homepage scale; tighter packings (3, 4, 5) can come from
-// per-row authoring overrides later.
-const DEFAULT_COLS: ColsMode = 2;
-
-// Reading speed for read-time estimates. Standard 200–250 WPM range; 220
-// is a comfortable middle ground for technical prose. Result is always at
-// least "1 min read" so tiny notes don't show "0 min read".
+// Three columns give the bullet-journal canvas room for asymmetry: 1-wide
+// stamps, 2-wide feature articles, and occasional 3-wide hero cards.
+const DEFAULT_COLS: ColsMode = 3;
 const WORDS_PER_MINUTE = 220;
 
 const computeReadTime = (markdown: string): string => {
@@ -61,7 +53,19 @@ const computeReadTime = (markdown: string): string => {
   return `${minutes} min read`;
 };
 
-const kindToEntryType = (kind: PreviewKind | undefined): EntryType => {
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const stringField = (value: unknown): string | undefined =>
+  typeof value === "string" && value.trim() ? value : undefined;
+
+const bannerImage = (fm: VaultNote["frontmatter"]): string | undefined => {
+  const banner = fm.banner;
+  if (!isRecord(banner)) return undefined;
+  return stringField(banner.light) ?? stringField(banner.dark);
+};
+
+const noteKindToEntryType = (kind: PreviewKind | undefined): EntryType => {
   switch (kind) {
     case "image":
       return "photo";
@@ -71,20 +75,45 @@ const kindToEntryType = (kind: PreviewKind | undefined): EntryType => {
       return "video";
     case "text":
     default:
+      return "note";
+  }
+};
+
+const reshareKindToEntryType = (kind: PreviewKind | undefined): EntryType => {
+  switch (kind) {
+    case "quote":
+      return "quote";
+    case "embed":
+      return "video";
+    case "image":
+    case "text":
+    default:
       return "essay";
+  }
+};
+
+const entryTypeForNote = (note: VaultNote): EntryType => {
+  switch (note.frontmatter.type) {
+    case "work":
+      return "caseStudy";
+    case "writing":
+      return "essay";
+    case "reshare":
+      return reshareKindToEntryType(note.preview.kind);
+    case "note":
+    default:
+      return noteKindToEntryType(note.preview.kind);
   }
 };
 
 const noteToEntry = (note: VaultNote, index: number): Entry => {
   const fm = note.frontmatter;
   const preview = note.preview;
-  const type = kindToEntryType(preview.kind);
+  const type = entryTypeForNote(note);
   const headline = preview.headline ?? fm.title;
   const excerpt = preview.excerpt ?? "";
+  const image = preview.image ?? bannerImage(fm);
 
-  // Conditional spread: Next.js getStaticProps rejects `undefined` values
-  // during JSON serialization, so optional visual tokens are only included
-  // when set.
   const base = {
     id: note.slug,
     date: fm.date,
@@ -97,8 +126,10 @@ const noteToEntry = (note: VaultNote, index: number): Entry => {
     return {
       ...base,
       type: "photo",
+      title: headline,
       caption: excerpt || headline,
       fig: `FIG.${index.toString().padStart(2, "0")}`,
+      ...(image !== undefined ? { image, imageAlt: headline } : {}),
     };
   }
   if (type === "quote") {
@@ -107,29 +138,53 @@ const noteToEntry = (note: VaultNote, index: number): Entry => {
   if (type === "video") {
     return { ...base, type: "video", title: headline, blurb: excerpt };
   }
-  // Default: essay-like card. Reads from preview.headline + preview.excerpt
-  // (which the adapter already filled in via applyPreviewDefaults). The
-  // `read` field surfaces in the card footer as the estimated read time.
+  if (type === "note") {
+    return { ...base, type: "note", text: excerpt || headline };
+  }
+
+  const articleType: "essay" | "caseStudy" | "project" | "mixed" =
+    type === "caseStudy" || type === "project" || type === "mixed" ? type : "essay";
+
   return {
     ...base,
-    type: "essay",
+    type: articleType,
     title: headline,
     blurb: excerpt,
     read: computeReadTime(note.bodyMarkdown),
+    ...(image !== undefined ? { image, imageAlt: headline } : {}),
   };
 };
 
-/**
- * Group a sorted list of public notes into NotebookMonth buckets keyed by
- * `YYYY-MM`. The output is sorted newest-month-first to match the bullet
- * journal "most recent month on top" reading order.
- */
+const spanForNote = (note: VaultNote): number | undefined => {
+  const span = note.preview.span;
+  if (span >= 10) return 3;
+  if (span >= 8) return 2;
+  return undefined;
+};
+
+const rowSpanForNote = (note: VaultNote): number | undefined => {
+  const type = entryTypeForNote(note);
+  const hasCover = Boolean(note.preview.image || bannerImage(note.frontmatter));
+  if ((type === "essay" || type === "caseStudy") && hasCover && note.preview.span >= 8) {
+    return 2;
+  }
+  return undefined;
+};
+
+const cellForNote = (note: VaultNote, index: number): NotebookCell => {
+  const colSpan = spanForNote(note);
+  const rowSpan = rowSpanForNote(note);
+  return {
+    entry: noteToEntry(note, index),
+    ...(colSpan !== undefined ? { colSpan } : {}),
+    ...(rowSpan !== undefined ? { rowSpan } : {}),
+  };
+};
+
 export function notesToNotebookMonths(notes: VaultNote[]): NotebookMonth[] {
   const valid: VaultNote[] = [];
   for (const n of notes) {
     const date = n.frontmatter.date;
-    // Strict YYYY-MM-DD shape — anything else gets dropped + logged so a
-    // bad note doesn't silently disappear from the notebook.
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       if (process.env.NODE_ENV !== "production") {
         console.warn(
@@ -141,10 +196,6 @@ export function notesToNotebookMonths(notes: VaultNote[]): NotebookMonth[] {
     valid.push(n);
   }
 
-  // Chronological index — oldest note gets #001, newest gets the highest
-  // number. Stable as new notes land: a fresh entry takes the next number up
-  // without renumbering existing cards. Tie-break on slug so notes that share
-  // a date stay deterministic across builds.
   const indexBySlug = new Map<string, number>();
   [...valid]
     .sort((a, b) => {
@@ -169,16 +220,15 @@ export function notesToNotebookMonths(notes: VaultNote[]): NotebookMonth[] {
     const monthIdx = parseInt(monthNum, 10) - 1;
     const items = (byKey.get(key) ?? [])
       .slice()
-      .sort((a, b) => b.frontmatter.date.localeCompare(a.frontmatter.date));
+      .sort((a, b) => {
+        const dateCmp = b.frontmatter.date.localeCompare(a.frontmatter.date);
+        return dateCmp !== 0 ? dateCmp : a.slug.localeCompare(b.slug);
+      });
 
-    const cells: NotebookCell[] = items.map((n) => ({
-      entry: noteToEntry(n, indexBySlug.get(n.slug) ?? 0),
-    }));
-
-    const rows: NotebookRow[] = [];
-    for (let i = 0; i < cells.length; i += DEFAULT_COLS) {
-      rows.push({ cols: DEFAULT_COLS, cells: cells.slice(i, i + DEFAULT_COLS) });
-    }
+    const cells: NotebookCell[] = items.map((n) =>
+      cellForNote(n, indexBySlug.get(n.slug) ?? 0),
+    );
+    const rows: NotebookRow[] = [{ cols: DEFAULT_COLS, cells }];
 
     return {
       key,

@@ -12,6 +12,7 @@
 /.next/
 /tsconfig.tsbuildinfo
 /out/
+/public/vault-assets/
 
 # production
 /build
