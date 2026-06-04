@@ -881,7 +881,7 @@ const Notebook = ({
           background: var(--paper);
           border-bottom: 1px solid var(--rule);
           margin-left: calc(-1 * var(--gutter-pad));
-          margin-right: calc(-1 * var(--content-pad-left));
+          margin-right: calc(-1 * (var(--content-pad-left) + var(--page-shell-bleed-x)));
         }
         .chipsInner {
           display: flex;

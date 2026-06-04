@@ -211,7 +211,9 @@ export const SiteNav = ({ current, position = "fixed" }: SiteNavProps) => {
           display: flex;
           align-items: center;
           width: 100%;
+          max-width: var(--page-shell-max, 2560px);
           height: var(--nav-h);
+          margin: 0 auto;
           padding: 0 var(--gutter-w);
           justify-content: space-between;
         }

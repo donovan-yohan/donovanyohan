@@ -764,6 +764,11 @@ const Index = ({ notebookMonths, notebookTagFilters, weather }: IndexProps) => {
           --rule: rgba(22, 20, 14, 0.32);
           --accent: #c33548;
           --accent-soft: rgba(195, 53, 72, 0.12);
+          /* Ultrawide guardrail. 2560px keeps laptop/normal desktop widths
+             untouched, but stops the journal grid from stretching into
+             absurd football-field cards on 21:9 displays. */
+          --page-shell-max: 2560px;
+          --page-shell-bleed-x: max(0px, calc((100vw - var(--page-shell-max)) / 2));
           --content-w: clamp(944px, round(down, 100vw - 128px, 192px), 1520px);
           --page-max: calc(var(--content-w) + 64px);
           /* Left gutter: sticky month labels (MAY, APR…) live here, with a
@@ -842,6 +847,8 @@ const Index = ({ notebookMonths, notebookTagFilters, weather }: IndexProps) => {
         .page {
           position: relative;
           z-index: 1;
+          width: 100%;
+          max-width: var(--page-shell-max);
           margin: 0 auto;
         }
         /* Hero takes the full first viewport below the nav, centred. */
@@ -872,9 +879,9 @@ const Index = ({ notebookMonths, notebookTagFilters, weather }: IndexProps) => {
              the chip bar is solid — no dots above the bar's bottom rule. */
           background: var(--paper);
           margin-top: -40px;
-          margin-left: calc(-1 * var(--content-pad-left));
-          margin-right: calc(-1 * var(--content-pad-left));
-          padding: 40px var(--content-pad-left) 24px;
+          margin-left: calc(-1 * (var(--content-pad-left) + var(--page-shell-bleed-x)));
+          margin-right: calc(-1 * (var(--content-pad-left) + var(--page-shell-bleed-x)));
+          padding: 40px calc(var(--content-pad-left) + var(--page-shell-bleed-x)) 24px;
         }
         .historyKicker,
         .historyTitle,
@@ -1574,8 +1581,8 @@ const Index = ({ notebookMonths, notebookTagFilters, weather }: IndexProps) => {
           position: absolute;
           top: 0;
           bottom: 0;
-          left: 0;
-          width: var(--gutter-w);
+          left: calc(-1 * var(--page-shell-bleed-x));
+          width: calc(var(--page-shell-bleed-x) + var(--gutter-w));
           background: var(--paper);
           pointer-events: none;
         }
@@ -1685,6 +1692,8 @@ const Index = ({ notebookMonths, notebookTagFilters, weather }: IndexProps) => {
             --notebook-bleed-x: var(--page-pad-x);
             --content-w: calc(100vw - (2 * var(--content-pad-left)));
             --page-max: 100vw;
+            --page-shell-max: 100vw;
+            --page-shell-bleed-x: 0px;
           }
           .page {
             padding: 0 var(--page-pad-x) 32px;
