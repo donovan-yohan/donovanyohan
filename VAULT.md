@@ -111,6 +111,8 @@ dy-journal/                # vault root
 ---
 title: My note               # REQUIRED, non-empty string
 date: 2026-05-10             # REQUIRED, YYYY-MM-DD
+updated: 2026-06-04          # OPTIONAL, YYYY-MM-DD revision date
+changeNote: Tightened intro  # OPTIONAL, rendered with updated
 visibility: public           # prod opt-in; use preview for staging-only notes
 slug: my-note                # OPTIONAL, override derived slug
 preview:                     # OPTIONAL, all sub-fields optional

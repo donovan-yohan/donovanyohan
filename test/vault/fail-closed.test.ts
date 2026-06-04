@@ -20,7 +20,9 @@
  *   { visibility: 'public' }                                  → private (missing title/date)
  *   { title: '', date: '2026-05-10', visibility: 'public' }   → private (empty title)
  *   { title: 'X', date: 'not-a-date', visibility: 'public' }  → private (bad date)
- *   { title: 'X', date: '2026-05-10', visibility: 'public' }  → public  (the only public)
+ *   { title: 'X', date: '2026-05-10', visibility: 'public' }  → public  (the only required public fields)
+ *   { title: 'X', date: '2026-05-10', updated: '2026-06-04', changeNote: 'Edited', visibility: 'public' } → public
+ *   { title: 'X', date: '2026-05-10', updated: 'June 4', visibility: 'public' } → private (bad updated)
  *   { title: 'X', date: '2026-05-10', visibility: 'public', mood: 'ok' } → public (passthrough)
  *   { title: 'X', date: new Date('2026-05-10'), visibility: 'public' }   → public (Date coercion P24)
  */
@@ -83,6 +85,12 @@ describe("resolveVisibility — fail-closed privacy boundary (P10)", () => {
     ).toBe("private");
   });
 
+  it("{ title: 'X', date: '2026-05-10', updated: 'June 4', visibility: 'public' } → private (bad updated)", () => {
+    expect(
+      resolveVisibility({ title: "X", date: "2026-05-10", updated: "June 4", visibility: "public" }),
+    ).toBe("private");
+  });
+
   // ── Additional private edge cases ──────────────────────────────────────────
 
   it("number input → private", () => {
@@ -124,6 +132,18 @@ describe("resolveVisibility — fail-closed privacy boundary (P10)", () => {
   it("{ title: 'X', date: '2026-05-10', visibility: 'public' } → public", () => {
     expect(
       resolveVisibility({ title: "X", date: "2026-05-10", visibility: "public" }),
+    ).toBe("public");
+  });
+
+  it("{ title: 'X', date: '2026-05-10', updated/changeNote, visibility: 'public' } → public", () => {
+    expect(
+      resolveVisibility({
+        title: "X",
+        date: "2026-05-10",
+        updated: "2026-06-04",
+        changeNote: "Edited examples",
+        visibility: "public",
+      }),
     ).toBe("public");
   });
 

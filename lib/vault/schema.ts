@@ -24,6 +24,11 @@ export const TagSlugSchema = z
   .string()
   .regex(TAG_SLUG_REGEX, "tag slug must be kebab-case ASCII, starting and ending with alphanumeric");
 
+const frontmatterDate = z.preprocess(
+  (v) => (v instanceof Date ? v.toISOString().slice(0, 10) : typeof v === "string" ? v : v),
+  z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
+);
+
 export const SeriesConfigSchema = z.object({
   slug: TagSlugSchema,
   title: z.string().min(1, "series.title cannot be empty"),
@@ -148,15 +153,9 @@ export const VaultFrontmatterSchema = z
   .object({
     title: z.string().min(1),
 
-    date: z.preprocess(
-      (v) =>
-        v instanceof Date
-          ? v.toISOString().slice(0, 10)
-          : typeof v === "string"
-            ? v
-            : v,
-      z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
-    ),
+    date: frontmatterDate,
+    updated: frontmatterDate.optional(),
+    changeNote: z.string().min(1).optional(),
 
     slug: z
       .string()
