@@ -38,6 +38,8 @@ export interface PreviewConfig {
 export interface VaultFrontmatter {
   title: string;
   date: string;             // YYYY-MM-DD (Date object coerced to ISO; see P24)
+  updated?: string;         // optional YYYY-MM-DD revision date
+  changeNote?: string;      // optional short rendered revision note
   slug?: string;            // optional override; otherwise derived from filename
   visibility: Visibility;
   preview?: Partial<PreviewConfig>;

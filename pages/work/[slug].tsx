@@ -29,6 +29,33 @@ const DY_PATHS: readonly string[] = [
   "M 486.58 1021.04 L 420.25 1021.04 C 245.1 1021.04 103.11 879.05 103.11 703.89 C 103.11 528.74 245.1 386.76 420.25 386.76 C 595.4 386.76 737.39 528.74 737.39 703.89 C 737.39 879.05 879.38 1021.04 1054.53 1021.04 C 1229.68 1021.04 1371.67 879.05 1371.67 703.89 L 1371.67 411.42",
 ];
 
+const MONTH_LABELS = [
+  "JAN",
+  "FEB",
+  "MAR",
+  "APR",
+  "MAY",
+  "JUN",
+  "JUL",
+  "AUG",
+  "SEP",
+  "OCT",
+  "NOV",
+  "DEC",
+] as const;
+
+const formatMonthYear = (date: string): string => {
+  const [year, month] = date.split("-");
+  const monthLabel = MONTH_LABELS[parseInt(month, 10) - 1] ?? month;
+  return `${monthLabel} ${year}`;
+};
+
+const formatFullDate = (date: string): string => {
+  const [year, month, day] = date.split("-");
+  const monthLabel = MONTH_LABELS[parseInt(month, 10) - 1] ?? month;
+  return `${monthLabel} ${parseInt(day, 10)}, ${year}`;
+};
+
 interface Props {
   note: VaultNote;
 }
@@ -59,23 +86,13 @@ export default function WorkSlug({ note }: Props) {
 
   // Format date as MAY 2026 etc. — same monospace badge convention used
   // on the bullet-journal homepage.
-  const [year, month] = note.frontmatter.date.split("-");
-  const monthLabels = [
-    "JAN",
-    "FEB",
-    "MAR",
-    "APR",
-    "MAY",
-    "JUN",
-    "JUL",
-    "AUG",
-    "SEP",
-    "OCT",
-    "NOV",
-    "DEC",
-  ];
-  const monthLabel = monthLabels[parseInt(month, 10) - 1] ?? month;
-  const formattedDate = `${monthLabel} ${year}`;
+  const formattedDate = formatMonthYear(note.frontmatter.date);
+  const updated =
+    typeof note.frontmatter.updated === "string" && note.frontmatter.updated !== note.frontmatter.date
+      ? note.frontmatter.updated
+      : null;
+  const changeNote =
+    typeof note.frontmatter.changeNote === "string" ? note.frontmatter.changeNote : null;
 
   // Pull the article's accent slot off of preview so the h2 dot + title
   // underline pick up the right highlighter colour.
@@ -179,7 +196,10 @@ export default function WorkSlug({ note }: Props) {
           <a href="/#work" className={`backLink ${gm500.className}`}>
             ← Index
           </a>
-          <span className={`articleStamp ${gm500.className}`}>{formattedDate}</span>
+          <span className={`articleStamp ${gm500.className}`}>
+            Published {formattedDate}
+            {updated ? <span> · Updated {formatFullDate(updated)}</span> : null}
+          </span>
         </div>
 
         <h1 className={`articleTitle ${gm800.className}`}>
@@ -188,6 +208,12 @@ export default function WorkSlug({ note }: Props) {
 
         {note.preview.excerpt ? (
           <p className={`articleLede ${cp400.className}`}>{note.preview.excerpt}</p>
+        ) : null}
+
+        {updated && changeNote ? (
+          <p className={`articleUpdateNote ${gm500.className}`}>
+            <span>Change note</span> {changeNote}
+          </p>
         ) : null}
 
         <hr className="articleRule" aria-hidden />
@@ -463,6 +489,22 @@ export default function WorkSlug({ note }: Props) {
           font-size: clamp(18px, 1.8vw, 22px);
           line-height: 1.5;
           color: var(--ink-soft);
+        }
+        .articleUpdateNote {
+          display: inline-block;
+          margin: 0 0 32px;
+          padding: 10px 12px;
+          border: 1px solid var(--rule);
+          background: var(--accent-soft);
+          font-size: 12px;
+          line-height: 1.5;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--ink-soft);
+        }
+        .articleUpdateNote span {
+          margin-right: 8px;
+          color: var(--ink);
         }
         .articleRule {
           border: 0;
