@@ -7,12 +7,14 @@ export interface CuratedGithubProject {
   tags: string[];
   accent: string;
   language?: string | null;
+  githubUrl?: string | null;
+  viewUrl?: string;
   image?: string;
   imageBg?: string;
 }
 
 export interface WorkProject extends CuratedGithubProject {
-  url: string;
+  githubUrl?: string | null;
   language?: string | null;
   latestCommitAt?: string | null;
   sortDate?: string | null;
@@ -49,11 +51,14 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
   },
   {
     repo: "quartiles",
-    title: "Quartiles",
+    title: "lexitiles",
     blurb: "A mobile-first word-building puzzle with a tiny surface area and a very annoying amount of product taste packed into it.",
-    tags: ["game", "mobile", "typescript"],
+    tags: ["word game", "mobile", "typescript"],
     accent: "#b4ff82",
     language: "TypeScript",
+    viewUrl: "https://lexitiles.donovanyohan.com",
+    image: "/img/work/lexitiles-preview.png",
+    imageBg: "#fdf8ed",
   },
   {
     repo: "typeline-svelte",
@@ -62,6 +67,22 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     tags: ["typing", "svelte", "typescript"],
     accent: "#9b8cff",
     language: "TypeScript",
+    githubUrl: null,
+    viewUrl: "https://typeline.app",
+    image: "/img/work/typeline-preview.png",
+    imageBg: "#fdf8ed",
+  },
+  {
+    repo: "sample-sound",
+    title: "sample-sound",
+    blurb: "A tiny browser soundboard for fast meme/audio triggers, keyboard shortcuts, and exactly the amount of chaos the room deserves.",
+    tags: ["soundboard", "audio", "javascript"],
+    accent: "#78dcff",
+    language: "JavaScript",
+    githubUrl: null,
+    viewUrl: "https://soundboard.donovanyohan.com",
+    image: "/img/work/sample-sound-preview.png",
+    imageBg: "#fdf8ed",
   },
   {
     repo: "open-music-player",
@@ -86,6 +107,9 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     tags: ["portfolio", "next.js", "vault"],
     accent: "#e07a3c",
     language: "TypeScript",
+    viewUrl: "https://donovanyohan.com",
+    image: "/img/work/donovanyohan-preview.png",
+    imageBg: "#fdf8ed",
   },
 ];
 
@@ -140,7 +164,10 @@ const loadWorkProjects = async (): Promise<WorkProject[]> => {
       const sortDate = latestCommitAt ?? repoMeta?.pushed_at;
       return {
         ...project,
-        url: repoMeta?.html_url ?? `https://github.com/${GITHUB_OWNER}/${project.repo}`,
+        githubUrl:
+          project.githubUrl === null
+            ? null
+            : (project.githubUrl ?? repoMeta?.html_url ?? `https://github.com/${GITHUB_OWNER}/${project.repo}`),
         language: repoMeta?.language ?? project.language ?? null,
         latestCommitAt: latestCommitAt ?? null,
         sortDate: sortDate ?? `1970-01-01T00:00:00.${String(999 - index).padStart(3, "0")}Z`,
@@ -148,10 +175,14 @@ const loadWorkProjects = async (): Promise<WorkProject[]> => {
     }),
   );
 
-  return projects.sort((a, b) => (b.sortDate ?? "").localeCompare(a.sortDate ?? ""));
+  return projects.sort((a, b) => {
+    const viewDelta = Number(Boolean(b.viewUrl)) - Number(Boolean(a.viewUrl));
+    if (viewDelta !== 0) return viewDelta;
+    return (b.sortDate ?? "").localeCompare(a.sortDate ?? "");
+  });
 };
 
-const loadCachedWorkProjects = unstable_cache(loadWorkProjects, ["work-projects-v2"], {
+const loadCachedWorkProjects = unstable_cache(loadWorkProjects, ["work-projects-v3"], {
   revalidate: WORK_PROJECTS_REVALIDATE_SECONDS,
 });
 

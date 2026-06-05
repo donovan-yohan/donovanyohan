@@ -35,7 +35,7 @@ export default function WorkIndex({ projects }: WorkIndexProps) {
         <title>Work — Donovan Yohan</title>
         <meta
           name="description"
-          content="Selected public GitHub projects by Donovan Yohan, sorted by recent authored commit activity."
+          content="Selected deployed projects and public GitHub repos by Donovan Yohan, with live projects prioritized."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
@@ -47,14 +47,14 @@ export default function WorkIndex({ projects }: WorkIndexProps) {
       <main className="workPage">
         <section className="workFrame">
           <header className="workHead">
-            <span className={`workKicker ${gm500.className}`}>Selected GitHub projects</span>
+            <span className={`workKicker ${gm500.className}`}>Selected deployed projects</span>
             <h1 className={`workTitle ${gm800.className}`}>
               <HiSpan slot={2}>WORK</HiSpan>
             </h1>
             <p className={`workLede ${cp400.className}`}>
-              Public repos and shipped-ish tools worth pointing at. The list is curated
-              in the app source, then sorted by the newest public commit I authored so
-              the active stuff naturally floats up.
+              Live projects come first with a View link; public repos get GitHub
+              links too. The source list stays curated, while GitHub activity is
+              fetched through a daily server cache instead of on every regeneration.
             </p>
           </header>
 

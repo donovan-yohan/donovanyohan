@@ -18,12 +18,15 @@ const formatCommitDate = (iso?: string | null): string => {
 };
 
 const WorkProjectCards = ({ projects }: WorkProjectCardsProps) => (
-  <div className="workProjectGrid" aria-label="Selected public GitHub projects">
+  <div className="workProjectGrid" aria-label="Selected deployed and public projects">
     {projects.map((project, index) => (
       <article
         className="workProjectCard"
         key={project.repo}
-        style={{ ["--project-accent" as string]: project.accent }}
+        style={{
+          ["--project-accent" as string]: project.accent,
+          ["--project-image-bg" as string]: project.imageBg ?? "transparent",
+        }}
       >
         <div className={`workProjectMeta ${gm500.className}`}>
           <span>#{String(index + 1).padStart(2, "0")}</span>
@@ -53,9 +56,18 @@ const WorkProjectCards = ({ projects }: WorkProjectCardsProps) => (
         </div>
         <footer className={`workProjectFooter ${gm500.className}`}>
           <span>{formatCommitDate(project.latestCommitAt ?? project.sortDate)}</span>
-          <a href={project.url} target="_blank" rel="noreferrer">
-            GitHub →
-          </a>
+          <span className="workProjectLinks">
+            {project.viewUrl ? (
+              <a href={project.viewUrl} target="_blank" rel="noreferrer">
+                View →
+              </a>
+            ) : null}
+            {project.githubUrl ? (
+              <a href={project.githubUrl} target="_blank" rel="noreferrer">
+                GitHub →
+              </a>
+            ) : null}
+          </span>
         </footer>
       </article>
     ))}
@@ -164,6 +176,13 @@ const WorkProjectCards = ({ projects }: WorkProjectCardsProps) => (
       .workProjectFooter a {
         color: var(--ink);
         text-decoration: none;
+      }
+      .workProjectLinks {
+        display: inline-flex;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
       }
       .workProjectFooter a:hover {
         text-decoration: underline;

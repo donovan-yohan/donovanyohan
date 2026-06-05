@@ -717,14 +717,14 @@ const Index = ({ workProjects, weather }: IndexProps) => {
         <Box className="historyFrame" id="work">
           <Box className="historyTopRule" aria-hidden="true" />
           <header className="historyHead">
-            <span className={`historyKicker ${gm500.className}`}>Selected GitHub projects</span>
+            <span className={`historyKicker ${gm500.className}`}>Selected deployed projects</span>
             <h2 className={`historyTitle ${gm800.className}`}>
               <HiSpan slot={2}>WORK</HiSpan>
             </h2>
             <p className={`historyLede ${cp400.className}`}>
-              A curated set of public repos and tools I actually want people to see.
-              Sorted by the most recent public commit I authored, when GitHub lets
-              the build check it.
+              A curated set of live projects and public repos I actually want people
+              to see. Deployed work floats first, then the rest follows recent
+              authored GitHub activity when the daily cache can check it.
             </p>
           </header>
 
