@@ -7,9 +7,10 @@
  * vault without any client-side fetching.
  *
  * Grouping: notes are bucketed by `YYYY-MM` from frontmatter.date. Each
- * month renders as dense three-column grid rows so authored `preview.span`
- * can create wider/taller feature cards while the month label keeps a sticky
- * scroll range on desktop.
+ * month renders as packed four-column grid rows. The packer uses complete
+ * 4-column patterns only (single full-width, two half-width, or one 2x2
+ * feature with two stacked half-width cards) so desktop rows don't leave
+ * dangling empty columns on the right.
  *
  * Entry type derivation is content-type aware:
  *   writing → article card, with optional `preview.image` cover
@@ -170,34 +171,54 @@ const noteToEntry = (note: VaultNote, index: number): Entry => {
   };
 };
 
-const spanForNote = (note: VaultNote): number | undefined => {
-  const span = note.preview.span;
-  const colSpan = Math.min(DEFAULT_COLS, Math.max(1, Math.ceil(span / 3)));
-  if (colSpan > 1) return colSpan;
-  return undefined;
-};
-
-const rowSpanForNote = (note: VaultNote): number | undefined => {
-  const type = entryTypeForNote(note);
-  const hasCover = Boolean(note.preview.image || bannerImage(note.frontmatter));
-  if ((type === "essay" || type === "caseStudy") && hasCover && note.preview.span >= 8) {
-    return 2;
-  }
-  return undefined;
-};
+const packedCell = (
+  cell: NotebookCell,
+  colSpan?: number,
+  rowSpan?: number,
+): NotebookCell => ({
+  entry: cell.entry,
+  ...(colSpan !== undefined && colSpan > 1 ? { colSpan } : {}),
+  ...(rowSpan !== undefined && rowSpan > 1 ? { rowSpan } : {}),
+});
 
 const rowsForCells = (cells: NotebookCell[]): NotebookRow[] => {
-  return [{ cols: DEFAULT_COLS, cells }];
+  const rows: NotebookRow[] = [];
+
+  for (let i = 0; i < cells.length;) {
+    const remaining = cells.length - i;
+
+    if (remaining === 1) {
+      rows.push({ cols: DEFAULT_COLS, cells: [packedCell(cells[i], DEFAULT_COLS)] });
+      i += 1;
+      continue;
+    }
+
+    if (remaining === 2) {
+      rows.push({
+        cols: DEFAULT_COLS,
+        cells: [packedCell(cells[i], 2), packedCell(cells[i + 1], 2)],
+      });
+      i += 2;
+      continue;
+    }
+
+    rows.push({
+      cols: DEFAULT_COLS,
+      rows: 2,
+      cells: [
+        packedCell(cells[i], 2, 2),
+        packedCell(cells[i + 1], 2),
+        packedCell(cells[i + 2], 2),
+      ],
+    });
+    i += 3;
+  }
+
+  return rows;
 };
 
 const cellForNote = (note: VaultNote, index: number): NotebookCell => {
-  const colSpan = spanForNote(note);
-  const rowSpan = rowSpanForNote(note);
-  return {
-    entry: noteToEntry(note, index),
-    ...(colSpan !== undefined ? { colSpan } : {}),
-    ...(rowSpan !== undefined ? { rowSpan } : {}),
-  };
+  return { entry: noteToEntry(note, index) };
 };
 
 export function notesToNotebookMonths(notes: VaultNote[]): NotebookMonth[] {
