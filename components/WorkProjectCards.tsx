@@ -6,7 +6,7 @@ interface WorkProjectCardsProps {
 }
 
 const formatCommitDate = (iso?: string | null): string => {
-  if (!iso) return "RECENCY UNKNOWN";
+  if (!iso || iso.startsWith("1970-01-01T00:00:00.")) return "RECENCY UNKNOWN";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "RECENCY UNKNOWN";
   return `UPDATED ${date.toLocaleDateString("en-US", {

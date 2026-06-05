@@ -11,7 +11,7 @@ import { gm500, gm800, cp400 } from "../../global/fonts";
 import { dotGridColor } from "../../lib/dot-grid-color";
 import { themeBootstrap } from "../../lib/theme-bootstrap";
 import type { WorkProject } from "../../lib/work-projects";
-import { getWorkProjects } from "../../lib/work-projects";
+import { getWorkProjects, WORK_PROJECTS_REVALIDATE_SECONDS } from "../../lib/work-projects";
 
 const DotGrid = dynamic(() => import("../../components/lab/DotGrid"), { ssr: false });
 
@@ -23,7 +23,7 @@ export const getStaticProps: GetStaticProps<WorkIndexProps> = async () => ({
   props: {
     projects: await getWorkProjects(),
   },
-  revalidate: 1800,
+  revalidate: WORK_PROJECTS_REVALIDATE_SECONDS,
 });
 
 export default function WorkIndex({ projects }: WorkIndexProps) {

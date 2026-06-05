@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+
 export interface CuratedGithubProject {
   repo: string;
   title: string;
@@ -17,6 +19,11 @@ export interface WorkProject extends CuratedGithubProject {
 }
 
 const GITHUB_OWNER = "donovan-yohan";
+export const WORK_PROJECTS_REVALIDATE_SECONDS = 24 * 60 * 60;
+const WORK_PROJECTS_CACHE_MS = WORK_PROJECTS_REVALIDATE_SECONDS * 1000;
+
+let workProjectsCache: { expiresAt: number; projects: WorkProject[] } | null = null;
+let workProjectsPromise: Promise<WorkProject[]> | null = null;
 
 /**
  * Source-owned shortlist for the WORK section. Edit this list when Donovan
@@ -46,6 +53,14 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     blurb: "A mobile-first word-building puzzle with a tiny surface area and a very annoying amount of product taste packed into it.",
     tags: ["game", "mobile", "typescript"],
     accent: "#b4ff82",
+    language: "TypeScript",
+  },
+  {
+    repo: "typeline-svelte",
+    title: "typeline",
+    blurb: "A typing-test POC for tuning feel, rhythm, and input feedback without dragging a full product surface behind it.",
+    tags: ["typing", "svelte", "typescript"],
+    accent: "#9b8cff",
     language: "TypeScript",
   },
   {
@@ -115,7 +130,7 @@ const latestAuthoredCommit = async (repo: string): Promise<string | undefined> =
   return commits?.[0]?.commit?.author?.date;
 };
 
-export const getWorkProjects = async (): Promise<WorkProject[]> => {
+const loadWorkProjects = async (): Promise<WorkProject[]> => {
   const projects = await Promise.all(
     CURATED_GITHUB_PROJECTS.map(async (project, index) => {
       const [repoMeta, latestCommitAt] = await Promise.all([
@@ -128,10 +143,34 @@ export const getWorkProjects = async (): Promise<WorkProject[]> => {
         url: repoMeta?.html_url ?? `https://github.com/${GITHUB_OWNER}/${project.repo}`,
         language: repoMeta?.language ?? project.language ?? null,
         latestCommitAt: latestCommitAt ?? null,
-        sortDate: sortDate ?? `1970-01-01T00:00:${String(99 - index).padStart(2, "0")}Z`,
+        sortDate: sortDate ?? `1970-01-01T00:00:00.${String(999 - index).padStart(3, "0")}Z`,
       } satisfies WorkProject;
     }),
   );
 
   return projects.sort((a, b) => (b.sortDate ?? "").localeCompare(a.sortDate ?? ""));
+};
+
+const loadCachedWorkProjects = unstable_cache(loadWorkProjects, ["work-projects-v2"], {
+  revalidate: WORK_PROJECTS_REVALIDATE_SECONDS,
+});
+
+export const getWorkProjects = async (): Promise<WorkProject[]> => {
+  const now = Date.now();
+  if (workProjectsCache && workProjectsCache.expiresAt > now) return workProjectsCache.projects;
+  if (workProjectsPromise) return workProjectsPromise;
+
+  workProjectsPromise = loadCachedWorkProjects().then((projects) => {
+    workProjectsCache = {
+      expiresAt: Date.now() + WORK_PROJECTS_CACHE_MS,
+      projects,
+    };
+    return projects;
+  });
+
+  try {
+    return await workProjectsPromise;
+  } finally {
+    workProjectsPromise = null;
+  }
 };
