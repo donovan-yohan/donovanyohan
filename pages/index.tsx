@@ -1749,24 +1749,16 @@ const loadNotebookData = async (): Promise<{
   months: NotebookMonth[];
   tagFilters: NotebookTagFilter[];
 }> => {
-  try {
-    const [notes, taxonomy] = await Promise.all([getPublicNotes(), getVaultTaxonomy()]);
-    const surfaced = notes.filter(
-      (n) =>
-        n.frontmatter.type === "work" || n.frontmatter.type === "writing",
-    );
-    const tagFilters = Object.entries(taxonomy.tags)
-      .filter(([, tag]) => tag.showInFilters)
-      .sort(([, a], [, b]) => a.order - b.order || a.label.localeCompare(b.label))
-      .map(([slug, tag]) => ({ slug, label: tag.label }));
-    return { months: notesToNotebookMonths(surfaced), tagFilters };
-  } catch (err) {
-    console.warn(
-      "[index] vault load failed, falling back to Notebook mock data:",
-      err instanceof Error ? err.message : err,
-    );
-    return { months: [], tagFilters: [] };
-  }
+  const [notes, taxonomy] = await Promise.all([getPublicNotes(), getVaultTaxonomy()]);
+  const surfaced = notes.filter(
+    (n) =>
+      n.frontmatter.type === "work" || n.frontmatter.type === "writing",
+  );
+  const tagFilters = Object.entries(taxonomy.tags)
+    .filter(([, tag]) => tag.showInFilters)
+    .sort(([, a], [, b]) => a.order - b.order || a.label.localeCompare(b.label))
+    .map(([slug, tag]) => ({ slug, label: tag.label }));
+  return { months: notesToNotebookMonths(surfaced), tagFilters };
 };
 
 const loadCurrentWeather = async (): Promise<CurrentWeather | null> => {
