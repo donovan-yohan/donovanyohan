@@ -24,6 +24,8 @@ const months: NotebookMonth[] = [
         cols: 2,
         cells: [
           {
+            colSpan: 3,
+            rowSpan: 2,
             entry: {
               id: "agents-loop",
               date: "2026-05-09",
@@ -32,6 +34,9 @@ const months: NotebookMonth[] = [
               title: "Shipping with agents in the loop.",
               blurb: "A working note.",
               read: "7 min",
+              image: "/vault-assets/agents-loop/cover.png",
+              imageAlt: "Shipping with agents in the loop.",
+              imageAspectRatio: "1376 / 768",
               tags: ["memory"],
             },
           },
@@ -116,5 +121,28 @@ describe("mobile work section layout", () => {
     );
     expect(screen.queryByRole("link", { name: /design log card/i })).toBeNull();
     expect(container.querySelector('.monthSection [data-cols="2"]')).not.toBeNull();
+  });
+
+  test("notebook keeps desktop spans as css variables and renders uncropped preview images", () => {
+    const { container } = render(
+      <Notebook
+        monoClass="mono"
+        serifClass="serif"
+        italicSerifClass="italic"
+        months={months}
+        cardHrefBuilder={(entry) => `/work/${entry.id}`}
+      />,
+    );
+
+    const card = container.querySelector<HTMLElement>('[data-entry-id="agents-loop"]');
+    const image = screen.getByRole("img", {
+      name: /shipping with agents in the loop/i,
+    });
+
+    expect(card?.style.getPropertyValue("--card-grid-column-desktop")).toBe("span 3");
+    expect(card?.style.getPropertyValue("--card-grid-row-desktop")).toBe("span 2");
+    expect(image).toHaveClass("cardCoverImage");
+    expect(image).toHaveStyle({ objectFit: "contain" });
+    expect(image.getAttribute("style")).toContain("--card-image-aspect: 1376 / 768");
   });
 });

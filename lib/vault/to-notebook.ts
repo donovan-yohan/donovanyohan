@@ -43,9 +43,10 @@ const MONTH_LABELS = [
   "DEC",
 ] as const;
 
-// Three columns give the bullet-journal canvas room for asymmetry: 1-wide
-// stamps, 2-wide feature articles, and occasional 3-wide hero cards.
-const DEFAULT_COLS: ColsMode = 3;
+// Four columns map cleanly onto dy-journal's 1-12 `preview.span` scale:
+// 1-3 = stamp, 4-6 = half-width, 7-9 = feature, 10-12 = full-width.
+// Mobile CSS collapses these spans back to one column via CSS variables.
+const DEFAULT_COLS: ColsMode = 4;
 const WORDS_PER_MINUTE = 220;
 
 const computeReadTime = (markdown: string): string => {
@@ -171,8 +172,8 @@ const noteToEntry = (note: VaultNote, index: number): Entry => {
 
 const spanForNote = (note: VaultNote): number | undefined => {
   const span = note.preview.span;
-  if (span >= 10) return 3;
-  if (span >= 8) return 2;
+  const colSpan = Math.min(DEFAULT_COLS, Math.max(1, Math.ceil(span / 3)));
+  if (colSpan > 1) return colSpan;
   return undefined;
 };
 
@@ -186,12 +187,6 @@ const rowSpanForNote = (note: VaultNote): number | undefined => {
 };
 
 const rowsForCells = (cells: NotebookCell[]): NotebookRow[] => {
-  if (cells.length > 1) {
-    return [
-      { cols: DEFAULT_COLS, cells: cells.slice(0, -1) },
-      { cols: DEFAULT_COLS, cells: cells.slice(-1) },
-    ];
-  }
   return [{ cols: DEFAULT_COLS, cells }];
 };
 

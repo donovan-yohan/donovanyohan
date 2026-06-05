@@ -1462,10 +1462,12 @@ interface EntryBodyProps {
   italicSerifClass: string;
 }
 
-const imageAspectStyle = (imageAspectRatio?: string): React.CSSProperties | undefined =>
-  imageAspectRatio
-    ? ({ ["--card-image-aspect" as string]: imageAspectRatio } as React.CSSProperties)
-    : undefined;
+const imageAspectStyle = (imageAspectRatio?: string): React.CSSProperties => ({
+  // Preview thumbnails should never crop source art. CSS can size the image box
+  // per breakpoint, but `contain` keeps the full image visible inside it.
+  objectFit: "contain",
+  ...(imageAspectRatio ? { ["--card-image-aspect" as string]: imageAspectRatio } : {}),
+});
 
 const EntryBody = ({ entry, monoClass, serifClass, italicSerifClass }: EntryBodyProps) => {
   switch (entry.type) {
@@ -1619,8 +1621,10 @@ const Body = () => (
     :global(.photoPreview) {
       display: block;
       width: 100%;
-      height: 176px;
-      object-fit: cover;
+      height: auto;
+      max-height: none;
+      aspect-ratio: var(--card-image-aspect, auto);
+      object-fit: contain;
       border: 1px solid var(--rule);
       border-radius: 1px;
       background: var(--paper-2);
@@ -1637,6 +1641,12 @@ const Body = () => (
     }
     :global(.photoSwatch) {
       flex: 1;
+    }
+    @media (max-width: 900px) {
+      :global(.cardCoverImage),
+      :global(.photoPreview) {
+        height: 176px;
+      }
     }
     :global(.figLine) {
       margin: 0;
