@@ -46,11 +46,10 @@ interface HatchSceneProps {
   /** Multiplier applied to (1 - luminance) when densityMode = "luminance". */
   luminanceBoost?: number;
   /**
-   * When true, default base/peak density adapts to the rendered content box,
-   * not the global viewport. Small boxes get a denser resting hatch, while
-   * their peak density is capped so the finest subdivisions don't collapse
-   * into cramped moiré. Explicit `baseDensity` / `peakDensity` props opt out
-   * for that value.
+   * When true, hatch density adapts to the rendered content box, not the
+   * global viewport. Small boxes use tighter hatch spacing and a denser
+   * resting hatch. Explicit `baseDensity` / `peakDensity` props opt out for
+   * those values; hatch spacing remains content-aware unless this is false.
    */
   contentAwareDensity?: boolean;
   /**
@@ -96,33 +95,42 @@ const clamp01 = (value: number): number => Math.min(1, Math.max(0, value));
 export const resolveContentAwareDensity = ({
   contentWidth,
   contentHeight,
+  hatchScale,
   baseDensity,
   peakDensity,
+  autoHatchScale,
   autoBaseDensity,
   autoPeakDensity,
 }: {
   contentWidth: number;
   contentHeight: number;
+  hatchScale: number;
   baseDensity: number;
   peakDensity: number;
+  autoHatchScale: boolean;
   autoBaseDensity: boolean;
   autoPeakDensity: boolean;
-}): { baseDensity: number; peakDensity: number; shortSide: number } => {
+}): { hatchScale: number; baseDensity: number; peakDensity: number; shortSide: number } => {
   const shortSide = Math.max(1, Math.min(contentWidth, contentHeight));
-  // Use the content box, not the viewport: below ~760px short-side the hatch
-  // needs more resting marks, but under ~360px it should stop adding finer
-  // tiers or the diagonals turn into a noisy plaid.
+  // Use the content box, not the viewport: below ~760px short-side the marks
+  // need to tighten so small canvases keep the same apparent detail. Do not
+  // remove the darkest luminance tier — that destroys recognisability in the
+  // manga panel. Cap only slightly below 1.0 on compact boxes.
   const spaciousness = clamp01((shortSide - 360) / 400);
   const compactness = 1 - spaciousness;
+  const resolvedHatchScale = autoHatchScale
+    ? Math.max(4, hatchScale * (0.72 + spaciousness * 0.28))
+    : hatchScale;
   const resolvedBaseDensity = autoBaseDensity
     ? Math.max(baseDensity, compactness * 0.48)
     : baseDensity;
-  const responsivePeak = 0.78 + spaciousness * 0.22;
+  const responsivePeak = 0.96 + spaciousness * 0.04;
   const resolvedPeakDensity = autoPeakDensity
     ? Math.max(resolvedBaseDensity, Math.min(peakDensity, responsivePeak))
     : Math.max(resolvedBaseDensity, peakDensity);
 
   return {
+    hatchScale: resolvedHatchScale,
     baseDensity: resolvedBaseDensity,
     peakDensity: resolvedPeakDensity,
     shortSide,
@@ -525,6 +533,7 @@ interface PlaneProps {
   thicknessJitter: number;
   lineWobble: number;
   peakDensity: number;
+  autoHatchScale: boolean;
   autoBaseDensity: boolean;
   autoPeakDensity: boolean;
   introMs: number;
@@ -550,6 +559,7 @@ const HatchPlane = ({
   thicknessJitter,
   lineWobble,
   peakDensity,
+  autoHatchScale,
   autoBaseDensity,
   autoPeakDensity,
   introMs,
@@ -573,12 +583,23 @@ const HatchPlane = ({
       resolveContentAwareDensity({
         contentWidth: size.width,
         contentHeight: size.height,
+        hatchScale,
         baseDensity,
         peakDensity,
+        autoHatchScale,
         autoBaseDensity,
         autoPeakDensity,
       }),
-    [size.width, size.height, baseDensity, peakDensity, autoBaseDensity, autoPeakDensity]
+    [
+      size.width,
+      size.height,
+      hatchScale,
+      baseDensity,
+      peakDensity,
+      autoHatchScale,
+      autoBaseDensity,
+      autoPeakDensity,
+    ]
   );
 
   useEffect(() => {
@@ -657,7 +678,7 @@ const HatchPlane = ({
       uTime: { value: 0 },
       uMouseActive: { value: 0 },
       uInk: { value: new THREE.Color(inkColor) },
-      uHatchScale: { value: hatchScale },
+      uHatchScale: { value: resolvedDensity.hatchScale },
       uMouseRadius: { value: mouseRadius },
       uOutlineWidth: { value: outlineWidth },
       uBaseDensity: { value: resolvedDensity.baseDensity },
@@ -690,8 +711,9 @@ const HatchPlane = ({
     if (matRef.current) matRef.current.uniforms.uInk.value = new THREE.Color(inkColor);
   }, [inkColor]);
   useEffect(() => {
-    if (matRef.current) matRef.current.uniforms.uHatchScale.value = hatchScale;
-  }, [hatchScale]);
+    if (matRef.current)
+      matRef.current.uniforms.uHatchScale.value = resolvedDensity.hatchScale;
+  }, [resolvedDensity.hatchScale]);
   useEffect(() => {
     if (matRef.current) matRef.current.uniforms.uMouseRadius.value = mouseRadius;
   }, [mouseRadius]);
@@ -856,6 +878,7 @@ const HatchScene = ({
           thicknessJitter={thicknessJitter}
           lineWobble={lineWobble}
           peakDensity={peakDensityValue}
+          autoHatchScale={contentAwareDensity}
           autoBaseDensity={contentAwareDensity && baseDensity === undefined}
           autoPeakDensity={contentAwareDensity && peakDensity === undefined}
           introMs={introMs}

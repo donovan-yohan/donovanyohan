@@ -469,9 +469,9 @@ const ContactFrame = ({
                   /* Tighter hatchScale + thicker line halfWidth on THIS
                      one instance — gives the centerpiece a wider tonal
                      range without affecting the rest of the site's
-                     HatchScene usages. Its density cap still follows the
-                     rendered panel size so the mobile version doesn't turn
-                     into a cramped plaid. */
+                     HatchScene usages. Its hatch spacing still follows the
+                     rendered panel size so the mobile version keeps enough
+                     detail to read. */
                   hatchScale={7}
                   halfWidthV={0.11}
                   mouseRadius={500}
