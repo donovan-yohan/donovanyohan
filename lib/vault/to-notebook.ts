@@ -7,10 +7,9 @@
  * vault without any client-side fetching.
  *
  * Grouping: notes are bucketed by `YYYY-MM` from frontmatter.date. Each
- * month renders as packed four-column grid rows. The packer uses complete
- * 4-column patterns only (single full-width, two half-width, or one 2x2
- * feature with two stacked half-width cards) so desktop rows don't leave
- * dangling empty columns on the right.
+ * month renders as chronological five-column rows that alternate 3/2 and 2/3
+ * card widths. Complete rows are always filled; only the final partial row of
+ * a month is allowed to leave blank space.
  *
  * Entry type derivation is content-type aware:
  *   writing → article card, with optional `preview.image` cover
@@ -44,10 +43,10 @@ const MONTH_LABELS = [
   "DEC",
 ] as const;
 
-// Four columns map cleanly onto dy-journal's 1-12 `preview.span` scale:
-// 1-3 = stamp, 4-6 = half-width, 7-9 = feature, 10-12 = full-width.
+// Five columns allow asymmetric chronological rows: 3+2, then 2+3. This gives
+// feature/side-card rhythm without ever making one card consume the full row.
 // Mobile CSS collapses these spans back to one column via CSS variables.
-const DEFAULT_COLS: ColsMode = 4;
+const DEFAULT_COLS: ColsMode = 5;
 const WORDS_PER_MINUTE = 220;
 
 const computeReadTime = (markdown: string): string => {
@@ -174,44 +173,29 @@ const noteToEntry = (note: VaultNote, index: number): Entry => {
 const packedCell = (
   cell: NotebookCell,
   colSpan?: number,
-  rowSpan?: number,
 ): NotebookCell => ({
   entry: cell.entry,
   ...(colSpan !== undefined && colSpan > 1 ? { colSpan } : {}),
-  ...(rowSpan !== undefined && rowSpan > 1 ? { rowSpan } : {}),
 });
+
+const leadingSpanForRow = (rowIndex: number): 2 | 3 => (rowIndex % 2 === 0 ? 3 : 2);
 
 const rowsForCells = (cells: NotebookCell[]): NotebookRow[] => {
   const rows: NotebookRow[] = [];
 
-  for (let i = 0; i < cells.length;) {
-    const remaining = cells.length - i;
-
-    if (remaining === 1) {
-      rows.push({ cols: DEFAULT_COLS, cells: [packedCell(cells[i], DEFAULT_COLS)] });
-      i += 1;
-      continue;
-    }
-
-    if (remaining === 2) {
-      rows.push({
-        cols: DEFAULT_COLS,
-        cells: [packedCell(cells[i], 2), packedCell(cells[i + 1], 2)],
-      });
-      i += 2;
-      continue;
-    }
+  for (let i = 0; i < cells.length; i += 2) {
+    const rowIndex = rows.length;
+    const firstSpan = leadingSpanForRow(rowIndex);
+    const secondSpan = (DEFAULT_COLS - firstSpan) as 2 | 3;
+    const second = cells[i + 1];
 
     rows.push({
       cols: DEFAULT_COLS,
-      rows: 2,
       cells: [
-        packedCell(cells[i], 2, 2),
-        packedCell(cells[i + 1], 2),
-        packedCell(cells[i + 2], 2),
+        packedCell(cells[i], firstSpan),
+        ...(second !== undefined ? [packedCell(second, secondSpan)] : []),
       ],
     });
-    i += 3;
   }
 
   return rows;

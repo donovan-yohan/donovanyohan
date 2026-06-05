@@ -32,61 +32,59 @@ const note = (overrides: {
 });
 
 const occupiedUnits = (row: NotebookRow): number =>
-  row.cells.reduce(
-    (sum, cell) => sum + (cell.colSpan ?? 1) * (cell.rowSpan ?? 1),
-    0,
-  );
+  row.cells.reduce((sum, cell) => sum + (cell.colSpan ?? 1), 0);
 
-const assertFullRow = (row: NotebookRow): void => {
-  expect(occupiedUnits(row)).toBe(row.cols * (row.rows ?? 1));
+const assertCompleteRow = (row: NotebookRow): void => {
+  expect(occupiedUnits(row)).toBe(row.cols);
 };
 
 describe("notesToNotebookMonths", () => {
-  test("packs dy-journal notes into full four-column desktop rows", () => {
+  test("packs dy-journal notes chronologically into alternating 3/2 and 2/3 rows", () => {
     const [month] = notesToNotebookMonths([
-      note({ slug: "feature", date: "2026-06-06", span: 9, image: "/vault-assets/feature/cover.png" }),
-      note({ slug: "side-a", date: "2026-06-05", span: 6, image: "/vault-assets/side-a/cover.png" }),
-      note({ slug: "side-b", date: "2026-06-04", span: 3, image: "/vault-assets/side-b/cover.png" }),
-      note({ slug: "half-a", date: "2026-06-03", span: 8 }),
-      note({ slug: "half-b", date: "2026-06-02", span: 4 }),
+      note({ slug: "recovery", date: "2026-06-06", span: 9, image: "/vault-assets/recovery/cover.png" }),
+      note({ slug: "subagents", date: "2026-06-05", span: 6, image: "/vault-assets/subagents/cover.png" }),
+      note({ slug: "hooks", date: "2026-06-04", span: 3, image: "/vault-assets/hooks/cover.png" }),
+      note({ slug: "verification", date: "2026-06-03", span: 8 }),
+      note({ slug: "filesystem", date: "2026-06-02", span: 4 }),
     ]);
 
-    expect(month.rows).toHaveLength(2);
-    expect(month.rows.map((row) => row.cols)).toEqual([4, 4]);
-    month.rows.forEach(assertFullRow);
-
-    expect(month.rows[0]).toMatchObject({
-      rows: 2,
-      cells: [
-        { colSpan: 2, rowSpan: 2, entry: { id: "feature" } },
-        { colSpan: 2, entry: { id: "side-a" } },
-        { colSpan: 2, entry: { id: "side-b" } },
-      ],
-    });
+    expect(month.rows.map((row) => row.cols)).toEqual([5, 5, 5]);
+    expect(month.rows[0].cells).toMatchObject([
+      { colSpan: 3, entry: { id: "recovery" } },
+      { colSpan: 2, entry: { id: "subagents" } },
+    ]);
     expect(month.rows[1].cells).toMatchObject([
-      { colSpan: 2, entry: { id: "half-a" } },
-      { colSpan: 2, entry: { id: "half-b" } },
+      { colSpan: 2, entry: { id: "hooks" } },
+      { colSpan: 3, entry: { id: "verification" } },
     ]);
+    expect(month.rows[2].cells).toMatchObject([
+      { colSpan: 3, entry: { id: "filesystem" } },
+    ]);
+
+    assertCompleteRow(month.rows[0]);
+    assertCompleteRow(month.rows[1]);
+    expect(occupiedUnits(month.rows[2])).toBeLessThan(month.rows[2].cols);
   });
 
-  test("uses full-width and half-width fallback rows for one or two entries", () => {
+  test("never makes a single card consume the full desktop grid", () => {
     const [singleMonth] = notesToNotebookMonths([
       note({ slug: "only", date: "2026-06-01" }),
     ]);
     expect(singleMonth.rows).toHaveLength(1);
-    assertFullRow(singleMonth.rows[0]);
+    expect(singleMonth.rows[0].cols).toBe(5);
     expect(singleMonth.rows[0].cells).toMatchObject([
-      { colSpan: 4, entry: { id: "only" } },
+      { colSpan: 3, entry: { id: "only" } },
     ]);
+    expect(occupiedUnits(singleMonth.rows[0])).toBeLessThan(singleMonth.rows[0].cols);
 
     const [pairMonth] = notesToNotebookMonths([
       note({ slug: "newer", date: "2026-06-02" }),
       note({ slug: "older", date: "2026-06-01" }),
     ]);
     expect(pairMonth.rows).toHaveLength(1);
-    assertFullRow(pairMonth.rows[0]);
+    assertCompleteRow(pairMonth.rows[0]);
     expect(pairMonth.rows[0].cells).toMatchObject([
-      { colSpan: 2, entry: { id: "newer" } },
+      { colSpan: 3, entry: { id: "newer" } },
       { colSpan: 2, entry: { id: "older" } },
     ]);
   });
