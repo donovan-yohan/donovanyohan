@@ -46,6 +46,14 @@ interface HatchSceneProps {
   /** Multiplier applied to (1 - luminance) when densityMode = "luminance". */
   luminanceBoost?: number;
   /**
+   * When true, default base/peak density adapts to the rendered content box,
+   * not the global viewport. Small boxes get a denser resting hatch, while
+   * their peak density is capped so the finest subdivisions don't collapse
+   * into cramped moiré. Explicit `baseDensity` / `peakDensity` props opt out
+   * for that value.
+   */
+  contentAwareDensity?: boolean;
+  /**
    * Intensity (0..1) of the inverse-proximity "flashlight" effect. In
    * luminance mode, this value scales how much density the cursor can
    * *subtract* under it — 0 disables it (cursor has no effect), 1 lets
@@ -82,6 +90,44 @@ interface HatchSceneProps {
    */
   onIntroStart?: () => void;
 }
+
+const clamp01 = (value: number): number => Math.min(1, Math.max(0, value));
+
+export const resolveContentAwareDensity = ({
+  contentWidth,
+  contentHeight,
+  baseDensity,
+  peakDensity,
+  autoBaseDensity,
+  autoPeakDensity,
+}: {
+  contentWidth: number;
+  contentHeight: number;
+  baseDensity: number;
+  peakDensity: number;
+  autoBaseDensity: boolean;
+  autoPeakDensity: boolean;
+}): { baseDensity: number; peakDensity: number; shortSide: number } => {
+  const shortSide = Math.max(1, Math.min(contentWidth, contentHeight));
+  // Use the content box, not the viewport: below ~760px short-side the hatch
+  // needs more resting marks, but under ~360px it should stop adding finer
+  // tiers or the diagonals turn into a noisy plaid.
+  const spaciousness = clamp01((shortSide - 360) / 400);
+  const compactness = 1 - spaciousness;
+  const resolvedBaseDensity = autoBaseDensity
+    ? Math.max(baseDensity, compactness * 0.48)
+    : baseDensity;
+  const responsivePeak = 0.78 + spaciousness * 0.22;
+  const resolvedPeakDensity = autoPeakDensity
+    ? Math.max(resolvedBaseDensity, Math.min(peakDensity, responsivePeak))
+    : Math.max(resolvedBaseDensity, peakDensity);
+
+  return {
+    baseDensity: resolvedBaseDensity,
+    peakDensity: resolvedPeakDensity,
+    shortSide,
+  };
+};
 
 const vertexShader = /* glsl */ `
   varying vec2 vUv;
@@ -342,7 +388,7 @@ const fragmentShader = /* glsl */ `
       // a radius — acting like a flashlight that erases hatching under
       // the mouse — letting users light up portions of the source.
       float lum = lumAt(wobbleUv);
-      float lumDark = clamp((1.0 - lum) * uLuminanceBoost, 0.0, 1.0);
+      float lumDark = clamp((1.0 - lum) * uLuminanceBoost, 0.0, peak);
       darkness = clamp(lumDark - proximity * uInvertProximity, 0.0, 1.0);
     } else {
       darkness = clamp(uBaseDensity + proximity * (peak - uBaseDensity), 0.0, 1.0);
@@ -479,6 +525,8 @@ interface PlaneProps {
   thicknessJitter: number;
   lineWobble: number;
   peakDensity: number;
+  autoBaseDensity: boolean;
+  autoPeakDensity: boolean;
   introMs: number;
   introDelayMs: number;
   densityMode: "binary" | "luminance";
@@ -502,6 +550,8 @@ const HatchPlane = ({
   thicknessJitter,
   lineWobble,
   peakDensity,
+  autoBaseDensity,
+  autoPeakDensity,
   introMs,
   introDelayMs,
   densityMode,
@@ -518,6 +568,18 @@ const HatchPlane = ({
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
   const introStartRef = useRef<number | null>(null);
   const introStartFiredRef = useRef(false);
+  const resolvedDensity = useMemo(
+    () =>
+      resolveContentAwareDensity({
+        contentWidth: size.width,
+        contentHeight: size.height,
+        baseDensity,
+        peakDensity,
+        autoBaseDensity,
+        autoPeakDensity,
+      }),
+    [size.width, size.height, baseDensity, peakDensity, autoBaseDensity, autoPeakDensity]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -598,12 +660,12 @@ const HatchPlane = ({
       uHatchScale: { value: hatchScale },
       uMouseRadius: { value: mouseRadius },
       uOutlineWidth: { value: outlineWidth },
-      uBaseDensity: { value: baseDensity },
+      uBaseDensity: { value: resolvedDensity.baseDensity },
       uHalfWidthV: { value: halfWidthV },
       uFadeWidth: { value: fadeWidth },
       uThicknessJitter: { value: thicknessJitter },
       uLineWobble: { value: lineWobble },
-      uPeakDensity: { value: peakDensity },
+      uPeakDensity: { value: resolvedDensity.peakDensity },
       uIntro: { value: introMs > 0 ? 0 : 1 },
       uDensityMode: { value: densityMode === "luminance" ? 1 : 0 },
       uLuminanceBoost: { value: luminanceBoost },
@@ -637,8 +699,9 @@ const HatchPlane = ({
     if (matRef.current) matRef.current.uniforms.uOutlineWidth.value = outlineWidth;
   }, [outlineWidth]);
   useEffect(() => {
-    if (matRef.current) matRef.current.uniforms.uBaseDensity.value = baseDensity;
-  }, [baseDensity]);
+    if (matRef.current)
+      matRef.current.uniforms.uBaseDensity.value = resolvedDensity.baseDensity;
+  }, [resolvedDensity.baseDensity]);
   useEffect(() => {
     if (matRef.current) matRef.current.uniforms.uHalfWidthV.value = halfWidthV;
   }, [halfWidthV]);
@@ -652,8 +715,9 @@ const HatchPlane = ({
     if (matRef.current) matRef.current.uniforms.uLineWobble.value = lineWobble;
   }, [lineWobble]);
   useEffect(() => {
-    if (matRef.current) matRef.current.uniforms.uPeakDensity.value = peakDensity;
-  }, [peakDensity]);
+    if (matRef.current)
+      matRef.current.uniforms.uPeakDensity.value = resolvedDensity.peakDensity;
+  }, [resolvedDensity.peakDensity]);
   useEffect(() => {
     if (matRef.current)
       matRef.current.uniforms.uDensityMode.value =
@@ -747,21 +811,24 @@ const HatchScene = ({
   mouseRadius = 600,
   padding = 24,
   outlineWidth = 0.5,
-  baseDensity = 0,
+  baseDensity,
   halfWidthV = 0.07,
   fadeWidth = 0.5,
   thicknessJitter = 0.59,
   lineWobble = 0.89,
-  peakDensity = 1.0,
+  peakDensity,
   introMs = 1300,
   introDelayMs = 0,
   densityMode = "binary",
   luminanceBoost = 1.0,
+  contentAwareDensity = true,
   invertProximity = 0,
   pattern = "cross",
   maskWobble,
   onIntroStart,
 }: HatchSceneProps) => {
+  const baseDensityValue = baseDensity ?? 0;
+  const peakDensityValue = peakDensity ?? 1.0;
   const resolvedMaskWobble =
     maskWobble ?? (densityMode === "luminance" ? 0 : 0.008);
   const fill = height === "100%";
@@ -783,12 +850,14 @@ const HatchScene = ({
           mouseRadius={mouseRadius}
           padding={padding}
           outlineWidth={outlineWidth}
-          baseDensity={baseDensity}
+          baseDensity={baseDensityValue}
           halfWidthV={halfWidthV}
           fadeWidth={fadeWidth}
           thicknessJitter={thicknessJitter}
           lineWobble={lineWobble}
-          peakDensity={peakDensity}
+          peakDensity={peakDensityValue}
+          autoBaseDensity={contentAwareDensity && baseDensity === undefined}
+          autoPeakDensity={contentAwareDensity && peakDensity === undefined}
           introMs={introMs}
           introDelayMs={introDelayMs}
           densityMode={densityMode}
