@@ -722,6 +722,7 @@ const Index = ({ notebookMonths, notebookTagFilters, weather }: IndexProps) => {
         </Box>
 
         <Box className="historyFrame" id="work">
+          <Box className="historyTopRule" aria-hidden="true" />
           <header className="historyHead">
             <span className={`historyKicker ${gm500.className}`}>The bullet journal</span>
             <h2 className={`historyTitle ${gm800.className}`}>
@@ -870,10 +871,18 @@ const Index = ({ notebookMonths, notebookTagFilters, weather }: IndexProps) => {
         .historyFrame {
           position: relative;
           padding: 40px var(--content-pad-left) 96px;
-          /* Single horizontal rule cleanly separating hero from history. */
-          border-top: 1px solid var(--rule);
           /* Offset for the sticky topnav when #work is the scroll target. */
           scroll-margin-top: 48px;
+        }
+        .historyTopRule {
+          position: absolute;
+          top: 0;
+          left: calc(-1 * var(--page-shell-bleed-x));
+          width: calc(100% + (2 * var(--page-shell-bleed-x)));
+          height: 1px;
+          background: var(--rule);
+          pointer-events: none;
+          z-index: 30;
         }
         .historyHead {
           position: relative;
