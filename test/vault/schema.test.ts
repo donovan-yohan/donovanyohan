@@ -38,6 +38,7 @@ describe("VaultFrontmatterSchema", () => {
           headline: "Custom headline",
           excerpt: "Custom excerpt",
           image: "/img/notes/cover.png",
+          imageBg: "#ffffff",
         },
       });
       expect(result.success).toBe(true);
@@ -45,6 +46,7 @@ describe("VaultFrontmatterSchema", () => {
       expect(result.data.slug).toBe("hello-world");
       expect(result.data.preview?.kind).toBe("image");
       expect(result.data.preview?.span).toBe(6);
+      expect(result.data.preview?.imageBg).toBe("#ffffff");
     });
 
     it("preserves extra frontmatter keys via passthrough (P passthrough)", () => {
@@ -226,6 +228,15 @@ describe("VaultFrontmatterSchema", () => {
       expect(
         VaultFrontmatterSchema.safeParse({ ...VALID_BASE, preview: { span: 12 } }).success,
       ).toBe(true);
+    });
+
+    it("rejects malformed preview image backgrounds", () => {
+      expect(
+        VaultFrontmatterSchema.safeParse({
+          ...VALID_BASE,
+          preview: { imageBg: "green" },
+        }).success,
+      ).toBe(false);
     });
   });
 

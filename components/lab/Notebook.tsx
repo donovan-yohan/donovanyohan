@@ -58,6 +58,7 @@ interface EssayLike extends BaseEntry {
   image?: string;
   imageAlt?: string;
   imageAspectRatio?: string;
+  imageBg?: string;
 }
 
 interface NoteEntry extends BaseEntry {
@@ -73,6 +74,7 @@ interface PhotoEntry extends BaseEntry {
   image?: string;
   imageAlt?: string;
   imageAspectRatio?: string;
+  imageBg?: string;
   swatches?: string[];
 }
 
@@ -149,7 +151,11 @@ export interface NotebookMonth {
   rows: NotebookRow[];
 }
 
-const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+interface NotebookTimeSkip {
+  skippedYears: number;
+  label: string;
+  weight: "months" | "years";
+}
 
 const TYPE_LABEL: Record<EntryType, string> = {
   essay: "article",
@@ -567,6 +573,43 @@ const flattenEntries = (nb: NotebookMonth[]): Entry[] => {
   return out;
 };
 
+const monthOrdinal = (key: string): number | null => {
+  const match = /^(\d{4})-(\d{2})$/.exec(key);
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) {
+    return null;
+  }
+  return year * 12 + (month - 1);
+};
+
+const timeSkipBetween = (
+  newer: NotebookMonth | undefined,
+  older: NotebookMonth,
+): NotebookTimeSkip | null => {
+  const newerOrdinal = newer ? monthOrdinal(newer.key) : null;
+  const olderOrdinal = monthOrdinal(older.key);
+  if (newerOrdinal === null || olderOrdinal === null) return null;
+  const skippedMonths = newerOrdinal - olderOrdinal - 1;
+  if (skippedMonths <= 0) return null;
+
+  const skippedYears = Math.floor(skippedMonths / 12);
+  const leftoverMonths = skippedMonths % 12;
+  const parts = [
+    skippedYears > 0 ? `${skippedYears} ${skippedYears === 1 ? "year" : "years"}` : null,
+    leftoverMonths > 0
+      ? `${leftoverMonths} ${leftoverMonths === 1 ? "month" : "months"}`
+      : null,
+  ].filter(Boolean);
+
+  return {
+    skippedYears,
+    label: `${parts.join(" ")} skipped`,
+    weight: skippedYears > 0 ? "years" : "months",
+  };
+};
+
 // Components -----------------------------------------------------------------
 
 interface TagFilter {
@@ -760,6 +803,11 @@ const Notebook = ({
     () => tagFilters.filter((tag) => (counts[`tag:${tag.slug}`] ?? 0) > 0),
     [counts, tagFilters],
   );
+  const tagLabelBySlug = useMemo(() => {
+    const labels: Record<string, string> = {};
+    for (const tag of tagFilters) labels[tag.slug] = tag.label;
+    return labels;
+  }, [tagFilters]);
 
   const activeEntryFilter = useMemo(() => {
     if (filter === "all") return null;
@@ -789,6 +837,15 @@ const Notebook = ({
       }))
       .filter((month) => month.rows.length > 0);
   }, [activeEntryFilter, data]);
+
+  const visibleTimeline = useMemo(
+    () =>
+      visibleMonths.map((month, index) => ({
+        month,
+        skip: timeSkipBetween(visibleMonths[index - 1], month),
+      })),
+    [visibleMonths],
+  );
 
   return (
     <>
@@ -839,15 +896,20 @@ const Notebook = ({
           </div>
         </div>
 
-      {visibleMonths.map((m) => (
-        <MonthBlock
-          key={m.key}
-          month={m}
-          monoClass={monoClass}
-          serifClass={serifClass}
-          italicSerifClass={italicSerifClass}
-          cardHrefBuilder={cardHrefBuilder}
-        />
+      {visibleTimeline.map(({ month: m, skip }) => (
+        <div key={m.key} className="timelineMonthGroup">
+          {skip ? <TimeSkip skip={skip} monoClass={monoClass} /> : null}
+          <MonthBlock
+            month={m}
+            monoClass={monoClass}
+            serifClass={serifClass}
+            italicSerifClass={italicSerifClass}
+            cardHrefBuilder={cardHrefBuilder}
+            tagLabelBySlug={tagLabelBySlug}
+            onTagClick={(slug) => setFilter(`tag:${slug}`)}
+            activeTag={filter.startsWith("tag:") ? filter.slice("tag:".length) : null}
+          />
+        </div>
       ))}
 
       <style jsx global>{`
@@ -857,6 +919,9 @@ const Notebook = ({
            so IntersectionObserver fires when the chip bar pins. */
         .notebookStack {
           --notebook-stack-gap: var(--u);
+        }
+        .timelineMonthGroup {
+          display: contents;
         }
         .chipsWrap {
           position: relative;
@@ -979,12 +1044,92 @@ const Notebook = ({
   );
 };
 
+const TimeSkip = ({ skip, monoClass }: { skip: NotebookTimeSkip; monoClass: string }) => (
+  <div className={`timeSkip timeSkip-${skip.weight} ${monoClass}`} aria-label={skip.label}>
+    <span className="timeSkipRule" aria-hidden />
+    <span className="timeSkipDots" aria-hidden>
+      <span />
+      <span />
+      <span />
+    </span>
+    <span className="timeSkipLabel">{skip.label}</span>
+    <span className="timeSkipRule" aria-hidden />
+    <style jsx global>{`
+      .timeSkip {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto minmax(0, 1fr);
+        align-items: center;
+        gap: 10px;
+        color: var(--ink-mute);
+        margin: calc(var(--u) * 0.75) 0;
+      }
+      .timeSkipRule {
+        height: 1px;
+        background-image: linear-gradient(
+          90deg,
+          transparent,
+          var(--ink-faint),
+          transparent
+        );
+      }
+      .timeSkipDots {
+        display: inline-flex;
+        flex-direction: column;
+        gap: 3px;
+        align-items: center;
+      }
+      .timeSkipDots span {
+        width: 4px;
+        height: 4px;
+        border-radius: 999px;
+        background: var(--ink-mute);
+      }
+      .timeSkipLabel {
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .timeSkip-years {
+        margin: calc(var(--u) * 1.5) 0;
+        color: var(--ink);
+      }
+      .timeSkip-years .timeSkipDots span {
+        width: 5px;
+        height: 5px;
+        background: var(--ink);
+      }
+      .timeSkip-years .timeSkipLabel {
+        font-size: 11px;
+        font-weight: 800;
+      }
+      @media (max-width: 900px) {
+        .timeSkip {
+          grid-template-columns: auto minmax(0, 1fr);
+          justify-content: start;
+          padding: 0 var(--u);
+          margin: calc(var(--u) * 1.25) 0;
+        }
+        .timeSkipRule {
+          display: none;
+        }
+        .timeSkipLabel {
+          white-space: normal;
+        }
+      }
+    `}</style>
+  </div>
+);
+
 interface MonthBlockProps {
   month: NotebookMonth;
   monoClass: string;
   serifClass: string;
   italicSerifClass: string;
   cardHrefBuilder?: CardHrefBuilder;
+  tagLabelBySlug: Record<string, string>;
+  onTagClick: (slug: string) => void;
+  activeTag: string | null;
 }
 
 const MonthBlock = ({
@@ -993,6 +1138,9 @@ const MonthBlock = ({
   serifClass,
   italicSerifClass,
   cardHrefBuilder,
+  tagLabelBySlug,
+  onTagClick,
+  activeTag,
 }: MonthBlockProps) => {
   const lastIdx = month.rows.length - 1;
   const head = month.rows.slice(0, lastIdx);
@@ -1022,6 +1170,9 @@ const MonthBlock = ({
             serifClass={serifClass}
             italicSerifClass={italicSerifClass}
             cardHrefBuilder={cardHrefBuilder}
+            tagLabelBySlug={tagLabelBySlug}
+            onTagClick={onTagClick}
+            activeTag={activeTag}
           />
         ))}
       </div>
@@ -1033,6 +1184,9 @@ const MonthBlock = ({
           serifClass={serifClass}
           italicSerifClass={italicSerifClass}
           cardHrefBuilder={cardHrefBuilder}
+          tagLabelBySlug={tagLabelBySlug}
+          onTagClick={onTagClick}
+          activeTag={activeTag}
         />
       ) : null}
 
@@ -1150,6 +1304,9 @@ interface RowBlockProps {
   serifClass: string;
   italicSerifClass: string;
   cardHrefBuilder?: CardHrefBuilder;
+  tagLabelBySlug: Record<string, string>;
+  onTagClick: (slug: string) => void;
+  activeTag: string | null;
 }
 
 const RowBlock = ({
@@ -1158,6 +1315,9 @@ const RowBlock = ({
   serifClass,
   italicSerifClass,
   cardHrefBuilder,
+  tagLabelBySlug,
+  onTagClick,
+  activeTag,
 }: RowBlockProps) => (
   <Grid
     cols={row.cols}
@@ -1180,6 +1340,9 @@ const RowBlock = ({
         serifClass={serifClass}
         italicSerifClass={italicSerifClass}
         cardHrefBuilder={cardHrefBuilder}
+        tagLabelBySlug={tagLabelBySlug}
+        onTagClick={onTagClick}
+        activeTag={activeTag}
       />
     ))}
   </Grid>
@@ -1193,6 +1356,9 @@ interface EntryCardProps {
   serifClass: string;
   italicSerifClass: string;
   cardHrefBuilder?: CardHrefBuilder;
+  tagLabelBySlug: Record<string, string>;
+  onTagClick: (slug: string) => void;
+  activeTag: string | null;
 }
 
 const EntryCard = ({
@@ -1203,6 +1369,9 @@ const EntryCard = ({
   serifClass,
   italicSerifClass,
   cardHrefBuilder,
+  tagLabelBySlug,
+  onTagClick,
+  activeTag,
 }: EntryCardProps) => {
   const accent = entry.accent;
   const tint = entry.tint;
@@ -1221,6 +1390,7 @@ const EntryCard = ({
       : `https://${rawHref}`
     : null;
   const isExternal = href ? /^https?:\/\//i.test(href) : false;
+  const tags = entry.tags ?? [];
   const handleInternalClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     if (
       event.metaKey ||
@@ -1284,6 +1454,26 @@ const EntryCard = ({
             italicSerifClass={italicSerifClass}
           />
         </Box>
+
+        {tags.length > 0 ? (
+          <div className={`cardTags ${monoClass}`} aria-label="Entry tags">
+            {tags.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                className={`cardTag ${activeTag === tag ? "cardTagActive" : ""}`}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onTagClick(tag);
+                }}
+              >
+                <span className="cardTagHash">#</span>
+                <span>{tagLabelBySlug[tag] ?? tag}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
 
         <footer className={`cardBottomBar ${monoClass}`}>
           <span className="cardBottomLeft">
@@ -1394,6 +1584,44 @@ const EntryCard = ({
           gap: var(--u);
           flex: 1 1 auto;
         }
+        .cardTags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          padding: 0 var(--u) var(--u);
+          position: relative;
+          z-index: 2;
+        }
+        .cardTag {
+          appearance: none;
+          background: transparent;
+          border: 1px solid var(--ink-faint);
+          border-radius: 2px;
+          color: var(--ink-mute);
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 10px;
+          letter-spacing: 0.12em;
+          line-height: 1;
+          min-height: 24px;
+          padding: 6px 8px;
+          text-transform: uppercase;
+          transition:
+            background 140ms ease,
+            border-color 140ms ease,
+            color 140ms ease;
+        }
+        .cardTag:hover,
+        .cardTagActive {
+          background: var(--ink);
+          border-color: var(--ink);
+          color: var(--paper);
+        }
+        .cardTagHash {
+          opacity: 0.7;
+        }
         .cardBottomBar {
           padding: 8px var(--u);
           display: flex;
@@ -1462,11 +1690,15 @@ interface EntryBodyProps {
   italicSerifClass: string;
 }
 
-const imageAspectStyle = (imageAspectRatio?: string): React.CSSProperties => ({
+const imageAspectStyle = (
+  imageAspectRatio?: string,
+  imageBg?: string,
+): React.CSSProperties => ({
   // Preview thumbnails should never crop source art. CSS can size the image box
   // per breakpoint, but `contain` keeps the full image visible inside it.
   objectFit: "contain",
   ...(imageAspectRatio ? { ["--card-image-aspect" as string]: imageAspectRatio } : {}),
+  ...(imageBg ? { background: imageBg } : {}),
 });
 
 const EntryBody = ({ entry, monoClass, serifClass, italicSerifClass }: EntryBodyProps) => {
@@ -1482,7 +1714,7 @@ const EntryBody = ({ entry, monoClass, serifClass, italicSerifClass }: EntryBody
               className="cardCoverImage"
               src={entry.image}
               alt={entry.imageAlt ?? ""}
-              style={imageAspectStyle(entry.imageAspectRatio)}
+              style={imageAspectStyle(entry.imageAspectRatio, entry.imageBg)}
             />
           ) : null}
           <h3 className={`title ${monoClass}`}>
@@ -1519,7 +1751,7 @@ const EntryBody = ({ entry, monoClass, serifClass, italicSerifClass }: EntryBody
               className="photoPreview"
               src={entry.image}
               alt={entry.imageAlt ?? entry.caption}
-              style={imageAspectStyle(entry.imageAspectRatio)}
+              style={imageAspectStyle(entry.imageAspectRatio, entry.imageBg)}
             />
           ) : (
             <div className="photoStrip" aria-hidden>

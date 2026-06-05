@@ -37,6 +37,7 @@ const months: NotebookMonth[] = [
               image: "/vault-assets/agents-loop/cover.png",
               imageAlt: "Shipping with agents in the loop.",
               imageAspectRatio: "1376 / 768",
+              imageBg: "#ffffff",
               tags: ["memory"],
             },
           },
@@ -49,6 +50,30 @@ const months: NotebookMonth[] = [
               title: "A design log card.",
               blurb: "A project note.",
               meta: "project · draft",
+              tags: ["portfolio"],
+            },
+          },
+        ],
+      },
+    ],
+  },
+  {
+    key: "2024-03",
+    monthLabel: "MAR",
+    year: "2024",
+    rows: [
+      {
+        cols: 5,
+        cells: [
+          {
+            colSpan: 3,
+            entry: {
+              id: "old-note",
+              date: "2024-03-01",
+              index: 3,
+              type: "note",
+              text: "Old notebook note.",
+              tags: ["portfolio"],
             },
           },
         ],
@@ -88,6 +113,7 @@ describe("mobile work section layout", () => {
         months={months}
         tagFilters={[
           { slug: "memory", label: "Memory" },
+          { slug: "portfolio", label: "Portfolio" },
           { slug: "private-only", label: "Private Only" },
         ]}
         cardHrefBuilder={(entry) => `/work/${entry.id}`}
@@ -97,7 +123,12 @@ describe("mobile work section layout", () => {
     expect(screen.getByRole("button", { name: /all/i })).toHaveClass("chipActive");
     expect(screen.getByRole("button", { name: /article/i })).toHaveClass("chip");
     expect(screen.getByRole("button", { name: /project/i })).toHaveClass("chip");
-    expect(screen.getByRole("button", { name: /memory/i })).toHaveClass("chipTag");
+    expect(
+      screen.getAllByRole("button", { name: /memory/i }).some((button) =>
+        button.classList.contains("chipTag"),
+      ),
+    ).toBe(true);
+    expect(screen.getByText("2 years 1 month skipped")).toHaveClass("timeSkipLabel");
     expect(screen.queryByRole("button", { name: /private only/i })).toBeNull();
     expect(screen.getByText("MAY")).toHaveClass("monthName");
     expect(container.querySelector(".chipsBar")).not.toBeNull();
@@ -123,6 +154,37 @@ describe("mobile work section layout", () => {
     expect(container.querySelector('.monthSection [data-cols="2"]')).not.toBeNull();
   });
 
+  test("card tag buttons shortcut into tag filtering", () => {
+    const { container } = render(
+      <Notebook
+        monoClass="mono"
+        serifClass="serif"
+        italicSerifClass="italic"
+        months={months}
+        tagFilters={[
+          { slug: "memory", label: "Memory" },
+          { slug: "portfolio", label: "Portfolio" },
+        ]}
+        cardHrefBuilder={(entry) => `/work/${entry.id}`}
+      />,
+    );
+
+    const cardTag = container.querySelector<HTMLButtonElement>(
+      '[data-entry-id="agents-loop"] .cardTag',
+    );
+    expect(cardTag).not.toBeNull();
+    fireEvent.click(cardTag!);
+
+    expect(cardTag).toHaveClass("cardTagActive");
+    expect(screen.getByRole("button", { name: /article/i })).toHaveClass("chip");
+    expect(screen.getByText("1 entry")).toHaveClass("monthCount");
+    expect(screen.getByRole("link", { name: /shipping with agents/i })).toHaveAttribute(
+      "href",
+      "/work/agents-loop",
+    );
+    expect(screen.queryByRole("link", { name: /design log card/i })).toBeNull();
+  });
+
   test("notebook keeps desktop spans as css variables and renders uncropped preview images", () => {
     const { container } = render(
       <Notebook
@@ -142,7 +204,7 @@ describe("mobile work section layout", () => {
     expect(card?.style.getPropertyValue("--card-grid-column-desktop")).toBe("span 3");
     expect(card?.style.getPropertyValue("--card-grid-row-desktop")).toBe("span 2");
     expect(image).toHaveClass("cardCoverImage");
-    expect(image).toHaveStyle({ objectFit: "contain" });
+    expect(image).toHaveStyle({ objectFit: "contain", background: "#ffffff" });
     expect(image.getAttribute("style")).toContain("--card-image-aspect: 1376 / 768");
   });
 });

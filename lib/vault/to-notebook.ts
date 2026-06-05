@@ -141,7 +141,12 @@ const noteToEntry = (note: VaultNote, index: number): Entry => {
       caption: excerpt || headline,
       fig: `FIG.${index.toString().padStart(2, "0")}`,
       ...(image !== undefined
-        ? { image, imageAlt: headline, ...(imageAspectRatio ? { imageAspectRatio } : {}) }
+        ? {
+            image,
+            imageAlt: headline,
+            ...(imageAspectRatio ? { imageAspectRatio } : {}),
+            ...(preview.imageBg ? { imageBg: preview.imageBg } : {}),
+          }
         : {}),
     };
   }
@@ -165,7 +170,12 @@ const noteToEntry = (note: VaultNote, index: number): Entry => {
     blurb: excerpt,
     read: computeReadTime(note.bodyMarkdown),
     ...(image !== undefined
-      ? { image, imageAlt: headline, ...(imageAspectRatio ? { imageAspectRatio } : {}) }
+      ? {
+          image,
+          imageAlt: headline,
+          ...(imageAspectRatio ? { imageAspectRatio } : {}),
+          ...(preview.imageBg ? { imageBg: preview.imageBg } : {}),
+        }
       : {}),
   };
 };

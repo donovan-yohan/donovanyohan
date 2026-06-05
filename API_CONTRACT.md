@@ -32,7 +32,8 @@ export interface PreviewConfig {
   tint?: string;            // design-token name
   headline?: string;        // overrides title for card display
   excerpt?: string;         // default = first paragraph of body
-  image?: string;           // path/URL when kind === 'image'
+  image?: string;           // path/URL when the card displays an image/banner
+  imageBg?: string;         // optional hex background behind transparent PNGs
 }
 
 export type NoteType = 'note' | 'work';

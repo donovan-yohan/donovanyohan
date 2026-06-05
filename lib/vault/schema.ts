@@ -51,6 +51,10 @@ export const VaultTaxonomySchema = z.object({
 export type TaxonomyTag = z.infer<typeof TaxonomyTagSchema>;
 export type VaultTaxonomy = z.infer<typeof VaultTaxonomySchema>;
 
+// Hex colour validator — accepts #RGB or #RRGGBB. Rejects malformed colours
+// that would silently break colour-driven rendering.
+const HEX_COLOR = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+
 // ── Sub-schemas ───────────────────────────────────────────────────────────────
 
 /**
@@ -66,6 +70,10 @@ export const PreviewConfigSchema = z.object({
   headline: z.string().optional(),
   excerpt: z.string().optional(),
   image: z.string().optional(),
+  imageBg: z
+    .string()
+    .regex(HEX_COLOR, "preview.imageBg must be a hex colour (#RGB or #RRGGBB)")
+    .optional(),
 });
 
 export type PreviewConfigPartial = z.infer<typeof PreviewConfigSchema>;
@@ -78,6 +86,7 @@ export interface PreviewConfig {
   headline?: string;
   excerpt?: string;
   image?: string;
+  imageBg?: string;
 }
 
 /**
@@ -103,10 +112,6 @@ export type BannerConfig = z.infer<typeof BannerConfigSchema>;
  * BgColorConfig: light/dark hex colour for the work-page hero background.
  * Only meaningful when `type: work`.
  */
-// Hex colour validator — accepts #RGB or #RRGGBB. Rejects malformed colours
-// that would silently break the hero rendering in Phase B.
-const HEX_COLOR = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-
 export const BgColorConfigSchema = z.object({
   light: z
     .string()

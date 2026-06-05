@@ -10,6 +10,8 @@ const note = (overrides: {
   type?: VaultNote["frontmatter"]["type"];
   span?: number;
   image?: string;
+  imageBg?: string;
+  tags?: string[];
 }): VaultNote => ({
   slug: overrides.slug,
   path: `notes/writing/${overrides.slug}.md`,
@@ -18,7 +20,7 @@ const note = (overrides: {
     date: overrides.date ?? "2026-06-01",
     visibility: "public",
     type: overrides.type ?? "writing",
-    tags: [],
+    tags: overrides.tags ?? [],
   },
   body: "<p>body</p>",
   bodyMarkdown: "body",
@@ -28,6 +30,7 @@ const note = (overrides: {
     headline: overrides.slug,
     excerpt: "preview excerpt",
     ...(overrides.image ? { image: overrides.image } : {}),
+    ...(overrides.imageBg ? { imageBg: overrides.imageBg } : {}),
   },
 });
 
@@ -87,5 +90,22 @@ describe("notesToNotebookMonths", () => {
       { colSpan: 3, entry: { id: "newer" } },
       { colSpan: 2, entry: { id: "older" } },
     ]);
+  });
+
+  test("forwards preview image backgrounds and note tags to notebook entries", () => {
+    const [month] = notesToNotebookMonths([
+      note({
+        slug: "transparent-png",
+        image: "/vault-assets/transparent-png/cover.png",
+        imageBg: "#05AC5B",
+        tags: ["design", "portfolio"],
+      }),
+    ]);
+
+    expect(month.rows[0].cells[0].entry).toMatchObject({
+      id: "transparent-png",
+      imageBg: "#05AC5B",
+      tags: ["design", "portfolio"],
+    });
   });
 });

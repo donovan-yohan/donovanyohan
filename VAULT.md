@@ -122,7 +122,8 @@ preview:                     # OPTIONAL, all sub-fields optional
   tint: paper                # design-token name
   headline: Custom card title
   excerpt: First-paragraph override
-  image: /img/hero.png       # when kind: image
+  image: /img/hero.png       # when kind: image or for custom card cover
+  imageBg: "#ffffff"         # optional background behind transparent PNG previews
 mood: focused                # arbitrary passthrough — preserved but ignored
 
 # Work-type fields (Phase A) — only meaningful when type: work

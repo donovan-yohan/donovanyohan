@@ -28,6 +28,7 @@ async function resetCache() {
 function setFixtureEnv(vaultPath: string = FIXTURE_VAULT) {
   vi.stubEnv("VAULT_SOURCE", "local");
   vi.stubEnv("VAULT_PATH", vaultPath);
+  vi.stubEnv("VAULT_PUBLICATION_MODE", "production");
 }
 
 // ── Setup / teardown ──────────────────────────────────────────────────────────
