@@ -1,24 +1,9 @@
 ---
-illustration_type: framework
+illustration_type: screenshot-inspired-product-preview
 project: sample-sound
 aspect: 16:9
-style: technical-schematic
-palette: cyan accent #78dcff on warm paper
+source_screenshot: ../screenshots/sample-sound-ui.png
+palette: near-black purple #08060d, hot pink #ff2d70, cyan #5ddcff, lime #c9ff2e, orange #ff8b65, purple #ad74ff
 ---
 
-Create a landscape 16:9 assistive project-card preview graphic for a deployed meme soundboard web app.
-
-Visual content:
-- A compact web soundboard grid of colorful audio pads, each pad with a tiny category icon shape.
-- Small waveform snippets, play-trigger flashes, keyboard shortcut badges, and a search/filter control represented as UI shapes.
-- The composition should feel fast, punchy, and audio-reactive without becoming chaotic.
-- Use cyan #78dcff as the dominant accent, with black ink linework and muted paper shadows.
-
-Style:
-- Baoyu technical-schematic + editorial vector illustration.
-- Crisp flat shapes, subtle hand-drawn wobble, light grid marks, portfolio sketchbook feel.
-- Product-surface preview, not a title poster.
-
-Text constraints:
-- No readable words, no title, no byline, no author name, no fake logo.
-- If text-like marks are needed, use abstract rectangles/dashes only.
+Generate or render a preview graphic that feels like the live soundboard UI: dark neon grid, top vibe filter bar, volume slider, hot-pink stop pill, large rounded sound pads, colored key badges, and translucent colored orbs in each card. Avoid clean paper schematics; this one should feel noisy, neon, and meme-chaotic.

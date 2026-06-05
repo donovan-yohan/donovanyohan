@@ -5,16 +5,27 @@ interface WorkProjectCardsProps {
   projects: WorkProject[];
 }
 
+const GithubIcon = () => (
+  <svg className="githubIcon" aria-hidden="true" viewBox="0 0 16 16" focusable="false">
+    <path
+      fill="currentColor"
+      d="M8 0C3.58 0 0 3.67 0 8.2c0 3.63 2.29 6.7 5.47 7.79.4.08.55-.18.55-.4 0-.2-.01-.86-.01-1.56-2.01.38-2.53-.5-2.69-.95-.09-.23-.48-.95-.82-1.14-.28-.15-.68-.52-.01-.53.63-.01 1.08.59 1.23.83.72 1.24 1.87.89 2.33.68.07-.53.28-.89.51-1.1-1.78-.21-3.64-.91-3.64-4.05 0-.89.31-1.63.82-2.2-.08-.21-.36-1.04.08-2.17 0 0 .67-.22 2.2.84A7.42 7.42 0 0 1 8 3.97c.68 0 1.36.09 2 .27 1.52-1.06 2.19-.84 2.19-.84.44 1.13.16 1.96.08 2.17.51.57.82 1.3.82 2.2 0 3.15-1.87 3.84-3.65 4.05.29.26.54.75.54 1.52 0 1.1-.01 1.98-.01 2.25 0 .22.15.48.55.4A8.14 8.14 0 0 0 16 8.2C16 3.67 12.42 0 8 0Z"
+    />
+  </svg>
+);
+
 const formatCommitDate = (iso?: string | null): string => {
   if (!iso || iso.startsWith("1970-01-01T00:00:00.")) return "RECENCY UNKNOWN";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "RECENCY UNKNOWN";
-  return `UPDATED ${date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  }).toUpperCase()}`;
+  return `UPDATED ${date
+    .toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "UTC",
+    })
+    .toUpperCase()}`;
 };
 
 const WorkProjectCards = ({ projects }: WorkProjectCardsProps) => (
@@ -57,15 +68,24 @@ const WorkProjectCards = ({ projects }: WorkProjectCardsProps) => (
         <footer className={`workProjectFooter ${gm500.className}`}>
           <span>{formatCommitDate(project.latestCommitAt ?? project.sortDate)}</span>
           <span className="workProjectLinks">
-            {project.viewUrl ? (
-              <a href={project.viewUrl} target="_blank" rel="noreferrer">
-                View →
+            {project.githubUrl ? (
+              <a
+                className="githubLink"
+                href={project.githubUrl}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`${project.title} GitHub repository`}
+                title={`${project.title} GitHub repository`}
+              >
+                <GithubIcon />
               </a>
             ) : null}
-            {project.githubUrl ? (
-              <a href={project.githubUrl} target="_blank" rel="noreferrer">
-                GitHub →
-              </a>
+            {project.viewUrl ? (
+              <span className="viewLinkSlot">
+                <a href={project.viewUrl} target="_blank" rel="noreferrer">
+                  View →
+                </a>
+              </span>
             ) : null}
           </span>
         </footer>
@@ -120,7 +140,11 @@ const WorkProjectCards = ({ projects }: WorkProjectCardsProps) => (
         margin: 0 var(--u);
         border: 1px solid var(--rule);
         background:
-          linear-gradient(135deg, color-mix(in srgb, var(--project-accent) 24%, transparent), transparent 55%),
+          linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--project-accent) 24%, transparent),
+            transparent 55%
+          ),
           var(--paper);
       }
       .workProjectCover img {
@@ -173,6 +197,10 @@ const WorkProjectCards = ({ projects }: WorkProjectCardsProps) => (
         color: var(--ink-mute);
         padding: 12px var(--u);
       }
+      .workProjectFooter > span:first-child {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
       .workProjectFooter a {
         color: var(--ink);
         text-decoration: none;
@@ -182,7 +210,25 @@ const WorkProjectCards = ({ projects }: WorkProjectCardsProps) => (
         align-items: center;
         flex-wrap: wrap;
         justify-content: flex-end;
+        margin-left: auto;
         gap: 10px;
+        min-width: max-content;
+      }
+      .viewLinkSlot {
+        min-width: 58px;
+        text-align: right;
+      }
+      .githubLink {
+        display: inline-grid;
+        place-items: center;
+        width: 18px;
+        height: 18px;
+        color: var(--ink);
+      }
+      .githubIcon {
+        display: block;
+        width: 16px;
+        height: 16px;
       }
       .workProjectFooter a:hover {
         text-decoration: underline;

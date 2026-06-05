@@ -1,24 +1,9 @@
 ---
-illustration_type: framework
+illustration_type: screenshot-inspired-product-preview
 project: donovanyohan.com
 aspect: 16:9
-style: technical-schematic
-palette: orange accent #e07a3c on warm paper
+source_screenshot: ../screenshots/donovanyohan-ui.png
+palette: white #ffffff, black #000000, yellow highlighter #ffe600, gray #777777
 ---
 
-Create a landscape 16:9 assistive project-card preview graphic for a portfolio website wired to a private writing vault.
-
-Visual content:
-- A portfolio homepage card grid on the public side, connected by safe routing lines to a private note/vault stack behind a boundary wall.
-- Show public cards, blog/article cards, and a privacy gate as abstract UI surfaces.
-- Include tiny lock/key and route arrows as icon shapes, but keep the image clean and premium.
-- Use orange #e07a3c as the dominant accent, with black ink linework and muted paper shadows.
-
-Style:
-- Baoyu technical-schematic + editorial vector illustration.
-- Crisp flat shapes, subtle hand-drawn wobble, light grid marks, portfolio sketchbook feel.
-- Architecture/product preview, not a title poster.
-
-Text constraints:
-- No readable words, no title, no byline, no author name, no fake logo.
-- If text-like marks are needed, use abstract rectangles/dashes only.
+Generate or render a preview graphic that feels like the live portfolio UI: white editorial background, tiny nav, oversized black dy mark, large black typography, yellow highlighter strips under headings, and rounded grayscale work cards. Avoid orange/vault-lock metaphor graphics; the live page is minimal black/white/yellow.

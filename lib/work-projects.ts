@@ -36,7 +36,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
   {
     repo: "relay-ide",
     title: "Relay IDE",
-    blurb: "A remote web interface for steering real coding-agent sessions from anywhere without pretending the terminal stopped existing.",
+    blurb:
+      "A remote web interface for steering real coding-agent sessions from anywhere without pretending the terminal stopped existing.",
     tags: ["agents", "developer tooling", "typescript"],
     accent: "#78dcff",
     language: "TypeScript",
@@ -44,7 +45,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
   {
     repo: "hermes-plugin-dynamic-workflows",
     title: "Dynamic Workflows",
-    blurb: "A Hermes plugin prototype for letting agents turn plans into executable, inspectable workflows instead of vibes in a transcript.",
+    blurb:
+      "A Hermes plugin prototype for letting agents turn plans into executable, inspectable workflows instead of vibes in a transcript.",
     tags: ["agents", "hermes", "python"],
     accent: "#ffe066",
     language: "Python",
@@ -52,42 +54,46 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
   {
     repo: "quartiles",
     title: "lexitiles",
-    blurb: "A mobile-first word-building puzzle with a tiny surface area and a very annoying amount of product taste packed into it.",
+    blurb:
+      "A mobile-first word-building puzzle with a tiny surface area and a very annoying amount of product taste packed into it.",
     tags: ["word game", "mobile", "typescript"],
-    accent: "#b4ff82",
+    accent: "#5865f2",
     language: "TypeScript",
     viewUrl: "https://lexitiles.donovanyohan.com",
     image: "/img/work/lexitiles-preview.png",
-    imageBg: "#fdf8ed",
+    imageBg: "#11151d",
   },
   {
     repo: "typeline-svelte",
     title: "typeline",
-    blurb: "A typing-test POC for tuning feel, rhythm, and input feedback without dragging a full product surface behind it.",
+    blurb:
+      "A typing-test POC for tuning feel, rhythm, and input feedback without dragging a full product surface behind it.",
     tags: ["typing", "svelte", "typescript"],
-    accent: "#9b8cff",
+    accent: "#00e5ef",
     language: "TypeScript",
     githubUrl: null,
     viewUrl: "https://typeline.app",
     image: "/img/work/typeline-preview.png",
-    imageBg: "#fdf8ed",
+    imageBg: "#0d0d0d",
   },
   {
     repo: "sample-sound",
     title: "sample-sound",
-    blurb: "A tiny browser soundboard for fast meme/audio triggers, keyboard shortcuts, and exactly the amount of chaos the room deserves.",
+    blurb:
+      "A tiny browser soundboard for fast meme/audio triggers, keyboard shortcuts, and exactly the amount of chaos the room deserves.",
     tags: ["soundboard", "audio", "javascript"],
-    accent: "#78dcff",
+    accent: "#ff2d70",
     language: "JavaScript",
     githubUrl: null,
     viewUrl: "https://soundboard.donovanyohan.com",
     image: "/img/work/sample-sound-preview.png",
-    imageBg: "#fdf8ed",
+    imageBg: "#08060d",
   },
   {
     repo: "open-music-player",
     title: "Open Music Player",
-    blurb: "A local-first music player experiment aimed at waveform-heavy, DJ-ish listening instead of yet another dead-flat playlist table.",
+    blurb:
+      "A local-first music player experiment aimed at waveform-heavy, DJ-ish listening instead of yet another dead-flat playlist table.",
     tags: ["music", "mobile", "dart"],
     accent: "#ff82c8",
     language: "Dart",
@@ -95,7 +101,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
   {
     repo: "belayer",
     title: "Belayer",
-    blurb: "A multi-repo autonomous coding-agent orchestrator built around supervision, recovery, and making agents leave useful evidence behind.",
+    blurb:
+      "A multi-repo autonomous coding-agent orchestrator built around supervision, recovery, and making agents leave useful evidence behind.",
     tags: ["agents", "orchestration", "go"],
     accent: "#ea5b6f",
     language: "Go",
@@ -103,13 +110,14 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
   {
     repo: "donovanyohan",
     title: "donovanyohan.com",
-    blurb: "This site: a public portfolio wired into a private writing vault, with the privacy boundary treated like load-bearing infrastructure.",
+    blurb:
+      "This site: a public portfolio wired into a private writing vault, with the privacy boundary treated like load-bearing infrastructure.",
     tags: ["portfolio", "next.js", "vault"],
-    accent: "#e07a3c",
+    accent: "#ffe600",
     language: "TypeScript",
     viewUrl: "https://donovanyohan.com",
     image: "/img/work/donovanyohan-preview.png",
-    imageBg: "#fdf8ed",
+    imageBg: "#ffffff",
   },
 ];
 
@@ -149,7 +157,7 @@ const fetchJson = async <T>(url: string): Promise<T | null> => {
 
 const latestAuthoredCommit = async (repo: string): Promise<string | undefined> => {
   const commits = await fetchJson<GithubCommitResponse[]>(
-    `https://api.github.com/repos/${GITHUB_OWNER}/${repo}/commits?author=${GITHUB_OWNER}&per_page=1`,
+    `https://api.github.com/repos/${GITHUB_OWNER}/${repo}/commits?author=${GITHUB_OWNER}&per_page=1`
   );
   return commits?.[0]?.commit?.author?.date;
 };
@@ -158,7 +166,9 @@ const loadWorkProjects = async (): Promise<WorkProject[]> => {
   const projects = await Promise.all(
     CURATED_GITHUB_PROJECTS.map(async (project, index) => {
       const [repoMeta, latestCommitAt] = await Promise.all([
-        fetchJson<GithubRepoResponse>(`https://api.github.com/repos/${GITHUB_OWNER}/${project.repo}`),
+        fetchJson<GithubRepoResponse>(
+          `https://api.github.com/repos/${GITHUB_OWNER}/${project.repo}`
+        ),
         latestAuthoredCommit(project.repo),
       ]);
       const sortDate = latestCommitAt ?? repoMeta?.pushed_at;
@@ -167,12 +177,14 @@ const loadWorkProjects = async (): Promise<WorkProject[]> => {
         githubUrl:
           project.githubUrl === null
             ? null
-            : (project.githubUrl ?? repoMeta?.html_url ?? `https://github.com/${GITHUB_OWNER}/${project.repo}`),
+            : (project.githubUrl ??
+              repoMeta?.html_url ??
+              `https://github.com/${GITHUB_OWNER}/${project.repo}`),
         language: repoMeta?.language ?? project.language ?? null,
         latestCommitAt: latestCommitAt ?? null,
         sortDate: sortDate ?? `1970-01-01T00:00:00.${String(999 - index).padStart(3, "0")}Z`,
       } satisfies WorkProject;
-    }),
+    })
   );
 
   return projects.sort((a, b) => {

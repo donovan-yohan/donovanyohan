@@ -1,24 +1,9 @@
 ---
-illustration_type: framework
+illustration_type: screenshot-inspired-product-preview
 project: typeline
 aspect: 16:9
-style: technical-schematic
-palette: violet accent #9b8cff on warm paper
+source_screenshot: ../screenshots/typeline-ui.png
+palette: near-black #0d0d0d, cyan #00e5ef, gray #6e6e73
 ---
 
-Create a landscape 16:9 assistive project-card preview graphic for a deployed typing-test app.
-
-Visual content:
-- A clean browser/app surface floating on warm off-white paper.
-- Rows of small word tokens flowing horizontally like a typing test.
-- A visible cursor/progress rail, subtle WPM/accuracy meter shapes, and seed/share indicators represented iconically.
-- Use violet #9b8cff as the dominant accent, with black ink linework and muted paper shadows.
-
-Style:
-- Baoyu technical-schematic + editorial vector illustration.
-- Crisp flat shapes, subtle hand-drawn wobble, light grid marks, portfolio sketchbook feel.
-- High-end product preview, not a generic abstract gradient.
-
-Text constraints:
-- No readable words, no title, no byline, no author name, no fake logo.
-- If text-like marks are needed, use abstract rectangles/dashes only.
+Generate or render a preview graphic that feels like the live typeline UI: dark typing-test surface, gray monospaced word rows, a thin cyan cursor, cyan outline controls, a 30s progress rail, and faint WPM/accuracy chart motifs. Avoid warm paper or violet accents; the live app is black/gray/cyan.
