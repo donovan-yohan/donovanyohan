@@ -189,6 +189,8 @@ interface DrawnTitleProps {
   text: string;
   activate: boolean;
   hatchInk: string;
+  /** Resting hatch density before the cursor proximity boost. */
+  baseDensity?: number;
   /** ms after the section enters view before this line starts drawing. */
   delay: number;
 }
@@ -199,6 +201,7 @@ const DrawnTitle = ({
   text,
   activate,
   hatchInk,
+  baseDensity,
   delay,
 }: DrawnTitleProps) => {
   return (
@@ -254,6 +257,7 @@ const DrawnTitle = ({
             outlineWidth={0}
             mouseRadius={500}
             inkColor={hatchInk}
+            baseDensity={baseDensity}
             introMs={1000}
             /* Wait for the per-line outline slice draw to finish before
                the cross-hatch fades in over it. */
@@ -474,16 +478,13 @@ const ContactFrame = ({
                      detail to read. */
                   hatchScale={7}
                   halfWidthV={0.11}
-                  mouseRadius={500}
                   densityMode="luminance"
                   luminanceBoost={1.0}
                   /* Pinned to light-mode colours regardless of theme so the
-                     manga panel always reads as a halftone on white paper.
-                     Cursor *removes* hatching in a wide, low-intensity
-                     radius (subtle flashlight feel) instead of densifying. */
+                     manga panel always reads as a halftone on white paper. */
                   inkColor="#1a1814"
                   paperColor="#ffffff"
-                  invertProximity={0.4}
+                  invertProximity={0}
                   introMs={1200}
                   introDelayMs={600}
                   onIntroStart={() => setHatchDrawing(true)}
@@ -502,6 +503,7 @@ const ContactFrame = ({
                   text="WANNA"
                   activate={inView}
                   hatchInk={hatchInk}
+                  baseDensity={0.72}
                   delay={0}
                 />
                 <DrawnTitle
@@ -510,6 +512,7 @@ const ContactFrame = ({
                   text="CHAT?"
                   activate={inView}
                   hatchInk={hatchInk}
+                  baseDensity={0.72}
                   delay={400}
                 />
               </div>
