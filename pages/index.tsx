@@ -5,9 +5,9 @@ import type { GetStaticProps } from "next";
 import { Box } from "../components/lab/system";
 import Context from "../components/context";
 import SiteNav from "../components/SiteNav";
-import { getPublicNotes, getVaultTaxonomy } from "../lib/vault";
-import { notesToNotebookMonths } from "../lib/vault/to-notebook";
-import type { Entry, NotebookMonth } from "../components/lab/Notebook";
+import WorkProjectCards from "../components/WorkProjectCards";
+import type { WorkProject } from "../lib/work-projects";
+import { getWorkProjects } from "../lib/work-projects";
 import wannaOutline from "../lib/text-outlines/wanna.json";
 import chatOutline from "../lib/text-outlines/chat.json";
 import {
@@ -21,12 +21,11 @@ import {
 } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 import { themeBootstrap } from "../lib/theme-bootstrap";
-import { gm500, gm800, cp400, cp400i } from "../global/fonts";
+import { gm500, gm800, cp400 } from "../global/fonts";
 import { dotGridColor } from "../lib/dot-grid-color";
 
 const DotGrid = dynamic(() => import("../components/lab/DotGrid"), { ssr: false });
 const HatchScene = dynamic(() => import("../components/lab/HatchScene"), { ssr: false });
-const Notebook = dynamic(() => import("../components/lab/Notebook"), { ssr: false });
 import DrawBox from "../components/DrawBox";
 import { HiSpan } from "../components/Highlighter";
 
@@ -635,18 +634,12 @@ const ContactFrame = ({
   );
 };
 
-interface NotebookTagFilter {
-  slug: string;
-  label: string;
-}
-
 interface IndexProps {
-  notebookMonths: NotebookMonth[];
-  notebookTagFilters: NotebookTagFilter[];
+  workProjects: WorkProject[];
   weather: CurrentWeather | null;
 }
 
-const Index = ({ notebookMonths, notebookTagFilters, weather }: IndexProps) => {
+const Index = ({ workProjects, weather }: IndexProps) => {
   const { theme } = useContext(Context);
   const hatchInk = theme === "dark" ? "#ffffff" : "#1a1814";
 
@@ -724,28 +717,18 @@ const Index = ({ notebookMonths, notebookTagFilters, weather }: IndexProps) => {
         <Box className="historyFrame" id="work">
           <Box className="historyTopRule" aria-hidden="true" />
           <header className="historyHead">
-            <span className={`historyKicker ${gm500.className}`}>The bullet journal</span>
+            <span className={`historyKicker ${gm500.className}`}>Selected GitHub projects</span>
             <h2 className={`historyTitle ${gm800.className}`}>
-              <HiSpan slot={2}>MY JOURNAL</HiSpan>
+              <HiSpan slot={2}>WORK</HiSpan>
             </h2>
             <p className={`historyLede ${cp400.className}`}>
-              Long-form case studies, working articles, and the occasional
-              field note. Filter by type below.
+              A curated set of public repos and tools I actually want people to see.
+              Sorted by the most recent public commit I authored, when GitHub lets
+              the build check it.
             </p>
           </header>
 
-          <Notebook
-            monoClass={gm500.className}
-            serifClass={cp400.className}
-            italicSerifClass={cp400i.className}
-            months={notebookMonths.length > 0 ? notebookMonths : undefined}
-            tagFilters={notebookTagFilters}
-            cardHrefBuilder={
-              notebookMonths.length > 0
-                ? (e: Entry) => `/work/${e.id}`
-                : undefined
-            }
-          />
+          <WorkProjectCards projects={workProjects} />
         </Box>
 
         <ContactFrame
@@ -1758,22 +1741,6 @@ const Index = ({ notebookMonths, notebookTagFilters, weather }: IndexProps) => {
   );
 };
 
-const loadNotebookData = async (): Promise<{
-  months: NotebookMonth[];
-  tagFilters: NotebookTagFilter[];
-}> => {
-  const [notes, taxonomy] = await Promise.all([getPublicNotes(), getVaultTaxonomy()]);
-  const surfaced = notes.filter(
-    (n) =>
-      n.frontmatter.type === "work" || n.frontmatter.type === "writing",
-  );
-  const tagFilters = Object.entries(taxonomy.tags)
-    .filter(([, tag]) => tag.showInFilters)
-    .sort(([, a], [, b]) => a.order - b.order || a.label.localeCompare(b.label))
-    .map(([slug, tag]) => ({ slug, label: tag.label }));
-  return { months: notesToNotebookMonths(surfaced), tagFilters };
-};
-
 const loadCurrentWeather = async (): Promise<CurrentWeather | null> => {
   try {
     const r = await fetch(
@@ -1805,17 +1772,16 @@ const loadCurrentWeather = async (): Promise<CurrentWeather | null> => {
 };
 
 export const getStaticProps: GetStaticProps<IndexProps> = async () => {
-  // Vault walk + Open-Meteo are independent — run them concurrently so
-  // build time is max(vault, meteo) rather than the sum. ISR refreshes
-  // every 30min, and Open-Meteo can be slow; parallelizing here matters.
-  const [notebookData, weather] = await Promise.all([
-    loadNotebookData(),
+  // Public GitHub repo metadata + Open-Meteo are independent. Keep both
+  // fail-soft-ish so the homepage still builds if either external service is
+  // having a stupid little moment.
+  const [workProjects, weather] = await Promise.all([
+    getWorkProjects(),
     loadCurrentWeather(),
   ]);
   return {
     props: {
-      notebookMonths: notebookData.months,
-      notebookTagFilters: notebookData.tagFilters,
+      workProjects,
       weather,
     },
     revalidate: 1800,

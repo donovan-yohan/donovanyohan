@@ -5,60 +5,102 @@ import type { GetStaticProps } from "next";
 
 import Context from "../../components/context";
 import SiteNav from "../../components/SiteNav";
-import WorkProjectCards from "../../components/WorkProjectCards";
 import { HiSpan } from "../../components/Highlighter";
-import { gm500, gm800, cp400 } from "../../global/fonts";
+import type { Entry, NotebookMonth } from "../../components/lab/Notebook";
+import { gm500, gm800, cp400, cp400i } from "../../global/fonts";
 import { dotGridColor } from "../../lib/dot-grid-color";
 import { themeBootstrap } from "../../lib/theme-bootstrap";
-import type { WorkProject } from "../../lib/work-projects";
-import { getWorkProjects } from "../../lib/work-projects";
+import { getPublicNotes, getVaultConfig, getVaultTaxonomy } from "../../lib/vault";
+import { notesToNotebookMonths } from "../../lib/vault/to-notebook";
 
 const DotGrid = dynamic(() => import("../../components/lab/DotGrid"), { ssr: false });
+const Notebook = dynamic(() => import("../../components/lab/Notebook"), { ssr: false });
 
-interface WorkIndexProps {
-  projects: WorkProject[];
+interface NotebookTagFilter {
+  slug: string;
+  label: string;
 }
 
-export const getStaticProps: GetStaticProps<WorkIndexProps> = async () => ({
-  props: {
-    projects: await getWorkProjects(),
-  },
-  revalidate: 1800,
-});
+interface BlogIndexProps {
+  notebookMonths: NotebookMonth[];
+  notebookTagFilters: NotebookTagFilter[];
+  vaultSha: string;
+  vaultConfigured: boolean;
+}
 
-export default function WorkIndex({ projects }: WorkIndexProps) {
+const BLOG_LEDE =
+  "Notes, half-formed arguments, build logs, and the occasional coherent thought. Basically where the rambling goes once it seems useful enough to leave in public.";
+
+export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
+  const [notes, taxonomy] = await Promise.all([getPublicNotes(), getVaultTaxonomy()]);
+  const surfaced = notes.filter(
+    (note) => note.frontmatter.type === "work" || note.frontmatter.type === "writing",
+  );
+  const notebookTagFilters = Object.entries(taxonomy.tags)
+    .filter(([, tag]) => tag.showInFilters)
+    .sort(([, a], [, b]) => a.order - b.order || a.label.localeCompare(b.label))
+    .map(([slug, tag]) => ({ slug, label: tag.label }));
+
+  return {
+    props: {
+      notebookMonths: notesToNotebookMonths(surfaced),
+      notebookTagFilters,
+      vaultSha: process.env.BUILD_VAULT_SHA ?? "dev",
+      vaultConfigured: getVaultConfig() !== null,
+    },
+    revalidate: 1800,
+  };
+};
+
+export default function BlogIndex({
+  notebookMonths,
+  notebookTagFilters,
+  vaultSha,
+  vaultConfigured,
+}: BlogIndexProps) {
   const { theme } = useContext(Context);
 
   return (
     <>
       <Head>
-        <title>Work — Donovan Yohan</title>
-        <meta
-          name="description"
-          content="Selected public GitHub projects by Donovan Yohan, sorted by recent authored commit activity."
-        />
+        <title>Blog — Donovan Yohan</title>
+        <meta name="description" content={BLOG_LEDE} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="vault-sha" content={vaultSha} />
+        {!vaultConfigured ? <meta name="vault-status" content="unconfigured" /> : null}
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </Head>
 
-      <SiteNav current="work" />
+      <SiteNav current="blog" />
       <DotGrid color={dotGridColor(theme)} />
 
-      <main className="workPage">
-        <section className="workFrame">
-          <header className="workHead">
-            <span className={`workKicker ${gm500.className}`}>Selected GitHub projects</span>
-            <h1 className={`workTitle ${gm800.className}`}>
-              <HiSpan slot={2}>WORK</HiSpan>
+      <main className="blogPage">
+        <section className="blogFrame">
+          <header className="blogHead">
+            <span className={`blogKicker ${gm500.className}`}>The bullet journal</span>
+            <h1 className={`blogTitle ${gm800.className}`}>
+              <HiSpan slot={2}>BLOG</HiSpan>
             </h1>
-            <p className={`workLede ${cp400.className}`}>
-              Public repos and shipped-ish tools worth pointing at. The list is curated
-              in the app source, then sorted by the newest public commit I authored so
-              the active stuff naturally floats up.
-            </p>
+            <p className={`blogLede ${cp400.className}`}>{BLOG_LEDE}</p>
           </header>
 
-          <WorkProjectCards projects={projects} />
+          {notebookMonths.length > 0 ? (
+            <Notebook
+              monoClass={gm500.className}
+              serifClass={cp400.className}
+              italicSerifClass={cp400i.className}
+              months={notebookMonths}
+              tagFilters={notebookTagFilters}
+              showFilters={false}
+              cardHrefBuilder={(entry: Entry) => `/blog/${entry.id}`}
+            />
+          ) : (
+            <p className={`blogEmpty ${cp400.className}`}>
+              {vaultConfigured
+                ? "No public posts yet."
+                : "No posts published yet — vault not configured. See VAULT.md."}
+            </p>
+          )}
         </section>
       </main>
 
@@ -124,7 +166,7 @@ export default function WorkIndex({ projects }: WorkIndexProps) {
       `}</style>
 
       <style jsx>{`
-        .workPage {
+        .blogPage {
           position: relative;
           z-index: 1;
           width: 100%;
@@ -132,18 +174,41 @@ export default function WorkIndex({ projects }: WorkIndexProps) {
           margin: 0 auto;
           padding-top: 48px;
         }
-        .workFrame {
+        .blogFrame {
+          position: relative;
           min-height: 100vh;
           padding: 40px var(--content-pad-left) 96px;
         }
-        .workHead {
+        .blogFrame::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: calc(-1 * var(--page-shell-bleed-x));
+          width: calc(var(--page-shell-bleed-x) + var(--gutter-w));
+          background: var(--paper);
+          pointer-events: none;
+        }
+        .blogFrame::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: var(--gutter-w);
+          width: 1px;
+          background: var(--accent);
+          z-index: 25;
+          pointer-events: none;
+        }
+        .blogHead {
+          position: relative;
           margin: -40px calc(-1 * (var(--content-pad-left) + var(--page-shell-bleed-x))) 24px;
           padding: 56px calc(var(--content-pad-left) + var(--page-shell-bleed-x)) 28px;
           background: var(--paper);
           border-top: 1px solid var(--rule);
           border-bottom: 1px solid var(--rule);
         }
-        .workKicker {
+        .blogKicker {
           display: block;
           margin-bottom: 6px;
           color: var(--ink-mute);
@@ -151,7 +216,7 @@ export default function WorkIndex({ projects }: WorkIndexProps) {
           letter-spacing: 0.18em;
           text-transform: uppercase;
         }
-        .workTitle {
+        .blogTitle {
           width: fit-content;
           max-width: 100%;
           margin: 0 0 10px;
@@ -161,7 +226,8 @@ export default function WorkIndex({ projects }: WorkIndexProps) {
           letter-spacing: -0.04em;
           line-height: 0.95;
         }
-        .workLede {
+        .blogLede,
+        .blogEmpty {
           max-width: 820px;
           margin: 0;
           color: var(--ink-soft);
@@ -176,21 +242,26 @@ export default function WorkIndex({ projects }: WorkIndexProps) {
             --gutter-pad: 0px;
             --page-pad-x: clamp(16px, 4vw, 20px);
             --content-pad-left: var(--page-pad-x);
+            --notebook-bleed-x: var(--page-pad-x);
             --content-w: calc(100vw - (2 * var(--content-pad-left)));
             --page-shell-max: 100vw;
             --page-shell-bleed-x: 0px;
           }
-          .workPage {
+          .blogPage {
             padding: 0 var(--page-pad-x) 72px;
           }
-          .workFrame {
+          .blogFrame {
             margin-left: calc(-1 * var(--page-pad-x));
             margin-right: calc(-1 * var(--page-pad-x));
-            padding: 32px var(--page-pad-x) 72px;
+            padding: 32px var(--notebook-bleed-x) 72px;
           }
-          .workHead {
-            margin: -32px calc(-1 * var(--page-pad-x)) 20px;
-            padding: 32px var(--page-pad-x) 22px;
+          .blogFrame::before,
+          .blogFrame::after {
+            display: none;
+          }
+          .blogHead {
+            margin: -32px calc(-1 * var(--notebook-bleed-x)) 20px;
+            padding: 32px var(--notebook-bleed-x) 22px;
           }
         }
       `}</style>

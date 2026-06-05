@@ -13,7 +13,7 @@
 
 import { useContext } from "react";
 import Link from "next/link";
-import { BriefcaseBusiness, FileText, Mail, Moon, Sun } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, FileText, Mail, Moon, Sun } from "lucide-react";
 
 import Context from "./context";
 import { gm500, gm800 } from "../global/fonts";
@@ -27,7 +27,7 @@ const DY_PATHS: readonly string[] = [
 
 interface SiteNavProps {
   /** Highlights the current tab via a `data-current` attr on the link. */
-  current?: "home" | "work" | "about" | "contact";
+  current?: "home" | "work" | "blog" | "about" | "contact";
   /** Home uses sticky nav inside the page flow; article/detail pages keep it fixed. */
   position?: "fixed" | "sticky";
 }
@@ -72,6 +72,13 @@ export const SiteNav = ({ current, position = "fixed" }: SiteNavProps) => {
             data-current={current === "work" ? "true" : undefined}
           >
             <span className="navTabLabel">Work</span>
+          </Link>
+          <Link
+            className={`navTab tabAbout ${gm500.className}`}
+            href="/blog"
+            data-current={current === "blog" ? "true" : undefined}
+          >
+            <span className="navTabLabel">Blog</span>
           </Link>
           {ABOUT_PAGE_ENABLED ? (
             <Link
@@ -165,6 +172,15 @@ export const SiteNav = ({ current, position = "fixed" }: SiteNavProps) => {
         >
           <BriefcaseBusiness className="mobileNavIcon" aria-hidden />
           <span>Work</span>
+        </Link>
+        <Link
+          href="/blog"
+          className="mobileNavItem"
+          data-current={current === "blog" ? "true" : undefined}
+          aria-label="Blog"
+        >
+          <BookOpen className="mobileNavIcon" aria-hidden />
+          <span>Blog</span>
         </Link>
         <Link
           href="/#footer"
@@ -365,7 +381,7 @@ export const SiteNav = ({ current, position = "fixed" }: SiteNavProps) => {
             bottom: 0;
             z-index: 60;
             display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(6, minmax(0, 1fr));
             min-height: calc(var(--mobile-bottom-nav-h) + env(safe-area-inset-bottom, 0px));
             padding: 7px clamp(10px, 3vw, 16px) calc(7px + env(safe-area-inset-bottom, 0px));
             background: color-mix(in srgb, var(--paper) 94%, transparent);

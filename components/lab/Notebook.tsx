@@ -639,6 +639,12 @@ interface NotebookProps {
    * derived from entry tags after vault visibility filtering.
    */
   tagFilters?: TagFilter[];
+  /**
+   * Hide the sticky filter rail while keeping the notebook/month/card layout.
+   * Useful for reader-facing blog pages where taxonomy is informational, not
+   * an interaction the user needs shoved in their face.
+   */
+  showFilters?: boolean;
 }
 
 const Notebook = ({
@@ -648,6 +654,7 @@ const Notebook = ({
   months,
   cardHrefBuilder,
   tagFilters = [],
+  showFilters = true,
 }: NotebookProps) => {
   const [filter, setFilter] = useState("all");
   const [chipsStuck, setChipsStuck] = useState(false);
@@ -810,7 +817,7 @@ const Notebook = ({
   }, [tagFilters]);
 
   const activeEntryFilter = useMemo(() => {
-    if (filter === "all") return null;
+    if (!showFilters || filter === "all") return null;
     if (filter.startsWith("type:")) {
       const type = filter.slice("type:".length);
       return (entry: Entry) => entry.type === type;
@@ -820,7 +827,7 @@ const Notebook = ({
       return (entry: Entry) => (entry.tags ?? []).includes(tag);
     }
     return null;
-  }, [filter]);
+  }, [filter, showFilters]);
 
   const visibleMonths = useMemo(() => {
     if (activeEntryFilter === null) return data;
@@ -852,49 +859,51 @@ const Notebook = ({
       {/* Sentinel lives OUTSIDE the Stack so the parent's flex gap can't
           insert a dotted band between it and the chip bar — and so the
           chip bar's sticky range still spans the rest of the section. */}
-      <div ref={sentinelRef} className="chipsSentinel" aria-hidden />
+      {showFilters ? <div ref={sentinelRef} className="chipsSentinel" aria-hidden /> : null}
       <Stack
         gap={0}
         className="notebookStack"
         style={{ gap: "var(--notebook-stack-gap, var(--u))" }}
       >
-        <div className={`chipsBar ${chipsStuck ? "is-stuck" : ""} ${monoClass}`}>
-          <div className="chipsInner">
-            <button
-              type="button"
-              className={`chip ${filter === "all" ? "chipActive" : ""}`}
-              onClick={() => setFilter("all")}
-            >
-              <span className="chipGlyph">●</span>
-              <span className="chipLabel">all</span>
-              <span className="chipCount">{counts.all}</span>
-            </button>
-            {types.map((t) => (
+        {showFilters ? (
+          <div className={`chipsBar ${chipsStuck ? "is-stuck" : ""} ${monoClass}`}>
+            <div className="chipsInner">
               <button
-                key={t}
                 type="button"
-                className={`chip ${filter === `type:${t}` ? "chipActive" : ""}`}
-                onClick={() => setFilter(`type:${t}`)}
+                className={`chip ${filter === "all" ? "chipActive" : ""}`}
+                onClick={() => setFilter("all")}
               >
-                <span className="chipGlyph">{TYPE_GLYPH[t]}</span>
-                <span className="chipLabel">{TYPE_LABEL[t]}</span>
-                <span className="chipCount">{counts[`type:${t}`] ?? 0}</span>
+                <span className="chipGlyph">●</span>
+                <span className="chipLabel">all</span>
+                <span className="chipCount">{counts.all}</span>
               </button>
-            ))}
-            {visibleTagFilters.map((tag) => (
-              <button
-                key={tag.slug}
-                type="button"
-                className={`chip chipTag ${filter === `tag:${tag.slug}` ? "chipActive" : ""}`}
-                onClick={() => setFilter(`tag:${tag.slug}`)}
-              >
-                <span className="chipGlyph">#</span>
-                <span className="chipLabel">{tag.label}</span>
-                <span className="chipCount">{counts[`tag:${tag.slug}`] ?? 0}</span>
-              </button>
-            ))}
+              {types.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  className={`chip ${filter === `type:${t}` ? "chipActive" : ""}`}
+                  onClick={() => setFilter(`type:${t}`)}
+                >
+                  <span className="chipGlyph">{TYPE_GLYPH[t]}</span>
+                  <span className="chipLabel">{TYPE_LABEL[t]}</span>
+                  <span className="chipCount">{counts[`type:${t}`] ?? 0}</span>
+                </button>
+              ))}
+              {visibleTagFilters.map((tag) => (
+                <button
+                  key={tag.slug}
+                  type="button"
+                  className={`chip chipTag ${filter === `tag:${tag.slug}` ? "chipActive" : ""}`}
+                  onClick={() => setFilter(`tag:${tag.slug}`)}
+                >
+                  <span className="chipGlyph">#</span>
+                  <span className="chipLabel">{tag.label}</span>
+                  <span className="chipCount">{counts[`tag:${tag.slug}`] ?? 0}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : null}
 
       {visibleTimeline.map(({ month: m, skip }) => (
         <div key={m.key} className="timelineMonthGroup">
@@ -906,8 +915,8 @@ const Notebook = ({
             italicSerifClass={italicSerifClass}
             cardHrefBuilder={cardHrefBuilder}
             tagLabelBySlug={tagLabelBySlug}
-            onTagClick={(slug) => setFilter(`tag:${slug}`)}
-            activeTag={filter.startsWith("tag:") ? filter.slice("tag:".length) : null}
+            onTagClick={showFilters ? (slug) => setFilter(`tag:${slug}`) : undefined}
+            activeTag={showFilters && filter.startsWith("tag:") ? filter.slice("tag:".length) : null}
           />
         </div>
       ))}
@@ -1128,7 +1137,7 @@ interface MonthBlockProps {
   italicSerifClass: string;
   cardHrefBuilder?: CardHrefBuilder;
   tagLabelBySlug: Record<string, string>;
-  onTagClick: (slug: string) => void;
+  onTagClick?: (slug: string) => void;
   activeTag: string | null;
 }
 
@@ -1305,7 +1314,7 @@ interface RowBlockProps {
   italicSerifClass: string;
   cardHrefBuilder?: CardHrefBuilder;
   tagLabelBySlug: Record<string, string>;
-  onTagClick: (slug: string) => void;
+  onTagClick?: (slug: string) => void;
   activeTag: string | null;
 }
 
@@ -1357,7 +1366,7 @@ interface EntryCardProps {
   italicSerifClass: string;
   cardHrefBuilder?: CardHrefBuilder;
   tagLabelBySlug: Record<string, string>;
-  onTagClick: (slug: string) => void;
+  onTagClick?: (slug: string) => void;
   activeTag: string | null;
 }
 
@@ -1457,21 +1466,30 @@ const EntryCard = ({
 
         {tags.length > 0 ? (
           <div className={`cardTags ${monoClass}`} aria-label="Entry tags">
-            {tags.map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                className={`cardTag ${activeTag === tag ? "cardTagActive" : ""}`}
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  onTagClick(tag);
-                }}
-              >
-                <span className="cardTagHash">#</span>
-                <span>{tagLabelBySlug[tag] ?? tag}</span>
-              </button>
-            ))}
+            {tags.map((tag) => {
+              const label = tagLabelBySlug[tag] ?? tag;
+              const handleTagClick = onTagClick;
+              return handleTagClick ? (
+                <button
+                  key={tag}
+                  type="button"
+                  className={`cardTag ${activeTag === tag ? "cardTagActive" : ""}`}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    handleTagClick(tag);
+                  }}
+                >
+                  <span className="cardTagHash">#</span>
+                  <span>{label}</span>
+                </button>
+              ) : (
+                <span key={tag} className="cardTag cardTagStatic">
+                  <span className="cardTagHash">#</span>
+                  <span>{label}</span>
+                </span>
+              );
+            })}
           </div>
         ) : null}
 
@@ -1509,7 +1527,7 @@ const EntryCard = ({
           <Link
             className="cardStretchedLink"
             href={href}
-            onClick={href.startsWith("/work/") ? handleInternalClick : undefined}
+            onClick={href.startsWith("/work/") || href.startsWith("/blog/") ? handleInternalClick : undefined}
             aria-label={
               "title" in entry
                 ? entry.title
@@ -1618,6 +1636,14 @@ const EntryCard = ({
           background: var(--ink);
           border-color: var(--ink);
           color: var(--paper);
+        }
+        .cardTagStatic {
+          cursor: default;
+        }
+        .cardTagStatic:hover {
+          background: transparent;
+          border-color: var(--ink-faint);
+          color: var(--ink-mute);
         }
         .cardTagHash {
           opacity: 0.7;
