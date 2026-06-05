@@ -91,7 +91,6 @@ export default function BlogIndex({
               italicSerifClass={cp400i.className}
               months={notebookMonths}
               tagFilters={notebookTagFilters}
-              showFilters={false}
               cardHrefBuilder={(entry: Entry) => `/blog/${entry.id}`}
             />
           ) : (
