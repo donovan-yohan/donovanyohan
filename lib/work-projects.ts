@@ -122,7 +122,7 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     githubUrl: null,
     viewUrl: "https://typeline.app",
     image: "/img/work/typeline-preview.webp",
-    imageBg: "#1967ff",
+    imageBg: "#050505",
   },
   {
     repo: "sample-sound",
@@ -246,7 +246,7 @@ const loadWorkProjects = async (): Promise<WorkProject[]> => {
   });
 };
 
-const loadCachedWorkProjects = unstable_cache(loadWorkProjects, ["work-projects-v5"], {
+const loadCachedWorkProjects = unstable_cache(loadWorkProjects, ["work-projects-v6"], {
   revalidate: WORK_PROJECTS_REVALIDATE_SECONDS,
 });
 

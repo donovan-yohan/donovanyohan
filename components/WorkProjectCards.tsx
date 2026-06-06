@@ -14,10 +14,10 @@ const GithubIcon = () => (
   </svg>
 );
 
-const formatCommitDate = (iso?: string | null): string => {
-  if (!iso || iso.startsWith("1970-01-01T00:00:00.")) return "RECENCY UNKNOWN";
+const formatCommitDate = (iso?: string | null): string | null => {
+  if (!iso || iso.startsWith("1970-01-01T00:00:00.")) return null;
   const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "RECENCY UNKNOWN";
+  if (Number.isNaN(date.getTime())) return null;
   return `UPDATED ${date
     .toLocaleDateString("en-US", {
       month: "short",
@@ -30,67 +30,71 @@ const formatCommitDate = (iso?: string | null): string => {
 
 const WorkProjectCards = ({ projects }: WorkProjectCardsProps) => (
   <div className="workProjectGrid" aria-label="Selected deployed and public projects">
-    {projects.map((project, index) => (
-      <article
-        className="workProjectCard"
-        key={project.repo}
-        style={{
-          ["--project-accent" as string]: project.accent,
-          ["--project-image-bg" as string]: project.imageBg ?? "transparent",
-        }}
-      >
-        <div className={`workProjectMeta ${gm500.className}`}>
-          <span>#{String(index + 1).padStart(2, "0")}</span>
-          <span>{project.language ?? "repo"}</span>
-        </div>
-        <div className="workProjectCover" aria-hidden>
-          {project.image ? (
-            <img src={project.image} alt="" />
-          ) : (
-            <div className="workProjectMonogram">
-              {project.title
-                .split(/\s+/)
-                .map((word) => word[0])
-                .join("")
-                .slice(0, 3)}
-            </div>
-          )}
-        </div>
-        <div className="workProjectBody">
-          <h3 className={`workProjectTitle ${gm800.className}`}>{project.title}</h3>
-          <p className={`workProjectBlurb ${cp400.className}`}>{project.blurb}</p>
-        </div>
-        <div className={`workProjectTags ${gm500.className}`}>
-          {project.tags.map((tag) => (
-            <span key={tag}>#{tag}</span>
-          ))}
-        </div>
-        <footer className={`workProjectFooter ${gm500.className}`}>
-          <span>{formatCommitDate(project.latestCommitAt ?? project.sortDate)}</span>
-          <span className="workProjectLinks">
-            {project.githubUrl ? (
-              <a
-                className="githubLink"
-                href={project.githubUrl}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`${project.title} GitHub repository`}
-                title={`${project.title} GitHub repository`}
-              >
-                <GithubIcon />
-              </a>
-            ) : null}
-            {project.viewUrl ? (
-              <span className="viewLinkSlot">
-                <a href={project.viewUrl} target="_blank" rel="noreferrer">
-                  View →
+    {projects.map((project, index) => {
+      const updatedLabel = formatCommitDate(project.latestCommitAt ?? project.sortDate);
+
+      return (
+        <article
+          className="workProjectCard"
+          key={project.repo}
+          style={{
+            ["--project-accent" as string]: project.accent,
+            ["--project-image-bg" as string]: project.imageBg ?? "transparent",
+          }}
+        >
+          <div className={`workProjectMeta ${gm500.className}`}>
+            <span>#{String(index + 1).padStart(2, "0")}</span>
+            <span>{project.language ?? "repo"}</span>
+          </div>
+          <div className="workProjectCover" aria-hidden>
+            {project.image ? (
+              <img src={project.image} alt="" />
+            ) : (
+              <div className="workProjectMonogram">
+                {project.title
+                  .split(/\s+/)
+                  .map((word) => word[0])
+                  .join("")
+                  .slice(0, 3)}
+              </div>
+            )}
+          </div>
+          <div className="workProjectBody">
+            <h3 className={`workProjectTitle ${gm800.className}`}>{project.title}</h3>
+            <p className={`workProjectBlurb ${cp400.className}`}>{project.blurb}</p>
+          </div>
+          <div className={`workProjectTags ${gm500.className}`}>
+            {project.tags.map((tag) => (
+              <span key={tag}>#{tag}</span>
+            ))}
+          </div>
+          <footer className={`workProjectFooter ${gm500.className}`}>
+            <span>{updatedLabel ?? (project.viewUrl ? "LIVE PROJECT" : "")}</span>
+            <span className="workProjectLinks">
+              {project.githubUrl ? (
+                <a
+                  className="githubLink"
+                  href={project.githubUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`${project.title} GitHub repository`}
+                  title={`${project.title} GitHub repository`}
+                >
+                  <GithubIcon />
                 </a>
-              </span>
-            ) : null}
-          </span>
-        </footer>
-      </article>
-    ))}
+              ) : null}
+              {project.viewUrl ? (
+                <span className="viewLinkSlot">
+                  <a href={project.viewUrl} target="_blank" rel="noreferrer">
+                    View →
+                  </a>
+                </span>
+              ) : null}
+            </span>
+          </footer>
+        </article>
+      );
+    })}
 
     <style jsx>{`
       .workProjectGrid {
