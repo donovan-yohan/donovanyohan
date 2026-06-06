@@ -387,6 +387,107 @@ export default function WorkSlug({ note }: Props) {
           background: transparent;
           border: 0;
         }
+        .articleBody .articleTableFrame {
+          position: relative;
+          max-width: 100%;
+          margin: 32px 0;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          background:
+            linear-gradient(90deg, var(--paper-2) 30%, rgba(255, 255, 255, 0)),
+            linear-gradient(90deg, rgba(255, 255, 255, 0), var(--paper-2) 70%) 100% 0,
+            linear-gradient(90deg, var(--accent-soft), rgba(255, 255, 255, 0)),
+            linear-gradient(270deg, var(--accent-soft), rgba(255, 255, 255, 0)) 100% 0,
+            var(--paper-2);
+          background-attachment: local, local, scroll, scroll;
+          background-repeat: no-repeat;
+          background-size: 36px 100%, 36px 100%, 18px 100%, 18px 100%;
+          border: 1px solid var(--rule);
+          border-radius: 6px;
+          box-shadow: 0 14px 38px rgba(22, 20, 14, 0.08);
+        }
+        .articleBody .articleTableFrame:focus-visible {
+          outline: 2px solid var(--accent);
+          outline-offset: 3px;
+        }
+        [data-theme="dark"] .articleBody .articleTableFrame {
+          box-shadow: 0 16px 42px rgba(0, 0, 0, 0.34);
+        }
+        .articleBody .articleTableFrame::-webkit-scrollbar {
+          height: 10px;
+        }
+        .articleBody .articleTableFrame::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .articleBody .articleTableFrame::-webkit-scrollbar-thumb {
+          background: var(--rule);
+          border: 3px solid var(--paper-2);
+          border-radius: 999px;
+        }
+        .articleBody .articleTable {
+          width: max-content;
+          min-width: 100%;
+          border-collapse: separate;
+          border-spacing: 0;
+          color: var(--ink);
+          font-size: 0.86em;
+          line-height: 1.45;
+        }
+        .articleBody .articleTable thead {
+          background: var(--accent-soft);
+        }
+        .articleBody .articleTable th,
+        .articleBody .articleTable td {
+          min-width: 9rem;
+          max-width: 24rem;
+          padding: 12px 16px;
+          border-right: 1px solid var(--rule);
+          border-bottom: 1px solid var(--rule);
+          text-align: left;
+          vertical-align: top;
+          overflow-wrap: anywhere;
+        }
+        .articleBody .articleTable th:last-child,
+        .articleBody .articleTable td:last-child {
+          border-right: 0;
+        }
+        .articleBody .articleTable tr:last-child td {
+          border-bottom: 0;
+        }
+        .articleBody .articleTable th {
+          font-family:
+            "Geist Mono",
+            ui-monospace,
+            monospace;
+          font-size: 0.78em;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--ink);
+        }
+        .articleBody .articleTable tbody tr:nth-child(even) {
+          background: color-mix(in srgb, var(--accent-soft) 38%, transparent);
+        }
+        .articleBody .articleTable code,
+        .articleBody .articleTable a {
+          overflow-wrap: anywhere;
+        }
+        @supports not (background: color-mix(in srgb, black 50%, white)) {
+          .articleBody .articleTable tbody tr:nth-child(even) {
+            background: var(--accent-soft);
+          }
+        }
+        @media (max-width: 640px) {
+          .articleBody .articleTableFrame {
+            margin-left: -4px;
+            margin-right: -4px;
+            border-radius: 4px;
+          }
+          .articleBody .articleTable th,
+          .articleBody .articleTable td {
+            min-width: 10.5rem;
+            padding: 11px 14px;
+          }
+        }
         .articleBody blockquote {
           margin: 24px 0;
           padding: 4px 0 4px 20px;

@@ -55,10 +55,13 @@ describe("renderMarkdown", () => {
     expect(html).toContain("<li>");
   });
 
-  it("renders GFM tables", async () => {
+  it("renders GFM tables inside the article table frame", async () => {
     const md = `| A | B |\n| - | - |\n| 1 | 2 |`;
     const html = await renderMarkdown(md);
-    expect(html).toContain("<table>");
+    expect(html).toContain(
+      '<div class="articleTableFrame" role="region" aria-label="Scrollable table" tabindex="0">',
+    );
+    expect(html).toContain('<table class="articleTable">');
     expect(html).toContain("<th>");
     expect(html).toContain("<td>");
   });

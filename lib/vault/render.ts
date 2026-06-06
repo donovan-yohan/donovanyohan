@@ -47,6 +47,61 @@ export type { WikilinkResolveOpts } from "./wikilinks";
 const HEADING_TAGS = new Set(["h1", "h2", "h3", "h4", "h5", "h6"]);
 
 /**
+ * Wrap markdown tables after sanitization so article pages can style them as
+ * scrollable frames without requiring markdown authors to write raw HTML.
+ */
+const rehypeArticleTableFrames: Plugin<[], Root> = function () {
+  return (tree: Root) => {
+    wrapTables(tree);
+  };
+};
+
+function wrapTables(node: Root | Element): void {
+  if (!("children" in node)) return;
+
+  node.children = node.children.map((child) => {
+    if (child.type !== "element") {
+      return child;
+    }
+
+    if (child.tagName === "table") {
+      child.properties = {
+        ...child.properties,
+        className: mergeClassName(child.properties?.className, "articleTable"),
+      };
+
+      return {
+        type: "element",
+        tagName: "div",
+        properties: {
+          className: ["articleTableFrame"],
+          role: "region",
+          "aria-label": "Scrollable table",
+          tabIndex: 0,
+        },
+        children: [child],
+      };
+    }
+
+    wrapTables(child);
+    return child;
+  });
+}
+
+function mergeClassName(
+  className: Element["properties"]["className"],
+  nextClassName: string,
+): string[] {
+  const classes = Array.isArray(className)
+    ? className.map(String)
+    : typeof className === "string"
+      ? className.split(/\s+/).filter(Boolean)
+      : [];
+
+  return classes.includes(nextClassName) ? classes : [...classes, nextClassName];
+}
+
+/**
  * Wrap heading contents in an inline span after sanitization. Article pages
  * use this child span for multiline highlighter backgrounds with
  * `box-decoration-break: clone`; applying the class here keeps markdown
@@ -110,6 +165,7 @@ const stripProcessor = unified()
   .use(remarkRehype, { allowDangerousHtml: true })
   .use(rehypeRaw)
   .use(rehypeSanitize)
+  .use(rehypeArticleTableFrames)
   .use(rehypeArticleHeadingSpans)
   .use(rehypeStringify)
   .freeze();
@@ -144,6 +200,7 @@ export async function renderMarkdown(
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeRaw)
     .use(rehypeSanitize)
+    .use(rehypeArticleTableFrames)
     .use(rehypeArticleHeadingSpans)
     .use(rehypeStringify);
 
