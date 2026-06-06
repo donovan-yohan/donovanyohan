@@ -393,11 +393,13 @@ export default function WorkSlug({ note }: Props) {
           margin: 32px 0;
           overflow-x: auto;
           -webkit-overflow-scrolling: touch;
+          scrollbar-width: thin;
+          scrollbar-color: var(--rule) transparent;
           background:
-            linear-gradient(90deg, var(--paper-2) 30%, rgba(255, 255, 255, 0)),
-            linear-gradient(90deg, rgba(255, 255, 255, 0), var(--paper-2) 70%) 100% 0,
-            linear-gradient(90deg, var(--accent-soft), rgba(255, 255, 255, 0)),
-            linear-gradient(270deg, var(--accent-soft), rgba(255, 255, 255, 0)) 100% 0,
+            linear-gradient(90deg, var(--paper-2) 30%, transparent),
+            linear-gradient(90deg, transparent, var(--paper-2) 70%) 100% 0,
+            linear-gradient(90deg, var(--accent-soft), transparent),
+            linear-gradient(270deg, var(--accent-soft), transparent) 100% 0,
             var(--paper-2);
           background-attachment: local, local, scroll, scroll;
           background-repeat: no-repeat;
