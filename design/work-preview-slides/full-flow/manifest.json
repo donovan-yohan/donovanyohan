@@ -8,9 +8,9 @@
     "language": "TypeScript / Svelte",
     "sourceScreenshot": "../screenshots/typeline-ui.png",
     "description": "A full typing game focused on rhythm, flow, shared room seeds, retry loops, and input feedback.",
-    "palette": "near-black #0d0d0d, cyan #00e5ef, muted gray #6e6e73, soft white #e9e9e9",
-    "theme": "minimal dark typing-game surface with precise cyan interaction feedback; no literal UI text or words in the art.",
-    "visual": "abstract typing rhythm: glowing cursor trail, keypress pulse arcs, speed/accuracy energy forms, shared-room orbit, dark negative space"
+    "palette": "typeline logo blue #1967ff and white mark",
+    "theme": "simple brand-card treatment using the existing typeline logo instead of generated artwork.",
+    "visual": "centered typeline logo on a flat brand-blue 16:9 card"
   },
   {
     "slug": "lexitiles",

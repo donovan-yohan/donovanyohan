@@ -20,6 +20,7 @@ The actual card title/blurb/tags live in the website UI outside the image. There
   - `prompts/infographic.md`
   - final generated image is installed under `public/img/work/<slug>-preview.webp`
 - for projects with deployed pages, use the actual page only for palette and theme style guidance
+- typeline is the exception: use the existing typeline logo as the final card art instead of AI-generated artwork
 - for GitHub-only repos, create a Baoyu title-slide visual metaphor from repo metadata
 - no deterministic SVG/HTML substitutions
 
