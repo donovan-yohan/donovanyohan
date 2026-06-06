@@ -10,6 +10,8 @@ export interface CuratedGithubProject {
   githubUrl?: string | null;
   viewUrl?: string;
   image?: string;
+  imageLight?: string;
+  imageDark?: string;
   imageBg?: string;
 }
 
@@ -42,6 +44,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     accent: "#78dcff",
     language: "TypeScript",
     image: "/img/work/relay-ide-preview.webp",
+    imageLight: "/img/work/relay-ide-preview-light.webp",
+    imageDark: "/img/work/relay-ide-preview-dark.webp",
     imageBg: "#07111f",
   },
   {
@@ -53,6 +57,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     accent: "#ffe066",
     language: "Python",
     image: "/img/work/dynamic-workflows-preview.webp",
+    imageLight: "/img/work/dynamic-workflows-preview-light.webp",
+    imageDark: "/img/work/dynamic-workflows-preview-dark.webp",
     imageBg: "#1e3a5f",
   },
   {
@@ -64,6 +70,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     accent: "#22c55e",
     language: "Python",
     image: "/img/work/remote-hosts-preview.webp",
+    imageLight: "/img/work/remote-hosts-preview-light.webp",
+    imageDark: "/img/work/remote-hosts-preview-dark.webp",
     imageBg: "#111827",
   },
   {
@@ -75,6 +83,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     accent: "#ea5b6f",
     language: "Python",
     image: "/img/work/carabiner-preview.webp",
+    imageLight: "/img/work/carabiner-preview-light.webp",
+    imageDark: "/img/work/carabiner-preview-dark.webp",
     imageBg: "#211529",
   },
   {
@@ -86,6 +96,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     accent: "#ff4fd8",
     language: "Python",
     image: "/img/work/comfyui-image-backend-preview.webp",
+    imageLight: "/img/work/comfyui-image-backend-preview-light.webp",
+    imageDark: "/img/work/comfyui-image-backend-preview-dark.webp",
     imageBg: "#151320",
   },
   {
@@ -97,6 +109,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     accent: "#2dd4bf",
     language: "Python",
     image: "/img/work/talent-roster-preview.webp",
+    imageLight: "/img/work/talent-roster-preview-light.webp",
+    imageDark: "/img/work/talent-roster-preview-dark.webp",
     imageBg: "#0b1220",
   },
   {
@@ -109,6 +123,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     language: "TypeScript",
     viewUrl: "https://lexitiles.donovanyohan.com",
     image: "/img/work/lexitiles-preview.webp",
+    imageLight: "/img/work/lexitiles-preview-light.webp",
+    imageDark: "/img/work/lexitiles-preview-dark.webp",
     imageBg: "#11151d",
   },
   {
@@ -135,6 +151,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     githubUrl: null,
     viewUrl: "https://soundboard.donovanyohan.com",
     image: "/img/work/sample-sound-preview.webp",
+    imageLight: "/img/work/sample-sound-preview-light.webp",
+    imageDark: "/img/work/sample-sound-preview-dark.webp",
     imageBg: "#08060d",
   },
   {
@@ -146,6 +164,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     accent: "#ff82c8",
     language: "Dart",
     image: "/img/work/open-music-player-preview.webp",
+    imageLight: "/img/work/open-music-player-preview-light.webp",
+    imageDark: "/img/work/open-music-player-preview-dark.webp",
     imageBg: "#101014",
   },
   {
@@ -157,6 +177,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     accent: "#ea5b6f",
     language: "Go",
     image: "/img/work/belayer-preview.webp",
+    imageLight: "/img/work/belayer-preview-light.webp",
+    imageDark: "/img/work/belayer-preview-dark.webp",
     imageBg: "#101820",
   },
   {
@@ -169,6 +191,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     language: "TypeScript",
     viewUrl: "https://donovanyohan.com",
     image: "/img/work/donovanyohan-preview.webp",
+    imageLight: "/img/work/donovanyohan-preview-light.webp",
+    imageDark: "/img/work/donovanyohan-preview-dark.webp",
     imageBg: "#ffffff",
   },
 ];
@@ -246,7 +270,7 @@ const loadWorkProjects = async (): Promise<WorkProject[]> => {
   });
 };
 
-const loadCachedWorkProjects = unstable_cache(loadWorkProjects, ["work-projects-v7"], {
+const loadCachedWorkProjects = unstable_cache(loadWorkProjects, ["work-projects-v9"], {
   revalidate: WORK_PROJECTS_REVALIDATE_SECONDS,
 });
 

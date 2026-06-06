@@ -74,8 +74,13 @@ const WorkProjectCards = ({ projects }: WorkProjectCardsProps) => (
             <span>{project.language ?? "repo"}</span>
           </div>
           <div className="workProjectCover" aria-hidden>
-            {project.image ? (
-              <img src={project.image} alt="" />
+            {project.imageLight && project.imageDark ? (
+              <>
+                <img className="workProjectImage workProjectImageLight" src={project.imageLight} alt="" />
+                <img className="workProjectImage workProjectImageDark" src={project.imageDark} alt="" />
+              </>
+            ) : project.image ? (
+              <img className="workProjectImage" src={project.image} alt="" />
             ) : (
               <div className="workProjectMonogram">
                 {project.title
@@ -183,11 +188,20 @@ const WorkProjectCards = ({ projects }: WorkProjectCardsProps) => (
           ),
           var(--paper);
       }
-      .workProjectCover img {
+      .workProjectImage {
         width: 100%;
         height: 100%;
         object-fit: contain;
         background: var(--project-image-bg, transparent);
+      }
+      .workProjectImageDark {
+        display: none;
+      }
+      :global(html[data-theme="dark"]) .workProjectImageLight {
+        display: none;
+      }
+      :global(html[data-theme="dark"]) .workProjectImageDark {
+        display: block;
       }
       .workProjectMonogram {
         font-size: clamp(48px, 7vw, 92px);

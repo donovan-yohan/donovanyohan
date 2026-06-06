@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WORK preview card renderer</title>
+    <style>
+      :root {
+        --w: 1536px;
+        --h: 864px;
+        --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { width: var(--w); height: var(--h); margin: 0; overflow: hidden; }
+      body { font-family: var(--sans); -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; }
+      #stage { width: var(--w); height: var(--h); display: grid; place-items: center; padding: 72px; }
+
+      body[data-theme="light"] #stage { background: #f6f8fa; }
+      body[data-theme="dark"] #stage { background: #0d1117; }
+
+      .repo-card {
+        --accent: #5865f2;
+        position: relative;
+        width: 1312px;
+        height: 616px;
+        overflow: hidden;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        border: 2px solid color-mix(in srgb, var(--accent) 70%, transparent);
+        border-radius: 16px;
+        padding: 76px 84px 56px;
+        box-shadow: 0 30px 90px rgba(1, 4, 9, .12);
+      }
+      body[data-theme="light"] .repo-card { color: #24292f; background: #ffffff; }
+      body[data-theme="dark"] .repo-card { color: #f0f6fc; background: #161b22; box-shadow: 0 30px 90px rgba(1, 4, 9, .35); }
+      .repo-card::before {
+        content: "";
+        position: absolute;
+        inset: auto 0 0;
+        height: 24px;
+        background: linear-gradient(90deg, var(--accent) 0 92%, color-mix(in srgb, var(--accent) 72%, white) 92% 97%, #d4a72c 97% 100%);
+      }
+      .repo-card::after {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 10px;
+        background: var(--accent);
+        opacity: .28;
+      }
+      .repo-title {
+        margin: 0;
+        max-width: 1040px;
+        font-size: 72px;
+        line-height: 1.05;
+        letter-spacing: -.055em;
+        font-weight: 760;
+      }
+      .owner { font-weight: 420; opacity: .72; }
+      .repo { font-weight: 830; }
+      .repo-desc {
+        align-self: end;
+        max-width: 980px;
+        margin: 0 0 36px;
+        font-size: 34px;
+        line-height: 1.22;
+        letter-spacing: -.018em;
+        opacity: .78;
+      }
+      .repo-meta {
+        display: flex;
+        gap: 40px;
+        align-items: center;
+        font-size: 22px;
+        color: color-mix(in srgb, currentColor 64%, transparent);
+      }
+      .repo-meta span { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; }
+      .dot { width: 17px; height: 17px; border-radius: 999px; background: var(--accent); }
+      .repo-icon {
+        position: absolute;
+        top: 68px;
+        right: 80px;
+        width: 132px;
+        height: 132px;
+        display: grid;
+        place-items: center;
+        border-radius: 28px;
+        border: 1px solid color-mix(in srgb, var(--accent) 46%, transparent);
+        color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 10%, transparent);
+      }
+      .repo-icon svg { width: 72px; height: 72px; stroke-width: 1.8; }
+
+      .lexitiles-card {
+        width: 1312px;
+        height: 616px;
+        display: grid;
+        place-items: center;
+        border-radius: 34px;
+        border: 2px solid rgba(198, 204, 255, .24);
+        background:
+          radial-gradient(circle at 74% 26%, rgba(88, 101, 242, .24), transparent 34%),
+          linear-gradient(180deg, #242832 0%, #151820 48%, #0f1117 100%);
+      }
+      .lexitiles-logo {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px;
+        width: 1040px;
+      }
+      .lexitile {
+        aspect-ratio: 1 / .82;
+        display: grid;
+        place-items: center;
+        border: 3px solid rgba(198, 204, 255, .72);
+        border-radius: 24px;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05)),
+          #11151d;
+        color: #eef3ff;
+        box-shadow: 0 20px 42px rgba(0,0,0,.34), inset 0 1px rgba(255,255,255,.12);
+        font-size: 104px;
+        line-height: 1;
+        letter-spacing: -.08em;
+        font-weight: 900;
+      }
+      .lexitile:nth-child(2) { border-color: rgba(88, 101, 242, .94); background: linear-gradient(180deg, #6570ff, #4752c4); }
+      .lexitile:nth-child(3) { border-color: rgba(88, 101, 242, .72); }
+
+      .sample-card {
+        width: 1312px;
+        height: 616px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 34px;
+        padding: 42px;
+        border-radius: 42px;
+        border: 1px solid rgba(255,255,255,.14);
+        background:
+          radial-gradient(circle at 0% 0%, rgba(255,63,104,.30), transparent 30rem),
+          radial-gradient(circle at 100% 8%, rgba(101,216,255,.20), transparent 34rem),
+          radial-gradient(circle at 45% 100%, rgba(180,133,255,.18), transparent 34rem),
+          linear-gradient(135deg, #0a0710, #130d1d);
+      }
+      .sample-sound-tile {
+        --tone: #65d8ff;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 56px;
+        border: 1px solid rgba(255,255,255,.14);
+        border-radius: 44px;
+        background: linear-gradient(150deg, rgba(255,255,255,.145), rgba(255,255,255,.062));
+        color: #fff8ed;
+        box-shadow: 0 18px 52px rgba(0,0,0,.42);
+      }
+      .sample-sound-tile::after {
+        content: "";
+        position: absolute;
+        width: 430px;
+        height: 430px;
+        right: -168px;
+        bottom: -240px;
+        border-radius: 50%;
+        background: var(--tone);
+        opacity: .21;
+      }
+      .sample-topline { display: flex; justify-content: space-between; align-items: center; gap: 18px; width: 100%; position: relative; z-index: 1; }
+      .sample-key { display: inline-grid; place-items: center; min-width: 82px; height: 82px; border-radius: 23px; padding: 0 22px; background: var(--tone); color: #111; font-weight: 1000; font-size: 30px; box-shadow: inset 0 -7px rgba(0,0,0,.25); }
+      .sample-group { color: rgba(255,248,237,.48); font-size: 18px; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; }
+      .sample-label { position: relative; z-index: 1; max-width: 95%; font-size: 96px; line-height: .88; letter-spacing: -.075em; font-weight: 1000; text-wrap: balance; }
+      .sample-caption { position: relative; z-index: 1; max-width: 95%; color: #b9aabd; font-size: 25px; line-height: 1.18; }
+      .sample-sound-tile:nth-child(2) { --tone: #ff3f68; }
+
+      @media (max-width: 900px) {
+        .repo-card, .lexitiles-card, .sample-card { width: calc(100vw - 60px); height: calc(100vh - 60px); }
+      }
+    </style>
+  </head>
+  <body data-theme="dark">
+    <main id="stage" aria-label="work preview card"></main>
+    <script>
+      const cards = {
+        "relay-ide": { kind: "repo", accent: "#78dcff", title: "relay-ide", owner: "donovan-yohan", desc: "A remote web interface for steering real coding-agent sessions from anywhere.", meta: ["TypeScript", "agents", "developer tooling"], icon: "terminal" },
+        "dynamic-workflows": { kind: "repo", accent: "#ffe066", title: "hermes-plugin-dynamic-workflows", owner: "donovan-yohan", desc: "Executable, inspectable agent workflows instead of plans dissolving into transcript fog.", meta: ["Python", "Hermes", "agents"], icon: "flow" },
+        "remote-hosts": { kind: "repo", accent: "#22c55e", title: "hermes-plugin-remote-hosts", owner: "donovan-yohan", desc: "Explicit SSH-backed remote host tools for Hermes, with boundaries you can actually see.", meta: ["Python", "Hermes", "SSH"], icon: "lock" },
+        "carabiner": { kind: "repo", accent: "#ea5b6f", title: "hermes-plugin-carabiner", owner: "donovan-yohan", desc: "Honcho-backed collaboration memory for handoffs, peer feedback, and durable agent relationships.", meta: ["Python", "Hermes", "memory"], icon: "link" },
+        "comfyui-image-backend": { kind: "repo", accent: "#ff4fd8", title: "hermes-plugin-comfyui-image-backend", owner: "donovan-yohan", desc: "A local ComfyUI backend wired into Hermes image generation tool calls.", meta: ["Python", "Hermes", "image gen"], icon: "spark" },
+        "talent-roster": { kind: "repo", accent: "#2dd4bf", title: "hermes-plugin-talent-roster", owner: "donovan-yohan", desc: "Specialist-agent roster routing and Kanban-backed profile assignment for Hermes.", meta: ["Python", "Hermes", "Kanban"], icon: "users" },
+        "open-music-player": { kind: "repo", accent: "#ff82c8", title: "open-music-player", owner: "donovan-yohan", desc: "A local-first music player experiment aimed at waveform-heavy, DJ-ish listening.", meta: ["Dart", "music", "mobile"], icon: "music" },
+        "belayer": { kind: "repo", accent: "#ea5b6f", title: "belayer", owner: "donovan-yohan", desc: "A multi-repo coding-agent orchestrator built around supervision, recovery, and evidence.", meta: ["Go", "agents", "orchestration"], icon: "mountain" },
+        "lexitiles": { kind: "lexitiles" },
+        "sample-sound": { kind: "sample" }
+      };
+      const icons = {
+        terminal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m4 7 5 5-5 5"/><path d="M12 18h8"/><rect x="3" y="4" width="18" height="16" rx="3"/></svg>',
+        flow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><path d="M10 6.5h3.5A3.5 3.5 0 0 1 17 10v4"/><path d="M7 10v3.5A3.5 3.5 0 0 0 10.5 17H14"/></svg>',
+        lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v2"/></svg>',
+        link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L11 4.93"/><path d="M14 11a5 5 0 0 0-7.07 0L4.8 13.12a5 5 0 0 0 7.07 7.07L13 19.07"/></svg>',
+        spark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m18 15 .8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8L18 15Z"/></svg>',
+        users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+        music: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+        mountain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 20 7-14 4 8 2-4 5 10H3Z"/><path d="m10 6 2.2 3H8.5"/></svg>'
+      };
+      const params = new URLSearchParams(location.search);
+      const slug = params.get("slug") || "relay-ide";
+      const theme = params.get("theme") || "dark";
+      document.body.dataset.theme = theme;
+      const data = cards[slug];
+      const stage = document.getElementById("stage");
+      if (!data) throw new Error(`unknown card: ${slug}`);
+      if (data.kind === "lexitiles") {
+        stage.innerHTML = `<section class="lexitiles-card" aria-label="lexitiles logo"><div class="lexitiles-logo"><span class="lexitile">le</span><span class="lexitile">xi</span><span class="lexitile">ti</span><span class="lexitile">les</span></div></section>`;
+      } else if (data.kind === "sample") {
+        stage.innerHTML = `<section class="sample-card" aria-label="sample sound graphic"><div class="sample-sound-tile"><span class="sample-topline"><span class="sample-key">S</span><span class="sample-group">sample</span></span><span class="sample-label">sample</span><span class="sample-caption">button-triggered chaos</span></div><div class="sample-sound-tile"><span class="sample-topline"><span class="sample-key">S</span><span class="sample-group">sound</span></span><span class="sample-label">sound</span><span class="sample-caption">tiny browser soundboard</span></div></section>`;
+      } else {
+        stage.innerHTML = `<section class="repo-card" style="--accent:${data.accent}" aria-label="${data.title} repo hero card"><div class="repo-icon">${icons[data.icon] || ""}</div><h1 class="repo-title"><span class="owner">${data.owner}/</span><span class="repo">${data.title}</span></h1><p class="repo-desc">${data.desc}</p><div class="repo-meta">${data.meta.map((item, index) => `<span>${index === 0 ? '<i class="dot"></i>' : ''}${item}</span>`).join("")}</div></section>`;
+      }
+    </script>
+  </body>
+</html>
