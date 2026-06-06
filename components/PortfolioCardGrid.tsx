@@ -197,7 +197,7 @@ const PortfolioCardGrid = ({ items, ariaLabel, emptyMessage = "Nothing to show y
         );
       })}
 
-      <style jsx>{`
+      <style jsx global>{`
         .portfolioCardGrid {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));

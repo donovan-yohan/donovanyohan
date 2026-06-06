@@ -48,11 +48,69 @@ const BLOG_TYPE_META: Record<BlogTypeKey, { label: string; accent: string; ink: 
 };
 
 const WORDS_PER_MINUTE = 220;
+const ARTICLE_NOTE_TYPES = new Set(["writing", "work"]);
 
 const computeReadTime = (markdown: string): string => {
   const words = markdown.trim().split(/\s+/).filter(Boolean).length;
   const minutes = Math.max(1, Math.round(words / WORDS_PER_MINUTE));
   return `${minutes} MIN READ`;
+};
+
+const stringField = (value: unknown): string | undefined =>
+  typeof value === "string" && value.trim() ? value : undefined;
+
+const externalHrefForNote = (note: VaultNote): string | undefined => {
+  const fm = note.frontmatter as Record<string, unknown>;
+  const external = isRecord(fm.external)
+    ? fm.external
+    : isRecord(fm.url)
+      ? fm.url
+      : isRecord(fm.link)
+        ? fm.link
+        : undefined;
+  return (
+    stringField(external?.url) ??
+    stringField(fm.sourceUrl) ??
+    stringField(fm.source_url) ??
+    stringField(fm.externalUrl) ??
+    stringField(fm.external_url) ??
+    stringField(fm.canonicalUrl) ??
+    stringField(fm.canonical_url) ??
+    stringField(fm.url) ??
+    stringField(fm.href) ??
+    stringField(fm.link)
+  );
+};
+
+const sourceLabelForNote = (note: VaultNote): string | undefined => {
+  const fm = note.frontmatter as Record<string, unknown>;
+  const external = isRecord(fm.external)
+    ? fm.external
+    : isRecord(fm.url)
+      ? fm.url
+      : isRecord(fm.link)
+        ? fm.link
+        : undefined;
+  return stringField(external?.source) ?? stringField(external?.kind);
+};
+
+const externalActionLabel = (href: string, source?: string): string => {
+  if (/youtu\.?be|youtube\.com/i.test(href) || /youtube/i.test(source ?? "")) return "Watch";
+  return "Open";
+};
+
+const blogNoteOptIn = (note: VaultNote): boolean => {
+  const fm = note.frontmatter as Record<string, unknown>;
+  return fm.blog === true || fm.showInBlog === true || fm.publishToBlog === true;
+};
+
+const shouldHaveBlogArticlePage = (note: VaultNote): boolean =>
+  ARTICLE_NOTE_TYPES.has(note.frontmatter.type);
+
+const shouldShowOnBlogIndex = (note: VaultNote): boolean => {
+  if (note.frontmatter.type === "writing" || note.frontmatter.type === "work") return true;
+  if (note.frontmatter.type === "reshare") return externalHrefForNote(note) !== undefined;
+  return blogNoteOptIn(note);
 };
 
 const blogTypeForNote = (note: VaultNote): BlogTypeKey => {
@@ -105,6 +163,27 @@ const toBlogCard = (
   const title = note.preview.headline ?? note.frontmatter.title;
   const image = note.preview.image ?? bannerImage(note);
   const tags = note.frontmatter.tags.map((tag) => tagLabels[tag] ?? tag).slice(0, 3);
+  const externalHref = externalHrefForNote(note);
+  const sourceLabel = sourceLabelForNote(note);
+  const isArticle = shouldHaveBlogArticlePage(note);
+  const footerLabel = isArticle
+    ? computeReadTime(note.bodyMarkdown)
+    : sourceLabel
+      ? sourceLabel.toUpperCase()
+      : typeMeta.label.toUpperCase();
+  const actionLabel = externalHref ? externalActionLabel(externalHref, sourceLabel) : null;
+  const links = isArticle
+    ? [{ href: `/blog/${note.slug}`, label: "Read", kind: "internal" as const, ariaLabel: `Read ${title}` }]
+    : externalHref && actionLabel
+      ? [
+          {
+            href: externalHref,
+            label: actionLabel,
+            kind: "external" as const,
+            ariaLabel: `${actionLabel} ${title}`,
+          },
+        ]
+      : [];
 
   return {
     id: note.slug,
@@ -117,9 +196,9 @@ const toBlogCard = (
     accent: typeMeta.accent,
     ...(image ? { image } : {}),
     ...(note.preview.imageBg ? { imageBg: note.preview.imageBg } : {}),
-    footerLabel: computeReadTime(note.bodyMarkdown),
-    primaryHref: `/blog/${note.slug}`,
-    links: [{ href: `/blog/${note.slug}`, label: "Read", kind: "internal", ariaLabel: `Read ${title}` }],
+    footerLabel,
+    ...(isArticle ? { primaryHref: `/blog/${note.slug}` } : externalHref ? { primaryHref: externalHref } : {}),
+    ...(links.length > 0 ? { links } : {}),
     typeKey,
     tagSlugs: note.frontmatter.tags,
   };
@@ -132,6 +211,7 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
   );
   const sorted = notes
     .slice()
+    .filter(shouldShowOnBlogIndex)
     .sort((a, b) => {
       const dateCmp = b.frontmatter.date.localeCompare(a.frontmatter.date);
       return dateCmp !== 0 ? dateCmp : a.slug.localeCompare(b.slug);

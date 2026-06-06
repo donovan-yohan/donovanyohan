@@ -55,10 +55,13 @@ interface Props {
   note: VaultNote;
 }
 
+const hasBlogArticlePage = (note: VaultNote): boolean =>
+  note.frontmatter.type === "writing" || note.frontmatter.type === "work";
+
 export const getStaticPaths: GetStaticPaths = async () => {
   const notes = await getPublicNotes();
   return {
-    paths: notes.map((n) => ({ params: { slug: n.slug } })),
+    paths: notes.filter(hasBlogArticlePage).map((n) => ({ params: { slug: n.slug } })),
     // P27: fallback: false prevents on-demand SSR for unknown slugs —
     // a privacy-edge attack vector (request a private slug → SSR runs → cached).
     fallback: false,
@@ -69,7 +72,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = params?.slug as string;
   const note = await getNoteBySlug(slug);
 
-  if (!note) {
+  if (!note || !hasBlogArticlePage(note)) {
     return { notFound: true };
   }
 
