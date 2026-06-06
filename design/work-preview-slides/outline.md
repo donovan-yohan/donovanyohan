@@ -26,12 +26,12 @@ The actual card title/blurb/tags live in the website UI outside the image. There
 
 ## Deployed page cards
 
-| Project          | Source style                           | Final asset                 |
-| ---------------- | -------------------------------------- | --------------------------- |
-| typeline         | near-black/cyan typing game            | `typeline-preview.webp`     |
-| lexitiles        | dark slate/periwinkle puzzle app       | `lexitiles-preview.webp`    |
-| sample-sound     | dark neon soundboard                   | `sample-sound-preview.webp` |
-| donovanyohan.com | white/black/yellow editorial portfolio | `donovanyohan-preview.webp` |
+| Project          | Source style                            | Final asset                 |
+| ---------------- | --------------------------------------- | --------------------------- |
+| typeline         | typeline-blue logo card with white mark | `typeline-preview.webp`     |
+| lexitiles        | dark slate/periwinkle puzzle app        | `lexitiles-preview.webp`    |
+| sample-sound     | dark neon soundboard                    | `sample-sound-preview.webp` |
+| donovanyohan.com | white/black/yellow editorial portfolio  | `donovanyohan-preview.webp` |
 
 ## GitHub-only cards
 
