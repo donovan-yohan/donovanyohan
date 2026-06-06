@@ -41,6 +41,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     tags: ["agents", "developer tooling", "typescript"],
     accent: "#78dcff",
     language: "TypeScript",
+    image: "/img/work/relay-ide-preview.webp",
+    imageBg: "#07111f",
   },
   {
     repo: "hermes-plugin-dynamic-workflows",
@@ -50,6 +52,52 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     tags: ["agents", "hermes", "python"],
     accent: "#ffe066",
     language: "Python",
+    image: "/img/work/dynamic-workflows-preview.webp",
+    imageBg: "#1e3a5f",
+  },
+  {
+    repo: "hermes-plugin-remote-hosts",
+    title: "Remote Hosts",
+    blurb:
+      "A Hermes plugin for explicit SSH-backed remote host tools, because invisible shell access is how you get haunted later.",
+    tags: ["hermes", "ssh", "python"],
+    accent: "#22c55e",
+    language: "Python",
+    image: "/img/work/remote-hosts-preview.webp",
+    imageBg: "#111827",
+  },
+  {
+    repo: "hermes-plugin-carabiner",
+    title: "Carabiner Memory",
+    blurb:
+      "A Hermes plugin for Honcho-backed collaboration memory: handoffs, peer feedback, and agent relationship episodes that actually persist.",
+    tags: ["hermes", "memory", "python"],
+    accent: "#ea5b6f",
+    language: "Python",
+    image: "/img/work/carabiner-preview.webp",
+    imageBg: "#211529",
+  },
+  {
+    repo: "hermes-plugin-comfyui-image-backend",
+    title: "ComfyUI Backend",
+    blurb:
+      "A ComfyUI image-generation backend for Hermes, bridging local node graphs into the image_generate tool path.",
+    tags: ["hermes", "image gen", "python"],
+    accent: "#ff4fd8",
+    language: "Python",
+    image: "/img/work/comfyui-image-backend-preview.webp",
+    imageBg: "#151320",
+  },
+  {
+    repo: "hermes-plugin-talent-roster",
+    title: "Talent Roster",
+    blurb:
+      "A Hermes plugin for teammate roster routing and Kanban-backed profile assignment across specialist agents.",
+    tags: ["hermes", "kanban", "python"],
+    accent: "#2dd4bf",
+    language: "Python",
+    image: "/img/work/talent-roster-preview.webp",
+    imageBg: "#0b1220",
   },
   {
     repo: "quartiles",
@@ -60,20 +108,20 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     accent: "#5865f2",
     language: "TypeScript",
     viewUrl: "https://lexitiles.donovanyohan.com",
-    image: "/img/work/lexitiles-preview.png",
+    image: "/img/work/lexitiles-preview.webp",
     imageBg: "#11151d",
   },
   {
     repo: "typeline-svelte",
     title: "typeline",
     blurb:
-      "A typing-test POC for tuning feel, rhythm, and input feedback without dragging a full product surface behind it.",
+      "A full typing game for tuning feel, rhythm, and input feedback without dragging a bloated product surface behind it.",
     tags: ["typing", "svelte", "typescript"],
     accent: "#00e5ef",
     language: "TypeScript",
     githubUrl: null,
     viewUrl: "https://typeline.app",
-    image: "/img/work/typeline-preview.png",
+    image: "/img/work/typeline-preview.webp",
     imageBg: "#0d0d0d",
   },
   {
@@ -86,7 +134,7 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     language: "JavaScript",
     githubUrl: null,
     viewUrl: "https://soundboard.donovanyohan.com",
-    image: "/img/work/sample-sound-preview.png",
+    image: "/img/work/sample-sound-preview.webp",
     imageBg: "#08060d",
   },
   {
@@ -97,6 +145,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     tags: ["music", "mobile", "dart"],
     accent: "#ff82c8",
     language: "Dart",
+    image: "/img/work/open-music-player-preview.webp",
+    imageBg: "#101014",
   },
   {
     repo: "belayer",
@@ -106,6 +156,8 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     tags: ["agents", "orchestration", "go"],
     accent: "#ea5b6f",
     language: "Go",
+    image: "/img/work/belayer-preview.webp",
+    imageBg: "#101820",
   },
   {
     repo: "donovanyohan",
@@ -116,7 +168,7 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     accent: "#ffe600",
     language: "TypeScript",
     viewUrl: "https://donovanyohan.com",
-    image: "/img/work/donovanyohan-preview.png",
+    image: "/img/work/donovanyohan-preview.webp",
     imageBg: "#ffffff",
   },
 ];
@@ -194,7 +246,7 @@ const loadWorkProjects = async (): Promise<WorkProject[]> => {
   });
 };
 
-const loadCachedWorkProjects = unstable_cache(loadWorkProjects, ["work-projects-v3"], {
+const loadCachedWorkProjects = unstable_cache(loadWorkProjects, ["work-projects-v4"], {
   revalidate: WORK_PROJECTS_REVALIDATE_SECONDS,
 });
 

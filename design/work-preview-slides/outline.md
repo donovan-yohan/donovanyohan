@@ -1,49 +1,46 @@
 ---
-illustration_type: screenshot-inspired-product-preview
-style: product-ui-schematic
-image_count: 4
+illustration_type: full-baoyu-infographic-title-slides
+style: text-free generated project visuals
+image_count: 12
 ---
 
 # Work project preview slides
 
-Screenshot-inspired preview graphics for deployed WORK cards. These are not title slides; the card title lives in UI text outside the image. The goal is to make each cover inherit the live app's palette, density, and UI motifs instead of forcing every project into the same generic Baoyu/paper style.
+Full Baoyu workflow project preview graphics for WORK cards. These are **not** HTML/SVG mockups and not screenshots; each final card asset is generated image-model output, then cropped to the 16:9 card format.
+
+The actual card title/blurb/tags live in the website UI outside the image. Therefore the generated image itself must contain no readable words, letters, numerals, logos, fake code, or UI labels.
 
 ## Shared visual system
 
-- landscape 16:9 card covers, final PNG size 1536 × 864
-- generated from editable SVG sources under `generated-svg/`
-- use live-site screenshots under `screenshots/` as palette/layout references
-- match the deployed app vibe first; portfolio card consistency comes from the surrounding card chrome
-- keep text decorative/minimal enough that minor rasterization is not content-critical
+- final card covers: 1536 × 864 WebP under `public/img/work/`
+- full workflow provenance per project under `full-flow/<slug>/`:
+  - `source-*.md`
+  - `analysis.md`
+  - `structured-content.md`
+  - `prompts/infographic.md`
+  - final generated image is installed under `public/img/work/<slug>-preview.webp`
+- for projects with deployed pages, use the actual page only for palette and theme style guidance
+- for GitHub-only repos, create a Baoyu title-slide visual metaphor from repo metadata
+- no deterministic SVG/HTML substitutions
 
-## 01 — typeline
+## Deployed page cards
 
-**Purpose**: show the dark typing-test surface: logo bar, cyan controls, monospaced typing rows, timer/progress line, and WPM/accuracy rhythm chart.
-**Filename**: typeline-preview.png
-**Source screenshot**: screenshots/typeline-ui.png
-**Accent**: cyan `#00e5ef`
-**Background**: near-black `#0d0d0d`
+| Project | Source style | Final asset |
+| --- | --- | --- |
+| typeline | near-black/cyan typing game | `typeline-preview.webp` |
+| lexitiles | dark slate/periwinkle puzzle app | `lexitiles-preview.webp` |
+| sample-sound | dark neon soundboard | `sample-sound-preview.webp` |
+| donovanyohan.com | white/black/yellow editorial portfolio | `donovanyohan-preview.webp` |
 
-## 02 — lexitiles
+## GitHub-only cards
 
-**Purpose**: show the dark slate word-puzzle dashboard: periwinkle CTA, puzzle history rows, and fragment tiles.
-**Filename**: lexitiles-preview.png
-**Source screenshot**: screenshots/lexitiles-ui.png
-**Accent**: periwinkle `#5865f2`
-**Background**: slate `#11151d`
-
-## 03 — sample-sound
-
-**Purpose**: show the neon meme soundboard: top filter/volume bar, large rounded sound pads, category badges, and colored orb accents.
-**Filename**: sample-sound-preview.png
-**Source screenshot**: screenshots/sample-sound-ui.png
-**Accent**: hot pink `#ff2d70`
-**Background**: near-black purple `#08060d`
-
-## 04 — donovanyohan.com
-
-**Purpose**: show the portfolio's current white editorial surface: oversized black `dy`, clean nav, large type, yellow highlight strips, and rounded work card.
-**Filename**: donovanyohan-preview.png
-**Source screenshot**: screenshots/donovanyohan-ui.png
-**Accent**: yellow `#ffe600`
-**Background**: white `#ffffff`
+| Project | Visual metaphor | Final asset |
+| --- | --- | --- |
+| Relay IDE | remote browser-to-terminal agent control | `relay-ide-preview.webp` |
+| Dynamic Workflows | executable workflow graph/machine | `dynamic-workflows-preview.webp` |
+| Remote Hosts | secure SSH host constellation | `remote-hosts-preview.webp` |
+| Carabiner Memory | collaboration memory carabiner graph | `carabiner-preview.webp` |
+| ComfyUI Backend | node-based image generation pipeline | `comfyui-image-backend-preview.webp` |
+| Talent Roster | agent roster routing + Kanban assignment | `talent-roster-preview.webp` |
+| Open Music Player | waveform-heavy DJ queue | `open-music-player-preview.webp` |
+| Belayer | supervised multi-repo agent belay system | `belayer-preview.webp` |
