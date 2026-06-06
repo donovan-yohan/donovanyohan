@@ -34,6 +34,7 @@ const cards = [
   "talent-roster",
   "lexitiles",
   "sample-sound",
+  "dicesuki",
   "open-music-player",
   "belayer",
 ];

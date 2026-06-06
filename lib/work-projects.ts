@@ -141,6 +141,20 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     imageBg: "#1967ff",
   },
   {
+    repo: "dicesuki",
+    title: "dicesuki",
+    blurb:
+      "A tactile 3D dice roller with physics simulation, device-motion controls, and enough polish to make random numbers feel dramatic.",
+    tags: ["dice", "3d", "typescript"],
+    accent: "#f97316",
+    language: "TypeScript",
+    viewUrl: "https://dice.donovanyohan.com",
+    image: "/img/work/dicesuki-preview.webp",
+    imageLight: "/img/work/dicesuki-preview-light.webp",
+    imageDark: "/img/work/dicesuki-preview-dark.webp",
+    imageBg: "#111827",
+  },
+  {
     repo: "sample-sound",
     title: "sample-sound",
     blurb:
@@ -270,7 +284,7 @@ const loadWorkProjects = async (): Promise<WorkProject[]> => {
   });
 };
 
-const loadCachedWorkProjects = unstable_cache(loadWorkProjects, ["work-projects-v9"], {
+const loadCachedWorkProjects = unstable_cache(loadWorkProjects, ["work-projects-v10"], {
   revalidate: WORK_PROJECTS_REVALIDATE_SECONDS,
 });
 

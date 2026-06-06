@@ -27,7 +27,6 @@ import { dotGridColor } from "../lib/dot-grid-color";
 const DotGrid = dynamic(() => import("../components/lab/DotGrid"), { ssr: false });
 const HatchScene = dynamic(() => import("../components/lab/HatchScene"), { ssr: false });
 import DrawBox from "../components/DrawBox";
-import { HiSpan } from "../components/Highlighter";
 
 // True silhouette outline of the DY mark, traced from the rasterised glyph
 // via potrace. Single closed contour — animating its dash gives a continuous
@@ -718,9 +717,7 @@ const Index = ({ workProjects, weather }: IndexProps) => {
           <Box className="historyTopRule" aria-hidden="true" />
           <header className="historyHead">
             <span className={`historyKicker ${gm500.className}`}>Selected deployed projects</span>
-            <h2 className={`historyTitle ${gm800.className}`}>
-              <HiSpan slot={2}>WORK</HiSpan>
-            </h2>
+            <h2 className={`historyTitle ${gm800.className}`}>WORK</h2>
             <p className={`historyLede ${cp400.className}`}>
               A curated set of live projects and public repos I actually want people
               to see. Deployed work floats first, then the rest follows recent
@@ -847,10 +844,9 @@ const Index = ({ workProjects, weather }: IndexProps) => {
           justify-content: center;
           padding: 32px var(--content-pad-left);
         }
-        /* History section: solid paper bg across the whole frame so the
-           dot grid doesn't bleed through behind the heading or the chip
-           bar. The left margin still holds sticky MAY/APR labels; the
-           vertical accent rule runs the full height of the section. */
+        /* Work section keeps the dot-grid visible behind the header. The left
+           gutter still masks under sticky labels, but the heading band itself
+           does not paint over the grid. */
         .historyFrame {
           position: relative;
           padding: 40px var(--content-pad-left) 96px;
@@ -870,10 +866,6 @@ const Index = ({ workProjects, weather }: IndexProps) => {
         .historyHead {
           position: relative;
           margin-bottom: 0;
-          /* Paper bg bleeds left/right past the historyFrame padding AND
-             up through the frame's top padding so the entire band above
-             the chip bar is solid — no dots above the bar's bottom rule. */
-          background: var(--paper);
           margin-top: -40px;
           margin-left: calc(-1 * (var(--content-pad-left) + var(--page-shell-bleed-x)));
           margin-right: calc(-1 * (var(--content-pad-left) + var(--page-shell-bleed-x)));
