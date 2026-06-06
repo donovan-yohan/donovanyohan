@@ -36,7 +36,14 @@ interface PortfolioCardGridProps {
 }
 
 const GithubIcon = () => (
-  <svg className="portfolioCardIcon" aria-hidden="true" viewBox="0 0 16 16" width="16" height="16" focusable="false">
+  <svg
+    className="portfolioCardIcon"
+    aria-hidden="true"
+    viewBox="0 0 16 16"
+    width="16"
+    height="16"
+    focusable="false"
+  >
     <path
       fill="currentColor"
       d="M8 0C3.58 0 0 3.67 0 8.2c0 3.63 2.29 6.7 5.47 7.79.4.08.55-.18.55-.4 0-.2-.01-.86-.01-1.56-2.01.38-2.53-.5-2.69-.95-.09-.23-.48-.95-.82-1.14-.28-.15-.68-.52-.01-.53.63-.01 1.08.59 1.23.83.72 1.24 1.87.89 2.33.68.07-.53.28-.89.51-1.1-1.78-.21-3.64-.91-3.64-4.05 0-.89.31-1.63.82-2.2-.08-.21-.36-1.04.08-2.17 0 0 .67-.22 2.2.84A7.42 7.42 0 0 1 8 3.97c.68 0 1.36.09 2 .27 1.52-1.06 2.19-.84 2.19-.84.44 1.13.16 1.96.08 2.17.51.57.82 1.3.82 2.2 0 3.15-1.87 3.84-3.65 4.05.29.26.54.75.54 1.52 0 1.1-.01 1.98-.01 2.25 0 .22.15.48.55.4A8.14 8.14 0 0 0 16 8.2C16 3.67 12.42 0 8 0Z"
@@ -45,7 +52,14 @@ const GithubIcon = () => (
 );
 
 const ExternalLinkIcon = () => (
-  <svg className="portfolioCardIcon portfolioCardIconExternal" aria-hidden="true" viewBox="0 0 16 16" width="15" height="15" focusable="false">
+  <svg
+    className="portfolioCardIcon portfolioCardIconExternal"
+    aria-hidden="true"
+    viewBox="0 0 16 16"
+    width="15"
+    height="15"
+    focusable="false"
+  >
     <path
       fill="currentColor"
       d="M10.75 1.5a.75.75 0 0 0 0 1.5h1.19L6.47 8.47a.75.75 0 1 0 1.06 1.06L13 4.06v1.19a.75.75 0 0 0 1.5 0v-3A.75.75 0 0 0 13.75 1.5h-3Z"
@@ -79,7 +93,7 @@ const contrastInk = (hex: string): string => {
   const g = parseInt(value.slice(2, 4), 16) / 255;
   const b = parseInt(value.slice(4, 6), 16) / 255;
   const linear = [r, g, b].map((channel) =>
-    channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
+    channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
   );
   const luminance = 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
   return luminance > 0.46 ? "#0e0d0a" : "#fdfdf9";
@@ -87,7 +101,9 @@ const contrastInk = (hex: string): string => {
 
 const cardInitials = (title: string): string =>
   title
+    .trim()
     .split(/\s+/)
+    .filter(Boolean)
     .map((word) => word[0])
     .join("")
     .slice(0, 3);
@@ -108,7 +124,13 @@ const CardLink = ({ link }: { link: PortfolioCardLink }) => {
   );
 
   return isExternalHref(link.href) ? (
-    <a className={className} href={link.href} target="_blank" rel="noreferrer" aria-label={link.ariaLabel}>
+    <a
+      className={className}
+      href={link.href}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={link.ariaLabel}
+    >
       {content}
     </a>
   ) : (
@@ -120,12 +142,22 @@ const CardLink = ({ link }: { link: PortfolioCardLink }) => {
 
 const PrimaryOverlay = ({ href, label }: { href: string; label: string }) =>
   isExternalHref(href) ? (
-    <a className="portfolioCardOverlay" href={href} target="_blank" rel="noreferrer" aria-label={label} />
+    <a
+      className="portfolioCardOverlay"
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={label}
+    />
   ) : (
     <Link className="portfolioCardOverlay" href={href} aria-label={label} />
   );
 
-const PortfolioCardGrid = ({ items, ariaLabel, emptyMessage = "Nothing to show yet." }: PortfolioCardGridProps) => {
+const PortfolioCardGrid = ({
+  items,
+  ariaLabel,
+  emptyMessage = "Nothing to show yet.",
+}: PortfolioCardGridProps) => {
   if (items.length === 0) {
     return <p className={`portfolioCardEmpty ${cp400.className}`}>{emptyMessage}</p>;
   }
@@ -152,17 +184,37 @@ const PortfolioCardGrid = ({ items, ariaLabel, emptyMessage = "Nothing to show y
                 <span>{item.indexLabel}</span>
                 <span>{item.categoryLabel}</span>
               </span>
-              {item.metaLabel ? <span className="portfolioCardTopRight">{item.metaLabel}</span> : null}
+              {item.metaLabel ? (
+                <span className="portfolioCardTopRight">{item.metaLabel}</span>
+              ) : null}
             </header>
 
             <div className="portfolioCardCover" aria-hidden>
               {item.imageLight && item.imageDark ? (
                 <>
-                  <img className="portfolioCardImage portfolioCardImageLight" src={item.imageLight} alt="" />
-                  <img className="portfolioCardImage portfolioCardImageDark" src={item.imageDark} alt="" />
+                  <img
+                    className="portfolioCardImage portfolioCardImageLight"
+                    src={item.imageLight}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <img
+                    className="portfolioCardImage portfolioCardImageDark"
+                    src={item.imageDark}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </>
               ) : item.image ? (
-                <img className="portfolioCardImage" src={item.image} alt="" />
+                <img
+                  className="portfolioCardImage"
+                  src={item.image}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
               ) : (
                 <div className="portfolioCardMonogram">{cardInitials(item.title)}</div>
               )}
@@ -170,7 +222,9 @@ const PortfolioCardGrid = ({ items, ariaLabel, emptyMessage = "Nothing to show y
 
             <div className="portfolioCardBody">
               <h3 className={`portfolioCardTitle ${gm800.className}`}>{item.title}</h3>
-              {item.blurb ? <p className={`portfolioCardBlurb ${cp400.className}`}>{item.blurb}</p> : null}
+              {item.blurb ? (
+                <p className={`portfolioCardBlurb ${cp400.className}`}>{item.blurb}</p>
+              ) : null}
             </div>
 
             {item.tags && item.tags.length > 0 ? (
@@ -192,7 +246,9 @@ const PortfolioCardGrid = ({ items, ariaLabel, emptyMessage = "Nothing to show y
               ) : null}
             </footer>
 
-            {item.primaryHref ? <PrimaryOverlay href={item.primaryHref} label={item.title} /> : null}
+            {item.primaryHref ? (
+              <PrimaryOverlay href={item.primaryHref} label={item.title} />
+            ) : null}
           </article>
         );
       })}

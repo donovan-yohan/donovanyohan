@@ -37,7 +37,10 @@ interface BlogIndexProps {
 const BLOG_LEDE =
   "Notes, half-formed arguments, build logs, and the occasional coherent thought. Basically where the rambling goes once it seems useful enough to leave in public.";
 
-const BLOG_TYPE_META: Record<BlogTypeKey, { label: string; accent: string; ink: string; order: number }> = {
+const BLOG_TYPE_META: Record<
+  BlogTypeKey,
+  { label: string; accent: string; ink: string; order: number }
+> = {
   article: { label: "article", accent: "#78dcff", ink: "#0e0d0a", order: 1 },
   "case-study": { label: "case study", accent: "#ffe066", ink: "#0e0d0a", order: 2 },
   share: { label: "share", accent: "#ff82c8", ink: "#0e0d0a", order: 3 },
@@ -156,7 +159,7 @@ const bannerImage = (note: VaultNote): string | undefined => {
 const toBlogCard = (
   note: VaultNote,
   index: number,
-  tagLabels: Record<string, string>,
+  tagLabels: Record<string, string>
 ): BlogCard => {
   const typeKey = blogTypeForNote(note);
   const typeMeta = BLOG_TYPE_META[typeKey];
@@ -173,7 +176,14 @@ const toBlogCard = (
       : typeMeta.label.toUpperCase();
   const actionLabel = externalHref ? externalActionLabel(externalHref, sourceLabel) : null;
   const links = isArticle
-    ? [{ href: `/blog/${note.slug}`, label: "Read", kind: "internal" as const, ariaLabel: `Read ${title}` }]
+    ? [
+        {
+          href: `/blog/${note.slug}`,
+          label: "Read",
+          kind: "internal" as const,
+          ariaLabel: `Read ${title}`,
+        },
+      ]
     : externalHref && actionLabel
       ? [
           {
@@ -197,7 +207,11 @@ const toBlogCard = (
     ...(image ? { image } : {}),
     ...(note.preview.imageBg ? { imageBg: note.preview.imageBg } : {}),
     footerLabel,
-    ...(isArticle ? { primaryHref: `/blog/${note.slug}` } : externalHref ? { primaryHref: externalHref } : {}),
+    ...(isArticle
+      ? { primaryHref: `/blog/${note.slug}` }
+      : externalHref
+        ? { primaryHref: externalHref }
+        : {}),
     ...(links.length > 0 ? { links } : {}),
     typeKey,
     tagSlugs: note.frontmatter.tags,
@@ -207,7 +221,7 @@ const toBlogCard = (
 export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
   const [notes, taxonomy] = await Promise.all([getPublicNotes(), getVaultTaxonomy()]);
   const tagLabels = Object.fromEntries(
-    Object.entries(taxonomy.tags).map(([slug, tag]) => [slug, tag.label]),
+    Object.entries(taxonomy.tags).map(([slug, tag]) => [slug, tag.label])
   );
   const sorted = notes
     .slice()
@@ -259,7 +273,7 @@ export default function BlogIndex({
 
   const visibleTagFilters = useMemo(
     () => notebookTagFilters.filter((tag) => (counts[`tag:${tag.slug}`] ?? 0) > 0),
-    [counts, notebookTagFilters],
+    [counts, notebookTagFilters]
   );
 
   const visibleCards = useMemo(() => {
@@ -300,7 +314,11 @@ export default function BlogIndex({
               <p className={`blogLede ${cp400.className}`}>{BLOG_LEDE}</p>
             </header>
 
-            <div className={`blogFilters ${gm500.className}`} aria-label="Filter blog entries">
+            <div
+              className={`blogFilters ${gm500.className}`}
+              role="group"
+              aria-label="Filter blog entries"
+            >
               <button
                 type="button"
                 className={`blogChip ${filter === "all" ? "blogChipActive" : ""}`}

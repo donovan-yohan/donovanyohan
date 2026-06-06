@@ -1,10 +1,11 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
-import { chromium } from "playwright";
+import { fileURLToPath } from "node:url";
+import { chromium } from "playwright-core";
 import sharp from "sharp";
 
-const repoRoot = resolve(new URL("..", import.meta.url).pathname);
+const repoRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const publicDir = resolve(repoRoot, "public/img/work");
 const baseUrl = process.env.PORTFOLIO_PREVIEW_URL ?? "http://127.0.0.1:3113/";
 const settleMs = Number.parseInt(process.env.HERO_SETTLE_MS ?? "5200", 10);
@@ -26,7 +27,9 @@ const chromiumExecutable = (() => {
 })();
 
 if (!chromiumExecutable) {
-  throw new Error("No Chromium binary found. Set CHROMIUM_BIN or install chromium to capture the hero preview.");
+  throw new Error(
+    "No Chromium binary found. Set CHROMIUM_BIN or install chromium to capture the hero preview."
+  );
 }
 
 mkdirSync(publicDir, { recursive: true });
@@ -44,7 +47,7 @@ for (const theme of ["light", "dark"]) {
   });
   await context.addInitScript((value) => localStorage.setItem("theme", value), theme);
   const page = await context.newPage();
-  await page.goto(baseUrl, { waitUntil: "networkidle" });
+  await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
   await page.evaluate(() => document.fonts?.ready);
   await page.waitForTimeout(settleMs);
 

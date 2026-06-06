@@ -7,7 +7,7 @@ Deterministic replacement for generated/AI WORK preview images.
 - The script writes light and dark variants as `*-preview-light.webp` / `*-preview-dark.webp`, plus the legacy `*-preview.webp` path as the dark fallback.
 - Intermediate Chromium PNG screenshots go to `/tmp/donovanyohan-work-preview-cards` by default, not the repo.
 - `typeline-preview.webp` is intentionally not regenerated; it uses the source project branding.
-- `donovanyohan-preview.webp` is intentionally captured from the real portfolio hero instead of this generic card renderer. Use `scripts/capture-donovanyohan-hero-preview.mjs` against a running local server; it crops `.heroFrame` after the intro animations settle, rather than screenshotting the whole browser viewport.
+- `donovanyohan-preview.webp` is intentionally captured from the real portfolio hero instead of this generic card renderer. Use `scripts/capture-donovanyohan-hero-preview.mjs` against a running local server; it uses `playwright-core` to drive your local Chromium binary and crops `.heroFrame` after the intro animations settle, rather than screenshotting the whole browser viewport.
 
 Run from the repo root:
 
@@ -16,4 +16,4 @@ node scripts/render-work-preview-cards.mjs
 PORTFOLIO_PREVIEW_URL=http://127.0.0.1:3113/ node scripts/capture-donovanyohan-hero-preview.mjs
 ```
 
-This needs a local Chromium binary (`chromium`, `chromium-browser`, `google-chrome`, or `CHROMIUM_BIN`).
+This needs the committed `playwright-core` devDependency plus a local Chromium binary (`chromium`, `chromium-browser`, `google-chrome`, or `CHROMIUM_BIN`).
