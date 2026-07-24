@@ -17,7 +17,7 @@ import { BookOpen, BriefcaseBusiness, FileText, Mail, Moon, Sun } from "lucide-r
 
 import Context from "./context";
 import { gm500, gm800 } from "../global/fonts";
-import { ABOUT_PAGE_ENABLED } from "../lib/flags";
+import { ABOUT_PAGE_ENABLED, BLOG_PAGE_ENABLED } from "../lib/flags";
 
 const DY_PATHS: readonly string[] = [
   "M 1371.48 700.4 L 1371.67 1013.54 L 1371.67 1063.38 C 1371.67 1238.53 1229.69 1380.51 1054.54 1380.51 L 990.63 1380.51",
@@ -73,13 +73,15 @@ export const SiteNav = ({ current, position = "fixed" }: SiteNavProps) => {
           >
             <span className="navTabLabel">Work</span>
           </Link>
-          <Link
-            className={`navTab tabAbout ${gm500.className}`}
-            href="/blog"
-            data-current={current === "blog" ? "true" : undefined}
-          >
-            <span className="navTabLabel">Blog</span>
-          </Link>
+          {BLOG_PAGE_ENABLED ? (
+            <Link
+              className={`navTab tabAbout ${gm500.className}`}
+              href="/blog"
+              data-current={current === "blog" ? "true" : undefined}
+            >
+              <span className="navTabLabel">Blog</span>
+            </Link>
+          ) : null}
           {ABOUT_PAGE_ENABLED ? (
             <Link
               className={`navTab tabAbout ${gm500.className}`}
@@ -135,6 +137,9 @@ export const SiteNav = ({ current, position = "fixed" }: SiteNavProps) => {
         className={`mobileBottomNav ${gm500.className}`}
         role="navigation"
         aria-label="Mobile navigation"
+        style={{
+          gridTemplateColumns: `repeat(${BLOG_PAGE_ENABLED ? 6 : 5}, minmax(0, 1fr))`,
+        }}
       >
         <Link href="/" className="mobileNavItem" aria-label="Home">
           <span className="mobileHomeLogo" aria-hidden>
@@ -173,15 +178,17 @@ export const SiteNav = ({ current, position = "fixed" }: SiteNavProps) => {
           <BriefcaseBusiness className="mobileNavIcon" aria-hidden />
           <span>Work</span>
         </Link>
-        <Link
-          href="/blog"
-          className="mobileNavItem"
-          data-current={current === "blog" ? "true" : undefined}
-          aria-label="Blog"
-        >
-          <BookOpen className="mobileNavIcon" aria-hidden />
-          <span>Blog</span>
-        </Link>
+        {BLOG_PAGE_ENABLED ? (
+          <Link
+            href="/blog"
+            className="mobileNavItem"
+            data-current={current === "blog" ? "true" : undefined}
+            aria-label="Blog"
+          >
+            <BookOpen className="mobileNavIcon" aria-hidden />
+            <span>Blog</span>
+          </Link>
+        ) : null}
         <Link
           href="/#footer"
           className="mobileNavItem"
@@ -381,7 +388,6 @@ export const SiteNav = ({ current, position = "fixed" }: SiteNavProps) => {
             bottom: 0;
             z-index: 60;
             display: grid;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
             min-height: calc(var(--mobile-bottom-nav-h) + env(safe-area-inset-bottom, 0px));
             padding: 7px clamp(10px, 3vw, 16px) calc(7px + env(safe-area-inset-bottom, 0px));
             background: color-mix(in srgb, var(--paper) 94%, transparent);

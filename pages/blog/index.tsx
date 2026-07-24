@@ -9,6 +9,7 @@ import { HiSpan } from "../../components/Highlighter";
 import type { Entry, NotebookMonth } from "../../components/lab/Notebook";
 import { gm500, gm800, cp400, cp400i } from "../../global/fonts";
 import { dotGridColor } from "../../lib/dot-grid-color";
+import { BLOG_PAGE_ENABLED } from "../../lib/flags";
 import { themeBootstrap } from "../../lib/theme-bootstrap";
 import { getPublicNotes, getVaultConfig, getVaultTaxonomy } from "../../lib/vault";
 import { notesToNotebookMonths } from "../../lib/vault/to-notebook";
@@ -32,6 +33,10 @@ const BLOG_LEDE =
   "Notes, half-formed arguments, build logs, and the occasional coherent thought. Basically where the rambling goes once it seems useful enough to leave in public.";
 
 export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
+  if (!BLOG_PAGE_ENABLED) {
+    return { notFound: true };
+  }
+
   const [notes, taxonomy] = await Promise.all([getPublicNotes(), getVaultTaxonomy()]);
   const surfaced = notes.filter(
     (note) => note.frontmatter.type === "work" || note.frontmatter.type === "writing",

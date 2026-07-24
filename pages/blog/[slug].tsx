@@ -18,6 +18,7 @@ import type { VaultNote } from "../../lib/vault/schema";
 import SiteNav from "../../components/SiteNav";
 import { getPublicNotes, getNoteBySlug } from "../../lib/vault";
 import Context from "../../components/context";
+import { BLOG_PAGE_ENABLED } from "../../lib/flags";
 import { themeBootstrap } from "../../lib/theme-bootstrap";
 import { gm500, gm800, cp400 } from "../../global/fonts";
 import { dotGridColor } from "../../lib/dot-grid-color";
@@ -56,6 +57,10 @@ interface Props {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  if (!BLOG_PAGE_ENABLED) {
+    return { paths: [], fallback: false };
+  }
+
   const notes = await getPublicNotes();
   return {
     paths: notes.map((n) => ({ params: { slug: n.slug } })),
@@ -65,8 +70,12 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = params?.slug as string;
+export const getStaticProps: GetStaticProps<Props> = async (context) => {
+  if (!BLOG_PAGE_ENABLED) {
+    return { notFound: true };
+  }
+
+  const slug = context.params?.slug as string;
   const note = await getNoteBySlug(slug);
 
   if (!note) {

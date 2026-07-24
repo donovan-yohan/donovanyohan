@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 
 vi.mock("next/font/google", () => ({
@@ -11,6 +11,35 @@ import Context from "../components/context";
 import SiteNav from "../components/SiteNav";
 
 describe("SiteNav", () => {
+  test("omits Blog from desktop and mobile navigation without leaving an empty column", () => {
+    const { container } = render(
+      <Context.Provider value={{ theme: "light", toggleTheme: vi.fn() }}>
+        <SiteNav current="work" />
+      </Context.Provider>,
+    );
+
+    const desktopNav = container.querySelector(".navTabs");
+    expect(desktopNav).not.toBeNull();
+    expect(within(desktopNav as HTMLElement).queryByRole("link", { name: "Blog" })).toBeNull();
+
+    const mobileNav = container.querySelector('[aria-label="Mobile navigation"]');
+    expect(mobileNav).not.toBeNull();
+    expect((mobileNav as HTMLElement).querySelector('a[href="/blog"]')).toBeNull();
+    expect((mobileNav as HTMLElement).querySelectorAll(".mobileNavItem")).toHaveLength(5);
+    expect(mobileNav as HTMLElement).toHaveStyle({
+      gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+    });
+
+    expect(within(desktopNav as HTMLElement).getByRole("link", { name: "Work" })).toHaveAttribute(
+      "href",
+      "/#work",
+    );
+    expect((mobileNav as HTMLElement).querySelector('a[aria-label="Work"]')).toHaveAttribute(
+      "href",
+      "/#work",
+    );
+  });
+
   test("renders a stable circular theme-toggle control", async () => {
     const toggleTheme = vi.fn();
     render(
