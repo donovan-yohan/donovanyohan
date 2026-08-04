@@ -80,8 +80,10 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     blurb:
       "The Snakebyte Studios marketing site preserved as a self-contained static archive — committed content snapshot in, CMS and trackers out.",
     tags: ["archive", "marketing site", "typescript"],
-    accent: "#a3e635",
+    accent: "#ff5714",
     language: "TypeScript",
+    image: "/img/work/snakebyte-studios-preview.webp",
+    imageBg: "#f2f2f3",
   },
   {
     repo: "hermes-plugin-carabiner",
