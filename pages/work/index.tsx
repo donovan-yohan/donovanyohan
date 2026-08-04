@@ -6,7 +6,6 @@ import type { GetStaticProps } from "next";
 import Context from "../../components/context";
 import SiteNav from "../../components/SiteNav";
 import WorkProjectCards from "../../components/WorkProjectCards";
-import { HiSpan } from "../../components/Highlighter";
 import { gm500, gm800, cp400 } from "../../global/fonts";
 import { dotGridColor } from "../../lib/dot-grid-color";
 import { themeBootstrap } from "../../lib/theme-bootstrap";
@@ -48,9 +47,7 @@ export default function WorkIndex({ projects }: WorkIndexProps) {
         <section className="workFrame">
           <header className="workHead">
             <span className={`workKicker ${gm500.className}`}>Selected deployed projects</span>
-            <h1 className={`workTitle ${gm800.className}`}>
-              <HiSpan slot={2}>WORK</HiSpan>
-            </h1>
+            <h1 className={`workTitle ${gm800.className}`}>WORK</h1>
             <p className={`workLede ${cp400.className}`}>
               Live projects come first with a View link; public repos get GitHub
               links too. The source list stays curated, while GitHub activity is
@@ -139,7 +136,6 @@ export default function WorkIndex({ projects }: WorkIndexProps) {
         .workHead {
           margin: -40px calc(-1 * (var(--content-pad-left) + var(--page-shell-bleed-x))) 24px;
           padding: 56px calc(var(--content-pad-left) + var(--page-shell-bleed-x)) 28px;
-          background: var(--paper);
           border-top: 1px solid var(--rule);
           border-bottom: 1px solid var(--rule);
         }

@@ -1,9 +1,10 @@
 import { spawnSync } from "node:child_process";
 import { mkdirSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
-const repoRoot = resolve(new URL("..", import.meta.url).pathname);
+const repoRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const sourceHtml = resolve(repoRoot, "design/work-preview-cards/index.html");
 const renderedDir = resolve(process.env.TMPDIR ?? "/tmp", "donovanyohan-work-preview-cards");
 const publicDir = resolve(repoRoot, "public/img/work");
@@ -22,7 +23,9 @@ const chromium = chromiumCandidates.find((candidate) => {
 });
 
 if (!chromium) {
-  throw new Error("No Chromium binary found. Set CHROMIUM_BIN or install chromium to render WORK preview screenshots.");
+  throw new Error(
+    "No Chromium binary found. Set CHROMIUM_BIN or install chromium to render WORK preview screenshots."
+  );
 }
 
 const cards = [
@@ -34,6 +37,7 @@ const cards = [
   "talent-roster",
   "lexitiles",
   "sample-sound",
+  "dicesuki",
   "open-music-player",
   "belayer",
 ];
@@ -56,7 +60,7 @@ const renderPng = (slug, theme) => {
       `--screenshot=${output}`,
       url,
     ],
-    { encoding: "utf8" },
+    { encoding: "utf8" }
   );
   if (result.status !== 0 || !existsSync(output)) {
     throw new Error(`Chromium failed for ${slug}/${theme}:\n${result.stdout}\n${result.stderr}`);
