@@ -75,6 +75,15 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     imageBg: "#111827",
   },
   {
+    repo: "snakebyte-studios-portfolio",
+    title: "Snakebyte Studios",
+    blurb:
+      "The Snakebyte Studios marketing site preserved as a self-contained static archive — committed content snapshot in, CMS and trackers out.",
+    tags: ["archive", "marketing site", "typescript"],
+    accent: "#a3e635",
+    language: "TypeScript",
+  },
+  {
     repo: "hermes-plugin-carabiner",
     title: "Carabiner Memory",
     blurb:
