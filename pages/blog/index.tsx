@@ -9,6 +9,7 @@ import { HiSpan } from "../../components/Highlighter";
 import PortfolioCardGrid, { type PortfolioCardItem } from "../../components/PortfolioCardGrid";
 import { gm500, gm800, cp400 } from "../../global/fonts";
 import { dotGridColor } from "../../lib/dot-grid-color";
+import { BLOG_PAGE_ENABLED } from "../../lib/flags";
 import { themeBootstrap } from "../../lib/theme-bootstrap";
 import { getPublicNotes, getVaultConfig, getVaultTaxonomy } from "../../lib/vault";
 import type { VaultNote } from "../../lib/vault/schema";
@@ -219,6 +220,10 @@ const toBlogCard = (
 };
 
 export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
+  if (!BLOG_PAGE_ENABLED) {
+    return { notFound: true };
+  }
+
   const [notes, taxonomy] = await Promise.all([getPublicNotes(), getVaultTaxonomy()]);
   const tagLabels = Object.fromEntries(
     Object.entries(taxonomy.tags).map(([slug, tag]) => [slug, tag.label])

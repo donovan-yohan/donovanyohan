@@ -719,9 +719,11 @@ const Index = ({ workProjects, weather }: IndexProps) => {
             <span className={`historyKicker ${gm500.className}`}>Selected deployed projects</span>
             <h2 className={`historyTitle ${gm800.className}`}>WORK</h2>
             <p className={`historyLede ${cp400.className}`}>
-              A curated set of live projects and public repos I actually want people
-              to see. Deployed work floats first, then the rest follows recent
-              authored GitHub activity when the daily cache can check it.
+              Here are a few things I&apos;ve enjoyed building. You can find more of my work on{" "}
+              <a href="https://github.com/donovan-yohan" target="_blank" rel="noreferrer">
+                GitHub
+              </a>
+              .
             </p>
           </header>
 
@@ -901,6 +903,14 @@ const Index = ({ workProjects, weather }: IndexProps) => {
           font-size: clamp(18px, 1.6vw, 22px);
           line-height: 1.45;
           color: var(--ink-soft);
+        }
+        .historyLede a {
+          color: inherit;
+          text-decoration-thickness: 1px;
+          text-underline-offset: 0.18em;
+        }
+        .historyLede a:hover {
+          color: var(--ink);
         }
 
         /* Contact / footer — tabloid sketchbook layout. Cards float in
