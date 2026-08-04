@@ -65,7 +65,7 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     repo: "hermes-plugin-remote-hosts",
     title: "Remote Hosts",
     blurb:
-      "A Hermes plugin for explicit SSH-backed remote host tools, because invisible shell access is how you get haunted later.",
+      "A Hermes plugin for explicit SSH-backed remote host tools.",
     tags: ["hermes", "ssh", "python"],
     accent: "#22c55e",
     language: "Python",
