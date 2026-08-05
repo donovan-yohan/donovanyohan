@@ -42,6 +42,13 @@ const cards = [
   "belayer",
 ];
 
+const selectedCards = process.argv.slice(2);
+const unknownCards = selectedCards.filter((slug) => !cards.includes(slug));
+if (unknownCards.length > 0) {
+  throw new Error(`Unknown WORK preview card slug(s): ${unknownCards.join(", ")}`);
+}
+const cardsToRender = selectedCards.length > 0 ? selectedCards : cards;
+
 mkdirSync(renderedDir, { recursive: true });
 mkdirSync(publicDir, { recursive: true });
 
@@ -68,7 +75,7 @@ const renderPng = (slug, theme) => {
   return output;
 };
 
-for (const slug of cards) {
+for (const slug of cardsToRender) {
   for (const theme of ["light", "dark"]) {
     const png = renderPng(slug, theme);
     const webp = resolve(publicDir, `${slug}-preview-${theme}.webp`);
@@ -82,4 +89,4 @@ for (const slug of cards) {
     .toFile(resolve(publicDir, `${slug}-preview.webp`));
 }
 
-console.log(`rendered ${cards.length} deterministic WORK preview cards using ${chromium}`);
+console.log(`rendered ${cardsToRender.length} deterministic WORK preview cards using ${chromium}`);

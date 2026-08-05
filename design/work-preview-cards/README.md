@@ -16,4 +16,12 @@ node scripts/render-work-preview-cards.mjs
 PORTFOLIO_PREVIEW_URL=http://127.0.0.1:3113/ node scripts/capture-donovanyohan-hero-preview.mjs
 ```
 
+Render one generic card while iterating:
+
+```bash
+node scripts/render-work-preview-cards.mjs belayer
+```
+
+The portfolio's own preview still uses the separate live-hero capture command above.
+
 This needs the committed `playwright-core` devDependency plus a local Chromium binary (`chromium`, `chromium-browser`, `google-chrome`, or `CHROMIUM_BIN`).
