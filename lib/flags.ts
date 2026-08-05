@@ -26,13 +26,13 @@ export const ABOUT_PAGE_ENABLED = false;
 /**
  * `/blog` index + article pages + navigation links.
  *
- * Disabled for the release candidate while the public articles receive their
- * final editorial pass. Flip to `true` once the blog is ready to ship.
+ * Enabled for the Tailnet release candidate so public and preview-visible
+ * articles can be evaluated before the production release.
  *
- * When `false`:
- *   - `pages/blog/index.tsx` returns `notFound` before reading the vault.
- *   - `pages/blog/[slug].tsx` generates no paths and returns `notFound`
- *     before reading the vault or requested slug.
- *   - `components/SiteNav.tsx` omits Blog from desktop and mobile navigation.
+ * When `true`:
+ *   - `/blog` and eligible `/blog/[slug]` routes are generated from the vault.
+ *   - `components/SiteNav.tsx` includes Blog in desktop and mobile navigation.
+ *
+ * Set this back to `false` to fail closed before any vault reads.
  */
-export const BLOG_PAGE_ENABLED = false;
+export const BLOG_PAGE_ENABLED = true;
