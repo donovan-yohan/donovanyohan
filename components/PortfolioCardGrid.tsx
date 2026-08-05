@@ -2,6 +2,10 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 
 import { gm500, gm800, cp400 } from "../global/fonts";
+import {
+  PORTFOLIO_CARD_CLASS,
+  PORTFOLIO_CARD_GRID_CLASS,
+} from "../lib/portfolio-card-grid-geometry";
 
 export interface PortfolioCardLink {
   href: string;
@@ -264,7 +268,7 @@ const PortfolioCardGrid = ({
   }
 
   return (
-    <div className="portfolioCardGrid" aria-label={ariaLabel}>
+    <div className={PORTFOLIO_CARD_GRID_CLASS} aria-label={ariaLabel}>
       {items.map((item) => {
         const accentInk = item.accentInk ?? contrastInk(item.accent);
         const style: CSSProperties = {
@@ -279,7 +283,7 @@ const PortfolioCardGrid = ({
         }
 
         return (
-          <article className="portfolioCard" key={item.id} style={style}>
+          <article className={PORTFOLIO_CARD_CLASS} key={item.id} style={style}>
             <header className={`portfolioCardTop ${gm500.className}`}>
               <span className="portfolioCardTopLeft">
                 <span>{item.indexLabel}</span>
