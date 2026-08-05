@@ -11,6 +11,7 @@ export default defineConfig({
       "**/node_modules/**",
       "**/dist/**",
       "**/.next/**",
+      "**/.next-leak-test/**",
       "**/.claude/**",
       "**/.worktrees/**",
     ],

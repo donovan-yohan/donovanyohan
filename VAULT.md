@@ -80,12 +80,13 @@ guarantees the privacy boundary makes, and how to debug when notes don't appear.
 12. **Fine-grained PAT only.** Token scoped to `dy-journal` only with
     `Contents: read` + `Metadata: read`. Classic PATs (with broad `repo` scope)
     are rejected.
-13. **CI leak test.** Every PR is gated by a leak test that walks built
-    artifacts (`.next/server/**`, `.next/static/**/*.{js,map}`,
-    `.next/cache/fetch-cache/**`, `.next/trace`, `_next/data/`, `out/**`,
-    `public/**`) plus HTTP-level checks (request `/sitemap.xml`, `/robots.txt`,
-    `/feed.xml`, `/_next/data/...json`, OG endpoints) for any private fixture
-    string. Includes a positive-control canary so a broken test fails loudly.
+13. **CI leak test.** Every PR is gated by a leak test that builds fixture
+    content into isolated `.next-leak-test/` artifacts and scans its `server/**`,
+    `static/**/*.{js,map}`, `cache/fetch-cache/**`, `trace`, `_next/data/`, plus
+    `out/**` and `public/**`. HTTP-level checks request `/sitemap.xml`,
+    `/robots.txt`, `/feed.xml`, `/_next/data/...json`, and OG endpoints for any
+    private fixture string. A positive-control canary makes a broken test fail
+    loudly without replacing the production `.next` build.
 
 ## Vault layout
 

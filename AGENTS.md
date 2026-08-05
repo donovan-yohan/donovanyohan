@@ -17,7 +17,7 @@ This is Donovan Yohan's portfolio site. It uses Next.js Pages Router, React, sty
 
 - Keep visual behavior stable unless the task is explicitly a redesign.
 - Use the existing Pages Router and component structure.
-- Keep generated folders (`.next`, `out`, `coverage`, `node_modules`) out of edits.
+- Keep generated folders (`.next`, `.next-leak-test`, `out`, `coverage`, `node_modules`) out of edits.
 - Future design-system work should align content and layout to the dot-grid/sketchbook direction in `DESIGN.md`.
 
 ## Theme awareness
