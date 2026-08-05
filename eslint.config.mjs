@@ -9,6 +9,7 @@ export default tseslint.config(
     ignores: [
       ".git/**",
       ".next/**",
+      ".next-leak-test/**",
       ".claude/**",
       ".worktrees/**",
       "out/**",
