@@ -1,6 +1,6 @@
 import Head from "next/head";
 import dynamic from "next/dynamic";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { GetStaticProps } from "next";
 
 import Context from "../../components/context";
@@ -11,6 +11,10 @@ import { MarginAnchor } from "../../components/lab/system/MarginAnchor";
 import { gm500, gm800, cp400 } from "../../global/fonts";
 import { dotGridColor } from "../../lib/dot-grid-color";
 import { BLOG_PAGE_ENABLED } from "../../lib/flags";
+import {
+  PORTFOLIO_CARD_GRID_CLASS,
+  getLastGridRowTop,
+} from "../../lib/portfolio-card-grid-geometry";
 import { themeBootstrap } from "../../lib/theme-bootstrap";
 import {
   formatEntryNumber,
@@ -370,6 +374,44 @@ export default function BlogIndex({
   }, [cards, filter]);
 
   const visibleMonths = useMemo(() => groupCardsByMonth(visibleCards), [visibleCards]);
+  const blogMonthsRef = useRef<HTMLDivElement>(null);
+
+  // Measures the desktop sticky track. Below 900px the track is `display:
+  // contents` (see the mobile block below), so the heights written here have no
+  // box to apply to and the effect is inert — the grid observer just never has
+  // anything to correct. The grid's own box is the only signal needed: a column
+  // reflow or any row growing changes the grid height, which is what moves the
+  // final row's top.
+  useEffect(() => {
+    const blogMonths = blogMonthsRef.current;
+    if (!blogMonths || typeof ResizeObserver === "undefined") return;
+
+    const zones = Array.from(
+      blogMonths.querySelectorAll<HTMLElement>(".blogMonthStickyZone"),
+      (zone) => ({
+        track: zone.querySelector<HTMLElement>(":scope > .blogMonthStickyTrack"),
+        grid: zone.querySelector<HTMLElement>(`:scope > .${PORTFOLIO_CARD_GRID_CLASS}`),
+      }),
+    ).filter((zone): zone is { track: HTMLElement; grid: HTMLElement } =>
+      Boolean(zone.track && zone.grid),
+    );
+
+    // Read every grid before writing any height, so one write can't force a
+    // reflow before the next read.
+    const measure = () => {
+      const heights = zones.map(({ grid }) => getLastGridRowTop(grid));
+      zones.forEach(({ track }, index) => {
+        track.style.height = `${heights[index]}px`;
+      });
+    };
+
+    measure();
+
+    const resizeObserver = new ResizeObserver(measure);
+    zones.forEach(({ grid }) => resizeObserver.observe(grid));
+
+    return () => resizeObserver.disconnect();
+  }, [visibleMonths]);
 
   return (
     <>
@@ -447,26 +489,25 @@ export default function BlogIndex({
           </div>
 
           {visibleMonths.length > 0 ? (
-            <div className="blogMonths">
+            <div ref={blogMonthsRef} className="blogMonths">
               {visibleMonths.map((month) => (
                 <section
                   key={month.key}
                   className="blogMonth"
                   aria-labelledby={`blog-month-${month.key}`}
                 >
-                  {/* The grid lives inside the sticky zone so the margin header
-                      stays pinned for exactly as long as its own month's cards
-                      are on screen, then hands off to the next month. */}
                   <div className="blogMonthStickyZone">
-                    <MarginAnchor top={3} className={gm500.className}>
-                      <span className="blogMonthName" id={`blog-month-${month.key}`}>
-                        {month.monthLabel}
-                      </span>
-                      <span className="blogMonthYear">{month.year}</span>
-                      <span className="blogMonthCount">
-                        {month.cards.length} {month.cards.length === 1 ? "entry" : "entries"}
-                      </span>
-                    </MarginAnchor>
+                    <div className="blogMonthStickyTrack">
+                      <MarginAnchor top={3} className={gm500.className}>
+                        <span className="blogMonthName" id={`blog-month-${month.key}`}>
+                          {month.monthLabel}
+                        </span>
+                        <span className="blogMonthYear">{month.year}</span>
+                        <span className="blogMonthCount">
+                          {month.cards.length} {month.cards.length === 1 ? "entry" : "entries"}
+                        </span>
+                      </MarginAnchor>
+                    </div>
 
                     <PortfolioCardGrid
                       ariaLabel={`${month.monthLabel} ${month.year} blog entries`}
@@ -680,9 +721,24 @@ export default function BlogIndex({
         }
         .blogMonthStickyZone {
           position: relative;
-          display: flex;
-          flex-direction: column;
-          gap: var(--u);
+        }
+        /* The zero-height MarginAnchor sticks inside this measured track. Its
+           bottom is the top of the grid's final row, so a one-row month never
+           pins and a longer month hands the label to its final row instead of
+           floating over it.
+           Notebook's MonthBlock gets the same boundary for free by rendering
+           its last authored row outside the sticky zone. That isn't available
+           here: PortfolioCardGrid's rows are implicit and breakpoint-driven, so
+           "all but the final row" isn't knowable at render time — hence the
+           measured height. */
+        .blogMonthStickyTrack {
+          position: absolute;
+          inset: 0 0 auto;
+          height: 0;
+          pointer-events: none;
+        }
+        .blogMonthStickyTrack :global(.marginAnchor) {
+          --margin-anchor-inner-top: 0px;
         }
         /* Anchor markup belongs to MarginAnchor, so reach it globally — but
            only ever from inside .blogMonth, never the homepage notebook. */
@@ -766,7 +822,15 @@ export default function BlogIndex({
             gap: calc(var(--u) * 1.5);
           }
           .blogMonthStickyZone {
+            display: flex;
+            flex-direction: column;
             gap: var(--u);
+          }
+          /* Mobile month strips remain in normal flow. The measured desktop
+             track has no box here, so MarginAnchor keeps using the whole month
+             section as its sticky containing block. */
+          .blogMonthStickyTrack {
+            display: contents;
           }
           /* The gutter is gone on mobile, so the rail becomes a full-bleed
              sticky strip that pins directly under the chip bar and slides
