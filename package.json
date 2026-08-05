@@ -14,6 +14,7 @@
     "test:run": "vitest run --exclude test/leak.test.ts",
     "leak-test": "vitest run test/leak.test.ts",
     "vault-lint": "tsx scripts/vault-lint.ts",
+    "share-previews": "tsx scripts/fetch-share-previews.ts",
     "check": "npm run lint && npm run typecheck && npm run test:run && npm run build && npm run leak-test"
   },
   "dependencies": {
@@ -68,6 +69,7 @@
     "jsdom": "^29.1.1",
     "playwright-core": "^1.60.0",
     "prettier": "^3.8.3",
+    "sharp": "^0.35.3",
     "tsx": "^4.22.4",
     "typescript": "6.0.3",
     "typescript-eslint": "^8.59.2",

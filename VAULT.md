@@ -246,6 +246,51 @@ git add . && git commit -m "post: hello world" && git push
 
 Slice 1 adds the webhook: vault push → automatic rebuild.
 
+## Share-card preview images — `npm run share-previews`
+
+A `type: reshare` note with no `preview.image` renders its blog card with a
+letter monogram. This script resolves a real preview image for every **public**
+reshare that has a `link.url`, so the card shows the linked page's own artwork.
+
+```bash
+cd /path/to/donovanyohan
+npm run share-previews -- /path/to/dy-journal            # resolve what's missing
+npm run share-previews -- --dry-run /path/to/dy-journal  # report, write nothing
+npm run share-previews -- --force /path/to/dy-journal    # re-fetch everything
+npm run share-previews -- --only pi-mono /path/to/dy-journal
+```
+
+What it does per note:
+
+- **YouTube links** (`youtu.be/…`, `youtube.com/watch?v=…`, `/shorts/`, `/embed/`,
+  `/live/`) — derives the thumbnail from the video id and walks
+  `maxresdefault → hq720 → sddefault → hqdefault` until one exists.
+- **Everything else** — fetches the page and reads `og:image`, falling back to
+  `twitter:image`.
+- Normalises the result onto a 1376x768 WebP canvas (`fit: contain`, transparent
+  padding — card covers use `object-fit: contain`, so wide open-graph cards keep
+  their edges instead of being cropped) and writes it to
+  `notes/reshares/imgs/<slug>-preview.webp`.
+- Adds one line to the note: `preview.image: imgs/<slug>-preview.webp`. The rest
+  of the frontmatter — including hand-formatted `excerpt: |` blocks — is left
+  byte-for-byte alone.
+
+It is **operator-side and offline-safe by design**: nothing here runs during
+`next build`, in `getStaticProps`, or at render. The vault stays the source of
+truth, exactly as it is for hand-authored article images, and
+`lib/vault/assets.ts` publishes the result to `/vault-assets/<slug>/…`.
+
+Re-running is idempotent — notes that already carry a `preview.image` are
+skipped unless you pass `--force`. Per-note failures (unreachable page, no
+`og:image`, dead thumbnail) are logged and skipped; the card simply keeps its
+monogram fallback, and the run still exits 0.
+
+Private and `preview`-visibility reshares are never fetched for — the script
+uses the same `resolveVisibility()` gate the site does.
+
+Commit the generated `.webp` files and the frontmatter change to dy-journal like
+any other note edit, then redeploy.
+
 ## Debugging — "I added a note and it didn't appear"
 
 **Run the vault-lint report.** Single most useful command.
