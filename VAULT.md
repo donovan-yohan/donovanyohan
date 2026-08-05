@@ -46,7 +46,7 @@ guarantees the privacy boundary makes, and how to debug when notes don't appear.
 │  │                            │                                │ │
 │  └────────────────────────────┼────────────────────────────────┘ │
 │                               ▼                                  │
-│                       /writing  /writing/[slug]                  │
+│                         /work  /work/[slug]                      │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -80,16 +80,17 @@ guarantees the privacy boundary makes, and how to debug when notes don't appear.
 12. **Fine-grained PAT only.** Token scoped to `dy-journal` only with
     `Contents: read` + `Metadata: read`. Classic PATs (with broad `repo` scope)
     are rejected.
-13. **CI leak test.** Every PR is gated by a leak test that walks built
-    artifacts (`.next/server/**`, `.next/static/**/*.{js,map}`,
-    `.next/cache/fetch-cache/**`, `.next/trace`, `_next/data/`, `out/**`,
-    `public/**`) plus HTTP-level checks (request `/sitemap.xml`, `/robots.txt`,
-    `/feed.xml`, `/_next/data/...json`, OG endpoints) for any private fixture
-    string. Includes a positive-control canary so a broken test fails loudly.
+13. **CI leak test.** Every PR is gated by a leak test that builds fixture
+    content into isolated `.next-leak-test/` artifacts and scans its `server/**`,
+    `static/**/*.{js,map}`, `cache/fetch-cache/**`, `trace`, `_next/data/`, plus
+    `out/**` and `public/**`. HTTP-level checks request `/sitemap.xml`,
+    `/robots.txt`, `/feed.xml`, `/_next/data/...json`, and OG endpoints for any
+    private fixture string. A positive-control canary makes a broken test fail
+    loudly without replacing the production `.next` build.
 
 ## Vault layout
 
-The adapter walks the vault root recursively. Conventions:
+The adapter walks only the `notes/` subtree. Root markdown files are operator docs, not publishable content. Conventions:
 
 ```
 dy-journal/                # vault root
@@ -111,7 +112,9 @@ dy-journal/                # vault root
 ---
 title: My note               # REQUIRED, non-empty string
 date: 2026-05-10             # REQUIRED, YYYY-MM-DD
-visibility: public           # OPT-IN to publish (anything else = private)
+updated: 2026-06-04          # OPTIONAL, YYYY-MM-DD revision date
+changeNote: Tightened intro  # OPTIONAL, rendered with updated
+visibility: public           # prod opt-in; use preview for staging-only notes
 slug: my-note                # OPTIONAL, override derived slug
 preview:                     # OPTIONAL, all sub-fields optional
   kind: text                 # text | image | quote | embed
@@ -120,7 +123,8 @@ preview:                     # OPTIONAL, all sub-fields optional
   tint: paper                # design-token name
   headline: Custom card title
   excerpt: First-paragraph override
-  image: /img/hero.png       # when kind: image
+  image: /img/hero.png       # when kind: image or for custom card cover
+  imageBg: "#ffffff"         # optional background behind transparent PNG previews
 mood: focused                # arbitrary passthrough — preserved but ignored
 
 # Work-type fields (Phase A) — only meaningful when type: work
@@ -201,6 +205,7 @@ VAULT_PATH=/absolute/path/to/dy-journal
 # Slice 1+ (production — uncomment when shipping authed/webhook flows)
 # VAULT_SOURCE=github
 # VAULT_REPO_URL=https://github.com/donovan-yohan/dy-journal
+# VAULT_GITHUB_REF=HEAD
 # VAULT_GITHUB_TOKEN=github_pat_...
 # OWNER_GITHUB_LOGIN=donovan-yohan
 # VERCEL_DEPLOY_HOOK_URL=https://api.vercel.com/v1/integrations/deploy/...
@@ -211,11 +216,17 @@ VAULT_PATH=/absolute/path/to/dy-journal
 root (e.g. `../dy-journal`). Production (`NODE_ENV=production`) requires the
 env vars to be set explicitly — no fixture fallback.
 
+Development preview branches (`develop` and `development` by default, or the
+comma-separated `VAULT_PREVIEW_BRANCHES` list) render both `visibility: public`
+and `visibility: preview`. Production/default branches (`master`/`main`) render
+only `visibility: public`. You can override explicitly with
+`VAULT_PUBLICATION_MODE=preview` or `VAULT_PUBLICATION_MODE=production`.
+
 ### 5. Run
 
 ```bash
 npm run dev
-# → http://localhost:3000/writing renders public notes from VAULT_PATH
+# → http://localhost:3000/work renders public notes from VAULT_PATH
 ```
 
 ## Daily workflow — Donovan
@@ -231,10 +242,55 @@ git add . && git commit -m "post: hello world" && git push
 #    Visit Vercel dashboard → donovanyohan → Deployments → "Redeploy"
 #    OR set up Vercel CLI: `vercel --prod`
 
-# 5. Verify live at https://donovanyohan.com/writing
+# 5. Verify live at https://donovanyohan.com/work
 ```
 
 Slice 1 adds the webhook: vault push → automatic rebuild.
+
+## Share-card preview images — `npm run share-previews`
+
+A `type: reshare` note with no `preview.image` renders its blog card with a
+letter monogram. This script resolves a real preview image for every **public**
+reshare that has a `link.url`, so the card shows the linked page's own artwork.
+
+```bash
+cd /path/to/donovanyohan
+npm run share-previews -- /path/to/dy-journal            # resolve what's missing
+npm run share-previews -- --dry-run /path/to/dy-journal  # report, write nothing
+npm run share-previews -- --force /path/to/dy-journal    # re-fetch everything
+npm run share-previews -- --only pi-mono /path/to/dy-journal
+```
+
+What it does per note:
+
+- **YouTube links** (`youtu.be/…`, `youtube.com/watch?v=…`, `/shorts/`, `/embed/`,
+  `/live/`) — derives the thumbnail from the video id and walks
+  `maxresdefault → hq720 → sddefault → hqdefault` until one exists.
+- **Everything else** — fetches the page and reads `og:image`, falling back to
+  `twitter:image`.
+- Normalises the result onto a 1376x768 WebP canvas (`fit: contain`, transparent
+  padding — card covers use `object-fit: contain`, so wide open-graph cards keep
+  their edges instead of being cropped) and writes it to
+  `notes/reshares/imgs/<slug>-preview.webp`.
+- Adds one line to the note: `preview.image: imgs/<slug>-preview.webp`. The rest
+  of the frontmatter — including hand-formatted `excerpt: |` blocks — is left
+  byte-for-byte alone.
+
+It is **operator-side and offline-safe by design**: nothing here runs during
+`next build`, in `getStaticProps`, or at render. The vault stays the source of
+truth, exactly as it is for hand-authored article images, and
+`lib/vault/assets.ts` publishes the result to `/vault-assets/<slug>/…`.
+
+Re-running is idempotent — notes that already carry a `preview.image` are
+skipped unless you pass `--force`. Per-note failures (unreachable page, no
+`og:image`, dead thumbnail) are logged and skipped; the card simply keeps its
+monogram fallback, and the run still exits 0.
+
+Private and `preview`-visibility reshares are never fetched for — the script
+uses the same `resolveVisibility()` gate the site does.
+
+Commit the generated `.webp` files and the frontmatter change to dy-journal like
+any other note edit, then redeploy.
 
 ## Debugging — "I added a note and it didn't appear"
 
@@ -344,11 +400,11 @@ If a leak somehow makes it past the test (it shouldn't, but):
 | Symlink rejection | `lib/vault/walk.ts` (`followSymbolicLinks: false`) |
 | Tarball traversal | `lib/vault/adapter-github.ts` extraction guards |
 | HTML sanitization | `lib/vault/render.ts` (`rehype-sanitize`) |
-| Wikilink strip | `lib/vault/wikilinks.ts` (remark plugin) |
+| Wikilink resolution | `lib/vault/wikilinks.ts` (remark plugin) |
 | Wikilink-target leak | leak test in CI |
 | No public history | adapter reads working tree only, never `git log` |
 | Module purity | (no enforcement; reviewed via AGENTS.md rules) |
-| Static path mode | `pages/writing/[slug].tsx` `fallback: false` |
+| Static path mode | `pages/work/[slug].tsx` `fallback: false` |
 | PAT scope | (manual; documented above) |
 | Build artifact leak | leak test in CI (`test/leak.test.ts`) |
 | HTTP-level leak | leak test in CI (spawns `next start`, curls endpoints) |

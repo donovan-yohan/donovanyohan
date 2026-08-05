@@ -18,11 +18,13 @@
  * occur inside explicitly-called functions.
  */
 
-import type { VaultNote, VaultConfig } from "./schema";
+import type { VaultNote, VaultConfig, VaultTaxonomy, VaultAdapter } from "./schema";
 import { LocalVaultAdapter } from "./adapter-local";
 import { GitHubVaultAdapter } from "./adapter-github";
 import { assertNoDuplicateSlugs } from "./duplicate-check";
 import { VaultConfigError } from "./errors";
+import { shouldIncludePreviewNotes } from "./publication-mode";
+import { EMPTY_VAULT_TAXONOMY } from "./taxonomy";
 
 // Re-export new work-type types so consumers can import from lib/vault.
 export type {
@@ -30,7 +32,14 @@ export type {
   BannerConfig,
   BgColorConfig,
   WorkInfoItem,
+  VaultTaxonomy,
+  TaxonomyTag,
+  SeriesConfig,
 } from "./schema";
+
+// Stable card numbering (oldest published note = #001, forever). Pure helper,
+// re-exported here so pages keep importing the vault API from this barrel.
+export { stableIndexBySlug, formatEntryNumber } from "./stable-index";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -52,12 +61,12 @@ export function getVaultConfig(): VaultConfig | null {
   // VAULT_PATH is set in production, return null so the caller can render an
   // empty vault rather than crash. Common scenario: someone forks the
   // template, deploys to Vercel, hasn't wired up their vault yet — the site
-  // should still build with /writing rendering the empty state.
+  // should still build with /work rendering the empty state.
   if (isProduction && !sourceEnv && !process.env.VAULT_PATH) {
     if (typeof process !== "undefined" && typeof console !== "undefined") {
       console.warn(
         "[vault] No vault configured (VAULT_SOURCE / VAULT_PATH unset in production). " +
-          "/writing will render empty. Set VAULT_SOURCE=local|github + the matching " +
+          "/work will render empty. Set VAULT_SOURCE=local|github + the matching " +
           "vars to publish content. See VAULT.md.",
       );
     }
@@ -79,7 +88,12 @@ export function getVaultConfig(): VaultConfig | null {
       throw new VaultConfigError(missing);
     }
 
-    return { source: "github", repoUrl: repoUrl!, token: token! };
+    return {
+      source: "github",
+      repoUrl: repoUrl!,
+      token: token!,
+      ref: process.env.VAULT_GITHUB_REF || undefined,
+    };
   }
 
   // source === 'local'
@@ -97,8 +111,52 @@ export function getVaultConfig(): VaultConfig | null {
 
 // ── Memoization cache ─────────────────────────────────────────────────────────
 
+function adapterForConfig(config: Exclude<VaultConfig, null>, includePreview: boolean): VaultAdapter {
+  if (config.source === "github") {
+    const urlParts = config.repoUrl
+      .replace(/^https?:\/\/github\.com\//, "")
+      .replace(/\.git$/, "")
+      .split("/");
+    const owner = urlParts[0];
+    const repo = urlParts[1];
+    if (!owner || !repo) {
+      throw new Error(
+        `Invalid VAULT_REPO_URL: "${config.repoUrl}" — expected https://github.com/{owner}/{repo}`,
+      );
+    }
+    return new GitHubVaultAdapter({
+      owner,
+      repo,
+      token: config.token,
+      ref: config.ref,
+      includePreview,
+    });
+  }
+
+  return new LocalVaultAdapter(config.path, { includePreview });
+}
+
 let cachedNotes: VaultNote[] | null = null;
 let cacheInflight: Promise<VaultNote[]> | null = null;
+let cachedTaxonomy: VaultTaxonomy | null = null;
+let taxonomyInflight: Promise<VaultTaxonomy> | null = null;
+let cachedAdapterKey: string | null = null;
+let cachedAdapter: VaultAdapter | null = null;
+
+function adapterKeyForConfig(config: Exclude<VaultConfig, null>, includePreview: boolean): string {
+  return JSON.stringify({ config, includePreview });
+}
+
+function sharedAdapterForConfig(
+  config: Exclude<VaultConfig, null>,
+  includePreview: boolean,
+): VaultAdapter {
+  const key = adapterKeyForConfig(config, includePreview);
+  if (cachedAdapter && cachedAdapterKey === key) return cachedAdapter;
+  cachedAdapterKey = key;
+  cachedAdapter = adapterForConfig(config, includePreview);
+  return cachedAdapter;
+}
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
@@ -124,25 +182,8 @@ export async function getPublicNotes(): Promise<VaultNote[]> {
     if (config === null) {
       return [];
     }
-    let adapter;
-
-    if (config.source === "github") {
-      // Parse owner/repo from repoUrl (e.g. "https://github.com/owner/repo")
-      const urlParts = config.repoUrl
-        .replace(/^https?:\/\/github\.com\//, "")
-        .replace(/\.git$/, "")
-        .split("/");
-      const owner = urlParts[0];
-      const repo = urlParts[1];
-      if (!owner || !repo) {
-        throw new Error(
-          `Invalid VAULT_REPO_URL: "${config.repoUrl}" — expected https://github.com/{owner}/{repo}`,
-        );
-      }
-      adapter = new GitHubVaultAdapter({ owner, repo, token: config.token });
-    } else {
-      adapter = new LocalVaultAdapter(config.path);
-    }
+    const includePreview = shouldIncludePreviewNotes();
+    const adapter = sharedAdapterForConfig(config, includePreview);
 
     const notes = await adapter.getPublicNotes();
 
@@ -164,6 +205,30 @@ export async function getPublicNotes(): Promise<VaultNote[]> {
   } catch (err) {
     // On error, clear inflight so the next call retries
     cacheInflight = null;
+    throw err;
+  }
+}
+
+export async function getVaultTaxonomy(): Promise<VaultTaxonomy> {
+  if (cachedTaxonomy !== null) return cachedTaxonomy;
+  if (taxonomyInflight !== null) return taxonomyInflight;
+
+  taxonomyInflight = (async () => {
+    const config = getVaultConfig();
+    if (config === null) return EMPTY_VAULT_TAXONOMY;
+
+    const includePreview = shouldIncludePreviewNotes();
+    const adapter = sharedAdapterForConfig(config, includePreview);
+    const taxonomy = await adapter.getTaxonomy();
+    cachedTaxonomy = taxonomy;
+    taxonomyInflight = null;
+    return taxonomy;
+  })();
+
+  try {
+    return await taxonomyInflight;
+  } catch (err) {
+    taxonomyInflight = null;
     throw err;
   }
 }
@@ -190,4 +255,8 @@ export function __resetVaultCache__(): void {
   }
   cachedNotes = null;
   cacheInflight = null;
+  cachedTaxonomy = null;
+  taxonomyInflight = null;
+  cachedAdapterKey = null;
+  cachedAdapter = null;
 }

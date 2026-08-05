@@ -10,8 +10,10 @@
 
 # next.js
 /.next/
+/.next-leak-test/
 /tsconfig.tsbuildinfo
 /out/
+/public/vault-assets/
 
 # production
 /build
@@ -27,3 +29,8 @@ yarn-error.log*
 
 .now
 .vercel
+
+# Local Claude Code state + worktrees + transient lockfiles
+/.claude/
+/.worktrees/
+/.package-lock.json

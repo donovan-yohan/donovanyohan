@@ -1,0 +1,7 @@
+tags:
+  memory:
+    label: Memory
+    showInFilters: true
+    order: 10
+  diy-agent:
+    label: DIY Agent

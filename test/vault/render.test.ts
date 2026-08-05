@@ -39,6 +39,14 @@ describe("renderMarkdown", () => {
     expect(html).toContain("<h6>");
   });
 
+  it("wraps heading content in an inline span for per-line article highlights", async () => {
+    const html = await renderMarkdown("## What the loop is doing that the prompt can't");
+
+    expect(html).toContain('<h2><span class="articleHeadingText">');
+    expect(html).toContain("What the loop is doing that the prompt can't");
+    expect(html).toContain("</span></h2>");
+  });
+
   it("renders unordered and ordered lists", async () => {
     const md = `- item one\n- item two\n\n1. first\n2. second`;
     const html = await renderMarkdown(md);
@@ -47,10 +55,13 @@ describe("renderMarkdown", () => {
     expect(html).toContain("<li>");
   });
 
-  it("renders GFM tables", async () => {
+  it("renders GFM tables inside the article table frame", async () => {
     const md = `| A | B |\n| - | - |\n| 1 | 2 |`;
     const html = await renderMarkdown(md);
-    expect(html).toContain("<table>");
+    expect(html).toContain(
+      '<div class="articleTableFrame" role="region" aria-label="Scrollable table" tabindex="0">',
+    );
+    expect(html).toContain('<table class="articleTable">');
     expect(html).toContain("<th>");
     expect(html).toContain("<td>");
   });
@@ -173,6 +184,74 @@ describe("renderMarkdown", () => {
     expect(html).not.toContain("onmouseover");
     expect(html).not.toContain("alert(1)");
     expect(html).not.toContain("evil()");
+  });
+
+  // ── Resolve mode (P31) ────────────────────────────────────────────────────
+
+  it("resolve mode: emits anchor /work/{slug} for public wikilink targets", async () => {
+    const html = await renderMarkdown("See [[hello-world]] for details.", {
+      publicSlugs: new Set(["hello-world"]),
+      privateSlugs: new Set(),
+      sourcePath: "notes/source.md",
+    });
+    expect(html).toContain('<a href="/work/hello-world">hello-world</a>');
+  });
+
+  it("resolve mode: uses alias text for [[target|alias]]", async () => {
+    const html = await renderMarkdown(
+      "See [[hello-world|the first post]].",
+      {
+        publicSlugs: new Set(["hello-world"]),
+        privateSlugs: new Set(),
+        sourcePath: "notes/source.md",
+      },
+    );
+    expect(html).toContain(
+      '<a href="/work/hello-world">the first post</a>',
+    );
+  });
+
+  it("resolve mode: throws WikilinkLeakError on private target", async () => {
+    const { WikilinkLeakError } = await import("../../lib/vault/errors");
+    await expect(
+      renderMarkdown("Linking [[secret-note]].", {
+        publicSlugs: new Set(),
+        privateSlugs: new Set(["secret-note"]),
+        sourcePath: "notes/source.md",
+      }),
+    ).rejects.toBeInstanceOf(WikilinkLeakError);
+  });
+
+  it("resolve mode: unresolved target falls back to plain text (no anchor)", async () => {
+    const html = await renderMarkdown("See [[unknown-slug]] here.", {
+      publicSlugs: new Set(["hello-world"]),
+      privateSlugs: new Set(),
+      sourcePath: "notes/source.md",
+    });
+    expect(html).toContain("unknown-slug");
+    expect(html).not.toContain("<a");
+  });
+
+  it("resolve mode: embeds are still stripped (no anchor, no asset name)", async () => {
+    const html = await renderMarkdown("Before ![[hello-world]] after.", {
+      publicSlugs: new Set(["hello-world"]),
+      privateSlugs: new Set(),
+      sourcePath: "notes/source.md",
+    });
+    expect(html).not.toContain("<a");
+    expect(html).not.toContain("hello-world");
+  });
+
+  it("resolve mode: literal wikilinks inside fenced code blocks are not resolved (no throw on private)", async () => {
+    // Inside a code fence the private target must not trip the leak gate —
+    // it's literal source text, not a link. (Mirrors the strip-mode contract.)
+    const md = "```\n[[secret-note]]\n```";
+    const html = await renderMarkdown(md, {
+      publicSlugs: new Set(),
+      privateSlugs: new Set(["secret-note"]),
+      sourcePath: "notes/source.md",
+    });
+    expect(html).toContain("[[secret-note]]");
   });
 
   it("renders concurrently without cross-call regex state corruption", async () => {

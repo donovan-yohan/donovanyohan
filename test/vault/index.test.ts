@@ -30,6 +30,17 @@ describe("getPublicNotes — memoization", () => {
     expect(notes.length).toBeGreaterThanOrEqual(3);
   });
 
+  it("returns taxonomy from the fixture vault", async () => {
+    const { getVaultTaxonomy, __resetVaultCache__ } = await import(
+      "../../lib/vault/index"
+    );
+    __resetVaultCache__();
+
+    const taxonomy = await getVaultTaxonomy();
+    expect(taxonomy.tags.memory.label).toBe("Memory");
+    expect(taxonomy.tags.memory.showInFilters).toBe(true);
+  });
+
   it("second call returns same cached result (spy on LocalVaultAdapter)", async () => {
     const { getPublicNotes, __resetVaultCache__ } = await import(
       "../../lib/vault/index"
@@ -63,6 +74,31 @@ describe("getPublicNotes — memoization", () => {
 
     // Called twice — once per cache reset
     expect(spy).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("getPublicNotes — publication mode", () => {
+  beforeEach(async () => {
+    const { __resetVaultCache__ } = await import("../../lib/vault/index");
+    __resetVaultCache__();
+    delete process.env.VAULT_PUBLICATION_MODE;
+    delete process.env.VAULT_VISIBILITY_MODE;
+    delete process.env.VERCEL_GIT_COMMIT_REF;
+    delete process.env.VAULT_PREVIEW_BRANCHES;
+  });
+
+  it("includes preview notes on the configured development preview branch", async () => {
+    process.env.VERCEL_GIT_COMMIT_REF = "develop";
+    const { getPublicNotes } = await import("../../lib/vault/index");
+    const notes = await getPublicNotes();
+    expect(notes.map((n) => n.slug)).toContain("note-preview-1");
+  });
+
+  it("keeps preview notes out of master/main production builds", async () => {
+    process.env.VERCEL_GIT_COMMIT_REF = "master";
+    const { getPublicNotes } = await import("../../lib/vault/index");
+    const notes = await getPublicNotes();
+    expect(notes.map((n) => n.slug)).not.toContain("note-preview-1");
   });
 });
 

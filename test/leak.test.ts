@@ -6,7 +6,7 @@
  * HTTP-level gate). This is the load-bearing privacy guarantee.
  *
  * Structure:
- *   Phase 0 — build the site against __fixtures__/vault/
+ *   Phase 0 — build the site against __fixtures__/vault/ in an isolated dist directory
  *   Phase 1 — collect private strings, scan build artifacts
  *   Phase 2 — HTTP-level checks against `next start`
  *
@@ -21,14 +21,18 @@
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { execSync, spawn, type ChildProcess } from "node:child_process";
+import { once } from "node:events";
 import {
   readFile,
+  writeFile,
   readdir,
   stat,
   access,
+  rm,
   constants as fsConstants,
 } from "node:fs/promises";
 import path from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 import matter from "gray-matter";
 import { resolveVisibility } from "../lib/vault/fail-closed";
 import { walkVault } from "../lib/vault/walk";
@@ -38,6 +42,38 @@ import { deriveSlug } from "../lib/vault/slug";
 
 const REPO_ROOT = path.resolve(".");
 const FIXTURE_VAULT = path.resolve("__fixtures__/vault");
+const LEAK_BUILD_DIR_NAME = ".next-leak-test";
+const LEAK_BUILD_DIR = path.join(REPO_ROOT, LEAK_BUILD_DIR_NAME);
+
+function leakBuildEnv(): NodeJS.ProcessEnv {
+  return {
+    ...process.env,
+    LEAK_TEST_DIST_DIR: LEAK_BUILD_DIR_NAME,
+    VAULT_PATH: FIXTURE_VAULT,
+    VAULT_SOURCE: "local",
+    NODE_ENV: "production",
+  };
+}
+
+async function readProductionBuildMarkers(): Promise<{
+  buildId: string | null;
+  prerenderManifest: string | null;
+}> {
+  const readOptional = async (relativePath: string): Promise<string | null> => {
+    try {
+      return await readFile(path.join(REPO_ROOT, ".next", relativePath), "utf8");
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+      throw error;
+    }
+  };
+
+  const [buildId, prerenderManifest] = await Promise.all([
+    readOptional("BUILD_ID"),
+    readOptional("prerender-manifest.json"),
+  ]);
+  return { buildId, prerenderManifest };
+}
 
 /**
  * The unique sentinel string from __fixtures__/vault/leak-canary.md.
@@ -70,23 +106,40 @@ let canarySentinelWasChecked = false;
 
 beforeAll(
   async () => {
-    // Run next build against the fixture vault.
-    // This is the same build that ships to Vercel, so artifact leaks here
-    // will be caught before deploy.
-    execSync("npm run build", {
-      env: {
-        ...process.env,
-        VAULT_PATH: FIXTURE_VAULT,
-        VAULT_SOURCE: "local",
-        NODE_ENV: "production",
-      },
-      cwd: REPO_ROOT,
-      stdio: "pipe",
-    });
+    const productionBuildBefore = await readProductionBuildMarkers();
+    const nextEnvPath = path.join(REPO_ROOT, "next-env.d.ts");
+    const nextEnvBefore = await readFile(nextEnvPath, "utf8");
+    await rm(LEAK_BUILD_DIR, { recursive: true, force: true });
 
-    // Extract the build ID from .next/BUILD_ID
+    // Run next build against the fixture vault.
+    // Use a dedicated dist directory so this gate cannot replace a developer
+    // or release candidate build already present in `.next`.
     try {
-      const buildIdFile = path.join(REPO_ROOT, ".next", "BUILD_ID");
+      execSync("npm run build", {
+        env: leakBuildEnv(),
+        cwd: REPO_ROOT,
+        stdio: "pipe",
+      });
+    } finally {
+      // Next rewrites this tracked declaration to point at the custom dist dir.
+      // Restore it even when the fixture build fails.
+      await writeFile(nextEnvPath, nextEnvBefore);
+    }
+
+    const productionBuildAfter = await readProductionBuildMarkers();
+    if (
+      productionBuildAfter.buildId !== productionBuildBefore.buildId ||
+      productionBuildAfter.prerenderManifest !== productionBuildBefore.prerenderManifest
+    ) {
+      throw new Error(
+        "LEAK TEST INFRASTRUCTURE BROKEN: the fixture build modified `.next`. " +
+          "Keep the leak-test build isolated from production artifacts.",
+      );
+    }
+
+    // Extract the build ID from the isolated fixture build.
+    try {
+      const buildIdFile = path.join(LEAK_BUILD_DIR, "BUILD_ID");
       buildId = (await readFile(buildIdFile, "utf8")).trim();
     } catch {
       buildId = "unknown";
@@ -126,6 +179,10 @@ beforeAll(
   // 120s timeout for next build
   120_000,
 );
+
+afterAll(async () => {
+  await rm(LEAK_BUILD_DIR, { recursive: true, force: true });
+});
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -290,7 +347,7 @@ async function collectArtifactFiles(
  * Collects all build artifact files to scan per the spec.
  */
 async function collectArtifactPaths(): Promise<string[]> {
-  const nextDir = path.join(REPO_ROOT, ".next");
+  const nextDir = LEAK_BUILD_DIR;
   const outDir = path.join(REPO_ROOT, "out");
   const vercelDir = path.join(REPO_ROOT, ".vercel", "output");
   const publicDir = path.join(REPO_ROOT, "public");
@@ -652,12 +709,7 @@ describe("Phase 2 — HTTP-level checks (P26)", () => {
         "node_modules/.bin/next",
         ["start", "--port", String(serverPort)],
         {
-          env: {
-            ...process.env,
-            VAULT_PATH: FIXTURE_VAULT,
-            VAULT_SOURCE: "local",
-            NODE_ENV: "production",
-          },
+          env: leakBuildEnv(),
           cwd: REPO_ROOT,
           stdio: "pipe",
         },
@@ -679,9 +731,20 @@ describe("Phase 2 — HTTP-level checks (P26)", () => {
   );
 
   afterAll(async () => {
-    if (serverProcess) {
-      serverProcess.kill("SIGTERM");
-      serverProcess = null;
+    const process = serverProcess;
+    serverProcess = null;
+    if (!process || process.exitCode !== null || process.signalCode !== null) return;
+
+    const exit = once(process, "exit");
+    process.kill("SIGTERM");
+    const exited = await Promise.race([
+      exit.then(() => true),
+      delay(5_000, false, { ref: false }),
+    ]);
+
+    if (!exited && process.exitCode === null && process.signalCode === null) {
+      process.kill("SIGKILL");
+      await exit;
     }
   });
 
@@ -788,10 +851,10 @@ describe("Phase 2 — HTTP-level checks (P26)", () => {
   );
 
   it(
-    "/_next/data/{buildId}/writing.json does not contain private content",
+    "/_next/data/{buildId}/work.json does not contain private content",
     async () => {
       if (!serverReady) return;
-      const url = `${serverBaseUrl}/_next/data/${buildId}/writing.json`;
+      const url = `${serverBaseUrl}/_next/data/${buildId}/work.json`;
       const { status, body } = await safeFetch(url);
       if (status !== 404 && status !== 0) {
         await assertNoPrivateContent(body, url);
@@ -801,11 +864,11 @@ describe("Phase 2 — HTTP-level checks (P26)", () => {
   );
 
   it(
-    "/_next/data/{buildId}/writing/{publicSlug}.json does not contain private content",
+    "/_next/data/{buildId}/work/{publicSlug}.json does not contain private content",
     async () => {
       if (!serverReady) return;
       for (const slug of publicSlugs) {
-        const url = `${serverBaseUrl}/_next/data/${buildId}/writing/${slug}.json`;
+        const url = `${serverBaseUrl}/_next/data/${buildId}/work/${slug}.json`;
         const { status, body } = await safeFetch(url);
         if (status !== 404 && status !== 0) {
           await assertNoPrivateContent(body, url);
@@ -816,11 +879,11 @@ describe("Phase 2 — HTTP-level checks (P26)", () => {
   );
 
   it(
-    "/_next/data/{buildId}/writing/{privateSlug}.json returns 404 (no private route rendered)",
+    "/_next/data/{buildId}/work/{privateSlug}.json returns 404 (no private route rendered)",
     async () => {
       if (!serverReady) return;
       for (const slug of privateSlugs) {
-        const url = `${serverBaseUrl}/_next/data/${buildId}/writing/${slug}.json`;
+        const url = `${serverBaseUrl}/_next/data/${buildId}/work/${slug}.json`;
         const { status, body } = await safeFetch(url);
         // Private slugs must not be served — they should 404
         if (status !== 0) {

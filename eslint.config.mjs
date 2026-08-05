@@ -6,7 +6,17 @@ import importPlugin from "eslint-plugin-import";
 
 export default tseslint.config(
   {
-    ignores: [".git/**", ".next/**", "out/**", "coverage/**", "node_modules/**", "next-env.d.ts"],
+    ignores: [
+      ".git/**",
+      ".next/**",
+      ".next-leak-test/**",
+      ".claude/**",
+      ".worktrees/**",
+      "out/**",
+      "coverage/**",
+      "node_modules/**",
+      "next-env.d.ts",
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

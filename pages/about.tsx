@@ -1,120 +1,341 @@
-import Image from "next/image";
-import Hero from "../components/hero";
-import Card from "../components/card";
-import { MobileWidth, hobbies } from "../global/global";
-import Main from "../layouts/main";
-import useWindowWidth from "../hooks/useWindowWidth";
-import { AboutHero, AboutText } from "../global/content";
+/**
+ * /about — horizontally-scrolling life timeline.
+ *
+ * Whole page is locked to 100dvh: there is no vertical scroll. Vertical
+ * wheel input is captured and remapped to `scrollLeft` on a horizontal
+ * scroller that fills the viewport below a fixed topnav. The hero takes
+ * almost the full first screen (`calc(100vw - 128px)`); the remaining
+ * 128px reveals the rail + first card of the timeline, signalling that
+ * there's more to the right.
+ *
+ * Inside the timeline block, a rail of year markers sits on top of the
+ * horizontal lane of cards. Rail and lane share the same `cardStride` /
+ * `leftPad` math so ticks line up over their cards. Sketches draw on as
+ * each card crosses the viewport's horizontal middle, via an
+ * IntersectionObserver scoped to the scroller.
+ */
+
+import Head from "next/head";
+import dynamic from "next/dynamic";
+import type { GetStaticProps } from "next";
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
+
+import { timeline } from "../global/timeline";
+import { TimelineCard } from "../components/about/TimelineCard";
+import { TimelineRail } from "../components/about/TimelineRail";
+import { HeroComposition } from "../components/about/HeroComposition";
+import SiteNav from "../components/SiteNav";
+import Context from "../components/context";
+import { themeBootstrap } from "../lib/theme-bootstrap";
+import { gm500, gm800, cp400, cp400i } from "../global/fonts";
+import { dotGridColor } from "../lib/dot-grid-color";
+import { ABOUT_PAGE_ENABLED } from "../lib/flags";
+
+const DotGrid = dynamic(() => import("../components/lab/DotGrid"), { ssr: false });
+
+// Desktop lane geometry lives in CSS variables so narrow viewports can keep
+// the same horizontal timeline while shrinking cards to the viewport.
+const LEFT_PAD_U = 2;
+const RIGHT_PAD_U = 8;
 
 const About = () => {
-  const windowWidth = useWindowWidth();
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [drawnIds, setDrawnIds] = useState<Set<string>>(() => new Set());
+  const { theme } = useContext(Context);
+
+  // Wheel hijack: deltaY → scrollLeft. Native horizontal trackpad input is
+  // left alone (only fires when |deltaY| > |deltaX|).
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+      }
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
+  // Per-card draw-on trigger. Once drawn, an id sticks — re-scrolling past
+  // doesn't restart the animation.
+  useLayoutEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const targets = el.querySelectorAll<HTMLElement>("[data-tcard-id]");
+    const io = new IntersectionObserver(
+      (entries) => {
+        setDrawnIds((prev) => {
+          let next = prev;
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const id = entry.target.getAttribute("data-tcard-id");
+            if (!id || prev.has(id)) return;
+            if (next === prev) next = new Set(prev);
+            next.add(id);
+          });
+          return next;
+        });
+      },
+      { root: el, rootMargin: "0px -10% 0px -10%", threshold: 0.2 }
+    );
+    targets.forEach((t) => io.observe(t));
+    return () => io.disconnect();
+  }, []);
+
+  const handleShellKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    // ArrowUp/Down and PageUp/Down intentionally NOT mapped — interactive
+    // children (focused link/button inside a card) need vertical-keys to
+    // bubble for native focus/scroll behaviour, and remapping them sideways
+    // would surprise screen-reader and keyboard users.
+    let left: number | null = null;
+    if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+      const lane = el.querySelector<HTMLElement>(".aboutLane");
+      const slot = el.querySelector<HTMLElement>(".aboutSlot");
+      const parsedGap = lane
+        ? Number.parseFloat(window.getComputedStyle(lane).columnGap)
+        : Number.NaN;
+      const gap = Number.isFinite(parsedGap) ? parsedGap : 48;
+      const slotWidth = slot?.getBoundingClientRect().width;
+      const stride = (Number.isFinite(slotWidth) && slotWidth ? slotWidth : 448) + gap;
+      left = event.key === "ArrowRight" ? el.scrollLeft + stride : el.scrollLeft - stride;
+    } else if (event.key === "Home") {
+      left = 0;
+    } else if (event.key === "End") {
+      left = el.scrollWidth;
+    }
+
+    if (left === null) return;
+    event.preventDefault();
+    // Respect OS-level reduced-motion preference for JS-driven scrolls. The
+    // CSS rule below only catches `scroll-behavior: smooth`, not the explicit
+    // `behavior: "smooth"` option passed here.
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    el.scrollTo({ left, behavior: prefersReducedMotion ? "auto" : "smooth" });
+  };
 
   return (
-    <Main breadcrumbs={[{ label: "About", href: "/about" }]}>
-      <div className="pageRoot">
-        <div className="pageContent">
-          <Hero
-            image={
-              <Image
-                src="/img/photos/about.jpg"
-                width={420}
-                height={420}
-                priority
-                className="heroImage"
-                alt="About Donovan"
-                sizes="(max-width: 450px) 66vw, (max-width: 1130px) 47vw, 420px"
-              />
-            }
-            text={AboutHero}
-            customImageStyle={{ margin: "0px" }}
+    <>
+      <Head>
+        <title>About · Donovan Yohan</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+      </Head>
+
+      <SiteNav current="about" />
+
+      <div
+        className="aboutShell"
+        ref={scrollerRef}
+        tabIndex={0}
+        role="region"
+        aria-label="Horizontal about timeline. Use arrow keys, wheel, drag, or swipe to move sideways."
+        onKeyDown={handleShellKeyDown}
+      >
+        <DotGrid
+          spacing={16}
+          maxRadiusBoost={1.1}
+          scrollContainerRef={scrollerRef}
+          color={dotGridColor(theme)}
+        />
+
+        {/* Hero panel — full-height graphic-design landing. */}
+        <HeroComposition
+          monoClass={gm500.className}
+          monoBoldClass={gm800.className}
+          serifClass={cp400.className}
+          italicSerifClass={cp400i.className}
+          scrollerRef={scrollerRef}
+        />
+
+        {/* Timeline block — rail on top, lane below, both fixed-width. */}
+        <section className="aboutTimeline">
+          <TimelineRail
+            events={timeline}
+            monoClass={gm500.className}
+            monoBoldClass={gm800.className}
           />
-          <h1 className="headerText highlightStatic">
-            <a href="/about">About me.</a>
-          </h1>
-          <span className="body heroBlurb">{AboutText}</span>
-
-          <div className="cardWrapper">
-            {hobbies.map(
-              ({ key, href, label, date, content, disabled, src, isExternal, bgColor }) => {
-                return (
-                  <div key={key}>
-                    <Card
-                      title={label}
-                      caption={date}
-                      href={href}
-                      isExternal={isExternal}
-                      isMobile={windowWidth !== null && windowWidth < MobileWidth}
-                      content={content}
-                      src={src}
-                      disabled={disabled}
-                      bgColor={bgColor}
-                    />
-                  </div>
-                );
-              }
-            )}
+          <div className="aboutLane">
+            <div className="aboutLanePad" aria-hidden />
+            {timeline.map((event, i) => (
+              <div key={event.id} className="aboutSlot" data-tcard-id={event.id}>
+                <TimelineCard
+                  event={event}
+                  monoClass={gm500.className}
+                  monoBoldClass={gm800.className}
+                  serifClass={cp400.className}
+                  italicSerifClass={cp400i.className}
+                  drawn={drawnIds.has(event.id)}
+                  seed={i + 1}
+                />
+              </div>
+            ))}
+            <div className="aboutLanePadEnd" aria-hidden />
           </div>
-        </div>
-
-        <style jsx>{`
-          .heroImage {
-            border-radius: 100%;
-            max-width: 100%;
-            max-height: 100%;
-          }
-
-          .cardWrapper {
-            width: 100%;
-            position: relative;
-            margin-top: 250px;
-            max-width: 1024px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            margin-bottom: -250px;
-          }
-          .cardWrapper div {
-            width: 48%;
-          }
-          .cardWrapper a {
-            text-decoration: none;
-            color: black;
-          }
-          .cardWrapper div:nth-child(odd) {
-            position: relative;
-            top: -250px;
-          }
-
-          @media only screen and (max-width: 1024px) {
-            .cardWrapper div {
-              width: 49%;
-            }
-            .cardWrapper div:nth-child(odd) {
-              top: calc(50vw * 9 / 16 / 1.1 * -1);
-            }
-            .cardWrapper {
-              margin-top: calc(50vw * 9 / 16 / 1.1);
-              margin-bottom: 0;
-            }
-          }
-
-          @media only screen and (max-width: 425px) {
-            .cardWrapper div:nth-child(odd) {
-              top: 0;
-            }
-            .cardWrapper {
-              flex-direction: column;
-              margin-top: 0;
-              margin-bottom: 0;
-            }
-            .cardWrapper div {
-              width: 100%;
-            }
-          }
-        `}</style>
+        </section>
       </div>
-    </Main>
+
+      <style jsx global>{`
+        :root {
+          --u: 16px;
+          --paper: #fdfdf9;
+          --paper-2: #ffffff;
+          --ink: #16140e;
+          --ink-soft: rgba(22, 20, 14, 0.78);
+          --ink-mute: rgba(22, 20, 14, 0.55);
+          --ink-faint: rgba(22, 20, 14, 0.32);
+          --rule: rgba(22, 20, 14, 0.32);
+          --accent: #c33548;
+          --accent-soft: rgba(195, 53, 72, 0.12);
+          --gutter-w: calc(12 * var(--u));
+          --gutter-pad: var(--u);
+          --content-pad-left: calc(var(--gutter-w) + var(--gutter-pad));
+          --hero-panel-w: calc(100vw - 128px);
+          --timeline-card-w: calc(28 * var(--u));
+          --timeline-gap: calc(3 * var(--u));
+          --timeline-left-pad: calc(${LEFT_PAD_U} * var(--u));
+          --timeline-right-pad: calc(${RIGHT_PAD_U} * var(--u));
+          --rail-lane-h: calc(5 * var(--u));
+          /* Highlighter tab colours — mirrored from the home page so the nav
+             reads identically across routes. */
+          --hl-1: rgba(120, 220, 255, 0.55);
+          --hl-2: rgba(255, 130, 200, 0.55);
+          --hl-3: rgba(180, 255, 130, 0.6);
+          --hl-4: rgba(255, 224, 102, 0.55);
+          --tab-resume: var(--hl-3);
+          --tab-work: var(--hl-2);
+          --tab-about: var(--hl-4);
+          --tab-contact: var(--hl-1);
+          --logo-bg: #e07a3c;
+          --tab-ink: #fdfdf9;
+        }
+        [data-theme="dark"] {
+          --paper: #0e0d0a;
+          --paper-2: #16140f;
+          --ink: #faf7ec;
+          --ink-soft: rgba(250, 247, 236, 0.88);
+          --ink-mute: rgba(250, 247, 236, 0.68);
+          --ink-faint: rgba(250, 247, 236, 0.42);
+          --rule: rgba(250, 247, 236, 0.22);
+          --accent: #ea5b6f;
+          --hl-1: rgba(60, 110, 230, 0.55);
+          --hl-2: rgba(220, 70, 80, 0.55);
+          --hl-3: rgba(140, 90, 230, 0.55);
+          --hl-4: rgba(230, 130, 50, 0.55);
+          --logo-bg: #c8632b;
+        }
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          background: var(--paper);
+          color: var(--ink);
+          font-family: ui-monospace, monospace;
+          overflow: hidden;
+          overscroll-behavior: none;
+        }
+        * {
+          box-sizing: border-box;
+        }
+
+        @media (max-width: 600px) {
+          :root {
+            --gutter-w: calc(2 * var(--u));
+            --content-pad-left: calc(2 * var(--u));
+            --hero-panel-w: calc(100vw - 32px);
+            --timeline-card-w: calc(100vw - 32px);
+            --timeline-gap: var(--u);
+            --timeline-left-pad: var(--u);
+            --timeline-right-pad: calc(2 * var(--u));
+            --rail-lane-h: calc(4 * var(--u));
+          }
+        }
+      `}</style>
+
+      <style jsx global>{`
+        .aboutShell {
+          position: fixed;
+          top: 48px;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          display: flex;
+          flex-direction: row;
+          align-items: stretch;
+          overflow-x: auto;
+          overflow-y: hidden;
+          scrollbar-width: none;
+          overscroll-behavior: none;
+          outline: none;
+          scroll-snap-type: x proximity;
+          -webkit-overflow-scrolling: touch;
+        }
+        .aboutShell:focus-visible {
+          outline: 2px solid var(--ink);
+          outline-offset: -4px;
+        }
+        .aboutShell::-webkit-scrollbar {
+          display: none;
+        }
+
+        .aboutTimeline {
+          flex: 0 0 auto;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          padding: calc(1 * var(--u)) 0 0;
+        }
+        .aboutLane {
+          flex: 1 1 auto;
+          min-height: 0;
+          display: flex;
+          align-items: center;
+          gap: var(--timeline-gap);
+        }
+        .aboutLanePad {
+          flex: 0 0 var(--timeline-left-pad);
+          margin-right: calc(-1 * var(--timeline-gap));
+        }
+        .aboutLanePadEnd {
+          flex: 0 0 var(--timeline-right-pad);
+          margin-left: calc(-1 * var(--timeline-gap));
+        }
+        .aboutSlot {
+          flex: 0 0 var(--timeline-card-w);
+          display: flex;
+          align-items: center;
+          gap: calc(0.5 * var(--u));
+          height: 100%;
+          scroll-snap-align: center;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .aboutShell {
+            scroll-behavior: auto;
+          }
+        }
+      `}</style>
+    </>
   );
 };
 
 export default About;
+
+// `/about` is gated behind ABOUT_PAGE_ENABLED while the timeline content is
+// finalized. When the flag is off, Next.js serves the standard 404 page
+// instead of building/rendering the route — keeps the URL completely
+// off-grid until we're ready to ship.
+export const getStaticProps: GetStaticProps = async () => {
+  if (!ABOUT_PAGE_ENABLED) {
+    return { notFound: true };
+  }
+  return { props: {} };
+};

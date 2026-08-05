@@ -15,9 +15,45 @@ import { z } from "zod";
 
 // ── Exported primitive types ──────────────────────────────────────────────────
 
-export type Visibility = "public" | "private";
+export type Visibility = "public" | "preview" | "private";
 export type PreviewKind = "text" | "image" | "quote" | "embed";
-export type NoteType = "note" | "work";
+export type NoteType = "note" | "work" | "writing" | "reshare";
+
+export const TAG_SLUG_REGEX = /^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/;
+export const TagSlugSchema = z
+  .string()
+  .regex(TAG_SLUG_REGEX, "tag slug must be kebab-case ASCII, starting and ending with alphanumeric");
+
+const frontmatterDate = z.preprocess(
+  (v) => (v instanceof Date ? v.toISOString().slice(0, 10) : typeof v === "string" ? v : v),
+  z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
+);
+
+export const SeriesConfigSchema = z.object({
+  slug: TagSlugSchema,
+  title: z.string().min(1, "series.title cannot be empty"),
+  order: z.number().int().min(1).optional(),
+});
+
+export type SeriesConfig = z.infer<typeof SeriesConfigSchema>;
+
+export const TaxonomyTagSchema = z.object({
+  label: z.string().min(1, "tag label cannot be empty"),
+  description: z.string().optional(),
+  showInFilters: z.boolean().default(false),
+  order: z.number().int().default(1000),
+});
+
+export const VaultTaxonomySchema = z.object({
+  tags: z.record(TagSlugSchema, TaxonomyTagSchema).default({}),
+});
+
+export type TaxonomyTag = z.infer<typeof TaxonomyTagSchema>;
+export type VaultTaxonomy = z.infer<typeof VaultTaxonomySchema>;
+
+// Hex colour validator — accepts #RGB or #RRGGBB. Rejects malformed colours
+// that would silently break colour-driven rendering.
+const HEX_COLOR = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
 
 // ── Sub-schemas ───────────────────────────────────────────────────────────────
 
@@ -34,6 +70,10 @@ export const PreviewConfigSchema = z.object({
   headline: z.string().optional(),
   excerpt: z.string().optional(),
   image: z.string().optional(),
+  imageBg: z
+    .string()
+    .regex(HEX_COLOR, "preview.imageBg must be a hex colour (#RGB or #RRGGBB)")
+    .optional(),
 });
 
 export type PreviewConfigPartial = z.infer<typeof PreviewConfigSchema>;
@@ -46,6 +86,7 @@ export interface PreviewConfig {
   headline?: string;
   excerpt?: string;
   image?: string;
+  imageBg?: string;
 }
 
 /**
@@ -71,10 +112,6 @@ export type BannerConfig = z.infer<typeof BannerConfigSchema>;
  * BgColorConfig: light/dark hex colour for the work-page hero background.
  * Only meaningful when `type: work`.
  */
-// Hex colour validator — accepts #RGB or #RRGGBB. Rejects malformed colours
-// that would silently break the hero rendering in Phase B.
-const HEX_COLOR = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-
 export const BgColorConfigSchema = z.object({
   light: z
     .string()
@@ -121,15 +158,9 @@ export const VaultFrontmatterSchema = z
   .object({
     title: z.string().min(1),
 
-    date: z.preprocess(
-      (v) =>
-        v instanceof Date
-          ? v.toISOString().slice(0, 10)
-          : typeof v === "string"
-            ? v
-            : v,
-      z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
-    ),
+    date: frontmatterDate,
+    updated: frontmatterDate.optional(),
+    changeNote: z.string().min(1).optional(),
 
     slug: z
       .string()
@@ -140,13 +171,15 @@ export const VaultFrontmatterSchema = z
       .optional(),
 
     /**
-     * Privacy boundary (P10): default `'private'` — fail-closed.
-     * The only way a note becomes public is an explicit `visibility: public`
-     * in frontmatter that also passes full schema validation.
+     * Production privacy boundary (P10): default `private` — fail-closed.
+     * `visibility: preview` is also non-public unless the build explicitly opts
+     * into staging preview mode for a configured development branch.
      */
-    visibility: z.enum(["public", "private"]).default("private"),
+    visibility: z.enum(["public", "preview", "private"]).default("private"),
 
     preview: PreviewConfigSchema.optional(),
+    tags: z.array(TagSlugSchema).default([]),
+    series: SeriesConfigSchema.optional(),
 
     // ── Work-type fields (Layer B, Phase A) ────────────────────────────────
     // All optional. Backwards-compatible: existing notes that omit them are
@@ -155,13 +188,14 @@ export const VaultFrontmatterSchema = z
 
     /**
      * `type` — content category. Defaults to `"note"` for all existing notes.
-     * `"work"` enables work-page-specific rendering in Phase B (NoteRenderer).
+     * `"work"` enables work-page-specific rendering; `"writing"` and
+     * `"reshare"` are used by dy-journal article/frontmatter classification.
      */
     // `.default()` already makes the field optional at the input layer; do NOT
     // add `.optional()` after, which would cause Zod to infer `T | undefined`
     // and effectively bypass the default when the key is missing. The
-    // discriminator must always resolve to "note" or "work" at runtime.
-    type: z.enum(["note", "work"]).default("note"),
+    // discriminator must always resolve to a known note type at runtime.
+    type: z.enum(["note", "work", "writing", "reshare"]).default("note"),
 
     /**
      * `subtitle` — extended description shown in the work-page hero below the
@@ -227,6 +261,7 @@ export interface VaultNote {
  */
 export interface VaultAdapter {
   getPublicNotes(): Promise<VaultNote[]>;
+  getTaxonomy(): Promise<VaultTaxonomy>;
 }
 
 /**
@@ -234,7 +269,7 @@ export interface VaultAdapter {
  */
 export type VaultConfig =
   | { source: "local"; path: string }
-  | { source: "github"; repoUrl: string; token: string };
+  | { source: "github"; repoUrl: string; token: string; ref?: string };
 
 /**
  * AdapterResult — the per-file result from the adapter pipeline.

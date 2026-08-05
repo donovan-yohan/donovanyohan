@@ -30,7 +30,7 @@ export interface PreviewFallback {
  * Merges a partial `preview` frontmatter block with defaults, producing a
  * fully-resolved `PreviewConfig` with no undefined required fields.
  *
- * Optional visual fields (`accent`, `tint`, `image`) are forwarded as-is;
+ * Optional visual fields (`accent`, `tint`, `image`, `imageBg`) are forwarded as-is;
  * they remain `undefined` when not specified.
  *
  * @param partial - The `preview` object from frontmatter (may be undefined).
@@ -51,5 +51,6 @@ export function applyPreviewDefaults(
     ...(partial?.accent !== undefined ? { accent: partial.accent } : {}),
     ...(partial?.tint !== undefined ? { tint: partial.tint } : {}),
     ...(partial?.image !== undefined ? { image: partial.image } : {}),
+    ...(partial?.imageBg !== undefined ? { imageBg: partial.imageBg } : {}),
   };
 }

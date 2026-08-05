@@ -8,7 +8,7 @@ notebook UI to build against. This is the load-bearing contract.
 > - `lib/vault/schema.ts`, `lib/vault/index.ts` — ticket #32 / PR #42
 > - `lib/vault/adapter-local.ts`, `adapter-github.ts`, `walk.ts` — ticket #33
 > - `lib/vault/render.ts` — ticket #34
-> - `pages/writing/index.tsx`, `[slug].tsx` — ticket #35
+> - `pages/work/index.tsx`, `[slug].tsx` — ticket #35
 >
 > **Source of truth (once the code lands):** `lib/vault/schema.ts` (Zod) is
 > canonical; this doc is the human-readable mirror. If they ever disagree, the
@@ -21,7 +21,7 @@ notebook UI to build against. This is the load-bearing contract.
 ## Public types
 
 ```ts
-export type Visibility = 'public' | 'private';
+export type Visibility = 'public' | 'preview' | 'private';
 
 export type PreviewKind = 'text' | 'image' | 'quote' | 'embed';
 
@@ -32,7 +32,8 @@ export interface PreviewConfig {
   tint?: string;            // design-token name
   headline?: string;        // overrides title for card display
   excerpt?: string;         // default = first paragraph of body
-  image?: string;           // path/URL when kind === 'image'
+  image?: string;           // path/URL when the card displays an image/banner
+  imageBg?: string;         // optional hex background behind transparent PNGs
 }
 
 export type NoteType = 'note' | 'work';
@@ -55,6 +56,8 @@ export interface WorkInfoItem {
 export interface VaultFrontmatter {
   title: string;
   date: string;             // YYYY-MM-DD (Date object coerced to ISO; see P24)
+  updated?: string;         // optional YYYY-MM-DD revision date
+  changeNote?: string;      // optional short rendered revision note
   slug?: string;            // optional override; otherwise derived from filename
   visibility: Visibility;
   preview?: Partial<PreviewConfig>;
@@ -78,7 +81,7 @@ export interface VaultNote {
   slug: string;             // canonical URL slug (derived or frontmatter override)
   path: string;             // vault-relative file path (e.g. "notes/2026-05-10-hello.md")
   frontmatter: VaultFrontmatter;
-  body: string;             // SANITIZED HTML (rehype-sanitize applied; wikilinks stripped)
+  body: string;             // SANITIZED HTML (rehype-sanitize applied; wikilinks resolved)
   bodyMarkdown: string;     // raw markdown body, sans frontmatter (for future renderers)
   preview: PreviewConfig;   // merged with defaults — never undefined fields
 }
@@ -124,7 +127,7 @@ import type { VaultNote } from './schema';
 export function getPublicNotes(): Promise<VaultNote[]>;
 
 /**
- * Convenience for /writing/[slug] getStaticProps. Equivalent to
+ * Convenience for /work/[slug] getStaticProps. Equivalent to
  * `(await getPublicNotes()).find(n => n.slug === slug) ?? null`, but
  * shares the memoized cache with getPublicNotes() so per-slug lookups
  * are O(1) after the first walk.
@@ -141,7 +144,7 @@ export function getVaultConfig(): VaultConfig;
 
 **Slice 1 will add** `getAllNotes()` — authed-only, fetches all notes
 including private. ESLint `import/no-restricted-paths` will block public
-routes from importing it. Do NOT use it from `pages/writing/**` or
+routes from importing it. Do NOT use it from `pages/work/**` or
 `pages/index.tsx`.
 
 ## Slug rules (P11)
@@ -166,20 +169,23 @@ The frontend can rely on these guarantees from `getPublicNotes()`:
 - Every returned note's frontmatter passed full schema validation.
 - Notes with malformed YAML, missing fields, typo'd visibility, etc. are NEVER
   returned (they resolved to `private`).
-- Wikilinks in `body` (HTML) are stripped to plain text.
+- Public wikilinks in `body` (HTML) resolve to `/work/{slug}` links.
 - Wikilink targets to private slugs cause the build to fail (leak test).
 - HTML in markdown body is sanitized (`<script>`, `<iframe>`, `onclick=`, etc.
   removed by `rehype-sanitize`).
 
-**Default-deny.** `visibility: public` is the only opt-in. Anything else =
-private. The frontend never receives private content via this API.
+**Default-deny.** `visibility: public` is the only production opt-in. Anything
+else is private on `master`/production. `visibility: preview` is rendered only
+when the build runs in the configured development-preview publication mode
+(default branches: `develop`, `development`, or explicit
+`VAULT_PUBLICATION_MODE=preview`).
 
 ## Route shapes
 
-### `/writing` (index)
+### `/work` (index)
 
 ```tsx
-// pages/writing/index.tsx
+// pages/work/index.tsx
 import { getPublicNotes } from '@/lib/vault';
 
 export const getStaticProps = async () => {
@@ -192,10 +198,10 @@ interface Props {
 }
 ```
 
-### `/writing/[slug]` (detail)
+### `/work/[slug]` (detail)
 
 ```tsx
-// pages/writing/[slug].tsx
+// pages/work/[slug].tsx
 import { getPublicNotes } from '@/lib/vault';
 
 export const getStaticPaths = async () => {

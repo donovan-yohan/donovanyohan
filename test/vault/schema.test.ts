@@ -7,7 +7,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { VaultFrontmatterSchema } from "../../lib/vault/schema";
+import { VaultFrontmatterSchema, VaultTaxonomySchema } from "../../lib/vault/schema";
 
 const VALID_BASE = {
   title: "Hello World",
@@ -38,6 +38,7 @@ describe("VaultFrontmatterSchema", () => {
           headline: "Custom headline",
           excerpt: "Custom excerpt",
           image: "/img/notes/cover.png",
+          imageBg: "#ffffff",
         },
       });
       expect(result.success).toBe(true);
@@ -45,6 +46,7 @@ describe("VaultFrontmatterSchema", () => {
       expect(result.data.slug).toBe("hello-world");
       expect(result.data.preview?.kind).toBe("image");
       expect(result.data.preview?.span).toBe(6);
+      expect(result.data.preview?.imageBg).toBe("#ffffff");
     });
 
     it("preserves extra frontmatter keys via passthrough (P passthrough)", () => {
@@ -84,6 +86,16 @@ describe("VaultFrontmatterSchema", () => {
       expect(result.success).toBe(true);
       if (!result.success) return;
       expect(result.data.visibility).toBe("private");
+    });
+
+    it("accepts explicit 'preview' visibility", () => {
+      const result = VaultFrontmatterSchema.safeParse({
+        ...VALID_BASE,
+        visibility: "preview",
+      });
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.visibility).toBe("preview");
     });
 
     it("rejects invalid visibility values", () => {
@@ -216,6 +228,69 @@ describe("VaultFrontmatterSchema", () => {
       expect(
         VaultFrontmatterSchema.safeParse({ ...VALID_BASE, preview: { span: 12 } }).success,
       ).toBe(true);
+    });
+
+    it("rejects malformed preview image backgrounds", () => {
+      expect(
+        VaultFrontmatterSchema.safeParse({
+          ...VALID_BASE,
+          preview: { imageBg: "green" },
+        }).success,
+      ).toBe(false);
+    });
+  });
+
+  describe("tags, series, and taxonomy", () => {
+    it("defaults note tags to an empty array", () => {
+      const result = VaultFrontmatterSchema.safeParse(VALID_BASE);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.tags).toEqual([]);
+    });
+
+    it("accepts kebab-case tags and ordered series metadata", () => {
+      const result = VaultFrontmatterSchema.safeParse({
+        ...VALID_BASE,
+        tags: ["memory", "diy-agent"],
+        series: {
+          slug: "agent-memory-layers",
+          title: "Agent Memory Layers",
+          order: 3,
+        },
+      });
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.tags).toEqual(["memory", "diy-agent"]);
+      expect(result.data.series?.slug).toBe("agent-memory-layers");
+    });
+
+    it("rejects malformed tag and series slugs", () => {
+      expect(VaultFrontmatterSchema.safeParse({ ...VALID_BASE, tags: ["Bad Tag"] }).success).toBe(false);
+      expect(
+        VaultFrontmatterSchema.safeParse({
+          ...VALID_BASE,
+          series: { slug: "bad slug", title: "Bad", order: 1 },
+        }).success,
+      ).toBe(false);
+    });
+
+    it("parses dy-journal-owned taxonomy labels for filter tabs", () => {
+      const result = VaultTaxonomySchema.safeParse({
+        tags: {
+          memory: {
+            label: "Memory",
+            description: "Agent memory and recall.",
+            showInFilters: true,
+            order: 10,
+          },
+          "diy-agent": { label: "DIY Agent" },
+        },
+      });
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.tags.memory.showInFilters).toBe(true);
+      expect(result.data.tags["diy-agent"].showInFilters).toBe(false);
+      expect(result.data.tags["diy-agent"].order).toBe(1000);
     });
   });
 });

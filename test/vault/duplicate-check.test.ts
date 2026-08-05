@@ -16,6 +16,7 @@ function makeNote(slug: string, filepath: string, frontmatterSlug?: string): Vau
       date: "2026-05-10",
       visibility: "public",
       type: "note",
+      tags: [],
       ...(frontmatterSlug ? { slug: frontmatterSlug } : {}),
     },
     body: "<p>body</p>",
@@ -50,18 +51,12 @@ describe("assertNoDuplicateSlugs — no collision", () => {
 
 describe("assertNoDuplicateSlugs — 2-way collision", () => {
   it("throws DuplicateSlugError for 2 notes with the same slug", () => {
-    const notes = [
-      makeNote("my-note", "note-a.md"),
-      makeNote("my-note", "note-b.md"),
-    ];
+    const notes = [makeNote("my-note", "note-a.md"), makeNote("my-note", "note-b.md")];
     expect(() => assertNoDuplicateSlugs(notes)).toThrow(DuplicateSlugError);
   });
 
   it("error contains the colliding slug", () => {
-    const notes = [
-      makeNote("my-note", "note-a.md"),
-      makeNote("my-note", "note-b.md"),
-    ];
+    const notes = [makeNote("my-note", "note-a.md"), makeNote("my-note", "note-b.md")];
     try {
       assertNoDuplicateSlugs(notes);
     } catch (err) {
@@ -71,10 +66,7 @@ describe("assertNoDuplicateSlugs — 2-way collision", () => {
   });
 
   it("error contains both colliding paths", () => {
-    const notes = [
-      makeNote("my-note", "note-a.md"),
-      makeNote("my-note", "note-b.md"),
-    ];
+    const notes = [makeNote("my-note", "note-a.md"), makeNote("my-note", "note-b.md")];
     try {
       assertNoDuplicateSlugs(notes);
     } catch (err) {
@@ -116,11 +108,7 @@ describe("assertNoDuplicateSlugs — 3-way collision (N-way)", () => {
   });
 
   it("error resolutions array has same length as paths", () => {
-    const notes = [
-      makeNote("dup", "a.md"),
-      makeNote("dup", "b.md"),
-      makeNote("dup", "c.md"),
-    ];
+    const notes = [makeNote("dup", "a.md"), makeNote("dup", "b.md"), makeNote("dup", "c.md")];
     try {
       assertNoDuplicateSlugs(notes);
     } catch (err) {
