@@ -13,6 +13,12 @@ export interface CuratedGithubProject {
   imageLight?: string;
   imageDark?: string;
   imageBg?: string;
+  /**
+   * ISO date that wins over the GitHub API's latest-commit date for both the
+   * card's "UPDATED" label and sort order. For archival uploads where the
+   * upload date misrepresents when the work actually happened.
+   */
+  dateOverride?: string;
 }
 
 export interface WorkProject extends CuratedGithubProject {
@@ -84,6 +90,7 @@ export const CURATED_GITHUB_PROJECTS: CuratedGithubProject[] = [
     language: "TypeScript",
     image: "/img/work/snakebyte-studios-preview.webp",
     imageBg: "#f2f2f3",
+    dateOverride: "2021-10-06",
   },
   {
     repo: "hermes-plugin-carabiner",
@@ -266,12 +273,13 @@ const latestAuthoredCommit = async (repo: string): Promise<string | undefined> =
 const loadWorkProjects = async (): Promise<WorkProject[]> => {
   const projects = await Promise.all(
     CURATED_GITHUB_PROJECTS.map(async (project, index) => {
-      const [repoMeta, latestCommitAt] = await Promise.all([
+      const [repoMeta, fetchedCommitAt] = await Promise.all([
         fetchJson<GithubRepoResponse>(
           `https://api.github.com/repos/${GITHUB_OWNER}/${project.repo}`
         ),
-        latestAuthoredCommit(project.repo),
+        project.dateOverride ? Promise.resolve(undefined) : latestAuthoredCommit(project.repo),
       ]);
+      const latestCommitAt = project.dateOverride ?? fetchedCommitAt;
       const sortDate = latestCommitAt ?? repoMeta?.pushed_at;
       return {
         ...project,
