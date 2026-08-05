@@ -9,25 +9,6 @@ const sourceHtml = resolve(repoRoot, "design/work-preview-cards/index.html");
 const renderedDir = resolve(process.env.TMPDIR ?? "/tmp", "donovanyohan-work-preview-cards");
 const publicDir = resolve(repoRoot, "public/img/work");
 
-const chromiumCandidates = [
-  process.env.CHROMIUM_BIN,
-  "chromium",
-  "chromium-browser",
-  "google-chrome",
-  "google-chrome-stable",
-].filter(Boolean);
-
-const chromium = chromiumCandidates.find((candidate) => {
-  const result = spawnSync("bash", ["-lc", `command -v ${candidate}`], { encoding: "utf8" });
-  return result.status === 0;
-});
-
-if (!chromium) {
-  throw new Error(
-    "No Chromium binary found. Set CHROMIUM_BIN or install chromium to render WORK preview screenshots."
-  );
-}
-
 const cards = [
   "relay-ide",
   "dynamic-workflows",
@@ -48,6 +29,25 @@ if (unknownCards.length > 0) {
   throw new Error(`Unknown WORK preview card slug(s): ${unknownCards.join(", ")}`);
 }
 const cardsToRender = selectedCards.length > 0 ? selectedCards : cards;
+
+const chromiumCandidates = [
+  process.env.CHROMIUM_BIN,
+  "chromium",
+  "chromium-browser",
+  "google-chrome",
+  "google-chrome-stable",
+].filter(Boolean);
+
+const chromium = chromiumCandidates.find((candidate) => {
+  const result = spawnSync("bash", ["-lc", `command -v ${candidate}`], { encoding: "utf8" });
+  return result.status === 0;
+});
+
+if (!chromium) {
+  throw new Error(
+    "No Chromium binary found. Set CHROMIUM_BIN or install chromium to render WORK preview screenshots."
+  );
+}
 
 mkdirSync(renderedDir, { recursive: true });
 mkdirSync(publicDir, { recursive: true });

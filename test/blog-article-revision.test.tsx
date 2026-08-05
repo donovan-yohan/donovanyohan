@@ -28,7 +28,7 @@ vi.mock("../lib/vault", () => ({
 
 import BlogSlug from "../pages/blog/[slug]";
 
-const note = (updated: string, changeNote: string): VaultNote =>
+const note = ({ updated, changeNote }: { updated?: string; changeNote?: string } = {}): VaultNote =>
   ({
     slug: "revised-article",
     body: "<p>Body</p>",
@@ -48,16 +48,38 @@ const note = (updated: string, changeNote: string): VaultNote =>
   }) as VaultNote;
 
 describe("blog article revision metadata", () => {
-  test("renders a change note only for a later revision date", () => {
+  test("renders a change note for a different revision date", () => {
     const { rerender } = render(
-      <BlogSlug note={note("2026-06-04", "Clarified the memory-cost ladder.")} />
+      <BlogSlug
+        note={note({
+          updated: "2026-06-04",
+          changeNote: "Clarified the memory-cost ladder.",
+        })}
+      />
     );
 
     expect(screen.getByText("Updated JUN 4, 2026")).toBeInTheDocument();
     expect(screen.getByText("Change note")).toBeInTheDocument();
     expect(screen.getByText(/Clarified the memory-cost ladder/)).toBeInTheDocument();
 
-    rerender(<BlogSlug note={note("2026-05-10", "Should stay hidden.")} />);
+    rerender(
+      <BlogSlug note={note({ updated: "2026-05-10", changeNote: "Should stay hidden." })} />
+    );
+
+    expect(screen.queryByText(/Updated/)).not.toBeInTheDocument();
+    expect(screen.queryByText("Change note")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Should stay hidden/)).not.toBeInTheDocument();
+  });
+
+  test("renders an updated date without a change note", () => {
+    render(<BlogSlug note={note({ updated: "2026-06-04" })} />);
+
+    expect(screen.getByText("Updated JUN 4, 2026")).toBeInTheDocument();
+    expect(screen.queryByText("Change note")).not.toBeInTheDocument();
+  });
+
+  test("hides a change note when the revision date is missing", () => {
+    render(<BlogSlug note={note({ changeNote: "Should stay hidden." })} />);
 
     expect(screen.queryByText(/Updated/)).not.toBeInTheDocument();
     expect(screen.queryByText("Change note")).not.toBeInTheDocument();
