@@ -9,6 +9,27 @@ const sourceHtml = resolve(repoRoot, "design/work-preview-cards/index.html");
 const renderedDir = resolve(process.env.TMPDIR ?? "/tmp", "donovanyohan-work-preview-cards");
 const publicDir = resolve(repoRoot, "public/img/work");
 
+const cards = [
+  "relay-ide",
+  "dynamic-workflows",
+  "remote-hosts",
+  "carabiner",
+  "comfyui-image-backend",
+  "talent-roster",
+  "lexitiles",
+  "sample-sound",
+  "dicesuki",
+  "open-music-player",
+  "belayer",
+];
+
+const selectedCards = process.argv.slice(2);
+const unknownCards = selectedCards.filter((slug) => !cards.includes(slug));
+if (unknownCards.length > 0) {
+  throw new Error(`Unknown WORK preview card slug(s): ${unknownCards.join(", ")}`);
+}
+const cardsToRender = selectedCards.length > 0 ? selectedCards : cards;
+
 const chromiumCandidates = [
   process.env.CHROMIUM_BIN,
   "chromium",
@@ -27,20 +48,6 @@ if (!chromium) {
     "No Chromium binary found. Set CHROMIUM_BIN or install chromium to render WORK preview screenshots."
   );
 }
-
-const cards = [
-  "relay-ide",
-  "dynamic-workflows",
-  "remote-hosts",
-  "carabiner",
-  "comfyui-image-backend",
-  "talent-roster",
-  "lexitiles",
-  "sample-sound",
-  "dicesuki",
-  "open-music-player",
-  "belayer",
-];
 
 mkdirSync(renderedDir, { recursive: true });
 mkdirSync(publicDir, { recursive: true });
@@ -68,7 +75,7 @@ const renderPng = (slug, theme) => {
   return output;
 };
 
-for (const slug of cards) {
+for (const slug of cardsToRender) {
   for (const theme of ["light", "dark"]) {
     const png = renderPng(slug, theme);
     const webp = resolve(publicDir, `${slug}-preview-${theme}.webp`);
@@ -82,4 +89,4 @@ for (const slug of cards) {
     .toFile(resolve(publicDir, `${slug}-preview.webp`));
 }
 
-console.log(`rendered ${cards.length} deterministic WORK preview cards using ${chromium}`);
+console.log(`rendered ${cardsToRender.length} deterministic WORK preview cards using ${chromium}`);

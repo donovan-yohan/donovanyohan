@@ -93,6 +93,10 @@ export default function WorkSlug({ note }: Props) {
     typeof note.frontmatter.updated === "string" && note.frontmatter.updated !== note.frontmatter.date
       ? note.frontmatter.updated
       : null;
+  const changeNote =
+    updated && typeof note.frontmatter.changeNote === "string"
+      ? note.frontmatter.changeNote
+      : null;
   // Pull the article's accent slot off of preview so the h2 dot + title
   // underline pick up the right highlighter colour.
   const accentSlot = ((note.preview.accent || "yellow").toLowerCase().charCodeAt(0) % 4) + 1;
@@ -131,6 +135,12 @@ export default function WorkSlug({ note }: Props) {
 
         {note.preview.excerpt ? (
           <p className={`articleLede ${cp400.className}`}>{note.preview.excerpt}</p>
+        ) : null}
+
+        {changeNote ? (
+          <p className={`articleUpdateNote ${gm500.className}`}>
+            <span>Change note</span> {changeNote}
+          </p>
         ) : null}
 
         <hr className="articleRule" aria-hidden />
@@ -270,6 +280,22 @@ export default function WorkSlug({ note }: Props) {
           font-size: clamp(18px, 1.8vw, 22px);
           line-height: 1.5;
           color: var(--ink-soft);
+        }
+        .articleUpdateNote {
+          display: inline-block;
+          margin: 0 0 32px;
+          padding: 10px 12px;
+          border: 1px solid var(--rule);
+          background: var(--accent-soft);
+          font-size: 12px;
+          line-height: 1.5;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--ink-soft);
+        }
+        .articleUpdateNote span {
+          margin-right: 8px;
+          color: var(--ink);
         }
         .articleRule {
           border: 0;
