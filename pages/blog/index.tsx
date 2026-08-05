@@ -7,6 +7,7 @@ import Context from "../../components/context";
 import SiteNav from "../../components/SiteNav";
 import { HiSpan } from "../../components/Highlighter";
 import PortfolioCardGrid, { type PortfolioCardItem } from "../../components/PortfolioCardGrid";
+import { MarginAnchor } from "../../components/lab/system/MarginAnchor";
 import { gm500, gm800, cp400 } from "../../global/fonts";
 import { dotGridColor } from "../../lib/dot-grid-color";
 import { BLOG_PAGE_ENABLED } from "../../lib/flags";
@@ -26,6 +27,15 @@ type BlogTypeKey = "article" | "case-study" | "share" | "photo" | "quote" | "vid
 interface BlogCard extends PortfolioCardItem {
   typeKey: BlogTypeKey;
   tagSlugs: string[];
+  /** ISO `YYYY-MM-DD`, kept so the client can regroup cards by month per filter. */
+  date: string;
+}
+
+interface BlogMonthGroup {
+  key: string;
+  monthLabel: string;
+  year: string;
+  cards: BlogCard[];
 }
 
 interface BlogIndexProps {
@@ -146,6 +156,51 @@ const formatCardDate = (date: string): string => {
   return `${month}/${day}/${year.slice(-2)}`;
 };
 
+// Mirrors lib/vault/to-notebook.ts so the blog's month rail reads identically
+// to the homepage journal rail.
+const MONTH_LABELS = [
+  "JAN",
+  "FEB",
+  "MAR",
+  "APR",
+  "MAY",
+  "JUN",
+  "JUL",
+  "AUG",
+  "SEP",
+  "OCT",
+  "NOV",
+  "DEC",
+] as const;
+
+/**
+ * Cards arrive already sorted newest-first, so a single sequential pass yields
+ * newest-month-first groups without re-sorting. Runs over the *filtered* list
+ * too, which is how the notebook behaves: filtering thins each month and drops
+ * emptied months, it never flattens the timeline.
+ */
+const groupCardsByMonth = (cards: BlogCard[]): BlogMonthGroup[] => {
+  const groups: BlogMonthGroup[] = [];
+  let current: BlogMonthGroup | null = null;
+
+  for (const card of cards) {
+    const [year, month] = card.date.split("-");
+    const key = `${year}-${month}`;
+    if (!current || current.key !== key) {
+      current = {
+        key,
+        monthLabel: MONTH_LABELS[parseInt(month, 10) - 1] ?? month,
+        year,
+        cards: [],
+      };
+      groups.push(current);
+    }
+    current.cards.push(card);
+  }
+
+  return groups;
+};
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -216,6 +271,7 @@ const toBlogCard = (
     ...(links.length > 0 ? { links } : {}),
     typeKey,
     tagSlugs: note.frontmatter.tags,
+    date: note.frontmatter.date,
   };
 };
 
@@ -294,6 +350,8 @@ export default function BlogIndex({
     return cards;
   }, [cards, filter]);
 
+  const visibleMonths = useMemo(() => groupCardsByMonth(visibleCards), [visibleCards]);
+
   return (
     <>
       <Head>
@@ -318,12 +376,14 @@ export default function BlogIndex({
               </h1>
               <p className={`blogLede ${cp400.className}`}>{BLOG_LEDE}</p>
             </header>
+          </div>
 
-            <div
-              className={`blogFilters ${gm500.className}`}
-              role="group"
-              aria-label="Filter blog entries"
-            >
+          <div
+            className={`blogFilters ${gm500.className}`}
+            role="group"
+            aria-label="Filter blog entries"
+          >
+            <div className="blogFiltersInner">
               <button
                 type="button"
                 className={`blogChip ${filter === "all" ? "blogChipActive" : ""}`}
@@ -367,15 +427,47 @@ export default function BlogIndex({
             </div>
           </div>
 
-          <PortfolioCardGrid
-            ariaLabel="Blog entries"
-            items={visibleCards}
-            emptyMessage={
-              vaultConfigured
-                ? "No public posts match that filter."
-                : "No posts published yet — vault not configured. See VAULT.md."
-            }
-          />
+          {visibleMonths.length > 0 ? (
+            <div className="blogMonths">
+              {visibleMonths.map((month) => (
+                <section
+                  key={month.key}
+                  className="blogMonth"
+                  aria-labelledby={`blog-month-${month.key}`}
+                >
+                  {/* The grid lives inside the sticky zone so the margin header
+                      stays pinned for exactly as long as its own month's cards
+                      are on screen, then hands off to the next month. */}
+                  <div className="blogMonthStickyZone">
+                    <MarginAnchor top={3} className={gm500.className}>
+                      <span className="blogMonthName" id={`blog-month-${month.key}`}>
+                        {month.monthLabel}
+                      </span>
+                      <span className="blogMonthYear">{month.year}</span>
+                      <span className="blogMonthCount">
+                        {month.cards.length} {month.cards.length === 1 ? "entry" : "entries"}
+                      </span>
+                    </MarginAnchor>
+
+                    <PortfolioCardGrid
+                      ariaLabel={`${month.monthLabel} ${month.year} blog entries`}
+                      items={month.cards}
+                    />
+                  </div>
+                </section>
+              ))}
+            </div>
+          ) : (
+            <PortfolioCardGrid
+              ariaLabel="Blog entries"
+              items={[]}
+              emptyMessage={
+                vaultConfigured
+                  ? "No public posts match that filter."
+                  : "No posts published yet — vault not configured. See VAULT.md."
+              }
+            />
+          )}
         </section>
       </main>
 
@@ -478,7 +570,7 @@ export default function BlogIndex({
         .blogIntroBand {
           position: relative;
           z-index: 2;
-          margin: -40px calc(-1 * (var(--content-pad-left) + var(--page-shell-bleed-x))) 24px;
+          margin: -40px calc(-1 * (var(--content-pad-left) + var(--page-shell-bleed-x))) 0;
           padding: 56px calc(var(--content-pad-left) + var(--page-shell-bleed-x)) 0;
           background: var(--paper);
           border-top: 1px solid var(--rule);
@@ -512,14 +604,24 @@ export default function BlogIndex({
           font-size: clamp(19px, 1.7vw, 25px);
           line-height: 1.42;
         }
+        /* Pinned under the nav so every month rail has a stable ceiling to
+           stick beneath — same treatment as the homepage notebook chip bar.
+           Left edge lands on the accent rule; the bar bleeds off to the right. */
         .blogFilters {
+          position: sticky;
+          top: var(--nav-h, 48px);
+          z-index: 20;
+          margin: 0 calc(-1 * (var(--content-pad-left) + var(--page-shell-bleed-x))) 24px
+            calc(-1 * var(--gutter-pad));
+          background: var(--paper);
+          border-bottom: 1px solid var(--rule);
+        }
+        .blogFiltersInner {
           display: flex;
           flex-wrap: wrap;
           align-items: center;
           gap: var(--u);
-          padding: var(--u) 0;
-          background: var(--paper);
-          border-top: 1px solid var(--rule);
+          padding: var(--u) var(--content-pad-left) var(--u) var(--gutter-pad);
         }
         .blogChip {
           --blog-chip-accent: var(--ink);
@@ -552,6 +654,46 @@ export default function BlogIndex({
           border-color: var(--blog-chip-accent, var(--ink));
           color: var(--blog-chip-ink, #0e0d0a);
         }
+        .blogMonths {
+          display: flex;
+          flex-direction: column;
+          gap: calc(var(--u) * 3);
+        }
+        .blogMonthStickyZone {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          gap: var(--u);
+        }
+        /* Anchor markup belongs to MarginAnchor, so reach it globally — but
+           only ever from inside .blogMonth, never the homepage notebook. */
+        .blogMonth :global(.marginAnchor) {
+          --margin-anchor-z-index: 30;
+        }
+        .blogMonthName {
+          font-size: 96px;
+          font-weight: 900;
+          line-height: 0.85;
+          letter-spacing: -0.04em;
+          color: var(--ink);
+        }
+        .blogMonthYear {
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: var(--ink);
+          /* MarginAnchor puts gap: var(--u) between children. Pull the year
+             back flush under the month name; the count keeps its breathing
+             room below. */
+          margin-top: calc(var(--u) * -1);
+        }
+        .blogMonthCount {
+          font-size: 11px;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: var(--ink-mute);
+        }
         @media (max-width: 900px) {
           :global(:root),
           :global([data-theme="light"]),
@@ -568,6 +710,8 @@ export default function BlogIndex({
             padding: 0 var(--page-pad-x) 72px;
           }
           .blogFrame {
+            /* Chip-bar height, so month rails know where to pin beneath it. */
+            --blog-chips-h: 57px;
             margin-left: calc(-1 * var(--page-pad-x));
             margin-right: calc(-1 * var(--page-pad-x));
             padding: 32px var(--page-pad-x) 72px;
@@ -577,26 +721,78 @@ export default function BlogIndex({
             display: none;
           }
           .blogIntroBand {
-            margin: -32px calc(-1 * var(--page-pad-x)) 20px;
+            margin: -32px calc(-1 * var(--page-pad-x)) 0;
             padding: 32px var(--page-pad-x) 0;
           }
           .blogFilters {
+            margin: 0 calc(-1 * var(--page-pad-x)) 20px;
+          }
+          .blogFiltersInner {
             flex-wrap: nowrap;
             gap: 8px;
-            margin-left: calc(-1 * var(--page-pad-x));
-            margin-right: calc(-1 * var(--page-pad-x));
             overflow-x: auto;
             overscroll-behavior-x: contain;
             padding: 10px var(--page-pad-x);
             scrollbar-width: none;
           }
-          .blogFilters::-webkit-scrollbar {
+          .blogFiltersInner::-webkit-scrollbar {
             display: none;
           }
           .blogChip {
             flex: 0 0 auto;
             min-height: 36px;
             padding: 8px 10px;
+          }
+          .blogMonths {
+            gap: calc(var(--u) * 1.5);
+          }
+          .blogMonthStickyZone {
+            gap: var(--u);
+          }
+          /* The gutter is gone on mobile, so the rail becomes a full-bleed
+             sticky strip that pins directly under the chip bar and slides
+             beneath it (z 18 < chips' 20) when its month scrolls out. */
+          .blogMonth :global(.marginAnchor) {
+            --margin-anchor-position: sticky;
+            --margin-anchor-top: calc(var(--nav-h, 0px) + var(--blog-chips-h, 57px));
+            --margin-anchor-height: auto;
+            --margin-anchor-margin-left: calc(-1 * var(--page-pad-x));
+            --margin-anchor-margin-right: calc(-1 * var(--page-pad-x));
+            --margin-anchor-padding-left: 0;
+            --margin-anchor-z-index: 18;
+            --margin-anchor-pointer-events: auto;
+          }
+          .blogMonth :global(.marginAnchorInner) {
+            --margin-anchor-inner-position: static;
+            --margin-anchor-inner-width: auto;
+            --margin-anchor-inner-padding: 10px var(--page-pad-x) 8px;
+            --margin-anchor-inner-display: grid;
+            --margin-anchor-inner-grid-template-columns: auto minmax(0, 1fr) auto;
+            --margin-anchor-inner-align-items: baseline;
+            --margin-anchor-inner-gap: 8px;
+            background: var(--paper);
+            border-bottom: 1px solid var(--rule);
+          }
+          .blogMonthName {
+            font-size: 22px;
+            letter-spacing: 0.08em;
+            line-height: 1;
+          }
+          .blogMonthYear {
+            margin-top: 0;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            color: var(--ink-mute);
+          }
+          .blogMonthCount {
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-align: right;
+          }
+        }
+        @media (max-width: 560px) {
+          .blogMonthName {
+            font-size: 20px;
           }
         }
       `}</style>
