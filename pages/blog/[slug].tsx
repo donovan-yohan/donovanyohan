@@ -40,12 +40,6 @@ const MONTH_LABELS = [
   "DEC",
 ] as const;
 
-const formatMonthYear = (date: string): string => {
-  const [year, month] = date.split("-");
-  const monthLabel = MONTH_LABELS[parseInt(month, 10) - 1] ?? month;
-  return `${monthLabel} ${year}`;
-};
-
 const formatFullDate = (date: string): string => {
   const [year, month, day] = date.split("-");
   const monthLabel = MONTH_LABELS[parseInt(month, 10) - 1] ?? month;
@@ -94,9 +88,7 @@ export default function WorkSlug({ note }: Props) {
   const isBlogRoute = router.pathname.startsWith("/blog") || router.asPath.startsWith("/blog/");
   const indexHref = isBlogRoute ? "/blog" : "/#work";
 
-  // Format date as MAY 2026 etc. — same monospace badge convention used
-  // on the bullet-journal homepage.
-  const formattedDate = formatMonthYear(note.frontmatter.date);
+  const formattedDate = formatFullDate(note.frontmatter.date);
   const updated =
     typeof note.frontmatter.updated === "string" && note.frontmatter.updated !== note.frontmatter.date
       ? note.frontmatter.updated
