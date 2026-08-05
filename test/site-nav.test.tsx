@@ -11,7 +11,7 @@ import Context from "../components/context";
 import SiteNav from "../components/SiteNav";
 
 describe("SiteNav", () => {
-  test("omits Blog from desktop and mobile navigation without leaving an empty column", () => {
+  test("includes Blog in desktop and mobile navigation with a six-column mobile grid", () => {
     const { container } = render(
       <Context.Provider value={{ theme: "light", toggleTheme: vi.fn() }}>
         <SiteNav current="work" />
@@ -20,14 +20,17 @@ describe("SiteNav", () => {
 
     const desktopNav = container.querySelector(".navTabs");
     expect(desktopNav).not.toBeNull();
-    expect(within(desktopNav as HTMLElement).queryByRole("link", { name: "Blog" })).toBeNull();
+    expect(within(desktopNav as HTMLElement).getByRole("link", { name: "Blog" })).toHaveAttribute(
+      "href",
+      "/blog",
+    );
 
     const mobileNav = container.querySelector('[aria-label="Mobile navigation"]');
     expect(mobileNav).not.toBeNull();
-    expect((mobileNav as HTMLElement).querySelector('a[href="/blog"]')).toBeNull();
-    expect((mobileNav as HTMLElement).querySelectorAll(".mobileNavItem")).toHaveLength(5);
+    expect((mobileNav as HTMLElement).querySelector('a[href="/blog"]')).not.toBeNull();
+    expect((mobileNav as HTMLElement).querySelectorAll(".mobileNavItem")).toHaveLength(6);
     expect(mobileNav as HTMLElement).toHaveStyle({
-      gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+      gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
     });
 
     expect(within(desktopNav as HTMLElement).getByRole("link", { name: "Work" })).toHaveAttribute(
