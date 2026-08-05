@@ -52,7 +52,7 @@ const HW_DUR_MS = 280;
 const HERO_TOKENS: ReadonlyArray<{ text: string; bold: boolean }> = [
   { text: "Hi, I’m Donovan; a ", bold: false },
   { text: "senior full-stack engineer", bold: true },
-  { text: " designing and building ", bold: false },
+  { text: " designing and building for and with ", bold: false },
   { text: "agentic systems", bold: true },
   { text: ".", bold: false },
 ];
