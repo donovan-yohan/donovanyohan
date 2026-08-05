@@ -99,14 +99,115 @@ const contrastInk = (hex: string): string => {
   return luminance > 0.46 ? "#0e0d0a" : "#fdfdf9";
 };
 
-const cardInitials = (title: string): string =>
-  title
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((word) => word[0])
-    .join("")
-    .slice(0, 3);
+type PlaceholderGlyph = "article" | "work" | "share" | "photo" | "video" | "quote" | "note";
+
+/**
+ * Picks the placeholder mark from the card's own category label, so callers
+ * don't have to plumb a second taxonomy through: blog cards already pass
+ * "article" / "case study" / "share" / "photo" / "quote" / "video" / "note",
+ * work cards pass "work". Anything unrecognised falls back to the note mark.
+ */
+const placeholderGlyphFor = (categoryLabel: string): PlaceholderGlyph => {
+  const label = categoryLabel.toLowerCase();
+  if (label.includes("case") || label.includes("work") || label.includes("project"))
+    return "work";
+  if (label.includes("share") || label.includes("link")) return "share";
+  if (label.includes("photo") || label.includes("image")) return "photo";
+  if (label.includes("video") || label.includes("talk")) return "video";
+  if (label.includes("quote")) return "quote";
+  if (label.includes("article") || label.includes("essay") || label.includes("writing"))
+    return "article";
+  return "note";
+};
+
+const GlyphMark = ({ glyph }: { glyph: PlaceholderGlyph }) => {
+  switch (glyph) {
+    case "work":
+      return (
+        <>
+          <rect x="11.5" y="11.5" width="18" height="18" rx="1.5" />
+          <rect x="18.5" y="18.5" width="18" height="18" rx="1.5" />
+        </>
+      );
+    case "share":
+      return (
+        <>
+          <path d="M31.5 26v9a2.5 2.5 0 0 1-2.5 2.5H14a2.5 2.5 0 0 1-2.5-2.5V20a2.5 2.5 0 0 1 2.5-2.5h9" />
+          <path d="M28 10.5h9.5V20" />
+          <path d="M37.5 10.5 24.5 23.5" />
+        </>
+      );
+    case "photo":
+      return (
+        <>
+          <rect x="10.5" y="13.5" width="27" height="21" rx="1.5" />
+          <circle cx="18" cy="21" r="2.5" />
+          <path d="M11 30.5l6.5-5.5 5 4 6-5 9 7" />
+        </>
+      );
+    case "video":
+      return (
+        <>
+          <rect x="9.5" y="13.5" width="29" height="21" rx="2" />
+          <path d="M20.5 18.5l9 5.5-9 5.5z" />
+        </>
+      );
+    case "quote":
+      return (
+        <>
+          <path d="M13 13.5h22a2.5 2.5 0 0 1 2.5 2.5v13a2.5 2.5 0 0 1-2.5 2.5h-9l-7 5.5V31.5H13a2.5 2.5 0 0 1-2.5-2.5V16A2.5 2.5 0 0 1 13 13.5z" />
+          <path d="M17 20h14M17 25.5h9" />
+        </>
+      );
+    case "article":
+      return (
+        <>
+          <rect x="15.5" y="9.5" width="17" height="25" rx="1.5" />
+          <path d="M20 16.5h8M20 22h8M20 27.5h5" />
+        </>
+      );
+    case "note":
+    default:
+      return (
+        <>
+          <path d="M27 10.5H16A1.5 1.5 0 0 0 14.5 12v24A1.5 1.5 0 0 0 16 37.5h16a1.5 1.5 0 0 0 1.5-1.5V17z" />
+          <path d="M27 10.5V17h6.5" />
+          <path d="M19.5 24h9M19.5 30h6" />
+        </>
+      );
+  }
+};
+
+/**
+ * Cover fallback for cards with no artwork: a flat accent-tinted panel on the
+ * site's dot-grid registration surface, with a small stroked type mark and a
+ * highlighter tick. Pure CSS + inline SVG (CSS vars flip with the theme), so
+ * it reads correctly in light and dark without any image asset.
+ */
+const CardPlaceholder = ({ glyph }: { glyph: PlaceholderGlyph }) => (
+  <div className="portfolioCardPlaceholder" data-glyph={glyph}>
+    <span className="portfolioCardPlaceholderTint" />
+    <span className="portfolioCardPlaceholderDots" />
+    <svg
+      className="portfolioCardPlaceholderMark"
+      viewBox="0 0 48 48"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <g
+        className="portfolioCardPlaceholderGlyph"
+        fill="none"
+        stroke="var(--ink)"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <GlyphMark glyph={glyph} />
+      </g>
+      <path className="portfolioCardPlaceholderTick" d="M17 42.5h14" />
+    </svg>
+  </div>
+);
 
 const linkIcon = (kind: PortfolioCardLink["kind"], href: string) => {
   if (kind === "github") return <GithubIcon />;
@@ -216,7 +317,7 @@ const PortfolioCardGrid = ({
                   decoding="async"
                 />
               ) : (
-                <div className="portfolioCardMonogram">{cardInitials(item.title)}</div>
+                <CardPlaceholder glyph={placeholderGlyphFor(item.categoryLabel)} />
               )}
             </div>
 
@@ -328,12 +429,49 @@ const PortfolioCardGrid = ({
         :global(html[data-theme="dark"]) .portfolioCardImageDark {
           display: block;
         }
-        .portfolioCardMonogram {
-          color: var(--ink);
-          font-size: clamp(48px, 7vw, 92px);
-          font-weight: 800;
-          letter-spacing: -0.08em;
-          opacity: 0.88;
+        .portfolioCardPlaceholder {
+          position: relative;
+          display: grid;
+          place-items: center;
+          width: 100%;
+          height: 100%;
+          background: var(--paper);
+          overflow: hidden;
+        }
+        .portfolioCardPlaceholderTint,
+        .portfolioCardPlaceholderDots {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+        .portfolioCardPlaceholderTint {
+          background: var(--portfolio-card-accent);
+          opacity: 0.1;
+        }
+        .portfolioCardPlaceholderDots {
+          background-image: radial-gradient(var(--ink) 1px, transparent 1.4px);
+          background-size: 12px 12px;
+          background-position: 6px 6px;
+          opacity: 0.18;
+        }
+        .portfolioCardPlaceholderMark {
+          position: relative;
+          width: clamp(72px, 32%, 116px);
+          height: auto;
+        }
+        .portfolioCardPlaceholderGlyph {
+          opacity: 0.72;
+        }
+        .portfolioCardPlaceholderTick {
+          stroke: var(--portfolio-card-accent);
+          stroke-width: 3.5;
+          stroke-linecap: butt;
+        }
+        :global(html[data-theme="dark"]) .portfolioCardPlaceholderTint {
+          opacity: 0.14;
+        }
+        :global(html[data-theme="dark"]) .portfolioCardPlaceholderDots {
+          opacity: 0.12;
         }
         .portfolioCardBody {
           flex: 1 1 auto;

@@ -27,6 +27,7 @@ import type {
   ColsMode,
 } from "../../components/lab/Notebook";
 import type { VaultNote, PreviewKind } from "./schema";
+import { stableIndexBySlug } from "./stable-index";
 
 const MONTH_LABELS = [
   "JAN",
@@ -230,13 +231,9 @@ export function notesToNotebookMonths(notes: VaultNote[]): NotebookMonth[] {
     valid.push(n);
   }
 
-  const indexBySlug = new Map<string, number>();
-  [...valid]
-    .sort((a, b) => {
-      const cmp = a.frontmatter.date.localeCompare(b.frontmatter.date);
-      return cmp !== 0 ? cmp : a.slug.localeCompare(b.slug);
-    })
-    .forEach((n, i) => indexBySlug.set(n.slug, i + 1));
+  // Entry numbers belong to the note, not to the rendered row: oldest note is
+  // #001 forever. Shared with the blog index via lib/vault/stable-index.
+  const indexBySlug = stableIndexBySlug(valid);
 
   const byKey = new Map<string, VaultNote[]>();
   for (const n of valid) {

@@ -60,6 +60,11 @@ const readMonths = (container: HTMLElement) =>
     cards: [...section.querySelectorAll(".portfolioCard")].length,
   }));
 
+const readIndexLabels = (container: HTMLElement) =>
+  [...container.querySelectorAll(".portfolioCardTopLeft span:first-child")].map(
+    (span) => span.textContent,
+  );
+
 describe("blog index month grouping", () => {
   test("groups cards into newest-first month blocks with margin-rail headers", () => {
     const { container } = renderIndex();
@@ -98,6 +103,46 @@ describe("blog index month grouping", () => {
 
     fireEvent.click(getByRole("button", { name: /all/i }));
     expect(readMonths(container)).toHaveLength(3);
+  });
+
+  test("each card keeps its own stable number through month blocks and filters", () => {
+    // Numbers belong to the note (oldest post = #001), so grouping and
+    // filtering must never renumber what stays on screen.
+    const numbered: BlogCard[] = [
+      card({ id: "may-a", date: "2026-05-20", indexLabel: "#004" }),
+      card({
+        id: "may-b",
+        date: "2026-05-04",
+        indexLabel: "#003",
+        typeKey: "share",
+        categoryLabel: "share",
+      }),
+      card({ id: "apr-a", date: "2026-04-18", indexLabel: "#002", tagSlugs: ["memory"] }),
+      card({
+        id: "mar-a",
+        date: "2026-03-02",
+        indexLabel: "#001",
+        typeKey: "share",
+        categoryLabel: "share",
+      }),
+    ];
+
+    const { container, getByRole } = render(
+      <BlogIndex
+        cards={numbered}
+        notebookTagFilters={[{ slug: "memory", label: "Memory" }]}
+        vaultSha="test"
+        vaultConfigured
+      />,
+    );
+
+    expect(readIndexLabels(container)).toEqual(["#004", "#003", "#002", "#001"]);
+
+    fireEvent.click(getByRole("button", { name: /share/i }));
+    expect(readIndexLabels(container)).toEqual(["#003", "#001"]);
+
+    fireEvent.click(getByRole("button", { name: /memory/i }));
+    expect(readIndexLabels(container)).toEqual(["#002"]);
   });
 
   test("keeps the chip rail pinned above the month rails", () => {

@@ -37,6 +37,10 @@ export type {
   SeriesConfig,
 } from "./schema";
 
+// Stable card numbering (oldest published note = #001, forever). Pure helper,
+// re-exported here so pages keep importing the vault API from this barrel.
+export { stableIndexBySlug, formatEntryNumber } from "./stable-index";
+
 // ── Config ────────────────────────────────────────────────────────────────────
 
 /**

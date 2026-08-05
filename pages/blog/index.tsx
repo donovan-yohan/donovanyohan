@@ -12,7 +12,13 @@ import { gm500, gm800, cp400 } from "../../global/fonts";
 import { dotGridColor } from "../../lib/dot-grid-color";
 import { BLOG_PAGE_ENABLED } from "../../lib/flags";
 import { themeBootstrap } from "../../lib/theme-bootstrap";
-import { getPublicNotes, getVaultConfig, getVaultTaxonomy } from "../../lib/vault";
+import {
+  formatEntryNumber,
+  getPublicNotes,
+  getVaultConfig,
+  getVaultTaxonomy,
+  stableIndexBySlug,
+} from "../../lib/vault";
 import type { VaultNote } from "../../lib/vault/schema";
 
 const DotGrid = dynamic(() => import("../../components/lab/DotGrid"), { ssr: false });
@@ -212,9 +218,15 @@ const bannerImage = (note: VaultNote): string | undefined => {
   return typeof light === "string" ? light : typeof dark === "string" ? dark : undefined;
 };
 
+/**
+ * `entryNumber` is the note's stable 1-based position in date-ascending order
+ * (oldest published note = #001), not its position in this newest-first list —
+ * so month grouping and the client-side filters keep showing the same number
+ * for the same note, and a new post never renumbers the archive.
+ */
 const toBlogCard = (
   note: VaultNote,
-  index: number,
+  entryNumber: number,
   tagLabels: Record<string, string>
 ): BlogCard => {
   const typeKey = blogTypeForNote(note);
@@ -253,7 +265,7 @@ const toBlogCard = (
 
   return {
     id: note.slug,
-    indexLabel: `#${String(index + 1).padStart(3, "0")}`,
+    indexLabel: formatEntryNumber(entryNumber),
     categoryLabel: typeMeta.label,
     metaLabel: formatCardDate(note.frontmatter.date),
     title,
@@ -291,6 +303,11 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
       const dateCmp = b.frontmatter.date.localeCompare(a.frontmatter.date);
       return dateCmp !== 0 ? dateCmp : a.slug.localeCompare(b.slug);
     });
+  // Numbered over every note this index publishes — the eligibility filter has
+  // run, the client-side type/tag filters have not — so the oldest post is
+  // #001, numbers are gapless, and today's post gets the next number instead
+  // of pushing the archive down one.
+  const entryNumbers = stableIndexBySlug(sorted);
   const notebookTagFilters = Object.entries(taxonomy.tags)
     .filter(([, tag]) => tag.showInFilters)
     .sort(([, a], [, b]) => a.order - b.order || a.label.localeCompare(b.label))
@@ -298,7 +315,9 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
 
   return {
     props: {
-      cards: sorted.map((note, index) => toBlogCard(note, index, tagLabels)),
+      cards: sorted.map((note) =>
+        toBlogCard(note, entryNumbers.get(note.slug) ?? 0, tagLabels)
+      ),
       notebookTagFilters,
       vaultSha: process.env.BUILD_VAULT_SHA ?? "dev",
       vaultConfigured: getVaultConfig() !== null,
