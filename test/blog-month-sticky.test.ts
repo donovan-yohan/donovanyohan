@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { measuredStickyHeight } from "../lib/blog-month-sticky-geometry";
 import { PORTFOLIO_CARD_CLASS, getLastGridRowTop } from "../lib/portfolio-card-grid-geometry";
 
 const rectAt =
@@ -23,6 +24,13 @@ const makeGrid = (...cardTops: number[]) => {
 };
 
 describe("blog month sticky track", () => {
+  test("rounds a measured filter height up so the sticky rail cannot overlap it", () => {
+    expect(measuredStickyHeight(57.1)).toBe(58);
+    expect(measuredStickyHeight(57)).toBe(57);
+    expect(measuredStickyHeight(-1)).toBe(0);
+    expect(measuredStickyHeight(Number.NaN)).toBe(0);
+  });
+
   test("has no sticky travel when the final card is in the first row", () => {
     expect(getLastGridRowTop(makeGrid(120))).toBe(0);
   });

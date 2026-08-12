@@ -1,5 +1,5 @@
 import { fireEvent, render } from "@testing-library/react";
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 vi.mock("next/font/google", () => ({
   Geist_Mono: () => ({ className: "geist-mono" }),
@@ -64,6 +64,8 @@ const readIndexLabels = (container: HTMLElement) =>
   [...container.querySelectorAll(".portfolioCardTopLeft span:first-child")].map(
     (span) => span.textContent,
   );
+
+afterEach(() => vi.unstubAllGlobals());
 
 describe("blog index month grouping", () => {
   test("groups cards into newest-first month blocks with margin-rail headers", () => {
@@ -154,6 +156,40 @@ describe("blog index month grouping", () => {
     const filters = container.querySelector(".blogFilters");
     expect(filters?.parentElement).toBe(frame);
     expect(container.querySelector(".blogFilters .blogFiltersInner .blogChip")).not.toBeNull();
+  });
+
+  test("measures the filter bar into the month rail's scoped sticky geometry", () => {
+    class ResizeObserverMock {
+      static instances: ResizeObserverMock[] = [];
+      readonly observed: Element[] = [];
+
+      constructor(readonly callback: ResizeObserverCallback) {
+        ResizeObserverMock.instances.push(this);
+      }
+
+      observe(element: Element) {
+        this.observed.push(element);
+      }
+
+      disconnect() {}
+    }
+
+    vi.stubGlobal("ResizeObserver", ResizeObserverMock);
+    const { container } = renderIndex();
+    const frame = container.querySelector<HTMLElement>(".blogFrame");
+    const filters = container.querySelector<HTMLElement>(".blogFilters");
+    const observer = ResizeObserverMock.instances.find((instance) =>
+      instance.observed.includes(filters!),
+    );
+
+    expect(frame).not.toBeNull();
+    expect(filters).not.toBeNull();
+    expect(observer).toBeDefined();
+
+    filters!.getBoundingClientRect = () => ({ height: 117.2 }) as DOMRect;
+    observer!.callback([], observer! as unknown as ResizeObserver);
+
+    expect(frame!.style.getPropertyValue("--blog-filter-height")).toBe("118px");
   });
 
   test("falls back to the empty state when a filter matches nothing", () => {
