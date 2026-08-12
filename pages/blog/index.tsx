@@ -10,6 +10,7 @@ import PortfolioCardGrid, { type PortfolioCardItem } from "../../components/Port
 import { MarginAnchor } from "../../components/lab/system/MarginAnchor";
 import { gm500, gm800, cp400 } from "../../global/fonts";
 import { dotGridColor } from "../../lib/dot-grid-color";
+import { measuredStickyHeight } from "../../lib/blog-month-sticky-geometry";
 import { BLOG_PAGE_ENABLED } from "../../lib/flags";
 import {
   PORTFOLIO_CARD_GRID_CLASS,
@@ -374,7 +375,30 @@ export default function BlogIndex({
   }, [cards, filter]);
 
   const visibleMonths = useMemo(() => groupCardsByMonth(visibleCards), [visibleCards]);
+  const blogFrameRef = useRef<HTMLElement>(null);
+  const blogFiltersRef = useRef<HTMLDivElement>(null);
   const blogMonthsRef = useRef<HTMLDivElement>(null);
+
+  // The filter bar itself is sticky beneath the nav and can grow when chips
+  // wrap. Keep the desktop month rail's sticky ceiling directly below that
+  // real box (plus its normal-flow bottom gap) rather than assuming one row.
+  useEffect(() => {
+    const blogFrame = blogFrameRef.current;
+    const blogFilters = blogFiltersRef.current;
+    if (!blogFrame || !blogFilters || typeof ResizeObserver === "undefined") return;
+
+    const measure = () => {
+      const height = measuredStickyHeight(blogFilters.getBoundingClientRect().height);
+      blogFrame.style.setProperty("--blog-filter-height", `${height}px`);
+    };
+
+    measure();
+
+    const resizeObserver = new ResizeObserver(measure);
+    resizeObserver.observe(blogFilters);
+
+    return () => resizeObserver.disconnect();
+  }, []);
 
   // Measures the desktop sticky track. Below 900px the track is `display:
   // contents` (see the mobile block below), so the heights written here have no
@@ -428,7 +452,7 @@ export default function BlogIndex({
       <DotGrid color={dotGridColor(theme)} />
 
       <main className="blogPage">
-        <section className="blogFrame">
+        <section ref={blogFrameRef} className="blogFrame">
           <div className="blogIntroBand">
             <header className="blogHead">
               <span className={`blogKicker ${gm500.className}`}>The bullet journal</span>
@@ -440,6 +464,7 @@ export default function BlogIndex({
           </div>
 
           <div
+            ref={blogFiltersRef}
             className={`blogFilters ${gm500.className}`}
             role="group"
             aria-label="Filter blog entries"
@@ -602,6 +627,11 @@ export default function BlogIndex({
           padding-top: 48px;
         }
         .blogFrame {
+          /* One non-wrapping chip row is 62px: 16px vertical padding on both
+             sides, a 29px chip, and the filter's bottom rule. This is the
+             conservative SSR/no-ResizeObserver fallback; hydration replaces
+             it with the bar's measured live height. */
+          --blog-filter-height: calc(2 * var(--u) + 30px);
           position: relative;
           min-height: 100vh;
           padding: 40px var(--content-pad-left) 96px;
@@ -743,6 +773,12 @@ export default function BlogIndex({
         /* Anchor markup belongs to MarginAnchor, so reach it globally — but
            only ever from inside .blogMonth, never the homepage notebook. */
         .blogMonth :global(.marginAnchor) {
+          /* The live filter-bar height is measured on .blogFrame. Its scoped
+             fallback covers the non-wrapping row until hydration, while
+             ResizeObserver handles wrapped desktop chips. */
+          --margin-anchor-top: calc(
+            var(--nav-h, 48px) + var(--blog-filter-height) + 24px
+          );
           --margin-anchor-z-index: 30;
         }
         .blogMonthName {
