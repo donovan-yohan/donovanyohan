@@ -253,9 +253,18 @@ function lintProbe(relativeName: string, importSpecifier: string): ProbeResult {
   writeProbe(relativeName, importSpecifier);
   const relPath = path.join("pages", relativeName);
   try {
+    // `--format=json` is load-bearing, not a convenience. oxlint's default
+    // human-readable output is environment-sensitive: on GitHub Actions it
+    // switched to an annotation format that omits the `help:` text, so a filter
+    // matching the rule's message found nothing and the boundary looked
+    // unenforced. JSON is a stable contract with discrete fields.
     const result = spawnSync(
       process.execPath,
-      [path.join("node_modules", "oxlint", "bin", "oxlint"), relPath],
+      [
+        path.join("node_modules", "oxlint", "bin", "oxlint"),
+        "--format=json",
+        relPath,
+      ],
       { cwd: process.cwd(), encoding: "utf8" },
     );
 
@@ -272,13 +281,26 @@ function lintProbe(relativeName: string, importSpecifier: string): ProbeResult {
     }
 
     const raw = `${result.stdout ?? ""}${result.stderr ?? ""}`;
-    return {
-      violations: raw
-        .split("\n")
-        .filter((line) => /must import vault API from/.test(line)),
-      raw,
-      status: result.status,
-    };
+
+    let parsed: { diagnostics?: Array<{ code?: string; help?: string }> };
+    try {
+      parsed = JSON.parse(result.stdout);
+    } catch (err) {
+      throw new Error(
+        `could not parse oxlint --format=json output, so the vault boundary ` +
+          `was NOT verified: ${(err as Error).message}\nraw:\n${raw}`,
+      );
+    }
+
+    const violations = (parsed.diagnostics ?? [])
+      .filter(
+        (d) =>
+          d.code === "eslint(no-restricted-imports)" &&
+          /must import vault API from/.test(d.help ?? ""),
+      )
+      .map((d) => d.help ?? "");
+
+    return { violations, raw, status: result.status };
   } finally {
     fs.rmSync(path.join(PROBE_DIR, relativeName), { force: true });
     probeFiles.delete(path.join(PROBE_DIR, relativeName));
