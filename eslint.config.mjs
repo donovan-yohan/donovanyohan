@@ -33,25 +33,47 @@ export default tseslint.config(
   },
   // Vault adapter privacy boundary: pages must import from lib/vault/index,
   // never directly from adapter-local or adapter-github (Slice 1 rule per AGENTS.md).
+  //
+  // Two rules on purpose. `no-restricted-imports` is the primary gate: it is a
+  // core ESLint rule that matches the import specifier as text, so it cannot be
+  // silently disabled by a broken or missing import resolver.
+  // `import/no-restricted-paths` is kept as defense in depth because it matches
+  // the *resolved* file.
+  //
+  // NOTE: the `from` paths below MUST carry the `.ts` extension. The rule
+  // compares against the resolved module path (`lib/vault/adapter-local.ts`); an
+  // extensionless `from` never matches and the rule silently passes everything.
   {
     files: ["pages/**/*.{ts,tsx}"],
     plugins: {
       import: importPlugin,
     },
     rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/lib/vault/adapter-*", "@/lib/vault/adapter-*"],
+              message:
+                "Public pages must import vault API from 'lib/vault/index', not directly from an adapter.",
+            },
+          ],
+        },
+      ],
       "import/no-restricted-paths": [
         "error",
         {
           zones: [
             {
-              target: "pages",
-              from: "lib/vault/adapter-local",
+              target: "./pages",
+              from: "./lib/vault/adapter-local.ts",
               message:
                 "Public pages must import vault API from 'lib/vault/index', not directly from adapter-local.",
             },
             {
-              target: "pages",
-              from: "lib/vault/adapter-github",
+              target: "./pages",
+              from: "./lib/vault/adapter-github.ts",
               message:
                 "Public pages must import vault API from 'lib/vault/index', not directly from adapter-github.",
             },

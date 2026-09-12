@@ -89,7 +89,11 @@ function wrapTables(node: Root | Element): void {
 }
 
 function mergeClassName(
-  className: Element["properties"]["className"],
+  // @types/hast 3.0.5 narrowed `className` to `Array<string> | undefined`, which
+  // makes the string branch below unreachable by type. rehype-raw can still
+  // surface a raw string from inline HTML at runtime, so widen the parameter to
+  // match reality rather than delete a live code path.
+  className: Element["properties"]["className"] | string,
   nextClassName: string,
 ): string[] {
   const classes = Array.isArray(className)

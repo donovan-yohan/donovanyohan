@@ -191,20 +191,46 @@ describe("note body snapshot", () => {
 
 // ── ESLint import restriction — adapter-* never imported from pages ────────────
 //
-// These tests verify the ESLint import/no-restricted-paths rule that prevents
-// pages from importing vault adapters directly (AGENTS.md load-bearing rule).
-// ESLint startup is slow; tests carry a 30s timeout.
+// These tests verify the ESLint rules that prevent pages from importing vault
+// adapters directly (AGENTS.md load-bearing rule). ESLint startup is slow; tests
+// carry a 30s timeout.
+//
+// IMPORTANT: assert on the human-readable violation *message*, not merely on the
+// ruleId. A previous version filtered on ruleId alone, which meant a resolver
+// crash ("Resolve error: typescript with invalid interface loaded as resolver")
+// was reported under the same ruleId and counted as a passing enforcement —
+// masking the fact that the boundary was never actually enforced.
 
-describe("ESLint import/no-restricted-paths rule", () => {
+/** Lint a snippet as if it were a page, returning only real boundary violations. */
+async function lintPage(code: string, filePath: string) {
+  const { ESLint } = await import("eslint");
+  const eslint = new ESLint({ overrideConfigFile: "eslint.config.mjs" });
+  const results = await eslint.lintText(code, { filePath });
+  const messages = results[0].messages;
+
+  // A resolver failure is a broken harness, not a passing boundary. Fail loudly.
+  const resolveErrors = messages.filter((m) =>
+    m.message.startsWith("Resolve error:"),
+  );
+  if (resolveErrors.length > 0) {
+    throw new Error(
+      `ESLint import resolver is broken, so the vault boundary is NOT being ` +
+        `enforced: ${resolveErrors.map((m) => m.message).join("; ")}`,
+    );
+  }
+
+  return messages.filter(
+    (m) =>
+      (m.ruleId === "no-restricted-imports" ||
+        m.ruleId === "import/no-restricted-paths") &&
+      /must import vault API from/.test(m.message),
+  );
+}
+
+describe("vault adapter import boundary", () => {
   it(
-    "passes: import from @/lib/vault is allowed in pages",
+    "passes: import from lib/vault barrel is allowed in pages",
     async () => {
-      const { ESLint } = await import("eslint");
-      const eslint = new ESLint({
-        overrideConfigFile: "eslint.config.mjs",
-      });
-
-      // A minimal page-like file that imports from lib/vault (relative path)
       const code = [
         "import { getPublicNotes } from '../../lib/vault';",
         "export const getStaticProps = async () => {",
@@ -214,68 +240,40 @@ describe("ESLint import/no-restricted-paths rule", () => {
         "export default function Page() { return null; }",
       ].join("\n");
 
-      const results = await eslint.lintText(code, {
-        filePath: "pages/work/index.tsx",
-      });
-
-      const importErrors = results[0].messages.filter(
-        (m) =>
-          m.ruleId === "import/no-restricted-paths" &&
-          m.message.includes("adapter"),
-      );
-      expect(importErrors).toHaveLength(0);
+      expect(await lintPage(code, "pages/work/index.tsx")).toHaveLength(0);
     },
     30_000,
   );
 
   it(
-    "fails: import from lib/vault/adapter-local is blocked in pages",
+    "passes: non-adapter vault internals stay importable from pages",
     async () => {
-      const { ESLint } = await import("eslint");
-      const eslint = new ESLint({
-        overrideConfigFile: "eslint.config.mjs",
-      });
-
-      // A page that directly imports the adapter — must produce a lint error
-      const code = [
-        "import { LocalVaultAdapter } from '../lib/vault/adapter-local';",
-        "export default function Page() { return null; }",
-      ].join("\n");
-
-      const results = await eslint.lintText(code, {
-        filePath: "pages/work/bad-import.tsx",
-      });
-
-      const importErrors = results[0].messages.filter(
-        (m) => m.ruleId === "import/no-restricted-paths",
-      );
-      // Should have at least one error blocking the adapter import
-      expect(importErrors.length).toBeGreaterThan(0);
+      for (const spec of ["../../lib/vault/schema", "../../lib/vault/taxonomy"]) {
+        const code = [
+          `import type { X } from '${spec}';`,
+          "export default function Page() { return null; }",
+        ].join("\n");
+        expect(await lintPage(code, "pages/work/index.tsx")).toHaveLength(0);
+      }
     },
     30_000,
   );
 
-  it(
-    "fails: import from lib/vault/adapter-github is blocked in pages",
-    async () => {
-      const { ESLint } = await import("eslint");
-      const eslint = new ESLint({
-        overrideConfigFile: "eslint.config.mjs",
-      });
-
+  it.each([
+    ["adapter-local", "pages/work/bad.tsx", "../../lib/vault/adapter-local"],
+    ["adapter-github", "pages/work/bad.tsx", "../../lib/vault/adapter-github"],
+    ["adapter-local at pages root", "pages/bad.tsx", "../lib/vault/adapter-local"],
+    ["adapter-github via @/ alias", "pages/bad.tsx", "@/lib/vault/adapter-github"],
+    ["adapter-local via @/ alias", "pages/bad.tsx", "@/lib/vault/adapter-local"],
+  ])(
+    "blocks: %s is not importable from pages",
+    async (_name, filePath, spec) => {
       const code = [
-        "import { GitHubVaultAdapter } from '../lib/vault/adapter-github';",
+        `import { X } from '${spec}';`,
         "export default function Page() { return null; }",
       ].join("\n");
 
-      const results = await eslint.lintText(code, {
-        filePath: "pages/work/bad-import-github.tsx",
-      });
-
-      const importErrors = results[0].messages.filter(
-        (m) => m.ruleId === "import/no-restricted-paths",
-      );
-      expect(importErrors.length).toBeGreaterThan(0);
+      expect((await lintPage(code, filePath)).length).toBeGreaterThan(0);
     },
     30_000,
   );
