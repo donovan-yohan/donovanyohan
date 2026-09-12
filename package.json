@@ -15,7 +15,8 @@
     "leak-test": "vitest run test/leak.test.ts",
     "vault-lint": "tsx scripts/vault-lint.ts",
     "share-previews": "tsx scripts/fetch-share-previews.ts",
-    "check": "npm run lint && npm run typecheck && npm run test:run && npm run build && npm run leak-test"
+    "check": "npm run guards && npm run lint && npm run typecheck && npm run test:run && npm run build && npm run leak-test",
+    "guards": "./scripts/ci/check-vault-disables.sh && ./scripts/ci/check-no-new-js.sh"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.9",

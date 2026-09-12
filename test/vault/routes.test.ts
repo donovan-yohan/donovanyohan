@@ -233,22 +233,77 @@ function cleanupProbes() {
   probeFiles.clear();
 }
 
-/** Run oxlint against one probe file and return its boundary violations. */
-function lintProbe(relativeName: string, importSpecifier: string): string[] {
-  const file = writeProbe(relativeName, importSpecifier);
+interface ProbeResult {
+  violations: string[];
+  raw: string;
+  status: number | null;
+}
+
+/**
+ * Run oxlint against one probe file.
+ *
+ * The path passed to oxlint is deliberately **relative** to cwd. The boundary
+ * rule lives in an `overrides.files: ["pages/**"]` block, and matching that glob
+ * against an absolute path depends on oxlint relativizing it back to cwd. On CI
+ * the checkout path need not be identical to cwd (symlinks), in which case the
+ * glob silently fails to match, the override never applies, and oxlint reports
+ * nothing — which looks exactly like "the boundary is fine".
+ */
+function lintProbe(relativeName: string, importSpecifier: string): ProbeResult {
+  writeProbe(relativeName, importSpecifier);
+  const relPath = path.join("pages", relativeName);
   try {
+    // `--format=json` is load-bearing, not a convenience. oxlint's default
+    // human-readable output is environment-sensitive: on GitHub Actions it
+    // switched to an annotation format that omits the `help:` text, so a filter
+    // matching the rule's message found nothing and the boundary looked
+    // unenforced. JSON is a stable contract with discrete fields.
     const result = spawnSync(
-      "node",
-      [path.join("node_modules", "oxlint", "bin", "oxlint"), file],
+      process.execPath,
+      [
+        path.join("node_modules", "oxlint", "bin", "oxlint"),
+        "--format=json",
+        relPath,
+      ],
       { cwd: process.cwd(), encoding: "utf8" },
     );
-    const output = `${result.stdout ?? ""}${result.stderr ?? ""}`;
-    return output
-      .split("\n")
-      .filter((line) => /must import vault API from/.test(line));
+
+    if (result.error) {
+      throw new Error(`failed to spawn oxlint: ${result.error.message}`);
+    }
+    // oxlint exits 0 (clean) or 1 (lint errors found). Anything else means it
+    // did not actually lint — a broken harness, not a passing boundary.
+    if (result.status !== 0 && result.status !== 1) {
+      throw new Error(
+        `oxlint exited ${result.status}, so the vault boundary was NOT checked.\n` +
+          `stdout: ${result.stdout}\nstderr: ${result.stderr}`,
+      );
+    }
+
+    const raw = `${result.stdout ?? ""}${result.stderr ?? ""}`;
+
+    let parsed: { diagnostics?: Array<{ code?: string; help?: string }> };
+    try {
+      parsed = JSON.parse(result.stdout);
+    } catch (err) {
+      throw new Error(
+        `could not parse oxlint --format=json output, so the vault boundary ` +
+          `was NOT verified: ${(err as Error).message}\nraw:\n${raw}`,
+      );
+    }
+
+    const violations = (parsed.diagnostics ?? [])
+      .filter(
+        (d) =>
+          d.code === "eslint(no-restricted-imports)" &&
+          /must import vault API from/.test(d.help ?? ""),
+      )
+      .map((d) => d.help ?? "");
+
+    return { violations, raw, status: result.status };
   } finally {
-    fs.rmSync(file, { force: true });
-    probeFiles.delete(file);
+    fs.rmSync(path.join(PROBE_DIR, relativeName), { force: true });
+    probeFiles.delete(path.join(PROBE_DIR, relativeName));
   }
 }
 
@@ -256,11 +311,13 @@ describe("vault adapter import boundary", () => {
   afterEach(cleanupProbes);
 
   it("passes: import from the lib/vault barrel is allowed in pages", () => {
-    expect(lintProbe("__probe_ok.tsx", "../lib/vault")).toHaveLength(0);
+    const { violations, raw } = lintProbe("__probe_ok.tsx", "../lib/vault");
+    expect(violations, `oxlint output:\n${raw}`).toHaveLength(0);
   });
 
   it("passes: non-adapter vault internals stay importable from pages", () => {
-    expect(lintProbe("__probe_schema.tsx", "../lib/vault/schema")).toHaveLength(0);
+    const { violations, raw } = lintProbe("__probe_schema.tsx", "../lib/vault/schema");
+    expect(violations, `oxlint output:\n${raw}`).toHaveLength(0);
   });
 
   it.each([
@@ -269,6 +326,11 @@ describe("vault adapter import boundary", () => {
     ["adapter-local via @/ alias", "__probe_alias_local.tsx", "@/lib/vault/adapter-local"],
     ["adapter-github via @/ alias", "__probe_alias_github.tsx", "@/lib/vault/adapter-github"],
   ])("blocks: %s is not importable from pages", (_name, fileName, specifier) => {
-    expect(lintProbe(fileName, specifier).length).toBeGreaterThan(0);
+    const { violations, raw, status } = lintProbe(fileName, specifier);
+    expect(
+      violations.length,
+      `expected oxlint to block "${specifier}" from ${fileName}, but it reported ` +
+        `no boundary violation (exit ${status}). Raw oxlint output:\n${raw || "(empty)"}`,
+    ).toBeGreaterThan(0);
   });
 });

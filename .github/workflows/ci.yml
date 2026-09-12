@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+# A newer push to the same branch makes the in-flight run irrelevant. master is
+# excluded from cancellation so every merged commit keeps a complete result.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # `npm ci` rather than `npm install`: fails if package.json and the
+      # lockfile disagree, which is what we want in CI.
+      - name: Install dependencies
+        run: npm ci
+
+      # Separate steps rather than `npm run check` so a failure names the stage
+      # that broke instead of collapsing into one red block.
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm run test:run
+
+      # No vault secrets are provided. lib/vault/index.ts falls back to
+      # rendering an empty vault when VAULT_SOURCE/VAULT_PATH are unset, so this
+      # also proves the forker-friendly path (P20) keeps building.
+      - name: Build
+        run: npm run build
+
+  leak-test:
+    name: Vault leak test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Deliberately its own job. AGENTS.md makes this a merge gate, and a
+    # separate job can be marked required in branch protection independently of
+    # the rest of CI.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Leak test
+        run: npm run leak-test
+
+  guards:
+    name: Repo guards
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # No npm install needed — these are pure shell over tracked files, so they
+    # report in seconds instead of waiting on a dependency install.
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No lint-disable directives in lib/vault
+        run: ./scripts/ci/check-vault-disables.sh
+
+      - name: TypeScript-only (no new .js/.jsx)
+        run: ./scripts/ci/check-no-new-js.sh
