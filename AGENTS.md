@@ -78,11 +78,38 @@ the operator-side contract.
 - **No module-init side effects** in `lib/vault/*`. No I/O, no env validation,
   no throws at import time. Pure imports only.
 
-### Verification commands (available as tickets land)
+### CI
 
-Today (post #31):
+GitHub Actions runs `.github/workflows/ci.yml` on every pull request and on
+pushes to `master`, in three jobs:
+
+| Job | What it runs |
+|---|---|
+| `verify` | lint, typecheck, tests, build |
+| `leak-test` | `npm run leak-test` — its own job so it can be required independently in branch protection |
+| `guards` | the two repo guards below |
+
+CI runs with **no vault secrets**. `getVaultConfig()` falls back to rendering an
+empty vault when `VAULT_SOURCE`/`VAULT_PATH` are unset, so CI also continuously
+proves the forker-friendly path (P20) still builds.
+
+The two guards are real scripts, runnable locally via `npm run guards`:
+
+- `scripts/ci/check-vault-disables.sh` — fails if any `eslint-disable` or
+  `oxlint-disable` appears anywhere in `lib/vault/**`.
+- `scripts/ci/check-no-new-js.sh` — fails on any tracked `.js`/`.jsx` file not
+  explicitly grandfathered. This replaces an ESLint `no-restricted-syntax` rule
+  that oxlint does not implement; without it the TypeScript-only policy would
+  have quietly disappeared in the oxlint migration.
+
+Node version comes from `.nvmrc` and must stay at 22+ — `vitest` 5, `jsdom` 30
+and `@testing-library/jest-dom` 7 all refuse to run on Node 20.
+
+### Verification commands
+
 ```bash
-npm run check                         # full lint + typecheck + tests + build
+npm run check                         # guards + lint + typecheck + tests + build + leak test
+npm run guards                        # the two repo guards on their own
 npm test                              # vitest smoke tests
 ```
 
