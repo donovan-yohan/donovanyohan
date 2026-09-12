@@ -1,0 +1,54 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "import", "nextjs", "jsx-a11y", "unicorn"],
+  "categories": {
+    "correctness": "error"
+  },
+  "ignorePatterns": [
+    ".git/**",
+    ".next/**",
+    ".claude/**",
+    ".worktrees/**",
+    "out/**",
+    "coverage/**",
+    "node_modules/**",
+    "next-env.d.ts"
+  ],
+  "rules": {
+    "typescript/no-explicit-any": "warn",
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+
+    "nextjs/no-img-element": "off",
+    "nextjs/no-html-link-for-pages": "off",
+    "react/set-state-in-effect": "off",
+    "react/no-unescaped-entities": "off",
+
+    "react-hooks/exhaustive-deps": "warn",
+
+    "jsx-a11y/prefer-tag-over-role": "warn",
+    "jsx-a11y/no-noninteractive-tabindex": "warn",
+    "jsx-a11y/no-noninteractive-element-interactions": "warn",
+
+    "unicorn/no-useless-fallback-in-spread": "warn",
+
+    "import/default": "off"
+  },
+  "overrides": [
+    {
+      "files": ["pages/**/*.ts", "pages/**/*.tsx"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["**/lib/vault/adapter-*", "@/lib/vault/adapter-*"],
+                "message": "Public pages must import vault API from 'lib/vault/index', not directly from an adapter."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

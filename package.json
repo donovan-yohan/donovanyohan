@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "npm exec -- eslint .",
+    "lint": "oxlint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
@@ -48,8 +48,6 @@
     "zod": "^4.6.2"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.5",
-    "@eslint/js": "^9.39.4",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -59,17 +57,14 @@
     "@types/tar": "^6.1.13",
     "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^6.0.1",
-    "eslint": "^9.39.4",
-    "eslint-config-next": "^16.2.6",
-    "eslint-plugin-import": "^2.32.0",
     "js-yaml": "^5.4.1",
     "jsdom": "^30.0.1",
+    "oxlint": "^1.82.0",
     "playwright-core": "^1.60.0",
     "prettier": "^3.8.3",
     "sharp": "^0.35.3",
     "tsx": "^4.22.4",
-    "typescript": "6.0.3",
-    "typescript-eslint": "^8.59.2",
+    "typescript": "^7.0.2",
     "vitest": "^5.0.0"
   }
 }

@@ -11,6 +11,8 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import path from "node:path";
+import fs from "node:fs";
+import { spawnSync } from "node:child_process";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -189,92 +191,84 @@ describe("note body snapshot", () => {
   });
 });
 
-// ── ESLint import restriction — adapter-* never imported from pages ────────────
+// ── Lint import restriction — adapter-* never imported from pages ─────────────
 //
-// These tests verify the ESLint rules that prevent pages from importing vault
-// adapters directly (AGENTS.md load-bearing rule). ESLint startup is slow; tests
-// carry a 30s timeout.
+// Verifies the oxlint rule that prevents pages from importing vault adapters
+// directly (AGENTS.md load-bearing rule).
 //
-// IMPORTANT: assert on the human-readable violation *message*, not merely on the
-// ruleId. A previous version filtered on ruleId alone, which meant a resolver
-// crash ("Resolve error: typescript with invalid interface loaded as resolver")
-// was reported under the same ruleId and counted as a passing enforcement —
-// masking the fact that the boundary was never actually enforced.
+// oxlint has no stdin mode, and the rule is scoped to `pages/**`, so each case
+// writes a real probe file under pages/ and removes it in a finally block. A
+// leftover file there would become a Next.js route, so cleanup is mandatory
+// and also runs in afterEach as a backstop.
+//
+// IMPORTANT: assert on the human-readable violation *message*, not merely on a
+// rule name. The predecessor of this test filtered on ruleId alone, which meant
+// a resolver crash reported under that same ruleId counted as a passing
+// enforcement — masking the fact that the boundary was never enforced at all.
 
-/** Lint a snippet as if it were a page, returning only real boundary violations. */
-async function lintPage(code: string, filePath: string) {
-  const { ESLint } = await import("eslint");
-  const eslint = new ESLint({ overrideConfigFile: "eslint.config.mjs" });
-  const results = await eslint.lintText(code, { filePath });
-  const messages = results[0].messages;
+const PROBE_DIR = path.join(process.cwd(), "pages");
+const probeFiles = new Set<string>();
 
-  // A resolver failure is a broken harness, not a passing boundary. Fail loudly.
-  const resolveErrors = messages.filter((m) =>
-    m.message.startsWith("Resolve error:"),
+function writeProbe(relativeName: string, importSpecifier: string): string {
+  const file = path.join(PROBE_DIR, relativeName);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(
+    file,
+    `import { X } from "${importSpecifier}";\n` +
+      `export default function Page() {\n  void X;\n  return null;\n}\n`,
+    "utf8",
   );
-  if (resolveErrors.length > 0) {
-    throw new Error(
-      `ESLint import resolver is broken, so the vault boundary is NOT being ` +
-        `enforced: ${resolveErrors.map((m) => m.message).join("; ")}`,
-    );
+  probeFiles.add(file);
+  return file;
+}
+
+function cleanupProbes() {
+  for (const file of probeFiles) {
+    try {
+      fs.rmSync(file, { force: true });
+    } catch {
+      // best effort
+    }
   }
+  probeFiles.clear();
+}
 
-  return messages.filter(
-    (m) =>
-      (m.ruleId === "no-restricted-imports" ||
-        m.ruleId === "import/no-restricted-paths") &&
-      /must import vault API from/.test(m.message),
-  );
+/** Run oxlint against one probe file and return its boundary violations. */
+function lintProbe(relativeName: string, importSpecifier: string): string[] {
+  const file = writeProbe(relativeName, importSpecifier);
+  try {
+    const result = spawnSync(
+      "node",
+      [path.join("node_modules", "oxlint", "bin", "oxlint"), file],
+      { cwd: process.cwd(), encoding: "utf8" },
+    );
+    const output = `${result.stdout ?? ""}${result.stderr ?? ""}`;
+    return output
+      .split("\n")
+      .filter((line) => /must import vault API from/.test(line));
+  } finally {
+    fs.rmSync(file, { force: true });
+    probeFiles.delete(file);
+  }
 }
 
 describe("vault adapter import boundary", () => {
-  it(
-    "passes: import from lib/vault barrel is allowed in pages",
-    async () => {
-      const code = [
-        "import { getPublicNotes } from '../../lib/vault';",
-        "export const getStaticProps = async () => {",
-        "  const notes = await getPublicNotes();",
-        "  return { props: { notes } };",
-        "};",
-        "export default function Page() { return null; }",
-      ].join("\n");
+  afterEach(cleanupProbes);
 
-      expect(await lintPage(code, "pages/work/index.tsx")).toHaveLength(0);
-    },
-    30_000,
-  );
+  it("passes: import from the lib/vault barrel is allowed in pages", () => {
+    expect(lintProbe("__probe_ok.tsx", "../lib/vault")).toHaveLength(0);
+  });
 
-  it(
-    "passes: non-adapter vault internals stay importable from pages",
-    async () => {
-      for (const spec of ["../../lib/vault/schema", "../../lib/vault/taxonomy"]) {
-        const code = [
-          `import type { X } from '${spec}';`,
-          "export default function Page() { return null; }",
-        ].join("\n");
-        expect(await lintPage(code, "pages/work/index.tsx")).toHaveLength(0);
-      }
-    },
-    30_000,
-  );
+  it("passes: non-adapter vault internals stay importable from pages", () => {
+    expect(lintProbe("__probe_schema.tsx", "../lib/vault/schema")).toHaveLength(0);
+  });
 
   it.each([
-    ["adapter-local", "pages/work/bad.tsx", "../../lib/vault/adapter-local"],
-    ["adapter-github", "pages/work/bad.tsx", "../../lib/vault/adapter-github"],
-    ["adapter-local at pages root", "pages/bad.tsx", "../lib/vault/adapter-local"],
-    ["adapter-github via @/ alias", "pages/bad.tsx", "@/lib/vault/adapter-github"],
-    ["adapter-local via @/ alias", "pages/bad.tsx", "@/lib/vault/adapter-local"],
-  ])(
-    "blocks: %s is not importable from pages",
-    async (_name, filePath, spec) => {
-      const code = [
-        `import { X } from '${spec}';`,
-        "export default function Page() { return null; }",
-      ].join("\n");
-
-      expect((await lintPage(code, filePath)).length).toBeGreaterThan(0);
-    },
-    30_000,
-  );
+    ["adapter-local", "__probe_bad_local.tsx", "../lib/vault/adapter-local"],
+    ["adapter-github", "__probe_bad_github.tsx", "../lib/vault/adapter-github"],
+    ["adapter-local via @/ alias", "__probe_alias_local.tsx", "@/lib/vault/adapter-local"],
+    ["adapter-github via @/ alias", "__probe_alias_github.tsx", "@/lib/vault/adapter-github"],
+  ])("blocks: %s is not importable from pages", (_name, fileName, specifier) => {
+    expect(lintProbe(fileName, specifier).length).toBeGreaterThan(0);
+  });
 });
