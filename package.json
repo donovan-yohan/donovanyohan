@@ -28,7 +28,7 @@
     "github-slugger": "^2.0.0",
     "gray-matter": "^4.0.3",
     "lucide-react": "^1.14.0",
-    "next": "^16.2.11",
+    "next": "^16.4.1",
     "opentype.js": "^2.0.0",
     "react": "~19.2.8",
     "react-dom": "~19.2.8",
